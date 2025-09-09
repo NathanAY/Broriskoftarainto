@@ -1,0 +1,53 @@
+[gd_scene load_steps=10 format=3 uid="uid://dw17weh8b5wc3"]
+
+[ext_resource type="Script" uid="uid://b476vr2gdauu8" path="res://Scripts/tower.gd" id="1_4yjk7"]
+[ext_resource type="Texture2D" uid="uid://blr76khcrsxby" path="res://Assets/torch.png" id="1_ry8d0"]
+[ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://Systems/LocalEventManager.tscn" id="5_il7y0"]
+[ext_resource type="PackedScene" uid="uid://by0slo3uv1f0e" path="res://ui/DamageNumberSpawner.tscn" id="6_k6scv"]
+[ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://ui/HealthBar.tscn" id="7_aqd11"]
+[ext_resource type="PackedScene" uid="uid://bymf3sqpkbdcr" path="res://Systems/ItemHolder.tscn" id="7_kmdyl"]
+[ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/Stats.tscn" id="8_7ibl6"]
+[ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/Health.tscn" id="8_kmdyl"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ry8d0"]
+
+[node name="Tower" type="Node2D"]
+script = ExtResource("1_4yjk7")
+
+[node name="Node2D" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
+texture = ExtResource("1_ry8d0")
+
+[node name="Area2D" type="Area2D" parent="."]
+scale = Vector2(5, 5)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("CircleShape2D_ry8d0")
+
+[node name="EventManager" parent="." instance=ExtResource("5_il7y0")]
+
+[node name="Stats" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_7ibl6")]
+event_manager = NodePath("../EventManager")
+
+[node name="ItemHolder" parent="." instance=ExtResource("7_kmdyl")]
+
+[node name="DamageNumberSpawner" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("6_k6scv")]
+event_manager = NodePath("../EventManager")
+
+[node name="HealthBar" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("7_aqd11")]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 0.0
+offset_right = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+event_manager = NodePath("../EventManager")
+
+[node name="Health" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_kmdyl")]
+event_manager = NodePath("../EventManager")
+
+[connection signal="area_entered" from="Area2D" to="." method="_on_area_2d_area_entered"]

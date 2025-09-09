@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://da5n82twecexo"]
+
+[ext_resource type="Script" uid="uid://nnrfpdlaybyu" path="res://Scripts/LocalEventManager.gd" id="1_pvul4"]
+
+[node name="LocalEventManager" type="Node"]
+script = ExtResource("1_pvul4")

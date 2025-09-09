@@ -1,0 +1,30 @@
+[gd_scene load_steps=8 format=3 uid="uid://d2n8kw8wey5oa"]
+
+[ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_idj7w"]
+[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Scenes/Tower.tscn" id="1_r150o"]
+[ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://Scripts/Spawner.gd" id="3_kln2b"]
+[ext_resource type="Script" uid="uid://ciyukmalwlif7" path="res://Systems/Items/ExplosionModifier.gd" id="4_rgh2o"]
+[ext_resource type="PackedScene" uid="uid://c2fgvt88msuf6" path="res://Systems/GlobalEventManager.tscn" id="5_pbw6q"]
+[ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://ui/TowerUI.tscn" id="6_v1gob"]
+[ext_resource type="Resource" uid="uid://s8a01h7xtfvy" path="res://Resources/AttackSpeedItem.tres" id="9_4kpch"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_idj7w")
+
+[node name="GlobalEventManager" parent="." instance=ExtResource("5_pbw6q")]
+
+[node name="Spawner" type="Node2D" parent="."]
+script = ExtResource("3_kln2b")
+
+[node name="SpawnTimer" type="Timer" parent="Spawner"]
+
+[node name="Node" type="Node" parent="Spawner"]
+script = ExtResource("4_rgh2o")
+possible_items = Array[Resource]([ExtResource("9_4kpch")])
+
+[node name="Tower" parent="." instance=ExtResource("1_r150o")]
+
+[node name="TowerUi" parent="." node_paths=PackedStringArray("tower") instance=ExtResource("6_v1gob")]
+tower = NodePath("../Tower")
+
+[connection signal="timeout" from="Spawner/SpawnTimer" to="Spawner" method="_on_spawn_timer_timeout"]

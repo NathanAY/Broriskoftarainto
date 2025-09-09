@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://ccmp8wc205pp3"]
+
+[ext_resource type="PackedScene" uid="uid://cpaom6wp1sgxl" path="res://Systems/Items/ChainMod.tscn" id="1_r50vm"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Item.gd" id="2_dte42"]
+
+[resource]
+script = ExtResource("2_dte42")
+name = "Chain proj"
+description = "Chain proj mod"
+modifiers = {}
+effect_scene = ExtResource("1_r50vm")
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

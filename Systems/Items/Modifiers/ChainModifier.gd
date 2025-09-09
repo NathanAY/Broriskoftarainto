@@ -33,22 +33,21 @@ func _on_projectile_hit(projectile, body):
         return
     #TODO fix a Invalid access to property or key 'global_position' on a base object of type 'Vector2'.    
     #if next_target != body:
-    call_deferred("_spawn_chain_projectile", projectile.global_position, target_pos, body, projectile.damage)
+    call_deferred("_spawn_chain_projectile", projectile, target_pos, body)
 
 
-func _spawn_chain_projectile(from: Vector2, to: Vector2, ignore_enemy: Node, damage: float) -> void:
+func _spawn_chain_projectile(source: Node, to: Vector2, ignore_enemy: Node) -> void:
     #print("ChainModifier: _spawn_chain_projectile ")
     var new_projectile = projectile_scene.instantiate()
-    new_projectile.damage = damage
-    new_projectile.set_event_manager(event_manager)
-    new_projectile.global_position = from
-
+    new_projectile.damage = source.damage
+    new_projectile.speed = source.speed
+    new_projectile.ignore_groups = source.ignore_groups.duplicate()
+    new_projectile.attachEventManager(event_manager)
+    new_projectile.global_position = source.global_position
     if new_projectile.has_method("set_direction"):
-        var dir = (to - from).normalized()
+        var dir = (to - source.global_position).normalized()
         new_projectile.set_direction(dir)
 
     new_projectile.set_meta("ignore_enemy", ignore_enemy.get_path())
     new_projectile.set_meta("spawned_by_chain", true)
-
     get_tree().current_scene.add_child(new_projectile)
-    #print("ChainModifier: spawned chained projectile ", new_projectile)

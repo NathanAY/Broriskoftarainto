@@ -11,6 +11,7 @@ signal enemy_died(enemy: CharacterBody2D)
 
 func _ready():
     add_to_group("enemies")  # Add enemy to a group
+    add_to_group("damageable")
     event_manager.subscribe("on_death", Callable(self, "on_death"))
     $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
 

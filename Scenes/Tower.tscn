@@ -10,21 +10,19 @@
 [ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/Stats.tscn" id="8_7ibl6"]
 [ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/Health.tscn" id="8_kmdyl"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_ry8d0"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_7ibl6"]
 
-[node name="Tower" type="Node2D"]
+[node name="Tower" type="CharacterBody2D"]
 script = ExtResource("1_4yjk7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(5, 5)
+shape = SubResource("CircleShape2D_7ibl6")
 
 [node name="Node2D" type="Node2D" parent="."]
 
 [node name="Sprite2D" type="Sprite2D" parent="Node2D"]
 texture = ExtResource("1_ry8d0")
-
-[node name="Area2D" type="Area2D" parent="."]
-scale = Vector2(5, 5)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-shape = SubResource("CircleShape2D_ry8d0")
 
 [node name="EventManager" parent="." instance=ExtResource("5_il7y0")]
 
@@ -32,6 +30,7 @@ shape = SubResource("CircleShape2D_ry8d0")
 event_manager = NodePath("../EventManager")
 
 [node name="Health" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_kmdyl")]
+max_health = 5000.0
 event_manager = NodePath("../EventManager")
 
 [node name="ItemHolder" parent="." instance=ExtResource("7_kmdyl")]
@@ -52,5 +51,3 @@ offset_right = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 event_manager = NodePath("../EventManager")
-
-[connection signal="area_entered" from="Area2D" to="." method="_on_area_2d_area_entered"]

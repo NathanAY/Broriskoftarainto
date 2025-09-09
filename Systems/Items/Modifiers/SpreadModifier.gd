@@ -46,14 +46,20 @@ func _on_attack(data):
         var angle = 10;
         var left_angle = base_direction.rotated(deg_to_rad(-angle * (i + 1)))
         var right_angle = base_direction.rotated(deg_to_rad(angle * (i + 1)))
-        _spawn_extra(projectile.global_position, left_angle, damage)
-        _spawn_extra(projectile.global_position, right_angle, damage)
+        # Pass the source projectile so we can copy values
+        _spawn_extra(projectile, left_angle, damage)
+        _spawn_extra(projectile, right_angle, damage)
 
-func _spawn_extra(from: Vector2, direction: Vector2, damage: float):
+func _spawn_extra(source: Node, direction: Vector2, damage: float):
     var p = projectile_scene.instantiate()
+    
+    # Copy key values
     p.damage = damage
-    p.set_event_manager(event_manager)
-    p.global_position = from
+    p.speed = source.speed
+    p.ignore_groups = source.ignore_groups.duplicate()
+    p.attachEventManager(event_manager)
+    p.global_position = source.global_position
     if p.has_method("set_direction"):
         p.set_direction(direction)
     get_tree().current_scene.add_child(p)
+    

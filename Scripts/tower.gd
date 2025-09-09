@@ -16,6 +16,8 @@ var attack_range = 500
 var modifiers: Array = []
 
 func _ready():
+    add_to_group("tower")
+    add_to_group("damageable")
     for c in get_children():
         if c.has_method("attachEventManager"):
             c.attachEventManager(event_manager)  # attach SpreadModifier to this tower
@@ -24,6 +26,7 @@ func _ready():
     $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/SpreadShot.tres"))
+    $ItemHolder.add_item(load("res://Resources/items/ChainProjectile.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/PlusDamageItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
 

@@ -117,11 +117,25 @@ func _on_stat_changes(event) -> void:
             t.wait_time = _compute_weapon_wait_time(weapon_inst)
 
 func _find_target(range: float) -> Node:
-    var closest_enemy: Node = null
+    var closest_target: Node = null
     var closest_dist = INF
-    for enemy in get_tree().get_nodes_in_group("enemies"):
-        var dist = hold_owner.global_position.distance_to(enemy.global_position)
+    # Get all nodes in the scene
+    for node in get_tree().get_nodes_in_group("damageable"): # or iterate all nodes if you want
+        # Skip self
+        if node == hold_owner:
+            continue
+        # Skip if node is in any of the hold_owner's groups
+        var skip = false
+        for g in hold_owner.get_groups().filter(func(group): return  group != "damageable"):
+            if node.is_in_group(g):
+                skip = true
+                break
+        if skip:
+            continue
+        # Check distance
+        var dist = hold_owner.global_position.distance_to(node.global_position)
         if dist <= range and dist < closest_dist:
             closest_dist = dist
-            closest_enemy = enemy
-    return closest_enemy
+            closest_target = node
+    return closest_target
+    

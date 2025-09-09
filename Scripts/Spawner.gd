@@ -1,6 +1,6 @@
-extends Node2D
+extends Node
 
-@export var spawn_interval = 1.0
+@export var spawn_interval = 2.0
 var enemy_scene = preload("res://Scenes/Enemy.tscn")
 var screen_size
 var spawn_timer
@@ -8,7 +8,6 @@ var modifiers: Array = []
 
 func _ready():
     screen_size = get_viewport().get_visible_rect().size
-    
     # Create and configure the timer
     spawn_timer = Timer.new()
     add_child(spawn_timer)
@@ -26,11 +25,9 @@ func _on_spawn_timer_timeout():
 
 func spawn_enemy():
     var enemy = enemy_scene.instantiate()
-    
     # Randomly select a side to spawn from
     var side = randi() % 4  # 0: top, 1: right, 2: bottom, 3: left
     var spawn_position = Vector2()
-    
     match side:
         0:  # Top
             spawn_position = Vector2(randf_range(50, screen_size.x - 50), -50)

@@ -38,7 +38,7 @@ func try_shoot(target: Node) -> void:
         push_warning("Weapon %s has no valid holder (maybe freed)" % name)
         return
 
-    print("Weapon", name, "shooting from", holder.name, "at", target.name)
+    #print("Weapon ", name, " shooting from", holder.name, "at", target.name)
 
     if projectile_scene == null:
         push_warning("Weapon %s has no projectile_scene" % name)
@@ -52,13 +52,15 @@ func try_shoot(target: Node) -> void:
     projectile.global_position = holder.global_position
 
     var direction = (target.global_position - holder.global_position).normalized()
+    if projectile.has_method("attachEventManager") and event_manager:
+        projectile.attachEventManager(event_manager)
+    else:
+        print("Weapon.gd: Not event manager") 
     if projectile.has_method("set_direction"):
         projectile.set_direction(direction)
-
+    if projectile.has_method("set_ignore_groups"):
+        projectile.set_ignore_groups(holder.get_groups().filter(func(g): return g != "damageable"))
     projectile.damage = stats.get_stat("damage") + base_damage
-
-    if projectile.has_method("set_event_manager") and event_manager:
-        projectile.set_event_manager(event_manager)
 
     holder.get_tree().current_scene.add_child(projectile)
 

@@ -17,11 +17,11 @@ script = ExtResource("1_idj7w")
 
 [node name="GlobalEventManager" parent="." instance=ExtResource("5_pbw6q")]
 
-[node name="Spawner" type="Node2D" parent="."]
+[node name="Spawner" type="Node" parent="."]
 script = ExtResource("3_kln2b")
 
 [node name="SpawnTimer" type="Timer" parent="Spawner"]
-wait_time = 0.1
+wait_time = 2.0
 
 [node name="Node" type="Node" parent="Spawner"]
 script = ExtResource("4_rgh2o")

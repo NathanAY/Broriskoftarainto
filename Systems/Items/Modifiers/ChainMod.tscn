@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cpaom6wp1sgxl"]
 
-[ext_resource type="Script" uid="uid://r4r74eiy7amb" path="res://Systems/Items/ChainModifier.gd" id="1_xfdg0"]
+[ext_resource type="Script" uid="uid://r4r74eiy7amb" path="res://Systems/Items/Modifiers/ChainModifier.gd" id="1_xfdg0"]
 
 [node name="ChainMod" type="Node"]
 script = ExtResource("1_xfdg0")

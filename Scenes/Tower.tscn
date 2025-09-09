@@ -1,11 +1,12 @@
-[gd_scene load_steps=10 format=3 uid="uid://dw17weh8b5wc3"]
+[gd_scene load_steps=11 format=3 uid="uid://dw17weh8b5wc3"]
 
 [ext_resource type="Script" uid="uid://b476vr2gdauu8" path="res://Scripts/tower.gd" id="1_4yjk7"]
 [ext_resource type="Texture2D" uid="uid://blr76khcrsxby" path="res://Assets/torch.png" id="1_ry8d0"]
 [ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://Systems/LocalEventManager.tscn" id="5_il7y0"]
 [ext_resource type="PackedScene" uid="uid://by0slo3uv1f0e" path="res://ui/DamageNumberSpawner.tscn" id="6_k6scv"]
 [ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://ui/HealthBar.tscn" id="7_aqd11"]
-[ext_resource type="PackedScene" uid="uid://bymf3sqpkbdcr" path="res://Systems/ItemHolder.tscn" id="7_kmdyl"]
+[ext_resource type="PackedScene" uid="uid://bymf3sqpkbdcr" path="res://Systems/Items/ItemHolder.tscn" id="7_kmdyl"]
+[ext_resource type="PackedScene" uid="uid://cskdgn6s7qlfo" path="res://Systems/weapon/WeaponHolder.tscn" id="7_wtx2b"]
 [ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/Stats.tscn" id="8_7ibl6"]
 [ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/Health.tscn" id="8_kmdyl"]
 
@@ -30,7 +31,12 @@ shape = SubResource("CircleShape2D_ry8d0")
 [node name="Stats" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_7ibl6")]
 event_manager = NodePath("../EventManager")
 
+[node name="Health" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_kmdyl")]
+event_manager = NodePath("../EventManager")
+
 [node name="ItemHolder" parent="." instance=ExtResource("7_kmdyl")]
+
+[node name="WeaponHolder" parent="." instance=ExtResource("7_wtx2b")]
 
 [node name="DamageNumberSpawner" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("6_k6scv")]
 event_manager = NodePath("../EventManager")
@@ -45,9 +51,6 @@ offset_left = 0.0
 offset_right = 0.0
 grow_horizontal = 2
 grow_vertical = 2
-event_manager = NodePath("../EventManager")
-
-[node name="Health" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_kmdyl")]
 event_manager = NodePath("../EventManager")
 
 [connection signal="area_entered" from="Area2D" to="." method="_on_area_2d_area_entered"]

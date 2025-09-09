@@ -71,7 +71,7 @@ func _on_stat_changed(event) -> void:
     var new_value: float = event["final_value"]
     var lbl = value_labels.get(stat_name, null)
     if lbl:
-        lbl.text = str(new_value)
+        lbl.text = str(str(stat_name).capitalize(), ": ", new_value)
     else:
         # new stat not present in UI — rebuild full list
         _update_stats()

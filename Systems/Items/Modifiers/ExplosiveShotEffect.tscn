@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c7lhp6cgkitqc"]
 
-[ext_resource type="Script" uid="uid://b7n3x5h7dd17j" path="res://Systems/Items/ExplosiveShotEffect.gd" id="1_vmfed"]
+[ext_resource type="Script" uid="uid://b7n3x5h7dd17j" path="res://Systems/Items/Modifiers/ExplosiveShotEffect.gd" id="1_vmfed"]
 
 [node name="ExplosiveShotEffect" type="Node2D"]
 script = ExtResource("1_vmfed")

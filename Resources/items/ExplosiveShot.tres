@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://mlfohgnnpkph"]
 
-[ext_resource type="PackedScene" uid="uid://c7lhp6cgkitqc" path="res://Systems/Items/ExplosiveShotEffect.tscn" id="1_0wg2o"]
-[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Item.gd" id="1_civ83"]
+[ext_resource type="PackedScene" uid="uid://c7lhp6cgkitqc" path="res://Systems/Items/Modifiers/ExplosiveShotEffect.tscn" id="1_0wg2o"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="1_civ83"]
 
 [resource]
 script = ExtResource("1_civ83")

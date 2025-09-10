@@ -1,6 +1,6 @@
 extends Node
 
-@export var spawn_interval = 2.0
+@export var spawn_interval = 4.0
 var enemy_scene = preload("res://Scenes/Enemy.tscn")
 var screen_size
 var spawn_timer
@@ -25,21 +25,16 @@ func _on_spawn_timer_timeout():
 
 func spawn_enemy():
     var enemy = enemy_scene.instantiate()
-    # Randomly select a side to spawn from
-    var side = randi() % 4  # 0: top, 1: right, 2: bottom, 3: left
-    var spawn_position = Vector2()
-    match side:
-        0:  # Top
-            spawn_position = Vector2(randf_range(50, screen_size.x - 50), -50)
-        1:  # Right
-            spawn_position = Vector2(screen_size.x + 50, randf_range(50, screen_size.y - 50))
-        2:  # Bottom
-            spawn_position = Vector2(randf_range(50, screen_size.x - 50), screen_size.y + 50)
-        3:  # Left
-            spawn_position = Vector2(-50, randf_range(50, screen_size.y - 50))
-    
-    enemy.position = spawn_position
-    enemy.set_target_position(Vector2(screen_size.x / 2, screen_size.y / 2))
+
+    var tower_position: Vector2 = get_parent().get_node_or_null("Tower").global_position
+    # Pick a random angle in radians
+    var angle = randf_range(0, TAU)  # TAU = 2 * PI
+    var radius = 500.0  # distance from tower/player
+    # Calculate spawn position in a circle around tower
+    var spawn_position = tower_position + Vector2(cos(angle), sin(angle)) * radius
+
+    enemy.global_position = spawn_position
+    enemy.set_target_position(tower_position)
     #enemy.target_position = Vector2(screen_size.x / 2, screen_size.y / 2)  # Center of screen
     for mod in modifiers:
         mod.attach_to_enemy(enemy)

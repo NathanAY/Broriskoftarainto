@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene load_steps=13 format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_idj7w"]
 [ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Scenes/Tower.tscn" id="1_r150o"]
@@ -11,6 +11,7 @@
 [ext_resource type="Resource" uid="uid://mlfohgnnpkph" path="res://Resources/items/ExplosiveShot.tres" id="7_frkhe"]
 [ext_resource type="Resource" uid="uid://c2yumr1hjjhqh" path="res://Resources/items/PlusDamageItem.tres" id="8_frkhe"]
 [ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://Resources/items/SpreadShot.tres" id="9_1p5hy"]
+[ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="12_grg3l"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_idj7w")
@@ -23,13 +24,19 @@ script = ExtResource("3_kln2b")
 [node name="SpawnTimer" type="Timer" parent="Spawner"]
 wait_time = 2.0
 
-[node name="Node" type="Node" parent="Spawner"]
+[node name="ExplositionModifierToEnemyOnDeath" type="Node" parent="Spawner"]
 script = ExtResource("4_rgh2o")
 possible_items = Array[Resource]([ExtResource("5_4kpch"), ExtResource("6_grg3l"), ExtResource("7_frkhe"), ExtResource("8_frkhe"), ExtResource("9_1p5hy")])
 
 [node name="Tower" parent="." instance=ExtResource("1_r150o")]
 
-[node name="TowerUi" parent="." node_paths=PackedStringArray("tower") instance=ExtResource("6_v1gob")]
-tower = NodePath("../Tower")
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+script = ExtResource("12_grg3l")
+target = NodePath("../Tower")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="TowerUi" parent="CanvasLayer" node_paths=PackedStringArray("tower") instance=ExtResource("6_v1gob")]
+tower = NodePath("../../Tower")
 
 [connection signal="timeout" from="Spawner/SpawnTimer" to="Spawner" method="_on_spawn_timer_timeout"]

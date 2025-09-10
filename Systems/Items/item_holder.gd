@@ -1,5 +1,6 @@
 # res://scripts/ItemHolder.gd
 extends Node
+class_name ItemHolder
 
 # try to find Stats + EventManager on the parent (the entity that owns this ItemHolder)
 @onready var hold_owner: Node = get_parent()

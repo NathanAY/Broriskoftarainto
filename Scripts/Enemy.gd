@@ -2,34 +2,34 @@
 extends CharacterBody2D
 
 @export var target_position: Vector2 = Vector2.ZERO
-var speed = 100
 
 @onready var health_node: Node = $Health  # attach Health.gd as child
-@onready var event_manager = $EventManager
+@onready var stats: Stats = $Stats  # attach Health.gd as child
+@onready var event_manager: EventManager = $EventManager
+@onready var item_holder: ItemHolder = $ItemHolder
 
 signal enemy_died(enemy: CharacterBody2D)
 
 func _ready():
     add_to_group("enemies")  # Add enemy to a group
     add_to_group("damageable")
-    event_manager.subscribe("on_death", Callable(self, "on_death"))
     $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
+    item_holder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))
 
 func set_target_position(new_target: Vector2):
     target_position = new_target
 
 func _physics_process(delta):
     if target_position:
-        # Calculate direction to target
         var direction = (target_position - global_position).normalized()
-        # Set velocity and move
-        velocity = direction * speed
+        # ✅ Use stats for movement speed
+        var move_speed = stats.get_stat("movement_speed")
+        
+        velocity = direction * move_speed
         var collision = move_and_slide()
-        # Check if we've reached close to the target
+        
         if global_position.distance_to(target_position) < 5:
             queue_free()
             print("Enemy reached target!")
-            
-func on_death(owner):
-    print("Enemy died:", owner)
-    # now you can attach modifiers here if needed            
+                 

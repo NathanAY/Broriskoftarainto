@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Item" load_steps=2 format=3 uid="uid://btcj1lqxii213"]
+
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="1_4eod8"]
+
+[resource]
+script = ExtResource("1_4eod8")
+name = "Boots of speed"
+description = "Speed +50"
+modifiers = {
+"movement_speed": {
+"flat": 200.0
+}
+}
+effect_scene = Array[PackedScene]([])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

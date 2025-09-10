@@ -1,11 +1,10 @@
 #tower.gd
-extends Node2D
+extends CharacterBody2D
 
 @onready var event_manager = $EventManager
 @onready var item_holder = $ItemHolder
 @onready var stats = $Stats
 @onready var weapon_holder = $WeaponHolder
-
 
 var projectile_scene = preload("res://Scenes/Projectile.tscn")
 var current_target = null
@@ -23,6 +22,7 @@ func _ready():
             c.attachEventManager(event_manager)  # attach SpreadModifier to this tower
             modifiers.append(c)
     print("Tower: found modifiers:", modifiers)
+    
     $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
@@ -31,6 +31,7 @@ func _ready():
     #$ItemHolder.add_item(load("res://Resources/items/ChainProjectile.tres"))
     $ItemHolder.add_item(load("res://Resources/items/RegenPassive.tres"))
     $ItemHolder.add_item(load("res://Resources/items/RegenPassive.tres"))
+    $ItemHolder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/PlusDamageItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
 

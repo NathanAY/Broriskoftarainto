@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3 uid="uid://0yhs63g53jc2"]
+
+[sub_resource type="GDScript" id="GDScript_06hm5"]
+script/source = "# Movement.gd
+extends CharacterBody2D
+class_name Movement
+
+@onready var stats: Stats = get_node_or_null(\"Stats\")
+
+func _physics_process(delta: float) -> void:
+    var input_dir = Input.get_vector(\"move_left\", \"move_right\", \"move_up\", \"move_down\")
+    var move_speed = 200.0
+    
+    # If you have \"speed\" in Stats, use it
+    if stats:
+        move_speed = stats.get_stat(\"speed\")
+    
+    velocity = input_dir * move_speed
+    move_and_slide()
+"
+
+[node name="Movement" type="CharacterBody2D"]
+script = SubResource("GDScript_06hm5")

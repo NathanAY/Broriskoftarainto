@@ -11,6 +11,7 @@ class_name Stats
     "attack_speed": 2.0,
     "area_radius": 1.0,
     "attack_range": 500.0,
+    "movement_speed": 50,
 }
 
 # Active modifiers (items, buffs, debuffs, etc.)

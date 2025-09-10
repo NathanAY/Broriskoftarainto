@@ -8,5 +8,5 @@ script = ExtResource("2_dte42")
 name = "Chain proj"
 description = "Chain proj mod"
 modifiers = {}
-effect_scene = ExtResource("1_r50vm")
+effect_scene = Array[PackedScene]([ExtResource("1_r50vm")])
 metadata/_custom_type_script = "uid://bi8j7om4juysb"

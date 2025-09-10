@@ -1,7 +1,7 @@
 #projectile.gd
 extends Area2D
 
-var speed = 300
+var base_speed = 300
 var direction = Vector2.ZERO
 @export var damage: float = 0  # now set by the tower
 
@@ -26,7 +26,7 @@ func set_ignore_groups(groups: Array):
 
 func _physics_process(delta):
     if direction != Vector2.ZERO:
-        global_position += direction * speed * delta
+        global_position += direction * base_speed * delta
 
 func set_direction(target_direction: Vector2):
     direction = target_direction.normalized()

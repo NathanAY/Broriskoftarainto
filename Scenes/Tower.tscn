@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dw17weh8b5wc3"]
+[gd_scene load_steps=12 format=3 uid="uid://dw17weh8b5wc3"]
 
 [ext_resource type="Script" uid="uid://b476vr2gdauu8" path="res://Scripts/tower.gd" id="1_4yjk7"]
 [ext_resource type="Texture2D" uid="uid://blr76khcrsxby" path="res://Assets/torch.png" id="1_ry8d0"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://cskdgn6s7qlfo" path="res://Systems/weapon/WeaponHolder.tscn" id="7_wtx2b"]
 [ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/Stats.tscn" id="8_7ibl6"]
 [ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/Health.tscn" id="8_kmdyl"]
+[ext_resource type="PackedScene" uid="uid://bfv23hn20a0ia" path="res://ui/HealNumberSpawner.tscn" id="9_sijes"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_7ibl6"]
 
@@ -28,9 +29,15 @@ texture = ExtResource("1_ry8d0")
 
 [node name="Stats" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_7ibl6")]
 event_manager = NodePath("../EventManager")
+stats = {
+"area_radius": 1.0,
+"attack_range": 500.0,
+"attack_speed": 2.0,
+"damage": 10.0,
+"health": 400.0
+}
 
 [node name="Health" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_kmdyl")]
-max_health = 5000.0
 event_manager = NodePath("../EventManager")
 
 [node name="ItemHolder" parent="." instance=ExtResource("7_kmdyl")]
@@ -38,6 +45,9 @@ event_manager = NodePath("../EventManager")
 [node name="WeaponHolder" parent="." instance=ExtResource("7_wtx2b")]
 
 [node name="DamageNumberSpawner" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("6_k6scv")]
+event_manager = NodePath("../EventManager")
+
+[node name="HealNumberSpawner" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("9_sijes")]
 event_manager = NodePath("../EventManager")
 
 [node name="HealthBar" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("7_aqd11")]

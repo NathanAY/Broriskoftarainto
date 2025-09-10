@@ -11,28 +11,10 @@ extends Node
 func add_item(item: Resource) -> void:
     if item == null:
         return
-    #if item in items:
-        #return
     items.append(item)
 
-    # Preferred: if item is our Item resource (class_name Item), call its helper
-    #if item is Item:
-        #item.apply_to(hold_owner)
-    # Fallback: if resource defines an apply_to method, call it anyway
-    #elif item.has_method("apply_to"):
-        #item.apply_to(hold_owner)
-    # (If neither applies, nothing to do for stats)
-
-    # If resource has effect_scene (Item.effect_scene) and it's a proper Item, spawn effect and attach event manager
-    #if item is Item and item.effect_scene:
-        #var effect = item.effect_scene.instantiate()
-        #add_child(effect)  # attach the effect node to holder so it lives with the entity
-        ## If the effect expects an EventManager, attach it
-        #if effect.has_method("attachEventManager") and event_manager:
-            #effect.attachEventManager(event_manager)
-            # 🔹 Look if we already have an effect of this type
     if item is Item and item.effect_scene:
-        var effect_scene = item.effect_scene
+        var effect_scene = item.effect_scene[0]
         var effect: Node = null
         # 🔹 Look if we already have an effect of this type
         for child in get_children():
@@ -61,16 +43,13 @@ func remove_item(item: Resource) -> void:
         return
     if not (item in items):
         return
-
     # Remove stat modifiers
     if item is Item:
         item.remove_from(hold_owner)
     elif item.has_method("remove_from"):
         item.remove_from(hold_owner)
-
     # Remove from list
     items.erase(item)
-
     # Notify others
     if event_manager:
         event_manager.emit_event("on_item_removed", [hold_owner, item])

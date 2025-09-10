@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("2_nuk4p")
 name = "Spread"
-description = "Spread mod"
+description = "Spread shot"
 modifiers = {}
-effect_scene = ExtResource("1_a5gq2")
+effect_scene = Array[PackedScene]([ExtResource("1_a5gq2")])
 metadata/_custom_type_script = "uid://bi8j7om4juysb"

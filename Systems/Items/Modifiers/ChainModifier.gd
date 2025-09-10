@@ -40,7 +40,7 @@ func _spawn_chain_projectile(source: Node, to: Vector2, ignore_enemy: Node) -> v
     #print("ChainModifier: _spawn_chain_projectile ")
     var new_projectile = projectile_scene.instantiate()
     new_projectile.damage = source.damage
-    new_projectile.speed = source.speed
+    new_projectile.base_speed = source.base_speed
     new_projectile.ignore_groups = source.ignore_groups.duplicate()
     new_projectile.attachEventManager(event_manager)
     new_projectile.global_position = source.global_position

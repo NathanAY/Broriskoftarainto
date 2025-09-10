@@ -3,10 +3,10 @@ extends Node
 
 #@export var projectile_scene: PackedScene
 @export var projectile_scene = preload("res://Scenes/Projectile.tscn")
-var event_manager
+var event_manager: EventManager
 var stacks: int = 0  # number of items picked up
 
-func attachEventManager(em: Node):
+func attachEventManager(em: EventManager):
     event_manager = em
     em.subscribe("on_attack", Callable(self, "_on_attack"))
     em.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
@@ -22,8 +22,8 @@ func _on_item_added(event):
     pass
 
 func _on_item_removed(event):
-    #if event.get("item").resource_path.ends_with("SpreadShot.tres"):
-        #stacks = max(0, stacks - 1)
+    if event.get("item").resource_path.ends_with("SpreadShot.tres"):
+        stacks = max(0, stacks - 1)
     pass
 
 func _on_stat_changes(data):
@@ -55,7 +55,7 @@ func _spawn_extra(source: Node, direction: Vector2, damage: float):
     
     # Copy key values
     p.damage = damage
-    p.speed = source.speed
+    p.base_speed = source.base_speed
     p.ignore_groups = source.ignore_groups.duplicate()
     p.attachEventManager(event_manager)
     p.global_position = source.global_position

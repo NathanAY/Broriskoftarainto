@@ -6,7 +6,7 @@ extends Control
 @onready var stats_container: GridContainer = $PanelContainer/VBoxContainer/GridContainer
 @onready var items_container: VBoxContainer = $PanelContainer/VBoxContainer/Items
 
-var stats_node: Node = null
+var stats_node: Stats = null
 var item_holder: Node = null
 var value_labels: Dictionary = {}  # stat_name -> Label
 
@@ -58,7 +58,7 @@ func _update_stats() -> void:
         var value_label = Label.new()
         var name_label = str(stat_name).capitalize()
         
-        var val = stats_node.stats.get(stat_name)
+        var val = stats_node.get_stat(stat_name)
         value_label.text = str(name_label, ": ", val)
         value_label.name = "value_" + str(stat_name)
         stats_container.add_child(value_label)

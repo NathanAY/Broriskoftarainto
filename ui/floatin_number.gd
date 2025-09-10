@@ -4,12 +4,13 @@ extends Node2D
 @export var rise_distance: float = 30.0
 @export var start_scale: float = 1.5
 @export var end_scale: float = 1.0
+@export var color: = Color(1, 0, 0)  # red text
 
 @onready var label: Label = $Label
 
 func show_damage(amount: int) -> void:
     label.text = str(amount)
-    label.modulate = Color(1, 0, 0)  # red text
+    label.modulate = color
     scale = Vector2(start_scale, start_scale)
 
     # Animate upward, fade, and scale

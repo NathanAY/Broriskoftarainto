@@ -8,5 +8,5 @@ script = ExtResource("1_civ83")
 name = "Explosive Shot"
 description = "Your attacks explode on hit"
 modifiers = {}
-effect_scene = ExtResource("1_0wg2o")
+effect_scene = Array[PackedScene]([ExtResource("1_0wg2o")])
 metadata/_custom_type_script = "uid://bi8j7om4juysb"

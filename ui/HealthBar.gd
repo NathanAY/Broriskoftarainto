@@ -1,15 +1,16 @@
 extends Control
 
-@export var event_manager: Node
+@export var event_manager: EventManager
 @onready var background: ColorRect = $Background
 @onready var fill: ColorRect = $Fill
+@onready var label: Label = $Label
 
 
 func _ready() -> void:
-    event_manager.subscribe("on_take_damage", Callable(self, "update_health"))
+    event_manager.subscribe("on_health_changed", Callable(self, "update_health"))
     background.color = Color(0.2, 0.2, 0.2)  # dark gray
     fill.color = Color(1, 0, 0)  # red
-    visible = true  # hidden by default
+    visible = false  # hidden by default
 
 func update_health(event) -> void:
     var max_value: int = event["max_health"]
@@ -18,7 +19,7 @@ func update_health(event) -> void:
     var ratio: float = float(current_value) / float(max_value)
     fill.size.x = background.size.x * ratio
     fill.size.y = background.size.y
-    
+    label.text = str(current_value)
     # Show only if not full
     if current_value < max_value:
         visible = true

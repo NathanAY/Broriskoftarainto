@@ -1,5 +1,6 @@
 #stats.gd
 extends Node
+class_name Stats
 
 @export var event_manager: Node  # assign LocalEventManager in editor or via code
 

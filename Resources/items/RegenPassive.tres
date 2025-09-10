@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://baxmpuw46mb6o"]
+
+[ext_resource type="PackedScene" uid="uid://brkvpen3aw41w" path="res://Systems/Items/Modifiers/RegenModifier.tscn" id="1_f78uu"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="1_gxi8h"]
+
+[resource]
+script = ExtResource("1_gxi8h")
+name = "Passive regen"
+description = "Passive regen"
+modifiers = {}
+effect_scene = Array[PackedScene]([ExtResource("1_f78uu")])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

@@ -1,5 +1,6 @@
 #LocalEventManager.gd
 extends Node
+class_name EventManager
 
 var listeners: Dictionary = {}
 
@@ -21,9 +22,11 @@ func emit_event(event_name: String, args: Array = []) -> void:
 
 #on_stat_changes
 #on_item_added
+#on_item_removed
 
 #on_attack
 #projectile_hit
 
 #on_death
+#on_health_changed
 #on_take_damage

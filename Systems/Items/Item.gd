@@ -4,7 +4,7 @@ class_name Item
 @export var name: String
 @export var description: String
 @export var modifiers: Dictionary = {} # ex: {"damage": {"flat": 5}}
-@export var effect_scene: PackedScene # optional, for special effects (explosions, burns)
+@export var effect_scene: Array [PackedScene] #optional, for special effects (explosions, burns)
 
 # Apply modifiers / effects to a holder (holder = Node that has "Stats" child)
 func apply_to(holder: Node) -> void:

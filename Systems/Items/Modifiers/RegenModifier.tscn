@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://brkvpen3aw41w"]
+
+[ext_resource type="Script" uid="uid://1kjmgs2mst4a" path="res://Systems/Items/Modifiers/regen_modifier.gd" id="1_3bqev"]
+
+[node name="RegenModifier" type="Node"]
+script = ExtResource("1_3bqev")

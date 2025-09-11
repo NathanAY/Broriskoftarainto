@@ -38,7 +38,7 @@ func add_item(item: Resource) -> void:
     # Notify others
     if event_manager:
         event_manager.emit_event("on_item_added", [{"hold_owner": hold_owner, "item": item, "items": items}])
-
+ 
 func remove_item(item: Resource) -> void:
     if not item:
         return

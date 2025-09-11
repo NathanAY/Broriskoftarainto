@@ -31,7 +31,8 @@ script = ExtResource("3_sijes")
 
 [node name="EventManager" parent="." instance=ExtResource("5_il7y0")]
 
-[node name="Stats" parent="." instance=ExtResource("8_7ibl6")]
+[node name="Stats" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_7ibl6")]
+event_manager = NodePath("../EventManager")
 stats = {
 "area_radius": 1.0,
 "attack_range": 500.0,

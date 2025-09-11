@@ -10,9 +10,10 @@ class_name Item
 func apply_to(holder: Node) -> void:
     if not holder:
         return
-    var stats_node = holder.get_node_or_null("Stats")
+    var stats_node: Stats = holder.get_node_or_null("Stats")
     if stats_node and modifiers:
         stats_node.add_modifier(modifiers)
+        
 
 # Remove modifiers
 func remove_from(holder: Node) -> void:

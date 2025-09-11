@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="MeleeWeapon" load_steps=2 format=3 uid="uid://cl8on386uk6rp"]
+
+[ext_resource type="Script" uid="uid://btqm0gae3kpiu" path="res://Systems/weapon/melee_weapon.gd" id="1_363sm"]
+
+[resource]
+script = ExtResource("1_363sm")
+radius = 80.0
+name = "Knife"
+description = "Knife"
+base_attack_speed = 1.0
+base_damage = 5.0
+range = 400.0
+modifiers = {}
+metadata/_custom_type_script = "uid://2vl1rp4agc1u"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ShotgunWeapon" load_steps=3 format=3 uid="uid://fov62q3eb6q7"]
+
+[ext_resource type="PackedScene" uid="uid://bbj577efimtbf" path="res://Scenes/Projectile.tscn" id="1_hd58x"]
+[ext_resource type="Script" uid="uid://prg5uja0tmq4" path="res://Systems/weapon/shotgun_weapon.gd" id="1_st5ot"]
+
+[resource]
+script = ExtResource("1_st5ot")
+projectile_scene = ExtResource("1_hd58x")
+pellet_count = 5
+spread_angle = 15.0
+name = "Shotgun"
+description = "Shotgun"
+base_attack_speed = 1.0
+base_damage = 5.0
+range = 400.0
+modifiers = {}
+metadata/_custom_type_script = "uid://2vl1rp4agc1u"

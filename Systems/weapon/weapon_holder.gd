@@ -4,7 +4,7 @@ extends Node
 @onready var stats: Node = hold_owner.get_node_or_null("Stats")
 @onready var event_manager: Node = hold_owner.get_node_or_null("EventManager")
 
-@export var weapons: Array[Resource] = []   # list of Weapon .tres resources (templates)
+@export var weapons: Array[BaseWeapon] = []   # list of Weapon .tres resources (templates)
 
 # runtime state: map weapon_instance -> Timer
 var weapon_timers: Dictionary = {}   # key: weapon_instance (Resource), value: Timer
@@ -104,7 +104,7 @@ func _compute_weapon_wait_time(weapon_inst: Resource) -> float:
     if stats and stats.has_method("get_stat"):
         owner_speed = stats.get_stat("attack_speed")
     # defend against zero/negative combined speed
-    var combined = owner_speed + base_weapon_speed
+    var combined = owner_speed * base_weapon_speed
     if combined <= 0.001:
         combined = 0.001
     return 1.0 / combined
@@ -138,4 +138,3 @@ func _find_target(range: float) -> Node:
             closest_dist = dist
             closest_target = node
     return closest_target
-    

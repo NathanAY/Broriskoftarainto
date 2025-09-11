@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene load_steps=14 format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_idj7w"]
 [ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Scenes/Tower.tscn" id="1_r150o"]
@@ -11,6 +11,7 @@
 [ext_resource type="Resource" uid="uid://mlfohgnnpkph" path="res://Resources/items/ExplosiveShot.tres" id="7_frkhe"]
 [ext_resource type="Resource" uid="uid://c2yumr1hjjhqh" path="res://Resources/items/PlusDamageItem.tres" id="8_frkhe"]
 [ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://Resources/items/SpreadShot.tres" id="9_1p5hy"]
+[ext_resource type="PackedScene" uid="uid://co2jv4mljj5j0" path="res://Systems/Items/ItemPickup.tscn" id="12_frkhe"]
 [ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="12_grg3l"]
 
 [node name="Main" type="Node2D"]
@@ -33,6 +34,18 @@ possible_items = Array[Resource]([ExtResource("5_4kpch"), ExtResource("6_grg3l")
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
 script = ExtResource("12_grg3l")
 target = NodePath("../Tower")
+
+[node name="ItemPickup" parent="." instance=ExtResource("12_frkhe")]
+position = Vector2(-267, 149)
+item = ExtResource("5_4kpch")
+
+[node name="ItemPickup2" parent="." instance=ExtResource("12_frkhe")]
+position = Vector2(-111, 200)
+item = ExtResource("5_4kpch")
+
+[node name="ItemPickup3" parent="." instance=ExtResource("12_frkhe")]
+position = Vector2(-225, 262)
+item = ExtResource("5_4kpch")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

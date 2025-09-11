@@ -1,9 +1,10 @@
 #projectile.gd
 extends Area2D
+class_name Projectile
 
 var base_speed = 300
 var direction = Vector2.ZERO
-@export var damage: float = 0  # now set by the tower
+@export var damage: float = 0
 
 var event_manager = null
 

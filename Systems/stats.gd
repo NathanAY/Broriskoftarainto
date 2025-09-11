@@ -39,6 +39,8 @@ func add_modifier(mod: Dictionary):
         var final_value = get_stat(stat_name)
         if event_manager:
             event_manager.emit_event("on_stat_changes", [{"stat_name" :stat_name, "final_value": final_value}])
+        else:
+            print("Stats: No event manager")    
 
 func remove_modifier(mod: Dictionary):
     modifiers.erase(mod)

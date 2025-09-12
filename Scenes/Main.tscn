@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene load_steps=15 format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_idj7w"]
 [ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Scenes/Tower.tscn" id="1_r150o"]
@@ -13,6 +13,7 @@
 [ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://Resources/items/SpreadShot.tres" id="9_1p5hy"]
 [ext_resource type="PackedScene" uid="uid://co2jv4mljj5j0" path="res://Systems/Items/ItemPickup.tscn" id="12_frkhe"]
 [ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="12_grg3l"]
+[ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://ui/interractable/interaction_manager.gd" id="14_1p5hy"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_idj7w")
@@ -38,18 +39,24 @@ target = NodePath("../Tower")
 [node name="ItemPickup" parent="." instance=ExtResource("12_frkhe")]
 position = Vector2(-267, 149)
 item = ExtResource("5_4kpch")
+interaction_radius = 100.0
 
 [node name="ItemPickup2" parent="." instance=ExtResource("12_frkhe")]
 position = Vector2(-111, 200)
 item = ExtResource("5_4kpch")
+interaction_radius = 100.0
 
 [node name="ItemPickup3" parent="." instance=ExtResource("12_frkhe")]
 position = Vector2(-225, 262)
 item = ExtResource("5_4kpch")
+interaction_radius = 100.0
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="TowerUi" parent="CanvasLayer" node_paths=PackedStringArray("tower") instance=ExtResource("6_v1gob")]
 tower = NodePath("../../Tower")
+
+[node name="InteractionManager" type="Node" parent="."]
+script = ExtResource("14_1p5hy")
 
 [connection signal="timeout" from="Spawner/SpawnTimer" to="Spawner" method="_on_spawn_timer_timeout"]

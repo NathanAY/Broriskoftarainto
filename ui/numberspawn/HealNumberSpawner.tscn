@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://bfv23hn20a0ia"]
+
+[ext_resource type="Script" uid="uid://h4xocng4ljvo" path="res://ui/numberspawn/heal_number_spawner.gd" id="1_0gsms"]
+[ext_resource type="PackedScene" uid="uid://bynru56pu7iam" path="res://ui/numberspawn/FloatingNumber.tscn" id="2_388iv"]
+
+[node name="HealNumberSpawner" type="Node"]
+script = ExtResource("1_0gsms")
+damage_number_scene = ExtResource("2_388iv")

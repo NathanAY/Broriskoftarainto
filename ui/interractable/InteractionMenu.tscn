@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://dljplvstuesm1"]
+
+[node name="InteractionMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Thats label"
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_top = -66.0
+offset_right = 34.0
+offset_bottom = -35.0
+text = "E"
+
+[node name="Button2" type="Button" parent="."]
+layout_mode = 0
+offset_top = -31.0
+offset_right = 35.0
+text = "F"

@@ -1,21 +1,29 @@
 # ItemPickup.gd
-extends Area2D
+# ItemPickup.gd
+extends Interactable
 
-@export var item: Resource  # assign ExplosionShotItem.tres
+@export var item: Item
 
-func _ready():
-    connect("input_event", Callable(self, "_on_input_event"))
+func _populate_menu(menu: Control):
+    var label: Label = menu.get_node("Label")
+    label.text = "%s\n%s" % [item.name, item.description]
 
-func _on_input_event(viewport, event, shape_idx):
-    if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-        _give_item_to_tower()
-        queue_free()
+    var pickup_button: Button = menu.get_node("Button")
+    pickup_button.text = "Pick up"
+    pickup_button.pressed.connect(_on_pickup)
 
-func _give_item_to_tower():
-    var tower = get_tree().current_scene.get_node_or_null("Tower") # adjust path
+    var destroy_button: Button = menu.get_node("Button2")
+    destroy_button.text = "Destroy"
+    destroy_button.pressed.connect(_on_destroy)
+
+func _on_pickup():
+    var tower = get_tree().current_scene.get_node_or_null("Tower")
     if not tower:
-        push_warning("ItemPickup: No Tower found in scene!")
         return
     var holder = tower.get_node_or_null("ItemHolder")
     if holder:
         holder.add_item(item)
+        queue_free()
+
+func _on_destroy():
+    queue_free()

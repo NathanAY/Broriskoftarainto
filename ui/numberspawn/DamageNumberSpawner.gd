@@ -2,7 +2,7 @@ extends Node
 
 @export var event_manager: Node
 @export var damage_number_scene: PackedScene   # assign DamageNumber.tscn in inspector
-var spawn_offset: float = 10.0         # max random horizontal/vertical jitter
+var spawn_offset: float = 20.0         # max random horizontal/vertical jitter
 
 func _ready() -> void:
     event_manager.subscribe("projectile_hit", Callable(self, "_on_projectile_hit"))

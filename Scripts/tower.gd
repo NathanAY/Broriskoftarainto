@@ -33,6 +33,7 @@ func _ready():
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/SpreadShot.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/ChainProjectile.tres"))
+    $ItemHolder.add_item(load("res://Resources/items/ExplosiveShot.tres"))
     $ItemHolder.add_item(load("res://Resources/items/RegenPassive.tres"))
     $ItemHolder.add_item(load("res://Resources/items/RegenPassive.tres"))
     $ItemHolder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))

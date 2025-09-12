@@ -8,12 +8,16 @@ var event_manager = null
 
 func attachEventManager(em: Node):
     event_manager = em
-    em.subscribe("projectile_hit", Callable(self, "_on_projectile_hit"))
+    em.subscribe("on_hit", Callable(self, "_on_hit"))
 
 func _ready():
     rng.randomize()
 
-func _on_projectile_hit(projectile, body):
+func _on_hit(event: Dictionary):
+    if !event.find_key("projectile"):
+        return
+    var projectile = event["projectile"]
+    var body = event["projectile"]
     #print("ChainModifier: _on_projectile_hit -> projectile:", projectile, " body:", body)
     if not body or not body.is_in_group("enemies"):
         print("ChainModifier: hit body is not an enemy")

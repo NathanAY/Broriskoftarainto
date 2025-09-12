@@ -22,15 +22,14 @@ func set_target_position(new_target: Vector2):
     target_position = new_target
 
 func _physics_process(delta):
-    if target_position:
-        var direction = (target_position - global_position).normalized()
-        # ✅ Use stats for movement speed
-        var move_speed = stats.get_stat("movement_speed")
-        
-        velocity = direction * move_speed
-        var collision = move_and_slide()
-        
-        if global_position.distance_to(target_position) < 5:
-            queue_free()
-            print("Enemy reached target!")
+    var direction = (target_position - global_position).normalized()
+    # ✅ Use stats for movement speed
+    var move_speed = stats.get_stat("movement_speed")
+    
+    velocity = direction * move_speed
+    var collision = move_and_slide()
+    
+    if global_position.distance_to(target_position) < 5:
+        queue_free()
+        print("Enemy reached target!")
                  

@@ -47,7 +47,7 @@ func _on_area_entered(body):
         print("Projectile ignoring enemy:", body.name)
         return
     if event_manager:
-        event_manager.emit_event("projectile_hit", [self, body])
+        event_manager.emit_event("on_hit", [{"projectile": self, "body": body}])
     # Here you would typically damage the enemy
     #print("Projectile hit enemy!")
     if body.has_node("Health"):

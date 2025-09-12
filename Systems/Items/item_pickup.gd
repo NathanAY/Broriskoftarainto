@@ -9,7 +9,6 @@ func _ready():
     menu.get_node("Button").pressed.connect(_on_pickup)
     menu.get_node("Button2").pressed.connect(_on_destroy)
 
-
 func _populate_menu(menu: Control):
     var label: Label = menu.get_node("Label")
     label.text = "%s\n%s" % [item.name, item.description]

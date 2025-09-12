@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8l1agktutvbo"]
+
+[ext_resource type="Script" uid="uid://coe0e7lpackdi" path="res://Systems/Items/Buffs/buff.gd" id="1_ivxpu"]
+
+[node name="Buff" type="Node"]
+script = ExtResource("1_ivxpu")

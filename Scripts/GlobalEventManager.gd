@@ -3,7 +3,6 @@ extends Node
 
 var listeners: Dictionary = {}
 
-#event_manager.subscribe("on_kill", Callable(self, "_on_projectile_hit"))
 func subscribe(event_name: String, listener: Callable) -> void:
     if not listeners.has(event_name):
         listeners[event_name] = []

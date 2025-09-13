@@ -27,11 +27,13 @@ func _on_item_removed(event):
     pass
 
 func _on_stat_changes(data):
-    print("SpreadModifier: Unimplemented")
+    print("SpreadModifier: unimplemented _on_stat_changes")
     pass
 
 #func _on_tower_attack(projectile: Node):
-func _on_attack(data):
+func _on_attack(data: Dictionary):
+    if !data.has("projectile"):
+        return
     var projectile = data["projectile"]
     var damage = projectile.damage
     

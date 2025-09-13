@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://dtuwgvfelhnx4"]
+
+[ext_resource type="PackedScene" uid="uid://3g46r8pwf6mq" path="res://Systems/stats/conditions/StandingStillManager.tscn" id="1_so34u"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_d61em"]
+
+[resource]
+script = ExtResource("2_d61em")
+name = "Attack speed if still"
+description = "Attack speed if still"
+modifiers = {
+"attack_speed": {
+"percent": 1.0
+},
+"condition": {
+"standing_still": 1.0
+}
+}
+effect_scene = Array[PackedScene]([])
+condition_managers = Array[PackedScene]([ExtResource("1_so34u")])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

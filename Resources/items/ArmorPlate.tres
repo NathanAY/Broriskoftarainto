@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://o40qlgaf0bld"]
 
-[ext_resource type="PackedScene" uid="uid://cdfucojif8qe6" path="res://Systems/Items/Modifiers/ArmourMode.tscn" id="1_my2nx"]
+[ext_resource type="PackedScene" uid="uid://cdfucojif8qe6" path="res://Systems/Items/Modifiers/ArmorMode.tscn" id="1_my2nx"]
 [ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_dtik4"]
 
 [resource]
@@ -9,7 +9,7 @@ name = "Armour plate"
 description = "Armour +100"
 modifiers = {
 "armor": {
-"flat": -1000
+"flat": 100
 }
 }
 effect_scene = Array[PackedScene]([ExtResource("1_my2nx")])

@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://ui/HealthBar.tscn" id="7_aqd11"]
 [ext_resource type="PackedScene" uid="uid://bymf3sqpkbdcr" path="res://Systems/Items/ItemHolder.tscn" id="7_kmdyl"]
 [ext_resource type="PackedScene" uid="uid://cskdgn6s7qlfo" path="res://Systems/weapon/WeaponHolder.tscn" id="7_wtx2b"]
-[ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/Stats.tscn" id="8_7ibl6"]
+[ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/stats/Stats.tscn" id="8_7ibl6"]
 [ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/Health.tscn" id="8_kmdyl"]
 [ext_resource type="PackedScene" uid="uid://bfv23hn20a0ia" path="res://ui/numberspawn/HealNumberSpawner.tscn" id="9_sijes"]
 

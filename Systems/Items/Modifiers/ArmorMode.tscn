@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cdfucojif8qe6"]
+
+[ext_resource type="Script" uid="uid://dhp6gef525ttr" path="res://Systems/Items/Modifiers/armor_mode.gd" id="1_h7geu"]
+
+[node name="ArmourMode" type="Node"]
+script = ExtResource("1_h7geu")

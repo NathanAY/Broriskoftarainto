@@ -23,7 +23,7 @@ func do_damage(body):
     bodyHealth.event_manager.emit_event("before_take_damage", [{"damage_context": ctx}])
     bodyHealth.take_damage(ctx)
     if event_manager:
-        event_manager.emit_event("after_deal_damage", [{"projectile": self, "body": body, "damage_context": ctx}])
+        event_manager.emit_event("after_deal_damage", [{"weapon": self, "body": body, "damage_context": ctx}])
         event_manager.emit_event("on_attack", [{"weapon": self, "body": body, "damage_context": ctx}])
-        event_manager.emit_event("on_hit", [{"projectile": self, "body": body, "damage_context": ctx}])                     
+        event_manager.emit_event("on_hit", [{"weapon": self, "body": body, "damage_context": ctx}])                     
     

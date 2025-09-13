@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://b0s4jw4djsulk" path="res://Assets/frame0000.png" id="2_xeo28"]
 [ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://Systems/LocalEventManager.tscn" id="3_kpr8r"]
 [ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://ui/HealthBar.tscn" id="3_xeo28"]
-[ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/Stats.tscn" id="5_mo1ky"]
+[ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/stats/Stats.tscn" id="5_mo1ky"]
 [ext_resource type="PackedScene" uid="uid://bymf3sqpkbdcr" path="res://Systems/Items/ItemHolder.tscn" id="6_6bs3c"]
 [ext_resource type="PackedScene" uid="uid://cskdgn6s7qlfo" path="res://Systems/weapon/WeaponHolder.tscn" id="7_0o0ue"]
 [ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/Health.tscn" id="7_6bs3c"]

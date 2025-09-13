@@ -28,8 +28,8 @@ func emit_event(event_name: String, args: Array = []) -> void:
 #on_hit
 
 #before_deal_damage damage_context, body
-#before_take_damage damage_context, body
 #after_deal_damage damage_context, body
+#before_take_damage damage_context, body
 #on_death
 #on_health_changed
 #on_take_damage

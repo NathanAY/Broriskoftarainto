@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://c2fgvt88msuf6"]
-
-[ext_resource type="Script" uid="uid://cdb6bn5hxhoex" path="res://Scripts/GlobalEventManager.gd" id="1_igh4e"]
-
-[node name="GlobalEventManager" type="Node"]
-script = ExtResource("1_igh4e")

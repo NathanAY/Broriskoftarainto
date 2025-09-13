@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dqnqyed8sw06x"]
+
+[ext_resource type="Script" uid="uid://p5qcfy2gbne3" path="res://Systems/Items/Buffs/debuff.gd" id="1_otpib"]
+
+[node name="Debuff" type="Node"]
+script = ExtResource("1_otpib")

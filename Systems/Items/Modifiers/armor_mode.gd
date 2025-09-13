@@ -30,7 +30,7 @@ func _on_before_take_damage(event):
 
     ctx.final_amount *= multiplier
     ctx.armor_applied = armor   # optional, for debugging/logging
-    ctx.armour_damage_multiplier = multiplier
+    ctx.armor_damage_multiplier = multiplier
 
 func _on_stat_changes(_data):
     # ensure we keep stats up to date

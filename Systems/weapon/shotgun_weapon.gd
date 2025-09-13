@@ -6,11 +6,11 @@ class_name ShotgunWeapon
 @export var pellet_count: int = 8
 @export var spread_angle: float = 15.0
 
-func try_shoot(target: Node) -> void:
+func try_shoot(targets: Array[Node]) -> void:
     var holder = get_holder()
     if not holder or not projectile_scene: return
 
-    var dir = (target.global_position - holder.global_position).normalized()
+    var dir = (targets[0].global_position - holder.global_position).normalized()
     for i in range(pellet_count):
         var angle = deg_to_rad(randf_range(-spread_angle, spread_angle))
         var rotated = dir.rotated(angle)

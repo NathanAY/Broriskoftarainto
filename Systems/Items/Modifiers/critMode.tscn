@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bf70h3krsevqe"]
+
+[ext_resource type="Script" uid="uid://bb8hn5dk0ao1j" path="res://Systems/Items/Modifiers/critMod.gd" id="1_nxg2v"]
+
+[node name="CritModeScene" type="Node"]
+script = ExtResource("1_nxg2v")

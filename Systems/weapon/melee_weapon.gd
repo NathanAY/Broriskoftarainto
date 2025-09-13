@@ -2,17 +2,28 @@
 extends BaseWeapon
 class_name MeleeWeapon
 
-@export var radius: float = 80.0
-
-func try_shoot(target: Node) -> void:
+func try_shoot(targets: Array[Node]) -> void:
     var holder = get_holder()
     if not holder: return
 #    TODO: implement
-    for node in holder.get_tree().get_nodes_in_group("damageable"):
-        if node == holder: continue
-        var dist = holder.global_position.distance_to(node.global_position)
-        if dist <= radius:
-            if node.has_node("Health"):
-                node.get_node("Health").take_damage(base_damage)
-                event_manager.emit_event("on_attack", [{"weapon": self}])
+    for t in targets:
+        if t.has_node("Health"):
+            do_damage(t)
+                
+func do_damage(body):
+    var ctx = DamageContext.new()
+    ctx.source = get_holder()
+    ctx.target = body
+    ctx.base_amount = base_damage
+    ctx.final_amount = base_damage
+    ctx.tags.append("melee")
+    if event_manager: 
+        event_manager.emit_event("before_deal_damage", [{"damage_context": ctx}])
+    var bodyHealth: Health = body.get_node("Health")
+    bodyHealth.event_manager.emit_event("before_take_damage", [{"damage_context": ctx}])
+    bodyHealth.take_damage(ctx)
+    if event_manager:
+        event_manager.emit_event("after_deal_damage", [{"projectile": self, "body": body, "damage_context": ctx}])
+        event_manager.emit_event("on_attack", [{"weapon": self, "body": body, "damage_context": ctx}])
+        event_manager.emit_event("on_hit", [{"projectile": self, "body": body, "damage_context": ctx}])                     
     

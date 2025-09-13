@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://yj870a0q32n1"]
+
+[ext_resource type="PackedScene" uid="uid://bf70h3krsevqe" path="res://Systems/Items/Modifiers/critMode.tscn" id="1_o1s6e"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_jv3pb"]
+
+[resource]
+script = ExtResource("2_jv3pb")
+name = "Crit"
+description = "add crit hits"
+modifiers = {
+"critical_chance": {
+"flat": 0.35
+},
+&"critical_multiplier": {
+&"flat": 3.0
+}
+}
+effect_scene = Array[PackedScene]([ExtResource("1_o1s6e")])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

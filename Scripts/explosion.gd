@@ -2,7 +2,7 @@
 extends Area2D
 
 @export var radius: float = 100.0
-@export var damage: int = 20
+@export var damage: int = 10
 @export var duration: float = 0.15
 var time_passed: float = 0.0
 var event_manager: EventManager = null 
@@ -27,9 +27,24 @@ func _draw():
 
 func _on_body_entered(body: Node):
     if body.has_node("Health"):
-        var health_node: Health = body.get_node("Health")
-        health_node.take_damage(damage)
+        do_damage(body)
     else:
         print("Explosion.gd: Body has no Health node!")
+    
+
+func do_damage(body):
+    var ctx = DamageContext.new()
+    ctx.source = self
+    ctx.target = body
+    ctx.base_amount = damage
+    ctx.final_amount = damage
+    ctx.tags.append("explosion")
+    if event_manager: 
+        event_manager.emit_event("before_deal_damage", [{"damage_context": ctx}])
+    var bodyHealth: Health = body.get_node("Health")
+    bodyHealth.event_manager.emit_event("before_take_damage", [{"damage_context": ctx}])
+    bodyHealth.take_damage(ctx)
     if event_manager:
-        event_manager.emit_event("on_hit", [{"explosion": self, "body": body}])        
+        event_manager.emit_event("after_deal_damage", [{"projectile": self, "body": body, "damage_context": ctx}])
+    if event_manager:
+        event_manager.emit_event("on_hit", [{"explosion": self, "body": body, "damage_context": ctx}])  

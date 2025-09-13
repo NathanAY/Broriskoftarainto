@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="PistolWeapon" load_steps=3 format=3 uid="uid://0kk7tflomdcg"]
 
-[ext_resource type="PackedScene" uid="uid://bbj577efimtbf" path="res://Scenes/Projectile.tscn" id="1_120iq"]
+[ext_resource type="PackedScene" uid="uid://bbj577efimtbf" path="res://Systems/weapon/Projectile.tscn" id="1_120iq"]
 [ext_resource type="Script" uid="uid://c86g5wtgphef8" path="res://Systems/weapon/pistol_weapon.gd" id="1_yx5y6"]
 
 [resource]
@@ -11,4 +11,5 @@ description = "fdh"
 base_attack_speed = 1.0
 base_damage = 5.0
 range = 400.0
+modifiers = {}
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"

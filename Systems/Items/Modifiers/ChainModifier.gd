@@ -2,7 +2,7 @@
 extends Node
 
 #@export var projectile_scene: PackedScene
-@export var projectile_scene = preload("res://Scenes/Projectile.tscn")
+@export var projectile_scene = preload("res://Systems/weapon/Projectile.tscn")
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var event_manager = null
 

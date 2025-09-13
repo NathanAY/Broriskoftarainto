@@ -6,11 +6,9 @@ extends CharacterBody2D
 @onready var stats = $Stats
 @onready var weapon_holder = $WeaponHolder
 
-var projectile_scene = preload("res://Scenes/Projectile.tscn")
 var current_target = null
 var fire_timer = 0.0
 var timer = Timer.new()
-var attack_range = 500
 
 var modifiers: Array = []
 
@@ -23,8 +21,8 @@ func _ready():
             modifiers.append(c)
     print("Tower: found modifiers:", modifiers)
     
-    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
+    $WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
     $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
@@ -33,16 +31,20 @@ func _ready():
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/SpreadShot.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/ChainProjectile.tres"))
-    $ItemHolder.add_item(load("res://Resources/items/ExplosiveShot.tres"))
+    #$ItemHolder.add_item(load("res://Resources/items/ExplosiveShot.tres"))
     $ItemHolder.add_item(load("res://Resources/items/RegenPassive.tres"))
     $ItemHolder.add_item(load("res://Resources/items/RegenPassive.tres"))
+    #$ItemHolder.add_item(load("res://Resources/items/PoisonHit.tres"))
     $ItemHolder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))
+    $ItemHolder.add_item(load("res://Resources/items/HealthMeat.tres"))
+    #$ItemHolder.add_item(load("res://Resources/items/CritGlass.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/PlusDamageItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
 
 func _draw():
     # Draw a circle showing the attack range (for debugging)
-    draw_circle(Vector2.ZERO, stats.get_stat("attack_range"), Color(1, 0, 0, 0.02))
+    #draw_circle(Vector2.ZERO, stats.get_stat("attack_range"), Color(1, 0, 0, 0.02))
+    draw_circle(Vector2.ZERO, 80, Color(1, 0, 0, 0.02))
     pass
 
 func _on_area_2d_area_entered(area: Area2D) -> void:

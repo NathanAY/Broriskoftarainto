@@ -13,9 +13,9 @@ func _ready():
     max_health = stats.get_stat("health")
     current_health = max_health
 
-func take_damage(amount: float) -> void:
-    current_health -= amount
-    _emit_on_health_changed_event(-amount)
+func take_damage(damage_context: DamageContext) -> void:
+    current_health -= damage_context.final_amount
+    _emit_on_health_changed_event(-damage_context.final_amount)
     if current_health <= 0:
         die()
 
@@ -32,7 +32,7 @@ func die() -> void:
     # Optionally remove owner node
     get_parent().queue_free()
 
-func _update_max_health():
+func _update_max_health(event):
     max_health = stats.get_stat("health")
     _emit_on_health_changed_event(0)
 

@@ -11,9 +11,12 @@ class_name BaseWeapon
 
 var holder_ref: WeakRef
 var event_manager: Node
+#groups to ignore (friendly fire)
+var ignore_groups: Array = []
 
 func apply_to(holder: Node) -> void:
     holder_ref = weakref(holder)
+    var ignoreGroups = holder.get_groups().filter(func(g): return g != "damageable")
     event_manager = holder.get_node_or_null("EventManager")
 
 func remove_from(holder: Node) -> void:
@@ -24,5 +27,5 @@ func get_holder() -> Node:
     return holder_ref.get_ref() if holder_ref and holder_ref.get_ref() else null
 
 # abstract: subclasses override this
-func try_shoot(target: Node) -> void:
+func try_shoot(targets: Array[Node]) -> void:
     push_warning("BaseWeapon: try_shoot not implemented for %s" % name)

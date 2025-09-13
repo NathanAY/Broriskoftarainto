@@ -6,9 +6,9 @@ var base_speed = 300
 var direction = Vector2.ZERO
 @export var damage: float = 0
 
-var event_manager = null
+var event_manager: EventManager = null
 
-# New: groups to ignore (friendly fire)
+#groups to ignore (friendly fire)
 var ignore_groups: Array = []
 
 func _ready():
@@ -46,13 +46,26 @@ func _on_area_entered(body):
     if body == ignore_enemy:
         print("Projectile ignoring enemy:", body.name)
         return
-    if event_manager:
-        event_manager.emit_event("on_hit", [{"projectile": self, "body": body}])
-    # Here you would typically damage the enemy
-    #print("Projectile hit enemy!")
     if body.has_node("Health"):
-        var health_node = body.get_node("Health")
-        health_node.take_damage(damage)
+        do_damage(body)
     else:
         print("Enemy has no Health node!")
     queue_free()  # Remove the projectile
+
+func do_damage(body):
+    var ctx = DamageContext.new()
+    ctx.source = self
+    ctx.target = body
+    ctx.base_amount = damage
+    ctx.final_amount = damage
+    ctx.tags.append("projectile")
+    if event_manager: 
+        event_manager.emit_event("before_deal_damage", [{"damage_context": ctx}])
+    var bodyHealth: Health = body.get_node("Health")
+    bodyHealth.event_manager.emit_event("before_take_damage", [{"damage_context": ctx}])
+    bodyHealth.take_damage(ctx)
+    if event_manager:
+        event_manager.emit_event("after_deal_damage", [{"projectile": self, "body": body, "damage_context": ctx}])
+    if event_manager:
+        event_manager.emit_event("on_hit", [{"projectile": self, "body": body, "damage_context": ctx}])        
+    

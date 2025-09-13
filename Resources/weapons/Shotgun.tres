@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ShotgunWeapon" load_steps=3 format=3 uid="uid://fov62q3eb6q7"]
 
-[ext_resource type="PackedScene" uid="uid://bbj577efimtbf" path="res://Scenes/Projectile.tscn" id="1_hd58x"]
+[ext_resource type="PackedScene" uid="uid://bbj577efimtbf" path="res://Systems/weapon/Projectile.tscn" id="1_hd58x"]
 [ext_resource type="Script" uid="uid://prg5uja0tmq4" path="res://Systems/weapon/shotgun_weapon.gd" id="1_st5ot"]
 
 [resource]

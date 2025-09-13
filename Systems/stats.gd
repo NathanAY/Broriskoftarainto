@@ -12,6 +12,9 @@ class_name Stats
     "area_radius": 1.0,
     "attack_range": 500.0,
     "movement_speed": 50,
+    "armor": 0,
+    "critical_chance": 0.0,
+    "critical_multiplier": 1.0,
 }
 
 # Active modifiers (items, buffs, debuffs, etc.)

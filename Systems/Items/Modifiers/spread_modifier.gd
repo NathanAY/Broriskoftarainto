@@ -2,7 +2,7 @@
 extends Node
 
 #@export var projectile_scene: PackedScene
-@export var projectile_scene = preload("res://Scenes/Projectile.tscn")
+@export var projectile_scene = preload("res://Systems/weapon/Projectile.tscn")
 var event_manager: EventManager
 var stacks: int = 0  # number of items picked up
 
@@ -51,7 +51,7 @@ func _on_attack(data):
         _spawn_extra(projectile, right_angle, damage)
 
 func _spawn_extra(source: Node, direction: Vector2, damage: float):
-    var p = projectile_scene.instantiate()
+    var p: Projectile = projectile_scene.instantiate()
     
     # Copy key values
     p.damage = damage

@@ -1,8 +1,10 @@
 #ExplosiveShotEffect
 extends Node
 
+var explosionScene = preload("res://scenes/Explosion.tscn")
+
 var explosion_radius := 64.0
-var explosion_damage := 40
+var explosion_damage := 3
 
 var event_manager: EventManager = null 
 
@@ -16,12 +18,11 @@ func _on_hit(event: Dictionary):
     if !event.has("projectile"):
         return
     var projectile = event["projectile"]
-    print("ExplosiveShotEffect: _on_hit")
     # Defer the explosion spawn to avoid flushing query errors
     call_deferred("_spawn_explosion", projectile.global_position)
 
 func _spawn_explosion(position: Vector2):
-    var explosion = preload("res://scenes/Explosion.tscn").instantiate()
+    var explosion = explosionScene.instantiate()
     explosion.attachEventManager(event_manager)
     explosion.global_position = position
     explosion.radius = explosion_radius

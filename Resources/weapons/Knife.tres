@@ -4,11 +4,10 @@
 
 [resource]
 script = ExtResource("1_363sm")
-radius = 80.0
 name = "Knife"
 description = "Knife"
 base_attack_speed = 1.0
-base_damage = 5.0
-range = 400.0
+base_damage = 100.0
+range = 80.0
 modifiers = {}
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"

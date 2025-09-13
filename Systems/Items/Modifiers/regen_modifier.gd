@@ -3,7 +3,7 @@ extends Node
 
 @export var heal_amount: float = 4.0   # heal per tick
 @export var heal_amount_percent: float = 0.01   # heal% of max life per tick
-@export var interval: float = 3.0      # seconds
+@export var interval: float = 0.5      # seconds
 var event_manager: EventManager
 var stacks: int = 0
 var holder: Node = null

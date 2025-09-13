@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_dkwrk")
-name = "Attack speed on kill buff"
+name = "Attack speed on hit"
 description = "Attack speed on kill buff desc"
 modifiers = {}
 effect_scene = Array[PackedScene]([ExtResource("1_a53jq")])

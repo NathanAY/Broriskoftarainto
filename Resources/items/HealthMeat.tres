@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Item" load_steps=2 format=3 uid="uid://d0iwbusnq8yib"]
+
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="1_0swjq"]
+
+[resource]
+script = ExtResource("1_0swjq")
+name = "Health meet"
+description = "Health +1000"
+modifiers = {
+"health": {
+"flat": 1000
+}
+}
+effect_scene = Array[PackedScene]([])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

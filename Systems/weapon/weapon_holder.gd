@@ -88,11 +88,11 @@ func _on_weapon_timeout(weapon_inst: Resource) -> void:
     if not (weapon_inst in weapon_timers):
         return
 
-    var target: Node = _find_target(weapon_inst.range if weapon_inst.range else 0)
-    if target:
+    var targets: Array[Node] = _find_targets(weapon_inst.range if weapon_inst.range else 0)
+    if targets.size() > 0:
         # safe call: weapon_inst.try_shoot may be a method on the resource
         if weapon_inst.has_method("try_shoot"):
-            weapon_inst.try_shoot(target)
+            weapon_inst.try_shoot(targets)
         else:
             push_warning("WeaponHolder: weapon_inst has no try_shoot() method")
 
@@ -116,7 +116,8 @@ func _on_stat_changes(event) -> void:
         if is_instance_valid(t):
             t.wait_time = _compute_weapon_wait_time(weapon_inst)
 
-func _find_target(range: float) -> Node:
+func _find_targets(range: float) -> Array[Node]:
+    var targets: Array[Node] = []
     var closest_target: Node = null
     var closest_dist = INF
     # Get all nodes in the scene
@@ -137,4 +138,5 @@ func _find_target(range: float) -> Node:
         if dist <= range and dist < closest_dist:
             closest_dist = dist
             closest_target = node
-    return closest_target
+            targets.append(node)            
+    return targets

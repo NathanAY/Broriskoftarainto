@@ -1,11 +1,10 @@
-[gd_scene load_steps=16 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene load_steps=17 format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_idj7w"]
 [ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Scenes/Tower.tscn" id="1_r150o"]
 [ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://Scripts/Spawner.gd" id="3_kln2b"]
 [ext_resource type="Script" uid="uid://ciyukmalwlif7" path="res://Systems/Items/Modifiers/ExplosionModifier.gd" id="4_rgh2o"]
 [ext_resource type="Resource" uid="uid://s8a01h7xtfvy" path="res://Resources/items/AttackSpeedItem.tres" id="5_4kpch"]
-[ext_resource type="PackedScene" uid="uid://c2fgvt88msuf6" path="res://Systems/GlobalEventManager.tscn" id="5_pbw6q"]
 [ext_resource type="Resource" uid="uid://ccmp8wc205pp3" path="res://Resources/items/ChainProjectile.tres" id="6_grg3l"]
 [ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://ui/TowerUI.tscn" id="6_v1gob"]
 [ext_resource type="Resource" uid="uid://mlfohgnnpkph" path="res://Resources/items/ExplosiveShot.tres" id="7_frkhe"]
@@ -15,17 +14,14 @@
 [ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="12_grg3l"]
 [ext_resource type="Resource" uid="uid://ws6ag135x60i" path="res://Resources/items/AttackSpeedOnKillBuff.tres" id="13_h1m7h"]
 [ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://ui/interractable/interaction_manager.gd" id="14_1p5hy"]
+[ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://Scenes/Enemy.tscn" id="14_2w5on"]
+[ext_resource type="Resource" uid="uid://yj870a0q32n1" path="res://Resources/items/CritGlass.tres" id="14_erwvk"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_idj7w")
 
-[node name="GlobalEventManager" parent="." instance=ExtResource("5_pbw6q")]
-
 [node name="Spawner" type="Node" parent="."]
 script = ExtResource("3_kln2b")
-
-[node name="SpawnTimer" type="Timer" parent="Spawner"]
-wait_time = 2.0
 
 [node name="ExplositionModifierToEnemyOnDeath" type="Node" parent="Spawner"]
 script = ExtResource("4_rgh2o")
@@ -38,24 +34,35 @@ script = ExtResource("12_grg3l")
 target = NodePath("../Tower")
 
 [node name="ItemPickup" parent="." instance=ExtResource("12_frkhe")]
-position = Vector2(-267, 149)
+position = Vector2(-248, -268)
 item = ExtResource("5_4kpch")
 
 [node name="ItemPickup2" parent="." instance=ExtResource("12_frkhe")]
-position = Vector2(-111, 200)
+position = Vector2(-465, -270)
 item = ExtResource("5_4kpch")
 
 [node name="ItemPickup3" parent="." instance=ExtResource("12_frkhe")]
-position = Vector2(-225, 262)
+position = Vector2(-352, -271)
 item = ExtResource("5_4kpch")
 
 [node name="ItemPickup4" parent="." instance=ExtResource("12_frkhe")]
-position = Vector2(155, 233)
+position = Vector2(-240, -131)
 item = ExtResource("13_h1m7h")
 
 [node name="ItemPickup5" parent="." instance=ExtResource("12_frkhe")]
-position = Vector2(12, 235)
+position = Vector2(-244, -194)
 item = ExtResource("7_frkhe")
+
+[node name="ItemPickup6" parent="." instance=ExtResource("12_frkhe")]
+position = Vector2(-240, -62)
+item = ExtResource("14_erwvk")
+
+[node name="ItemPickup7" parent="." instance=ExtResource("12_frkhe")]
+position = Vector2(-240, -8)
+item = ExtResource("9_1p5hy")
+
+[node name="Enemy" parent="." instance=ExtResource("14_2w5on")]
+position = Vector2(506, -236)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -64,5 +71,3 @@ tower = NodePath("../../Tower")
 
 [node name="InteractionManager" type="Node" parent="."]
 script = ExtResource("14_1p5hy")
-
-[connection signal="timeout" from="Spawner/SpawnTimer" to="Spawner" method="_on_spawn_timer_timeout"]

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cxbxwwudprlwt"]
+
+[ext_resource type="Script" uid="uid://clcv6e5kql5es" path="res://Systems/Items/Modifiers/poison_modifier.gd" id="1_ls30c"]
+
+[node name="PoisonModifier" type="Node"]
+script = ExtResource("1_ls30c")

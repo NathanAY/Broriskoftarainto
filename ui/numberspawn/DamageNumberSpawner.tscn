@@ -3,6 +3,6 @@
 [ext_resource type="Script" uid="uid://d137fkn3alac8" path="res://ui/numberspawn/DamageNumberSpawner.gd" id="1_p64xj"]
 [ext_resource type="PackedScene" uid="uid://bynru56pu7iam" path="res://ui/numberspawn/FloatingNumber.tscn" id="2_43r8r"]
 
-[node name="DamageNumberSpawner" type="Node2D"]
+[node name="DamageNumberSpawner" type="Node"]
 script = ExtResource("1_p64xj")
 damage_number_scene = ExtResource("2_43r8r")

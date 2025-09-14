@@ -18,20 +18,13 @@ script = ExtResource("1_wovta")
 texture = ExtResource("2_xeo28")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-scale = Vector2(3.23, 3.23)
+scale = Vector2(3, 3)
 shape = SubResource("CircleShape2D_kpr8r")
 one_way_collision_margin = 1.2
 
 [node name="EventManager" parent="." instance=ExtResource("3_kpr8r")]
 
 [node name="HealthBar" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("3_xeo28")]
-anchors_preset = 15
-anchor_left = 0.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_right = 0.0
-grow_horizontal = 2
-grow_vertical = 2
 event_manager = NodePath("../EventManager")
 
 [node name="Stats" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("5_mo1ky")]

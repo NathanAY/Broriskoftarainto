@@ -7,6 +7,7 @@ class_name Stats
 # Base stats
 @export var stats := {
     "health": 40.0,
+    "energy_shield": 0.0,
     "damage": 10.0,
     "attack_speed": 2.0,
     "area_radius": 1.0,
@@ -119,9 +120,10 @@ var condition_update_interval: float = 0.5  # seconds
 
 func _process(delta: float) -> void:
     _condition_update_accum += delta
-    if _condition_update_accum >= condition_update_interval:
-        _condition_update_accum = 0.0
-        _update_condition_managers()
+    if _condition_update_accum <= condition_update_interval:
+        return
+    _condition_update_accum = 0.0
+    _update_condition_managers()
 
 func _update_condition_managers() -> void:
     for manager in condition_managers:

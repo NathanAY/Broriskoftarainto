@@ -1,6 +1,6 @@
 extends Node
 
-@export var spawn_interval = 2.0
+@export var spawn_interval = 200.0
 var enemy_scene = preload("res://Scenes/Enemy.tscn")
 var screen_size
 var spawn_timer

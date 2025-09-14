@@ -22,6 +22,7 @@ func _ready():
     #item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))
     item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))
     item_holder.add_item(load("res://Resources/items/ArmorPlate.tres"))
+    item_holder.add_item(load("res://Resources/items/EnergyShieldBlock.tres"))
     #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
     #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
     #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))

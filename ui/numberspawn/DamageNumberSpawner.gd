@@ -9,7 +9,7 @@ func _ready() -> void:
 
 func _show_damage(event: Dictionary) -> void:
     var ctx: DamageContext = event["damage_context"]
-    var damage = ctx.final_amount
+    var damage = ctx.final_amount + ctx.energy_shield_absorbed
     var body = ctx.target
     var dmg_num = damage_number_scene.instantiate()
     get_tree().current_scene.add_child(dmg_num)  # add to world/layer

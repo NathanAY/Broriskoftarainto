@@ -9,4 +9,5 @@ name = "Spread"
 description = "Spread shot"
 modifiers = {}
 effect_scene = Array[PackedScene]([ExtResource("1_a5gq2")])
+condition_managers = Array[PackedScene]([])
 metadata/_custom_type_script = "uid://bi8j7om4juysb"

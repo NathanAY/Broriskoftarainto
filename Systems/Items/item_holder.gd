@@ -4,12 +4,12 @@ class_name ItemHolder
 
 # try to find Stats + EventManager on the parent (the entity that owns this ItemHolder)
 @onready var hold_owner: Node = get_parent()
-@onready var stats: Node = hold_owner.get_node_or_null("Stats")
-@onready var event_manager: Node = hold_owner.get_node_or_null("EventManager")
+@onready var stats: Stats = hold_owner.get_node_or_null("Stats")
+@onready var event_manager: EventManager = hold_owner.get_node_or_null("EventManager")
 
 @export var items: Array = []
 
-func add_item(item: Resource) -> void:
+func add_item(item: Item) -> void:
     if item == null:
         return
     items.append(item)
@@ -28,10 +28,22 @@ func add_item(item: Resource) -> void:
             add_child(effect)
             item.apply_to(hold_owner)
             if effect.has_method("attachEventManager") and event_manager:
-                effect.attachEventManager(event_manager)
-        # 🔹 Update stacks if SpreadModifier
+                effect.attachEventManager(event_manager)                
+        # Decide stack state
+        var active = true
+        var scene_conditions: Array[String] = item.effect_scene_condition
+        if scene_conditions.size() > 0:
+            var condition: String = scene_conditions[0]
+            if condition != "" and stats:
+                active = stats.get_condition(condition) > 0
+                var idx = effect.stacks.size() # about to add
+                event_manager.subscribe("on_condition_change", func(ev):
+                    if effect.has_method("set_stack_active") and ev["name"] == condition:
+                        effect.set_stack_active(idx, stats.get_condition(condition) > 0)
+                )
+
         if effect.has_method("add_stack"):
-            effect.add_stack(1)
+            effect.add_stack(active)
     else:
         item.apply_to(hold_owner)        
 

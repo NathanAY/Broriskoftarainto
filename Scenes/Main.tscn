@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene load_steps=18 format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_idj7w"]
 [ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Scenes/Tower.tscn" id="1_r150o"]
@@ -15,6 +15,7 @@
 [ext_resource type="Resource" uid="uid://ws6ag135x60i" path="res://Resources/items/AttackSpeedOnKillBuff.tres" id="13_h1m7h"]
 [ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://ui/interractable/interaction_manager.gd" id="14_1p5hy"]
 [ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://Scenes/Enemy.tscn" id="14_2w5on"]
+[ext_resource type="Resource" uid="uid://d28aq4yyk8v4l" path="res://Resources/items/SpreadShotIfStill.tres" id="14_346fj"]
 [ext_resource type="Resource" uid="uid://yj870a0q32n1" path="res://Resources/items/CritGlass.tres" id="14_erwvk"]
 
 [node name="Main" type="Node2D"]
@@ -60,6 +61,18 @@ item = ExtResource("14_erwvk")
 [node name="ItemPickup7" parent="." instance=ExtResource("12_frkhe")]
 position = Vector2(-240, -8)
 item = ExtResource("9_1p5hy")
+
+[node name="ItemPickup8" parent="." instance=ExtResource("12_frkhe")]
+position = Vector2(-301, -4)
+item = ExtResource("9_1p5hy")
+
+[node name="ItemPickup9" parent="." instance=ExtResource("12_frkhe")]
+position = Vector2(-240, 46)
+item = ExtResource("14_346fj")
+
+[node name="ItemPickup10" parent="." instance=ExtResource("12_frkhe")]
+position = Vector2(-299, 46)
+item = ExtResource("14_346fj")
 
 [node name="Enemy" parent="." instance=ExtResource("14_2w5on")]
 position = Vector2(506, -236)

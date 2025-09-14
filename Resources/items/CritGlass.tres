@@ -16,4 +16,5 @@ modifiers = {
 }
 }
 effect_scene = Array[PackedScene]([ExtResource("1_o1s6e")])
+condition_managers = Array[PackedScene]([])
 metadata/_custom_type_script = "uid://bi8j7om4juysb"

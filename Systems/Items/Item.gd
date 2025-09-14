@@ -3,8 +3,9 @@ class_name Item
 
 @export var name: String
 @export var description: String
-@export var modifiers: Dictionary = {} # optional stat modifiers ex: {"damage": {"flat": 5}}
+@export var modifiers: Dictionary = {} # optional stat modifiers ex: {"damage": {"flat": 5}, "condition": "standing_still"}}
 @export var effect_scene: Array [PackedScene] #optional, for special effects (explosions, spread shot, chain projectiles, crit)
+@export var effect_scene_condition: Array[String] = [] # optional effect_scene condition. ex: "standing_still"
 @export var condition_managers: Array[PackedScene] = [] # optional condition managers
 
 # Apply modifiers / effects to a holder (holder = Node that has "Stats" child)

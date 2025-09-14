@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Item" load_steps=4 format=3 uid="uid://d28aq4yyk8v4l"]
+
+[ext_resource type="PackedScene" uid="uid://bwrwqelyrp4aa" path="res://Systems/Items/Modifiers/SpreadModifier.tscn" id="1_2d20f"]
+[ext_resource type="PackedScene" uid="uid://3g46r8pwf6mq" path="res://Systems/stats/conditions/StandingStillManager.tscn" id="1_tx0an"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_tx0an"]
+
+[resource]
+script = ExtResource("2_tx0an")
+name = "Spread if still"
+description = "Spread shot if still"
+modifiers = {}
+effect_scene = Array[PackedScene]([ExtResource("1_2d20f")])
+effect_scene_condition = Array[String](["standing_still"])
+condition_managers = Array[PackedScene]([ExtResource("1_tx0an")])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

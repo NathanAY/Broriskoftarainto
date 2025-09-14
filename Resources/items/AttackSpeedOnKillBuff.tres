@@ -9,4 +9,5 @@ name = "Attack speed on hit"
 description = "Attack speed on kill buff desc"
 modifiers = {}
 effect_scene = Array[PackedScene]([ExtResource("1_a53jq")])
+condition_managers = Array[PackedScene]([])
 metadata/_custom_type_script = "uid://bi8j7om4juysb"

@@ -92,6 +92,7 @@ func set_condition(name: String, value: float) -> void:
         conditions[name] = value
         if event_manager:
             event_manager.emit_event("on_stat_changes", [{"stat_name" :name, "final_value": value}])
+            event_manager.emit_event("on_condition_change", [{"name" :name, "value": value}])
 
 func get_condition(name: String) -> float:
     return conditions.get(name, 0.0)

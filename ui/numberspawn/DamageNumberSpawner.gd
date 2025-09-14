@@ -19,5 +19,7 @@ func _show_damage(event: Dictionary) -> void:
     )
     if (ctx.tags.has("poison")):
         dmg_num.color = Color(0, 1, 0)
+    if (ctx.tags.has("explosion")):
+        dmg_num.color = Color.YELLOW
     dmg_num.global_position = body.global_position + random_offset
     dmg_num.show_damage(damage)

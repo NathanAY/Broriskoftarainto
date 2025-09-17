@@ -9,8 +9,11 @@ class_name Debuff
 }
 
 var holder: Node = null
+var holder_em: EventManager = null
+
+var target: Node = null
 var target_stats: Stats = null
-var event_manager: EventManager = null
+var target_em: EventManager = null
 
 func _ready():
     holder = get_parent().hold_owner
@@ -18,30 +21,38 @@ func _ready():
         push_warning("Debuff has no parent/holder!")
         return
 
-    event_manager = holder.get_node_or_null("EventManager")
-
+    holder_em = holder.get_node_or_null("EventManager")
 
     # Subscribe to the trigger event
-    event_manager.subscribe(trigger_event, Callable(self, "_on_trigger"))
+    holder_em.subscribe(trigger_event, Callable(self, "_on_trigger"))
 
 func _on_trigger(event: Dictionary):
     var ctx: DamageContext = event["damage_context"]
-    target_stats = ctx.target.get_node_or_null("Stats")
+    target = ctx.target
+    target_stats = target.get_node_or_null("Stats")
+    target_em = target.get_node_or_null("EventManager")
     if not target_stats:
         return
-
-    # Apply buff modifiers
+   
+    # Apply debuff
     target_stats.add_modifier(modifiers)
+    
+    # Emit event so UI/logic can react
+    var id: int = randi()
+    target_em.emit_event("on_debuff_added", [{"debuff": self, "holder": holder, "target": target, "id": id}])
+
 
     # Setup timer to remove after duration
     var t := Timer.new()
     t.wait_time = duration
     t.one_shot = true
-    t.timeout.connect(_on_expire.bind(t))
+    t.timeout.connect(_on_expire.bind(t, id))
     add_child(t)
     t.start()
 
-func _on_expire(t: Timer):
+func _on_expire(t: Timer, id: int):
     if target_stats:
         target_stats.remove_modifier(modifiers)
+    if target_em:
+        target_em.emit_event("on_debuff_removed", [{"debuff": self, "holder": holder, "target": target, "id": id}])    
     t.queue_free()

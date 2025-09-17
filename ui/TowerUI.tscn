@@ -1,16 +1,22 @@
-[gd_scene load_steps=2 format=3 uid="uid://pv8pdtie8vq5"]
+[gd_scene load_steps=3 format=3 uid="uid://pv8pdtie8vq5"]
 
 [ext_resource type="Script" uid="uid://cfoaow3ldbe7n" path="res://ui/tower_ui.gd" id="1_fosbm"]
+[ext_resource type="PackedScene" uid="uid://byaxfk2256h15" path="res://ui/BuffUi.tscn" id="2_h3d8y"]
 
 [node name="TowerUi" type="Control"]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_fosbm")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_top = 40.0
+offset_right = 91.0
+offset_bottom = 106.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
 layout_mode = 2
@@ -31,3 +37,12 @@ text = "Items"
 
 [node name="Items" type="VBoxContainer" parent="PanelContainer/VBoxContainer"]
 layout_mode = 2
+
+[node name="BuffUi" parent="." instance=ExtResource("2_h3d8y")]
+layout_mode = 1
+anchors_preset = 0
+anchor_left = 0.0
+anchor_right = 0.0
+offset_left = 200.0
+offset_right = 200.0
+grow_horizontal = 1

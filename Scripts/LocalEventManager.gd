@@ -27,6 +27,11 @@ func emit_event(event_name: String, args: Array = []) -> void:
 #on_attack
 #on_hit
 
+#on_debuff_added
+#on_debuff_removed
+#on_buff_added
+#on_buff_removed
+
 #before_deal_damage damage_context, body
 #after_deal_damage damage_context, body
 #before_take_damage damage_context, body

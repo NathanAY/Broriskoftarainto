@@ -59,7 +59,7 @@ func _update_stats() -> void:
         var name_label = str(stat_name).capitalize()
         
         var val = stats_node.get_stat(stat_name)
-        value_label.text = str(name_label, ": ", val)
+        value_label.text = str(name_label, ": ", int(val))
         value_label.name = "value_" + str(stat_name)
         stats_container.add_child(value_label)
 
@@ -71,7 +71,7 @@ func _on_stat_changed(event) -> void:
     var new_value: float = event["final_value"]
     var lbl = value_labels.get(stat_name, null)
     if lbl:
-        lbl.text = str(str(stat_name).capitalize(), ": ", new_value)
+        lbl.text = str(str(stat_name).capitalize(), ": ", int(new_value))
     else:
         # new stat not present in UI — rebuild full list
         _update_stats()

@@ -5,7 +5,7 @@ class_name Buff
 @export var trigger_event: String = "on_hit"    # event name to listen for
 @export var duration: float = 3.0               # how long buff lasts
 @export var modifiers: Dictionary = {           # stat changes
-    "attack_speed": {"flat": 0.0, "percent": 0.5}
+    "attack_speed": {"flat": 1.0, "percent": 0.15}
 }
 
 var holder: Node = null
@@ -35,16 +35,20 @@ func _on_trigger(event_data):
 
     # Apply buff modifiers
     stats.add_modifier(modifiers)
-
+    var id: int = randi()
+    # Emit event: buff added
+    event_manager.emit_event("on_buff_added", [{"buff": self, "holder": holder, "id": id}])
     # Setup timer to remove after duration
     var t := Timer.new()
     t.wait_time = duration
     t.one_shot = true
-    t.timeout.connect(_on_expire.bind(t))
+    t.timeout.connect(_on_expire.bind(t, id))
     add_child(t)
     t.start()
 
-func _on_expire(t: Timer):
+func _on_expire(t: Timer, id: int):
     if stats:
         stats.remove_modifier(modifiers)
+    # Emit event: buff added
+    event_manager.emit_event("on_buff_removed", [{"buff": self, "holder": holder, "id": id}])
     t.queue_free()

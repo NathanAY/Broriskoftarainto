@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="RandomTargetSelector" load_steps=2 format=3 uid="uid://cvld6sehrc6ck"]
+
+[ext_resource type="Script" uid="uid://bmn3fkvrrkiah" path="res://Systems/weapon/target/random_target_selector.gd" id="1_mw5hx"]
+
+[resource]
+script = ExtResource("1_mw5hx")
+metadata/_custom_type_script = "uid://o7tsxgqpxyaf"

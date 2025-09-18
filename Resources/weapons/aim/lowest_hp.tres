@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="RandomTargetSelector" load_steps=2 format=3 uid="uid://o1i4xf6n4r6f"]
+
+[ext_resource type="Script" uid="uid://c3mv6f35olrpp" path="res://Systems/weapon/target/lowest_hp.gd" id="1_0yem0"]
+
+[resource]
+script = ExtResource("1_0yem0")
+metadata/_custom_type_script = "uid://o7tsxgqpxyaf"

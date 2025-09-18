@@ -18,8 +18,8 @@ func _ready():
             c.attachEventManager(event_manager)
     
     $WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
-    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
+    $WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
     $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
@@ -46,7 +46,7 @@ func _ready():
 func _draw():
     # Draw a circle showing the attack range (for debugging)
     #draw_circle(Vector2.ZERO, stats.get_stat("attack_range"), Color(1, 0, 0, 0.02))
-    draw_circle(Vector2.ZERO, 80, Color(1, 0, 0, 0.02))
+    draw_circle(Vector2.ZERO, 100, Color(1, 0, 0, 0.02))
     pass
 
 func _on_area_2d_area_entered(area: Area2D) -> void:

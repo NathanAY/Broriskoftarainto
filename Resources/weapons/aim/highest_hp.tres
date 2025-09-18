@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="LowestHealthTargetSelector" load_steps=2 format=3 uid="uid://crhs1rw6kcd5s"]
+
+[ext_resource type="Script" uid="uid://n24j8m7tnux6" path="res://Systems/weapon/target/highest_hp.gd" id="1_cgtxx"]
+
+[resource]
+script = ExtResource("1_cgtxx")
+metadata/_custom_type_script = "uid://o7tsxgqpxyaf"

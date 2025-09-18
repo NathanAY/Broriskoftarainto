@@ -8,6 +8,7 @@ class_name BaseWeapon
 @export var base_damage: float = 5.0
 @export var range: float = 400.0
 @export var modifiers: Dictionary = {}
+@export var target_selector: TargetSelector
 
 var holder_ref: WeakRef
 var event_manager: Node

@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="AllTargetsInRangeSelector" load_steps=2 format=3 uid="uid://88gqpdee82ou"]
+
+[ext_resource type="Script" uid="uid://bxgnko2204vvh" path="res://Systems/weapon/target/all_targets_in_range.gd" id="1_nm3iq"]
+
+[resource]
+script = ExtResource("1_nm3iq")
+metadata/_custom_type_script = "uid://o7tsxgqpxyaf"

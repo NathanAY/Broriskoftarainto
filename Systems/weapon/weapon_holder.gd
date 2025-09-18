@@ -18,12 +18,12 @@ func _ready() -> void:
     if event_manager:
         event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
-func add_weapon(weapon_resource: Resource) -> void:
+func add_weapon(weapon_resource: BaseWeapon) -> void:
     if weapon_resource == null:
         return
 
     # Duplicate the resource so we have an independent instance per holder
-    var weapon_inst: Resource = weapon_resource.duplicate(true)
+    var weapon_inst: BaseWeapon = weapon_resource.duplicate(true)
     # Keep the duplicate in our weapons list (so remove_weapon can match it)
     weapons.append(weapon_inst)
 
@@ -39,7 +39,7 @@ func add_weapon(weapon_resource: Resource) -> void:
     if event_manager:
         event_manager.emit_event("on_weapon_added", [hold_owner, weapon_inst])
 
-func remove_weapon(weapon_inst: Resource) -> void:
+func remove_weapon(weapon_inst: BaseWeapon) -> void:
     if not weapon_inst:
         return
     if not (weapon_inst in weapons):
@@ -63,7 +63,7 @@ func remove_weapon(weapon_inst: Resource) -> void:
     if event_manager:
         event_manager.emit_event("on_weapon_removed", [hold_owner, weapon_inst])
 
-func _equip_weapon(weapon_inst: Resource) -> void:
+func _equip_weapon(weapon_inst: BaseWeapon) -> void:
     # ensure modifiers applied (duplicate safe)
     if weapon_inst.has_method("apply_to"):
         weapon_inst.apply_to(hold_owner)
@@ -80,23 +80,24 @@ func _equip_weapon(weapon_inst: Resource) -> void:
     timer.start()
     weapon_timers[weapon_inst] = timer
 
-func _on_weapon_timeout(weapon_inst: Resource) -> void:
-    # called from timer; find a target and ask the weapon instance to shoot
+
+func _on_weapon_timeout(weapon_inst: BaseWeapon) -> void:
+    #called from timer; find a target and ask the weapon instance to shoot
     if weapon_inst == null:
         return
-    # guard: weapon instance might have been removed
     if not (weapon_inst in weapon_timers):
         return
-
-    var targets: Array[Node] = _find_targets(weapon_inst.range if weapon_inst.range else 0)
+    
+    var targets: Array[Node] = []
+    if weapon_inst.target_selector:
+        targets = weapon_inst.target_selector.find_targets(hold_owner, weapon_inst.range)
+    
     if targets.size() > 0:
-        # safe call: weapon_inst.try_shoot may be a method on the resource
         if weapon_inst.has_method("try_shoot"):
             weapon_inst.try_shoot(targets)
-        else:
-            push_warning("WeaponHolder: weapon_inst has no try_shoot() method")
+    
 
-func _compute_weapon_wait_time(weapon_inst: Resource) -> float:
+func _compute_weapon_wait_time(weapon_inst: BaseWeapon) -> float:
     var base_weapon_speed := 0.0
     if weapon_inst.base_attack_speed:
         base_weapon_speed = float(weapon_inst.base_attack_speed)
@@ -115,28 +116,3 @@ func _on_stat_changes(event) -> void:
         var t: Timer = weapon_timers[weapon_inst]
         if is_instance_valid(t):
             t.wait_time = _compute_weapon_wait_time(weapon_inst)
-
-func _find_targets(range: float) -> Array[Node]:
-    var targets: Array[Node] = []
-    var closest_target: Node = null
-    var closest_dist = INF
-    # Get all nodes in the scene
-    for node in get_tree().get_nodes_in_group("damageable"): # or iterate all nodes if you want
-        # Skip self
-        if node == hold_owner:
-            continue
-        # Skip if node is in any of the hold_owner's groups
-        var skip = false
-        for g in hold_owner.get_groups().filter(func(group): return  group != "damageable"):
-            if node.is_in_group(g):
-                skip = true
-                break
-        if skip:
-            continue
-        # Check distance
-        var dist = hold_owner.global_position.distance_to(node.global_position)
-        if dist <= range and dist < closest_dist:
-            closest_dist = dist
-            closest_target = node
-            targets.append(node)            
-    return targets

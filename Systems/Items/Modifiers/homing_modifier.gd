@@ -1,7 +1,7 @@
 # HomingModifier.gd
 extends Node
 
-@export var homing_strength: float = 2.0   # how fast projectile can turn (radians per second)
+@export var homing_strength: float = 1.0   # how fast projectile can turn (radians per second)
 @export var homing_range: float = 400.0    # max distance to search for targets
 
 var holder: Node

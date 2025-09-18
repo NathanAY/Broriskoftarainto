@@ -43,7 +43,7 @@ func _on_attack(data: Dictionary):
         _spawn_extra(projectile, left_angle, damage)
         _spawn_extra(projectile, right_angle, damage)
 
-func _spawn_extra(source: Node, direction: Vector2, damage: float):
+func _spawn_extra(source: Projectile, direction: Vector2, damage: float):
     var p: Projectile = projectile_scene.instantiate()
     p.damage = damage
     p.base_speed = source.base_speed
@@ -52,4 +52,5 @@ func _spawn_extra(source: Node, direction: Vector2, damage: float):
     p.global_position = source.global_position
     if p.has_method("set_direction"):
         p.set_direction(direction)
+        p.set_target(source.target)
     get_tree().current_scene.add_child(p)

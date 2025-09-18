@@ -1,4 +1,3 @@
-# HomingBehavior.gd
 extends Node
 
 @export var homing_strength: float = 2.0   # radians per second
@@ -7,11 +6,18 @@ extends Node
 var holder: Node
 var projectile: Projectile
 var target: Node = null
+var target_position: Vector2
 
 func _ready():
     projectile = get_parent()
     if not projectile or not projectile.has_method("set_direction"):
         queue_free()
+        return
+
+    # ✅ copy target from projectile if it has one
+    if projectile.target:
+        target = projectile.target
+        target_position = target.global_position
 
 func _physics_process(delta):
     if not projectile:
@@ -34,22 +40,25 @@ func _physics_process(delta):
 func _find_target() -> Node:
     var closest_target: Node = null
     var closest_dist = INF
-    # Get all nodes in the scene
-    for node in get_tree().get_nodes_in_group("damageable"): # or iterate all nodes if you want
-        # Skip self
+
+    for node in get_tree().get_nodes_in_group("damageable"):
         if node == holder:
             continue
-        # Skip if node is in any of the hold_owner's groups
+
+        # skip allies (same groups as holder except "damageable")
         var skip = false
-        for g in holder.get_groups().filter(func(group): return  group != "damageable"):
+        for g in holder.get_groups():
+            if g == "damageable":
+                continue
             if node.is_in_group(g):
                 skip = true
                 break
         if skip:
             continue
-        # Check distance
-        var dist = holder.global_position.distance_to(node.global_position)
+
+        var dist = target_position.distance_to(node.global_position)
         if dist <= homing_range and dist < closest_dist:
             closest_dist = dist
             closest_target = node           
+
     return closest_target

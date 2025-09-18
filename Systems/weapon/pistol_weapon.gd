@@ -18,6 +18,7 @@ func try_shoot(targets: Array[Node]) -> void:
     if p.has_method("set_direction"):
         var dir = (targets[0].global_position - holder.global_position).normalized()
         p.set_direction(dir)
+        p.set_target(targets[0])
     
     holder.get_tree().current_scene.add_child(p)
     event_manager.emit_event("on_attack", [{"projectile": p, "weapon": self}])

@@ -1,4 +1,3 @@
-#projectile.gd
 extends Area2D
 class_name Projectile
 
@@ -8,13 +7,14 @@ var direction = Vector2.ZERO
 
 var event_manager: EventManager = null
 
-#groups to ignore (friendly fire)
+# groups to ignore (friendly fire)
 var ignore_groups: Array = []
 
+# Optional target (only used by homing behaviors)
+var target: Node = null
+
 func _ready():
-    #emit_signal("projectile_created", self)
     connect("body_entered", Callable(self, "_on_area_entered"))
-#	body_entered.connect(_on_body_entered)
     # Automatically remove projectile after 2 seconds if it doesn't hit anything
     await get_tree().create_timer(2.0).timeout
     queue_free()
@@ -32,10 +32,13 @@ func _physics_process(delta):
 func set_direction(target_direction: Vector2):
     direction = target_direction.normalized()
     if not event_manager:
-        print("Projectile.gd: no event_manage")
+        print("Projectile.gd: no event_manager")
+
+# ✅ new method for assigning a target (used by homing behaviors or effects)
+func set_target(t: Node):
+    target = t
 
 func _on_area_entered(body):
-    #print("Projectile hit!" + body.name)
     for group in ignore_groups:
         if body.is_in_group(group):
             return
@@ -67,5 +70,4 @@ func do_damage(body):
     if event_manager:
         event_manager.emit_event("after_deal_damage", [{"projectile": self, "body": body, "damage_context": ctx}])
     if event_manager:
-        event_manager.emit_event("on_hit", [{"projectile": self, "body": body, "damage_context": ctx}])        
-    
+        event_manager.emit_event("on_hit", [{"projectile": self, "body": body, "damage_context": ctx}])

@@ -24,7 +24,8 @@ func try_shoot(targets: Array[Node]) -> void:
             var ignoreGroups = holder.get_groups().filter(func(g): return g != "damageable")
             p.set_ignore_groups(ignoreGroups)
         if p.has_method("set_direction"):
-            p.set_direction(rotated)  
+            p.set_direction(rotated)
+            p.set_target(targets[0])
         
         holder.get_tree().current_scene.add_child(p)
         event_manager.emit_event("on_attack", [{"projectile": p, "weapon": self}])

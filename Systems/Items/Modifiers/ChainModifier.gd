@@ -51,6 +51,7 @@ func _spawn_chain_projectile(source: Node, to: Vector2, ignore_enemy: Node) -> v
     if new_projectile.has_method("set_direction"):
         var dir = (to - source.global_position).normalized()
         new_projectile.set_direction(dir)
+        new_projectile.set_target(to)
 
     new_projectile.set_meta("ignore_enemy", ignore_enemy.get_path())
     new_projectile.set_meta("spawned_by_chain", true)

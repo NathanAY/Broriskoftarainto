@@ -13,8 +13,10 @@ signal enemy_died(enemy: CharacterBody2D)
 func _ready():
     add_to_group("enemies")  # Add enemy to a group
     add_to_group("damageable")
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     item_holder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))
     #item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))

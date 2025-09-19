@@ -2,19 +2,21 @@
 extends TargetSelector
 class_name ClosestTargetSelector
 
-func find_targets(holder: Node, range: float) -> Array[Node]:
+func find_targets(origin: Node, range: float, ignore_node: Node) -> Array[Node]:
     var closest: Node = null
     var closest_dist := INF
     var results: Array[Node] = []
-    for node in holder.get_tree().get_nodes_in_group("damageable"):
-        if node == holder:
+
+    for node in origin.get_tree().get_nodes_in_group("damageable"):
+        if node == ignore_node:  # skip the holder itself
             continue
-        if _should_skip(holder, node):
+        if _should_skip(ignore_node, node):
             continue
-        var dist = holder.global_position.distance_to(node.global_position)
+        var dist = origin.global_position.distance_to(node.global_position)
         if dist <= range and dist < closest_dist:
             closest_dist = dist
             closest = node
+
     if closest:
         results.append(closest)
     return results

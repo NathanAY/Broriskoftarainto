@@ -28,8 +28,8 @@ func _spawn_explosion(position: Vector2):
     explosion.global_position = position
     get_tree().current_scene.add_child(explosion)
 
-    #if (randomGenerator.randfn() < 0.1):
-        #return
+    if (randomGenerator.randfn() < 0.1):
+        return
     var random_item: Resource = possible_items[randi() % possible_items.size()]
     var pickup = pickup_scene.instantiate()
     pickup.global_position = position

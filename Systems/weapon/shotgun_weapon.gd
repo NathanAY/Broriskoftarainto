@@ -16,8 +16,17 @@ func try_shoot(targets: Array[Node]) -> void:
         var rotated = dir.rotated(angle)
 
         var p: Projectile = projectile_scene.instantiate()
+        
+            # get weapon’s sprite node
+        var holder_weapon_holder = holder.get_node("WeaponHolder")
+        var sprite_node: Node2D = holder_weapon_holder.weapon_templates.get(self, null)
+
+        if sprite_node:
+            p.global_position = sprite_node.global_position
+        else:
+            p.global_position = holder.global_position
+        
         p.attachEventManager(event_manager)
-        p.global_position = holder.global_position
         p.damage = base_damage / pellet_count
         p.base_speed = randf_range(p.base_speed * 0.9, p.base_speed * 1.1)
         if p.has_method("set_ignore_groups"):

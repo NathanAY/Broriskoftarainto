@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="PistolWeapon" load_steps=4 format=3 uid="uid://0kk7tflomdcg"]
+[gd_resource type="Resource" script_class="PistolWeapon" load_steps=5 format=3 uid="uid://0kk7tflomdcg"]
 
 [ext_resource type="PackedScene" uid="uid://bbj577efimtbf" path="res://Systems/weapon/Projectile.tscn" id="1_120iq"]
 [ext_resource type="Script" uid="uid://c86g5wtgphef8" path="res://Systems/weapon/pistol_weapon.gd" id="1_yx5y6"]
+[ext_resource type="Texture2D" uid="uid://cwwo3072oyhsp" path="res://Assets/pistol.png" id="3_70ry1"]
 [ext_resource type="Resource" uid="uid://hye6t5sxe2yg" path="res://Resources/weapons/aim/closest.tres" id="3_v0y1f"]
 
 [resource]
@@ -9,9 +10,11 @@ script = ExtResource("1_yx5y6")
 projectile_scene = ExtResource("1_120iq")
 name = "Pistol"
 description = "Pistol"
-base_attack_speed = 1.0
+base_attack_speed = 2.0
 base_damage = 5.0
 range = 400.0
 modifiers = {}
 target_selector = ExtResource("3_v0y1f")
+sprite = ExtResource("3_70ry1")
+sprite_offset = Vector2(0, 0)
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"

@@ -1,6 +1,6 @@
 extends Node
 
-@export var spawn_interval = 2.0
+@export var spawn_interval = 3
 @export var health_growth_per_minute: float = 20.0
 @export var damage_growth_per_minute: float = 5.0
 

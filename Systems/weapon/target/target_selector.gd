@@ -4,5 +4,5 @@ class_name TargetSelector
 
 # holder is the weapon's owner (the entity who wields the weapon)
 # enemies are nodes in group "damageable"
-func find_targets(holder: Node, range: float) -> Array[Node]:
-    return []  # subclasses override
+func find_targets(origin: Node, range: float, ignore_node: Node) -> Array[Node]:
+    return []  # override in subclasses

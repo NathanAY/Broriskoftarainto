@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://d2hktj5uteqbk" path="res://ui/HealthBar.gd" id="1_vbrc5"]
 
 [node name="HealthBar" type="Control"]
+z_index = 10
 layout_mode = 3
 anchors_preset = 7
 anchor_left = 0.5

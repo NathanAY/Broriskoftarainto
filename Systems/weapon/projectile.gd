@@ -16,7 +16,14 @@ var target: Node = null
 func _ready():
     connect("body_entered", Callable(self, "_on_area_entered"))
     # Automatically remove projectile after 2 seconds if it doesn't hit anything
-    await get_tree().create_timer(2.0).timeout
+    var timer := Timer.new()
+    timer.one_shot = true
+    timer.wait_time = 2.0
+    add_child(timer)
+    timer.timeout.connect(Callable(self, "_on_timeout"))
+    timer.start()
+
+func _on_timeout():
     queue_free()
 
 func attachEventManager(em: Node):

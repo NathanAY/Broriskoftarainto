@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="MeleeWeapon" load_steps=3 format=3 uid="uid://cl8on386uk6rp"]
+[gd_resource type="Resource" script_class="MeleeWeapon" load_steps=4 format=3 uid="uid://cl8on386uk6rp"]
 
 [ext_resource type="Script" uid="uid://btqm0gae3kpiu" path="res://Systems/weapon/melee_weapon.gd" id="1_363sm"]
 [ext_resource type="Resource" uid="uid://88gqpdee82ou" path="res://Resources/weapons/aim/all.tres" id="2_jyyv4"]
+[ext_resource type="Texture2D" uid="uid://cwwo3072oyhsp" path="res://Assets/pistol.png" id="2_pke07"]
 
 [resource]
 script = ExtResource("1_363sm")
@@ -12,4 +13,6 @@ base_damage = 5.0
 range = 90.0
 modifiers = {}
 target_selector = ExtResource("2_jyyv4")
+sprite = ExtResource("2_pke07")
+sprite_offset = Vector2(0, 0)
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"

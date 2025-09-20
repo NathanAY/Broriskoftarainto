@@ -16,6 +16,10 @@ config/features=PackedStringArray("4.4", "Forward Plus")
 run/max_fps=120
 config/icon="res://icon.svg"
 
+[display]
+
+window/size/initial_position_type=3
+
 [dotnet]
 
 project/assembly_name="Test1"

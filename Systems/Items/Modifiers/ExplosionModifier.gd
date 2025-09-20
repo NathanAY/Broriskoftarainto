@@ -22,16 +22,18 @@ func explode(enemy: Node):
         return
     # Use deferred spawn to avoid physics flushing error
     call_deferred("_spawn_explosion", enemy.global_position)
+    call_deferred("_spawn_item", enemy.global_position)
 
 func _spawn_explosion(position: Vector2):
     var explosion = explosion_scene.instantiate()
     explosion.global_position = position
     get_tree().current_scene.add_child(explosion)
 
+func _spawn_item(position: Vector2):
     if (randomGenerator.randfn() < 0.1):
         return
     var random_item: Resource = possible_items[randi() % possible_items.size()]
     var pickup = pickup_scene.instantiate()
     pickup.global_position = position
     pickup.item = random_item
-    get_tree().current_scene.add_child(pickup)
+    get_tree().current_scene.get_node("Nodes").get_node("pickups").add_child(pickup)

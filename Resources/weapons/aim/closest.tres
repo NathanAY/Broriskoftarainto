@@ -1,4 +1,4 @@
-[gd_resource type="Resource" load_steps=2 format=3 uid="uid://hye6t5sxe2yg"]
+[gd_resource type="Resource" script_class="ClosestTargetSelector" load_steps=2 format=3 uid="uid://hye6t5sxe2yg"]
 
 [ext_resource type="Script" uid="uid://4jtig3thlogl" path="res://Systems/weapon/target/closest_target_selector.gd" id="1_pnnlb"]
 

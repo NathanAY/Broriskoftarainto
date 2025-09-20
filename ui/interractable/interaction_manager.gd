@@ -24,21 +24,16 @@ func _unhandled_input(event):
 func _process(delta):
     if not tower or interactables.is_empty():
         return
-
     var closest: Node = null
     var closest_dist := INF
-
     for i in interactables:
         var dist = tower.global_position.distance_to(i.global_position)
         if dist < i.interaction_radius and dist < closest_dist:
             closest = i
             closest_dist = dist
-
     # Hide old one if different
     if current and current != closest:
         current.hide_menu()
-
     current = closest
-
     if current:
         current.show_menu()

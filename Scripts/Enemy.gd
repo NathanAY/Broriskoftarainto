@@ -1,14 +1,13 @@
 #Enemy
 extends CharacterBody2D
 
-var target_position: Vector2 = Vector2.ZERO
-
 @onready var health_node: Node = $Health  # attach Health.gd as child
 @onready var stats: Stats = $Stats  # attach Health.gd as child
 @onready var event_manager: EventManager = $EventManager
 @onready var item_holder: ItemHolder = $ItemHolder
-
 @onready var anim_player: AnimationPlayer = get_node("AnimationPlayer")
+@onready var sprite: Sprite2D = $Node2D/Sprite2D  # change path if needed
+var target_position: Vector2 = Vector2.ZERO
 
 func _ready():
     add_to_group("enemies")  # Add enemy to a group
@@ -50,5 +49,10 @@ func _physics_process(delta):
     # ✅ Use stats for movement speed
     var move_speed = stats.get_stat("movement_speed")
     velocity = direction * move_speed
+    # Flip horizontally
+    if direction.x < -0.1:
+        sprite.flip_h = true
+    elif direction.x > 0.1:
+        sprite.flip_h = false
     var collision = move_and_slide()
                

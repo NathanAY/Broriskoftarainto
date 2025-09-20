@@ -14,7 +14,6 @@
 radius = 41.0
 
 [node name="Enemy" type="CharacterBody2D"]
-position = Vector2(0, 3.88889)
 script = ExtResource("1_wovta")
 
 [node name="Node2D" type="Node2D" parent="."]

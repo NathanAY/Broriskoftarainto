@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene load_steps=19 format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_idj7w"]
 [ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Scenes/Tower.tscn" id="1_r150o"]
@@ -17,6 +17,7 @@
 [ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://Scenes/Enemy.tscn" id="14_2w5on"]
 [ext_resource type="Resource" uid="uid://d28aq4yyk8v4l" path="res://Resources/items/SpreadShotIfStill.tres" id="14_346fj"]
 [ext_resource type="Resource" uid="uid://yj870a0q32n1" path="res://Resources/items/CritGlass.tres" id="14_erwvk"]
+[ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://Scenes/PauseMenu.tscn" id="18_346fj"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_idj7w")
@@ -34,43 +35,47 @@ possible_items = Array[Resource]([ExtResource("5_4kpch"), ExtResource("6_grg3l")
 script = ExtResource("12_grg3l")
 target = NodePath("../Tower")
 
-[node name="ItemPickup" parent="." instance=ExtResource("12_frkhe")]
+[node name="Nodes" type="Node" parent="."]
+
+[node name="pickups" type="Node" parent="Nodes"]
+
+[node name="ItemPickup" parent="Nodes/pickups" instance=ExtResource("12_frkhe")]
 position = Vector2(-248, -268)
 item = ExtResource("5_4kpch")
 
-[node name="ItemPickup2" parent="." instance=ExtResource("12_frkhe")]
+[node name="ItemPickup2" parent="Nodes/pickups" instance=ExtResource("12_frkhe")]
 position = Vector2(-465, -270)
 item = ExtResource("5_4kpch")
 
-[node name="ItemPickup3" parent="." instance=ExtResource("12_frkhe")]
+[node name="ItemPickup3" parent="Nodes/pickups" instance=ExtResource("12_frkhe")]
 position = Vector2(-352, -271)
 item = ExtResource("5_4kpch")
 
-[node name="ItemPickup4" parent="." instance=ExtResource("12_frkhe")]
+[node name="ItemPickup4" parent="Nodes/pickups" instance=ExtResource("12_frkhe")]
 position = Vector2(-240, -131)
 item = ExtResource("13_h1m7h")
 
-[node name="ItemPickup5" parent="." instance=ExtResource("12_frkhe")]
+[node name="ItemPickup5" parent="Nodes/pickups" instance=ExtResource("12_frkhe")]
 position = Vector2(-244, -194)
 item = ExtResource("7_frkhe")
 
-[node name="ItemPickup6" parent="." instance=ExtResource("12_frkhe")]
+[node name="ItemPickup6" parent="Nodes/pickups" instance=ExtResource("12_frkhe")]
 position = Vector2(-240, -62)
 item = ExtResource("14_erwvk")
 
-[node name="ItemPickup7" parent="." instance=ExtResource("12_frkhe")]
+[node name="ItemPickup7" parent="Nodes/pickups" instance=ExtResource("12_frkhe")]
 position = Vector2(-240, -8)
 item = ExtResource("9_1p5hy")
 
-[node name="ItemPickup8" parent="." instance=ExtResource("12_frkhe")]
+[node name="ItemPickup8" parent="Nodes/pickups" instance=ExtResource("12_frkhe")]
 position = Vector2(-301, -4)
 item = ExtResource("9_1p5hy")
 
-[node name="ItemPickup9" parent="." instance=ExtResource("12_frkhe")]
+[node name="ItemPickup9" parent="Nodes/pickups" instance=ExtResource("12_frkhe")]
 position = Vector2(-240, 46)
 item = ExtResource("14_346fj")
 
-[node name="ItemPickup10" parent="." instance=ExtResource("12_frkhe")]
+[node name="ItemPickup10" parent="Nodes/pickups" instance=ExtResource("12_frkhe")]
 position = Vector2(-299, 46)
 item = ExtResource("14_346fj")
 
@@ -84,3 +89,6 @@ tower = NodePath("../../Tower")
 
 [node name="InteractionManager" type="Node" parent="."]
 script = ExtResource("14_1p5hy")
+
+[node name="PauseMenu" parent="." instance=ExtResource("18_346fj")]
+visible = false

@@ -5,6 +5,9 @@ class_name PistolWeapon
 @export var projectile_scene: PackedScene
 
 func try_shoot(targets: Array[Node]) -> void:
+    shoot_projectile(targets[0])
+
+func shoot_projectile(target: Node) -> Projectile:
     var holder = get_holder()
     if not holder or not projectile_scene: return
     
@@ -25,9 +28,10 @@ func try_shoot(targets: Array[Node]) -> void:
         var ignoreGroups = holder.get_groups().filter(func(g): return g != "damageable")
         p.set_ignore_groups(ignoreGroups)
     if p.has_method("set_direction"):
-        var dir = (targets[0].global_position - holder.global_position).normalized()
+        var dir = (target.global_position - sprite_node.global_position).normalized()
         p.set_direction(dir)
-        p.set_target(targets[0])
+        p.set_target(target)
     
     holder.get_tree().current_scene.add_child(p)
     event_manager.emit_event("on_attack", [{"projectile": p, "weapon": self}])
+    return p

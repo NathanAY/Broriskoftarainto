@@ -8,7 +8,7 @@ var target_position: Vector2 = Vector2.ZERO
 @onready var event_manager: EventManager = $EventManager
 @onready var item_holder: ItemHolder = $ItemHolder
 
-signal enemy_died(enemy: CharacterBody2D)
+@onready var anim_player: AnimationPlayer = get_node("AnimationPlayer")
 
 func _ready():
     add_to_group("enemies")  # Add enemy to a group
@@ -43,11 +43,12 @@ func _physics_process(delta):
     if global_position.distance_to(target_position) < 5:
         #queue_free()
         #print("Enemy reached target!")
+        anim_player.play("idle") 
         return
+    anim_player.play("move")
     var direction = (target_position - global_position).normalized()
     # ✅ Use stats for movement speed
     var move_speed = stats.get_stat("movement_speed")
-    
     velocity = direction * move_speed
     var collision = move_and_slide()
-                 
+               

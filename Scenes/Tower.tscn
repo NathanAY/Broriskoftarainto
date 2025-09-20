@@ -1,7 +1,7 @@
-[gd_scene load_steps=13 format=3 uid="uid://dw17weh8b5wc3"]
+[gd_scene load_steps=14 format=3 uid="uid://dw17weh8b5wc3"]
 
 [ext_resource type="Script" uid="uid://b476vr2gdauu8" path="res://Scripts/tower.gd" id="1_4yjk7"]
-[ext_resource type="Texture2D" uid="uid://blr76khcrsxby" path="res://Assets/torch.png" id="1_ry8d0"]
+[ext_resource type="Texture2D" uid="uid://co8tav7tulvwb" path="res://Assets/potato.png" id="2_sijes"]
 [ext_resource type="Script" uid="uid://bxqxit15wxm0g" path="res://Scripts/movement.gd" id="3_sijes"]
 [ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://Systems/LocalEventManager.tscn" id="5_il7y0"]
 [ext_resource type="PackedScene" uid="uid://by0slo3uv1f0e" path="res://ui/numberspawn/DamageNumberSpawner.tscn" id="6_k6scv"]
@@ -11,20 +11,21 @@
 [ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/stats/Stats.tscn" id="8_7ibl6"]
 [ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/Health.tscn" id="8_kmdyl"]
 [ext_resource type="PackedScene" uid="uid://bfv23hn20a0ia" path="res://ui/numberspawn/HealNumberSpawner.tscn" id="9_sijes"]
+[ext_resource type="PackedScene" uid="uid://cx3p26icyy5wu" path="res://animations/animation_player.tscn" id="12_sdt0m"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_7ibl6"]
+radius = 30.0
 
 [node name="Tower" type="CharacterBody2D"]
 script = ExtResource("1_4yjk7")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-scale = Vector2(5, 5)
-shape = SubResource("CircleShape2D_7ibl6")
-
 [node name="Node2D" type="Node2D" parent="."]
 
 [node name="Sprite2D" type="Sprite2D" parent="Node2D"]
-texture = ExtResource("1_ry8d0")
+texture = ExtResource("2_sijes")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_7ibl6")
 
 [node name="Movement" type="Node" parent="."]
 script = ExtResource("3_sijes")
@@ -49,3 +50,5 @@ event_manager = NodePath("../EventManager")
 
 [node name="HealthBar" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("7_aqd11")]
 event_manager = NodePath("../EventManager")
+
+[node name="AnimationPlayer" parent="." instance=ExtResource("12_sdt0m")]

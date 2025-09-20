@@ -17,7 +17,7 @@ func try_shoot(targets: Array[Node]) -> void:
 
         var p: Projectile = projectile_scene.instantiate()
         
-            # get weapon’s sprite node
+        # get weapon’s sprite node
         var holder_weapon_holder = holder.get_node("WeaponHolder")
         var sprite_node: Node2D = holder_weapon_holder.weapon_templates.get(self, null)
 

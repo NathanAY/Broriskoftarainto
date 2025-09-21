@@ -9,7 +9,6 @@ var holder: Node = null
 var stats: Node = null
 
 @export var poison_chance: float = 0.9993
-@export var poison_damage: float = 2.0
 @export var duration: float = 3.0
 @export var tick_interval: float = 1.0
 @export var max_stacks: int = 500
@@ -21,7 +20,7 @@ func attachEventManager(em: Node):
     # subscribe to on_hit (so poison is applied only on successful hits)
     em.subscribe("on_hit", Callable(self, "_on_on_hit"))
 
-func _on_on_hit(event) -> void:
+func _on_on_hit(event: Dictionary) -> void:
     # event expected to be a Dictionary: {"projectile":..., "body":..., "damage_context":...}
     var body = event.get("body", null)
     if not body:
@@ -42,9 +41,8 @@ func _on_on_hit(event) -> void:
         var p = PoisonEffect.new()
         p.name = "PoisonEffect"
         health_node.add_child(p)
-        p.damage_per_tick = poison_damage
         p.tick_interval = tick_interval
         p.duration = duration
         p.max_stacks = max_stacks
         p.source = holder
-        p.start_effect(health_node, poison_damage, duration, tick_interval, max_stacks, holder)
+        p.start_effect(health_node, event["damage_context"].base_amount, duration, tick_interval, max_stacks, holder)

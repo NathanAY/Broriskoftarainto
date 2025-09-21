@@ -11,7 +11,9 @@ class_name BaseWeapon
 @export var target_selector: TargetSelector
 @export var sprite: Texture2D    # assign in .tres
 @export var sprite_offset: Vector2 = Vector2.ZERO  # for fine positioning if needed
+@export var attack_sound: Array[Resource] = []
 
+var _current_attack_speed
 var holder_ref: WeakRef
 var event_manager: Node
 var timer: Timer     # each weapon has its own firing timer
@@ -72,10 +74,10 @@ func _update_timer_wait() -> void:
 
     var base_weapon_speed := base_attack_speed
     var owner_speed = stats_node.get_stat("attack_speed") if stats_node and stats_node.has_method("get_stat") else 1.0
-    var combined = owner_speed * base_weapon_speed
-    if combined <= 0.001:
-        combined = 0.001
-    timer.wait_time = 1.0 / combined
+    _current_attack_speed = owner_speed * base_weapon_speed
+    if _current_attack_speed <= 0.001:
+        _current_attack_speed = 0.001
+    timer.wait_time = 1.0 / _current_attack_speed
 
 func _on_stat_changes(_event) -> void:
     _update_timer_wait()

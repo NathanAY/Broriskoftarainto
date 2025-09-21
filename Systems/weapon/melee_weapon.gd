@@ -1,29 +1,30 @@
-# res://scripts/weapons/MeleeWeapon.gd
 extends BaseWeapon
 class_name MeleeWeapon
 
+@export var melee_scene: PackedScene   # scene for the runtime node
+
 func try_shoot(targets: Array[Node]) -> void:
     var holder = get_holder()
-    if not holder: return
-#    TODO: implement
-    for t in targets:
-        if t.has_node("Health"):
-            do_damage(t)
-                
-func do_damage(body):
-    var ctx = DamageContext.new()
-    ctx.source = get_holder()
-    ctx.target = body
-    ctx.base_amount = base_damage
-    ctx.final_amount = base_damage
-    ctx.tags.append("melee")
-    if event_manager: 
-        event_manager.emit_event("before_deal_damage", [{"damage_context": ctx}])
-    var bodyHealth: Health = body.get_node("Health")
-    bodyHealth.event_manager.emit_event("before_take_damage", [{"damage_context": ctx}])
-    bodyHealth.take_damage(ctx)
-    if event_manager:
-        event_manager.emit_event("after_deal_damage", [{"weapon": self, "body": body, "damage_context": ctx}])
-        event_manager.emit_event("on_attack", [{"weapon": self, "body": body, "damage_context": ctx}])
-        event_manager.emit_event("on_hit", [{"weapon": self, "body": body, "damage_context": ctx}])                     
-    
+    if not holder or not melee_scene: return
+    if targets.size() == 0: return
+
+    # Use weapon instance id to make node unique
+    var node_name = "%s_Node_%s" % [name, str(self.get_instance_id())]
+    var node: Node2D
+
+    if not holder.has_node(node_name):
+        node = melee_scene.instantiate()
+        node.name = node_name
+        holder.add_child(node)
+        node.call("setup", self, holder, event_manager)
+    else:
+        node = holder.get_node(node_name)
+
+    # Update spawn position at the weapon sprite
+    var holder_weapon_holder = holder.get_node("WeaponHolder")
+    var sprite_node: Node2D = holder_weapon_holder.weapon_templates.get(self, null)
+    node.global_position = sprite_node.global_position if sprite_node else holder.global_position
+
+    # Always calculate current target direction
+    var target_dir = (targets[0].global_position - node.global_position).normalized()
+    node.call("attack", target_dir)

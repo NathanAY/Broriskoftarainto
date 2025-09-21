@@ -3,7 +3,7 @@ extends Camera2D
 @export var target: Node2D
 @export var follow_speed: float = 3.0
 
-@export var zoom_step: float = 0.02
+@export var zoom_step: float = 0.07
 @export var min_zoom: float = 0.5
 @export var max_zoom: float = 2.0
 

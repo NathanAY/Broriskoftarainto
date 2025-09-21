@@ -6,7 +6,6 @@ extends CanvasLayer
 @onready var exit_button: Button = $Control/VBoxContainer/ExitButton
 
 var window_modes := [
-    Vector2i(800, 600),
     Vector2i(1280, 720),
     Vector2i(1920, 1080),
     "fullscreen"
@@ -57,6 +56,12 @@ func _apply_window_mode():
     else:
         DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
         DisplayServer.window_set_size(mode)
+        
+        # Center the window on the screen
+        var screen_size = DisplayServer.screen_get_size(0)  # primary monitor
+        var new_pos = (screen_size - mode) / 2
+        DisplayServer.window_set_position(Vector2i(new_pos.x, new_pos.y))
+        
         window_button.text = str(mode.x) + "x" + str(mode.y)
 
 func _on_exit_pressed():

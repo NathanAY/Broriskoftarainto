@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="MeleeWeapon" load_steps=4 format=3 uid="uid://cl8on386uk6rp"]
+[gd_resource type="Resource" script_class="AreaWeapon" load_steps=4 format=3 uid="uid://cl8on386uk6rp"]
 
-[ext_resource type="Script" uid="uid://btqm0gae3kpiu" path="res://Systems/weapon/melee_weapon.gd" id="1_363sm"]
+[ext_resource type="Script" uid="uid://btqm0gae3kpiu" path="res://Systems/weapon/area_weapon.gd" id="1_363sm"]
 [ext_resource type="Resource" uid="uid://88gqpdee82ou" path="res://Resources/weapons/aim/all.tres" id="2_jyyv4"]
-[ext_resource type="Texture2D" uid="uid://cwwo3072oyhsp" path="res://Assets/pistol.png" id="2_pke07"]
+[ext_resource type="Texture2D" uid="uid://s7hcv801yxij" path="res://Assets/circular_saw.png" id="2_pke07"]
 
 [resource]
 script = ExtResource("1_363sm")

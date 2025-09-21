@@ -80,7 +80,7 @@ position = Vector2(-299, 46)
 item = ExtResource("14_346fj")
 
 [node name="Enemy" parent="." instance=ExtResource("14_2w5on")]
-position = Vector2(506, -236)
+position = Vector2(0, 232)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

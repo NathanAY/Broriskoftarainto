@@ -4,7 +4,7 @@ extends Node
 @onready var event_manager: Node = hold_owner.get_node_or_null("EventManager")
 @export var weapons: Array[BaseWeapon] = []   # list of Weapon .tres resources (templates)
 # visual placement config
-@export var weapon_radius: float = 80.0
+@export var weapon_orbit_radius: float = 60.0
 @export var angle_offset: float = -PI * 1  # start at top; change if you want different start angle
 
 # keep a map: weapon_instance -> Node2D (the visual sprite node)
@@ -29,11 +29,6 @@ func add_weapon(weapon_resource: BaseWeapon) -> void:
     var weapon_inst: BaseWeapon = weapon_resource.duplicate(true)
     # Keep the duplicate in our weapons list (so remove_weapon can match it)
     weapons.append(weapon_inst)
-    # Apply modifiers and set holder on the weapon instance (Weapon.apply_to expects holder)
-    if weapon_inst.has_method("apply_to"):
-        weapon_inst.apply_to(hold_owner)
-    else:
-        push_warning("WeaponHolder: weapon has no apply_to method")
     # Equip (create timer + start firing)
     _equip_weapon(weapon_inst)
     if event_manager:
@@ -66,7 +61,11 @@ func remove_weapon(weapon_inst: BaseWeapon) -> void:
         event_manager.emit_event("on_weapon_removed", [hold_owner, weapon_inst])
 
 func _equip_weapon(weapon_inst: BaseWeapon) -> void:
-    weapon_inst.apply_to(hold_owner)
+    # Apply modifiers and set holder on the weapon instance (Weapon.apply_to expects holder)
+    if weapon_inst.has_method("apply_to"):
+        weapon_inst.apply_to(hold_owner)
+    else:
+        push_warning("WeaponHolder: weapon has no apply_to method")
     if weapon_inst.sprite:
         var sprite_node := Sprite2D.new()
         sprite_node.texture = weapon_inst.sprite
@@ -93,7 +92,7 @@ func _get_weapon_position(index: int, count: int) -> Vector2:
     if count <= 0:
         return Vector2.ZERO
     var angle := angle_offset + TAU * float(index) / float(count)
-    return Vector2(cos(angle), sin(angle)) * weapon_radius
+    return Vector2(cos(angle), sin(angle)) * weapon_orbit_radius
 
 func _update_weapon_orientation(node: Sprite2D, index: int, count: int):
     var angle := angle_offset + TAU * float(index) / float(count)

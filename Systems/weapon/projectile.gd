@@ -1,6 +1,9 @@
 extends Area2D
 class_name Projectile
 
+# New
+var pierce_left: int = 0   # how many enemies it can pass through
+var properties := {}       # scalable dictionary for future (bounce, chain, etc.)
 var base_speed = 300
 var direction = Vector2.ZERO
 @export var damage: float = 0
@@ -9,7 +12,6 @@ var event_manager: EventManager = null
 
 # groups to ignore (friendly fire)
 var ignore_groups: Array = []
-
 # Optional target (only used by homing behaviors)
 var target: Node = null
 
@@ -31,6 +33,10 @@ func attachEventManager(em: Node):
 
 func set_ignore_groups(groups: Array):
     ignore_groups = groups
+
+func set_properties(dict: Dictionary) -> void:
+    properties = dict.duplicate()
+    pierce_left = properties.get("pierce", 0)
 
 func _physics_process(delta):
     if direction != Vector2.ZERO:
@@ -60,7 +66,14 @@ func _on_area_entered(body):
         do_damage(body)
     else:
         print("Enemy has no Health node!")
-    queue_free()  # Remove the projectile
+    if pierce_left > 0:
+        pierce_left -= 1
+    else:
+        # Let behaviors handle bounce / chain / etc.
+        for child in get_children():
+            if child.has_method("on_projectile_hit") and child.on_projectile_hit(body):
+                return  # ✅ behavior decided what to do (bounce, chain, etc.)
+        queue_free()
 
 func do_damage(body):
     var ctx = DamageContext.new()

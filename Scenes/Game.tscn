@@ -1,0 +1,94 @@
+[gd_scene load_steps=19 format=3 uid="uid://d2n8kw8wey5oa"]
+
+[ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_x3xnh"]
+[ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://Scripts/Spawner.gd" id="2_8r6kd"]
+[ext_resource type="Script" uid="uid://ciyukmalwlif7" path="res://Systems/Items/Modifiers/ExplosionModifier.gd" id="3_tfod6"]
+[ext_resource type="Resource" uid="uid://s8a01h7xtfvy" path="res://Resources/items/AttackSpeedItem.tres" id="4_rajel"]
+[ext_resource type="Resource" uid="uid://ccmp8wc205pp3" path="res://Resources/items/ChainProjectile.tres" id="5_vvhu1"]
+[ext_resource type="Resource" uid="uid://mlfohgnnpkph" path="res://Resources/items/ExplosiveShot.tres" id="6_lbihj"]
+[ext_resource type="Resource" uid="uid://c2yumr1hjjhqh" path="res://Resources/items/PlusDamageItem.tres" id="7_raj38"]
+[ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://Resources/items/SpreadShot.tres" id="8_8e0uq"]
+[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Scenes/Tower.tscn" id="9_i0vto"]
+[ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="10_3jf1l"]
+[ext_resource type="PackedScene" uid="uid://co2jv4mljj5j0" path="res://Systems/Items/ItemPickup.tscn" id="11_356ba"]
+[ext_resource type="Resource" uid="uid://ws6ag135x60i" path="res://Resources/items/AttackSpeedOnKillBuff.tres" id="12_i4lct"]
+[ext_resource type="Resource" uid="uid://yj870a0q32n1" path="res://Resources/items/CritGlass.tres" id="13_iyesh"]
+[ext_resource type="Resource" uid="uid://d28aq4yyk8v4l" path="res://Resources/items/SpreadShotIfStill.tres" id="14_i1pr2"]
+[ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://Scenes/Enemy.tscn" id="15_4f4ik"]
+[ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://ui/TowerUI.tscn" id="16_khs3t"]
+[ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://ui/interractable/interaction_manager.gd" id="17_0iyqm"]
+[ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://Scenes/PauseMenu.tscn" id="18_jn8rg"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_x3xnh")
+
+[node name="Spawner" type="Node" parent="."]
+script = ExtResource("2_8r6kd")
+
+[node name="ExplositionModifierToEnemyOnDeath" type="Node" parent="Spawner"]
+script = ExtResource("3_tfod6")
+possible_items = Array[Resource]([ExtResource("4_rajel"), ExtResource("5_vvhu1"), ExtResource("6_lbihj"), ExtResource("7_raj38"), ExtResource("8_8e0uq")])
+
+[node name="Tower" parent="." instance=ExtResource("9_i0vto")]
+
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+script = ExtResource("10_3jf1l")
+target = NodePath("../Tower")
+
+[node name="Nodes" type="Node" parent="."]
+
+[node name="pickups" type="Node" parent="Nodes"]
+
+[node name="ItemPickup" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+position = Vector2(-248, -268)
+item = ExtResource("4_rajel")
+
+[node name="ItemPickup2" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+position = Vector2(-465, -270)
+item = ExtResource("4_rajel")
+
+[node name="ItemPickup3" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+position = Vector2(-352, -271)
+item = ExtResource("4_rajel")
+
+[node name="ItemPickup4" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+position = Vector2(-240, -131)
+item = ExtResource("12_i4lct")
+
+[node name="ItemPickup5" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+position = Vector2(-244, -194)
+item = ExtResource("6_lbihj")
+
+[node name="ItemPickup6" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+position = Vector2(-240, -62)
+item = ExtResource("13_iyesh")
+
+[node name="ItemPickup7" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+position = Vector2(-240, -8)
+item = ExtResource("8_8e0uq")
+
+[node name="ItemPickup8" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+position = Vector2(-301, -4)
+item = ExtResource("8_8e0uq")
+
+[node name="ItemPickup9" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+position = Vector2(-240, 46)
+item = ExtResource("14_i1pr2")
+
+[node name="ItemPickup10" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+position = Vector2(-299, 46)
+item = ExtResource("14_i1pr2")
+
+[node name="Enemy" parent="." instance=ExtResource("15_4f4ik")]
+position = Vector2(0, 232)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="TowerUi" parent="CanvasLayer" node_paths=PackedStringArray("tower") instance=ExtResource("16_khs3t")]
+tower = NodePath("../../Tower")
+
+[node name="InteractionManager" type="Node" parent="."]
+script = ExtResource("17_0iyqm")
+
+[node name="PauseMenu" parent="." instance=ExtResource("18_jn8rg")]
+visible = false

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://05vhlkdhu28"]
+
+[ext_resource type="Script" uid="uid://dn5qp3yya3cmi" path="res://Systems/Items/Modifiers/projectile_bounce_modifier.gd" id="1_i4pri"]
+
+[node name="ProjectileBounceModifier" type="Node"]
+script = ExtResource("1_i4pri")

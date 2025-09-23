@@ -15,6 +15,7 @@ class_name BaseWeapon
 
 var _current_attack_speed
 var holder_ref: WeakRef
+var stats: Stats
 var event_manager: Node
 var timer: Timer     # each weapon has its own firing timer
 var sprite_node: Sprite2D  # visual instance of this weapon
@@ -25,6 +26,7 @@ var ignore_groups: Array = []
 func apply_to(holder: Node) -> void:
     holder_ref = weakref(holder)
     event_manager = holder.get_node_or_null("EventManager")
+    stats = holder.get_node_or_null("Stats")
 
     # create and start timer
     timer = Timer.new()

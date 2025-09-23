@@ -16,22 +16,23 @@ func _ready():
     for c in get_children():
         if c.has_method("attachEventManager"):
             c.attachEventManager(event_manager)
-    
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
+
+    var weapons = GlobalGameState.starting_weapons
+    for weapon_path in weapons:
+        $WeaponHolder.add_weapon(load(weapon_path))
+
+    # Items
+    var items = GlobalGameState.starting_items
+    for item_path in items:
+        $ItemHolder.add_item(load(item_path))        
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
-    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
-    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
-    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
-    #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
-    #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
-    #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/SpreadShot.tres"))
@@ -41,12 +42,13 @@ func _ready():
     $ItemHolder.add_item(load("res://Resources/items/RegenPassive.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedIfStill.tres"))
     $ItemHolder.add_item(load("res://Resources/items/MinusArmorOnHitDebuff.tres"))
+    $ItemHolder.add_item(load("res://Resources/items/BounceProjectile.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/PoisonHit.tres"))
     $ItemHolder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))
     $ItemHolder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))
     $ItemHolder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/HomingShot.tres"))
-    $ItemHolder.add_item(load("res://Resources/items/HealthMeat.tres"))
+    #$ItemHolder.add_item(load("res://Resources/items/HealthMeat.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/EnergyShieldBlock.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/CritGlass.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/PlusDamageItem.tres"))

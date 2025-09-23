@@ -1,5 +1,5 @@
 # res://scripts/weapons/ShotgunWeapon.gd
-extends PistolWeapon
+extends ProjectileWeapon
 class_name ShotgunWeapon
 
 @export var pellet_count: int = 8

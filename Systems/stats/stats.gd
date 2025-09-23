@@ -16,6 +16,7 @@ class_name Stats
     "armor": 0,
     "critical_chance": 0.0,
     "critical_multiplier": 1.0,
+    "projectile_pierce": 0,
 }
 # All conditions are numeric (0/1 or seconds)
 var conditions := {

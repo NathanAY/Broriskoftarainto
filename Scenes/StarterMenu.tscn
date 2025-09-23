@@ -1,0 +1,108 @@
+[gd_scene load_steps=2 format=3 uid="uid://cnearl6ardcar"]
+
+[ext_resource type="Script" uid="uid://de8clrwu2mq0w" path="res://Scripts/starter_menu.gd" id="1_dmgkn"]
+
+[node name="StarterMenu" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_dmgkn")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.25)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="WeaponsLabel" type="Label" parent="Control/VBoxContainer"]
+layout_mode = 2
+text = "Choose your starting weapons"
+horizontal_alignment = 1
+
+[node name="Weapons" type="HBoxContainer" parent="Control/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChooseScroll" type="ScrollContainer" parent="Control/VBoxContainer/Weapons"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SelectList" type="VBoxContainer" parent="Control/VBoxContainer/Weapons/ChooseScroll"]
+layout_mode = 2
+alignment = 1
+
+[node name="ResultScroll" type="ScrollContainer" parent="Control/VBoxContainer/Weapons"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ResultList" type="ItemList" parent="Control/VBoxContainer/Weapons/ResultScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+auto_width = true
+auto_height = true
+
+[node name="Items" type="HBoxContainer" parent="Control/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChooseScroll" type="ScrollContainer" parent="Control/VBoxContainer/Items"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SelectList" type="VBoxContainer" parent="Control/VBoxContainer/Items/ChooseScroll"]
+layout_mode = 2
+alignment = 1
+
+[node name="ResultScroll" type="ScrollContainer" parent="Control/VBoxContainer/Items"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ResultList" type="ItemList" parent="Control/VBoxContainer/Items/ResultScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+auto_width = true
+auto_height = true
+
+[node name="ItemsLabel" type="Label" parent="Control/VBoxContainer"]
+layout_mode = 2
+text = "Choose your starting items"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Clear" type="Button" parent="Control/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Clear all"
+
+[node name="Play" type="Button" parent="Control/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Play"

@@ -1,6 +1,6 @@
-# res://scripts/weapons/PistolWeapon.gd
+# res://scripts/weapons/projectile_weapon.gd
 extends BaseWeapon
-class_name PistolWeapon
+class_name ProjectileWeapon
 
 @export var projectile_scene: PackedScene
 
@@ -23,6 +23,13 @@ func shoot_projectile(target: Node) -> Projectile:
         p.global_position = holder.global_position
     
     p.attachEventManager(event_manager)
+    var projectile_props = {
+        "pierce": stats.get_stat("projectile_pierce") if stats.get_stat("projectile_pierce") else 0,
+        "bounce": stats.get_stat("projectile_bounce") if stats.get_stat("projectile_bounce") else 0,
+        "chain": stats.get_stat("projectile_chain") if stats.get_stat("projectile_chain") else 0
+    }
+    p.set_properties(projectile_props)
+    
     p.damage = base_damage
     if p.has_method("set_ignore_groups"):
         var ignoreGroups = holder.get_groups().filter(func(g): return g != "damageable")

@@ -5,8 +5,8 @@
 
 [resource]
 script = ExtResource("2_auygr")
-name = "Spread"
-description = "Spread shot"
+name = "Bounce"
+description = "Bounce shot"
 modifiers = {}
 effect_scene = Array[PackedScene]([ExtResource("1_o7a8o")])
 effect_scene_condition = Array[String]([])

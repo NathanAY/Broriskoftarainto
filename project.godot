@@ -18,7 +18,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-SoundManager="*res://Scripts/sound/sound_manager.gd"
+SoundManager="*res://Scripts/autoload/sound_manager.gd"
+GlobalGameState="*res://Scripts/autoload/global_game_state.gd"
 
 [display]
 

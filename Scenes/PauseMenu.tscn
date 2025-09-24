@@ -46,6 +46,10 @@ text = "Resume"
 layout_mode = 2
 text = "Restart"
 
+[node name="NewRunButton" type="Button" parent="Control/VBoxContainer"]
+layout_mode = 2
+text = "New run"
+
 [node name="WindowButton" type="Button" parent="Control/VBoxContainer"]
 layout_mode = 2
 text = "Window size"

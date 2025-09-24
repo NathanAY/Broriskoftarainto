@@ -2,6 +2,7 @@ extends CanvasLayer
 
 @onready var resume_button: Button = $Control/VBoxContainer/ResumeButton
 @onready var restart_button: Button = $Control/VBoxContainer/RestartButton
+@onready var new_run_button: Button = $Control/VBoxContainer/NewRunButton
 @onready var window_button: Button = $Control/VBoxContainer/WindowButton
 @onready var exit_button: Button = $Control/VBoxContainer/ExitButton
 
@@ -15,6 +16,7 @@ var current_index := 0
 func _ready():
     resume_button.pressed.connect(_on_resume_pressed)
     restart_button.pressed.connect(_on_restart_pressed)
+    new_run_button.pressed.connect(_on_new_run_pressed)
     window_button.pressed.connect(_on_window_toggle_pressed)
     exit_button.pressed.connect(_on_exit_pressed)
     _apply_window_mode()
@@ -63,6 +65,10 @@ func _apply_window_mode():
         DisplayServer.window_set_position(Vector2i(new_pos.x, new_pos.y))
         
         window_button.text = str(mode.x) + "x" + str(mode.y)
+
+func _on_new_run_pressed():
+    toggle_pause()
+    get_tree().change_scene_to_file("res://Scenes/StarterMenu.tscn")
 
 func _on_exit_pressed():
     get_tree().quit()

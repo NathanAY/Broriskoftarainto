@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://dw17weh8b5wc3"]
+[gd_scene load_steps=15 format=3 uid="uid://dw17weh8b5wc3"]
 
 [ext_resource type="Script" uid="uid://b476vr2gdauu8" path="res://Scripts/tower.gd" id="1_4yjk7"]
 [ext_resource type="Texture2D" uid="uid://co8tav7tulvwb" path="res://Assets/potato.png" id="2_sijes"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/stats/Stats.tscn" id="8_7ibl6"]
 [ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/Health.tscn" id="8_kmdyl"]
 [ext_resource type="PackedScene" uid="uid://bfv23hn20a0ia" path="res://ui/numberspawn/HealNumberSpawner.tscn" id="9_sijes"]
+[ext_resource type="PackedScene" uid="uid://jsw2vxmrn6yc" path="res://Scenes/particles/ParticleEffectManager.tscn" id="12_6lnvs"]
 [ext_resource type="PackedScene" uid="uid://cx3p26icyy5wu" path="res://animations/animation_player.tscn" id="12_sdt0m"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_7ibl6"]
@@ -50,5 +51,7 @@ event_manager = NodePath("../EventManager")
 
 [node name="HealthBar" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("7_aqd11")]
 event_manager = NodePath("../EventManager")
+
+[node name="ParticleEffectManager" parent="." instance=ExtResource("12_6lnvs")]
 
 [node name="AnimationPlayer" parent="." instance=ExtResource("12_sdt0m")]

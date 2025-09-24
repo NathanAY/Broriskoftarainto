@@ -12,3 +12,5 @@ var armor_damage_multiplier: float = 0.0
 var energy_shield_absorbed: float = 0.0
 var damage_type: String = "physical"  # physical, fire, poison, etc.
 var tags: Array[String] = []   # ["projectile", "melee", "bleed"]
+
+var target_take_persent_damage: float  #set only after before_take_damage event

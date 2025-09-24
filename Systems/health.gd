@@ -16,8 +16,9 @@ func _ready():
 func take_damage(damage_context: DamageContext) -> void:
     current_health -= damage_context.final_amount
     _emit_on_health_changed_event(-damage_context.final_amount)
+    damage_context.target_take_persent_damage = damage_context.final_amount / max_health
     if current_health <= 0:
-        die()
+        die(damage_context)
 
 func heal(amount: float) -> void:
     current_health = min(current_health + amount, max_health)
@@ -26,11 +27,9 @@ func heal(amount: float) -> void:
         event_manager.emit_event("on_heal", [{"self":get_parent(),
         "amount":amount, "current_health": current_health, "max_health": max_health}])
 
-func die() -> void:
+func die(damage_context: DamageContext) -> void:
     if event_manager:
-        event_manager.emit_event("on_death", [self.get_parent()])
-    # Optionally remove owner node
-    get_parent().queue_free()
+        event_manager.emit_event("on_death", [{"self": self.get_parent(), "damage_context": damage_context}])
 
 func _update_max_health(event):
     max_health = stats.get_stat("health")

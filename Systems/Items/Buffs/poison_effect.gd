@@ -26,7 +26,6 @@ func start_effect(target: Node, damage: float, dur: float, interval: float, max_
 
 func add_poison() -> void:
     stacks = min(stacks + 1, max_stacks)
-
     # ensure tick timer exists
     if not _tick_timer:
         _tick_timer = Timer.new()
@@ -38,7 +37,6 @@ func add_poison() -> void:
     else:
         # adjust interval if changed
         _tick_timer.wait_time = tick_interval
-
     # reset / restart lifetime timer
     if _lifetime_timer:
         _lifetime_timer.stop()
@@ -73,23 +71,16 @@ func _on_tick() -> void:
             sorce_em.emit_event("before_deal_damage", [{"damage_context": ctx}])
     # Run through defender phase (so armor/resists can apply)
     var target_em: EventManager = target_health.event_manager
+
     if target_em:
         target_em.emit_event("before_take_damage", [{"damage_context": ctx}])
-    
     # Apply damage
     target_health.take_damage(ctx)
+    if target_em:
+        target_em.emit_event("after_take_damage", [{"damage_context": ctx}])
+
     if source and source.get_node_or_null("EventManager"):
-        sorce_em.emit_event("after_deal_damage", [{"damage_context": ctx}])
-        
-    ###
-    #
-    #var bodyHealth: Health = body.get_node("Health")
-    #bodyHealth.event_manager.emit_event("before_take_damage", [{"damage_context": ctx}])
-    #bodyHealth.take_damage(ctx)
-    #if event_manager:
-        #event_manager.emit_event("after_deal_damage", [{"projectile": self, "body": body, "damage_context": ctx}])
-    #if event_manager:
-        #event_manager.emit_event("on_hit", [{"projectile": self, "body": body, "damage_context": ctx}])       
+        sorce_em.emit_event("after_deal_damage", [{"damage_context": ctx}])   
 
 func _on_expire() -> void:
     queue_free()

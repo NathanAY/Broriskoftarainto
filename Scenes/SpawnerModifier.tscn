@@ -1,0 +1,15 @@
+[gd_scene load_steps=8 format=3 uid="uid://itfoa856jd22"]
+
+[ext_resource type="Script" uid="uid://ciyukmalwlif7" path="res://Scripts/spawner_modifier.gd" id="1_0y54c"]
+[ext_resource type="Resource" uid="uid://s8a01h7xtfvy" path="res://Resources/items/AttackSpeedItem.tres" id="2_3cse0"]
+[ext_resource type="Resource" uid="uid://ccmp8wc205pp3" path="res://Resources/items/ChainProjectile.tres" id="3_iuoh2"]
+[ext_resource type="Resource" uid="uid://mlfohgnnpkph" path="res://Resources/items/ExplosiveShot.tres" id="4_yoosm"]
+[ext_resource type="Resource" uid="uid://c2yumr1hjjhqh" path="res://Resources/items/PlusDamageItem.tres" id="5_64tx6"]
+[ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://Resources/items/SpreadShot.tres" id="6_afbbl"]
+[ext_resource type="PackedScene" uid="uid://bmqxtyoaqbpks" path="res://Systems/Items/ItemFactory.tscn" id="7_3cse0"]
+
+[node name="SpawnerModifier" type="Node"]
+script = ExtResource("1_0y54c")
+possible_items = Array[Resource]([ExtResource("2_3cse0"), ExtResource("3_iuoh2"), ExtResource("4_yoosm"), ExtResource("5_64tx6"), ExtResource("6_afbbl")])
+
+[node name="ItemFactory" parent="." instance=ExtResource("7_3cse0")]

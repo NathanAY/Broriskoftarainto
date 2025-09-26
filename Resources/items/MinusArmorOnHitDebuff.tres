@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://cy27m8442gyy8"]
 
-[ext_resource type="PackedScene" uid="uid://dqnqyed8sw06x" path="res://Systems/Items/Buffs/Debuff.tscn" id="1_bfuvf"]
+[ext_resource type="PackedScene" uid="uid://dqnqyed8sw06x" path="res://Systems/Items/Buffs/DebuffSource.tscn" id="1_bfuvf"]
 [ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_bcmrw"]
 
 [resource]

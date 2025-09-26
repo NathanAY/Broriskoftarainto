@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://bmqxtyoaqbpks"]
+
+[ext_resource type="Script" uid="uid://m737p1p072xd" path="res://Systems/Items/item_factory.gd" id="1_oy5ie"]
+[ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/stats/Stats.tscn" id="2_3k162"]
+
+[node name="ItemFactory" type="Node"]
+script = ExtResource("1_oy5ie")
+
+[node name="Stats" parent="." instance=ExtResource("2_3k162")]

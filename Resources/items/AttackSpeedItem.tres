@@ -8,7 +8,10 @@ name = "Attack speed +"
 description = "Attack speed des"
 modifiers = {
 "attack_speed": {
-"percent": 0.5
+"percent": 0.05
 }
 }
+effect_scene = Array[PackedScene]([])
+effect_scene_condition = Array[String]([])
+condition_managers = Array[PackedScene]([])
 metadata/_custom_type_script = "uid://bi8j7om4juysb"

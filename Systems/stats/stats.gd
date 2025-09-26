@@ -7,7 +7,7 @@ class_name Stats
 # Base stats
 @export var stats := {
     "health": 40.0,
-    "energy_shield": 0.0,
+    "energy_shield": 0,
     "damage": 10.0,
     "attack_speed": 1.0,
     "area_radius": 1.0,

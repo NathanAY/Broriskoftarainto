@@ -1,28 +1,29 @@
-# ExplosionModifier.gd
+#spawner_modifier.gd
 extends Node
 
 @export var explosion_scene = preload("res://Scenes/Explosion.tscn")
 @export var pickup_scene: PackedScene = preload("res://Systems/Items/ItemPickup.tscn")
 @export var possible_items: Array[Resource] = []
+@onready var itemFactory: ItemFactory = $ItemFactory
 
 var randomGenerator = RandomNumberGenerator.new()
 
 func attach_to_enemy(entity: Node):
     #print("ExplosionModifier attach_to_enemy")
     #enemy.connect("enemy_died", Callable(self, "_on_enemy_died"))
-    var health: Node = entity.get_node_or_null("Health")
+    var health: Health = entity.get_node_or_null("Health")
     if health and health.event_manager:
-        health.event_manager.subscribe("on_death", Callable(self, "explode"))
+        health.event_manager.subscribe("on_death", Callable(self, "attach_effects"))
     else:
         push_warning("ExplosionModifier: Entity has no Health or EventManager!")
 
-func explode(enemy: Node):
+func attach_effects(event: Dictionary):
     if explosion_scene == null:
         push_warning("ExplosionModifier: explosion_scene not assigned!")
         return
     # Use deferred spawn to avoid physics flushing error
-    call_deferred("_spawn_explosion", enemy.global_position)
-    call_deferred("_spawn_item", enemy.global_position)
+    call_deferred("_spawn_explosion", event.get("self").global_position)
+    call_deferred("_spawn_item", event.get("self").global_position)
 
 func _spawn_explosion(position: Vector2):
     var explosion = explosion_scene.instantiate()
@@ -30,10 +31,21 @@ func _spawn_explosion(position: Vector2):
     get_tree().current_scene.add_child(explosion)
 
 func _spawn_item(position: Vector2):
-    if (randomGenerator.randfn() < 0.1):
+    # Item drop chance 99%
+    if randf() > 0.99:
         return
-    var random_item: Resource = possible_items[randi() % possible_items.size()]
+    
+    var item = itemFactory.generate_random_item()
+    if not item:
+        return
+
     var pickup = pickup_scene.instantiate()
     pickup.global_position = position
-    pickup.item = random_item
-    get_tree().current_scene.get_node("Nodes").get_node("pickups").add_child(pickup)
+    pickup.item = item
+    get_tree().current_scene.get_node("Nodes/pickups").add_child(pickup)
+
+    #var random_item: Resource = possible_items[randi() % possible_items.size()]
+    #var pickup = pickup_scene.instantiate()
+    #pickup.global_position = position
+    #pickup.item = random_item
+    #get_tree().current_scene.get_node("Nodes").get_node("pickups").add_child(pickup)

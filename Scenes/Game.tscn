@@ -1,12 +1,10 @@
-[gd_scene load_steps=19 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene load_steps=17 format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_x3xnh"]
 [ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://Scripts/Spawner.gd" id="2_8r6kd"]
-[ext_resource type="Script" uid="uid://ciyukmalwlif7" path="res://Systems/Items/Modifiers/ExplosionModifier.gd" id="3_tfod6"]
+[ext_resource type="PackedScene" uid="uid://itfoa856jd22" path="res://Scenes/SpawnerModifier.tscn" id="3_alh3a"]
 [ext_resource type="Resource" uid="uid://s8a01h7xtfvy" path="res://Resources/items/AttackSpeedItem.tres" id="4_rajel"]
-[ext_resource type="Resource" uid="uid://ccmp8wc205pp3" path="res://Resources/items/ChainProjectile.tres" id="5_vvhu1"]
 [ext_resource type="Resource" uid="uid://mlfohgnnpkph" path="res://Resources/items/ExplosiveShot.tres" id="6_lbihj"]
-[ext_resource type="Resource" uid="uid://c2yumr1hjjhqh" path="res://Resources/items/PlusDamageItem.tres" id="7_raj38"]
 [ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://Resources/items/SpreadShot.tres" id="8_8e0uq"]
 [ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Scenes/Tower.tscn" id="9_i0vto"]
 [ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="10_3jf1l"]
@@ -15,7 +13,7 @@
 [ext_resource type="Resource" uid="uid://yj870a0q32n1" path="res://Resources/items/CritGlass.tres" id="13_iyesh"]
 [ext_resource type="Resource" uid="uid://d28aq4yyk8v4l" path="res://Resources/items/SpreadShotIfStill.tres" id="14_i1pr2"]
 [ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://Scenes/Enemy.tscn" id="15_4f4ik"]
-[ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://ui/TowerUI.tscn" id="16_khs3t"]
+[ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://ui/PlayerUI.tscn" id="16_khs3t"]
 [ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://ui/interractable/interaction_manager.gd" id="17_0iyqm"]
 [ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://Scenes/PauseMenu.tscn" id="18_jn8rg"]
 
@@ -25,9 +23,7 @@ script = ExtResource("1_x3xnh")
 [node name="Spawner" type="Node" parent="."]
 script = ExtResource("2_8r6kd")
 
-[node name="ExplositionModifierToEnemyOnDeath" type="Node" parent="Spawner"]
-script = ExtResource("3_tfod6")
-possible_items = Array[Resource]([ExtResource("4_rajel"), ExtResource("5_vvhu1"), ExtResource("6_lbihj"), ExtResource("7_raj38"), ExtResource("8_8e0uq")])
+[node name="SpawnerModifier" parent="Spawner" instance=ExtResource("3_alh3a")]
 
 [node name="Tower" parent="." instance=ExtResource("9_i0vto")]
 

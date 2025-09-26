@@ -7,16 +7,17 @@
 
 [resource]
 script = ExtResource("1_st5ot")
-projectile_scene = ExtResource("1_hd58x")
 pellet_count = 5
 spread_angle = 15.0
+projectile_scene = ExtResource("1_hd58x")
 name = "Shotgun"
 description = "Shotgun"
-base_attack_speed = 0.3
+base_attack_speed = 0.5
 base_damage = 5.0
 range = 400.0
 modifiers = {}
 target_selector = ExtResource("3_6lkm0")
 sprite = ExtResource("3_tvr5h")
 sprite_offset = Vector2(0, 0)
+attack_sound = Array[Resource]([])
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"

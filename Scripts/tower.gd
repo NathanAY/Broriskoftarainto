@@ -25,13 +25,13 @@ func _ready():
     var items = GlobalGameState.starting_items
     for item_path in items:
         $ItemHolder.add_item(load(item_path))        
-    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
-    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
+    $WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
+    $WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
     $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))

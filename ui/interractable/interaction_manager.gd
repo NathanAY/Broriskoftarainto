@@ -18,7 +18,7 @@ func _unhandled_input(event):
         return
     if event.is_action_pressed("ui_accept"):
         current.default_action()
-    elif event.is_action_pressed("ui_cancel"):
+    elif event.is_action_pressed("ui_focus_next"):
         current.cancel_action()
 
 func _process(delta):

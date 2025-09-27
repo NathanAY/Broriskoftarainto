@@ -17,7 +17,7 @@ func _populate_menu(menu: Control):
     pickup_button.text = "'Enter' Pick up"
 
     var destroy_button: Button = menu.get_node("Button2")
-    destroy_button.text = "'Esc' Destroy"
+    destroy_button.text = "'Tab' Destroy"
 
 func default_action():
     _on_pickup()

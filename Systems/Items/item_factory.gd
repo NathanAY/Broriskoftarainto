@@ -4,10 +4,68 @@ class_name ItemFactory
 
 var rng := RandomNumberGenerator.new()
 
-@onready var stats: Stats = $Stats
+# empty at begining, fills by generated items.
+var drop_pool: Array[Item] = []
 
-# pass in a Stats instance (so we can use its current values)
+@onready var stats: Stats = $Stats
+# preload or lazy-load effect scenes
+var effect_scenes: Array[PackedScene] = []
+
+
+func _ready():
+    _load_effect_scenes()
+
+func _load_effect_scenes():
+    var dir := DirAccess.open("res://Systems/Items/Modifiers")
+    if dir:
+        dir.list_dir_begin()
+        var file_name = dir.get_next()
+        while file_name != "":
+            if file_name.ends_with(".tscn"):
+                var path = "res://Systems/Items/Modifiers/%s" % file_name
+                var scene = load(path)
+                if scene is PackedScene:
+                    effect_scenes.append(scene)
+            file_name = dir.get_next()
+        dir.list_dir_end()
+    else:
+        push_warning("Cannot open Modifiers folder!")
+
+# -------------------
+# Item Generation API
+# -------------------
+func get_item_from_pool_or_generate() -> Item:
+    var pool_size = drop_pool.size()
+
+    if pool_size == 0:
+        var new_item = generate_random_item()
+        drop_pool.append(new_item)
+        return new_item
+
+    # N/(N+1) chance from pool, 1/(N+1) chance generate new
+    if rng.randi_range(0, pool_size) < pool_size:
+        # take existing
+        return drop_pool.pick_random()
+    else:
+        # generate new and push to pool
+        var new_item = generate_random_item()
+        drop_pool.append(new_item)
+        return new_item
+
+# -------------------
+# Item Generators
+# -------------------
 func generate_random_item() -> Item:
+    var stats_amount: int = stats.stats.size()
+    var effect_amount: int = effect_scenes.size()
+    var proportion: float = float(stats_amount) / (stats_amount + effect_amount)
+    if rng.randf() < proportion:
+        return _generate_stat_item()
+    else:
+        return _generate_effect_item()
+
+
+func _generate_stat_item() -> Item:
     var stat_names = stats.stats.keys()
     if stat_names.is_empty():
         return null
@@ -37,6 +95,16 @@ func generate_random_item() -> Item:
     item.modifiers[chosen_stat] = value
     return item
 
+func _generate_effect_item() -> Item:
+    var item := Item.new()
+    var chosen_scene: PackedScene = effect_scenes[rng.randi_range(0, effect_scenes.size() - 1)]
+
+    item.name = _generate_effect_name(chosen_scene.resource_path)
+    item.description = "Grants special effect: %s" % item.name
+    item.effect_scene = [chosen_scene]
+
+    return item   
+
 func _generate_item_name(stat: String) -> String:
     match stat:
         "health": return "Potion of Vitality"
@@ -46,3 +114,8 @@ func _generate_item_name(stat: String) -> String:
         "armor": return "Iron Skin"
         "critical_chance": return "Lucky Charm"
         _: return "Mystic " + stat.capitalize() + " Plus"
+
+func _generate_effect_name(path: String) -> String:
+    # crude but effective: use filename without extension
+    var fname = path.get_file().get_basename()
+    return fname.capitalize()

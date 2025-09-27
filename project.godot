@@ -28,3 +28,7 @@ window/size/initial_position_type=3
 [dotnet]
 
 project/assembly_name="Test1"
+
+[gui]
+
+theme/default_font_multichannel_signed_distance_field=true

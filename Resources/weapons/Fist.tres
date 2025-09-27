@@ -1,13 +1,13 @@
 [gd_resource type="Resource" script_class="MeleeWeapon" load_steps=9 format=3 uid="uid://dj8an5x7vxx4e"]
 
 [ext_resource type="PackedScene" uid="uid://vipiolfmurkt" path="res://Systems/weapon/MelleeWeaponNode.tscn" id="1_gd444"]
-[ext_resource type="AudioStream" uid="uid://by5d7u7fkkp2d" path="res://Assets/sounds/whoosh_swish_high_fast_01.wav" id="1_sjfbb"]
+[ext_resource type="AudioStream" uid="uid://by5d7u7fkkp2d" path="res://Assets/sounds/fist/whoosh_swish_high_fast_01.wav" id="1_sjfbb"]
 [ext_resource type="Script" uid="uid://dr1s3laux0quk" path="res://Systems/weapon/melee_weapon.gd" id="1_ukhvm"]
-[ext_resource type="AudioStream" uid="uid://c8hwpbk0f5eo1" path="res://Assets/sounds/whoosh_swish_high_fast_02.wav" id="2_6xf22"]
+[ext_resource type="AudioStream" uid="uid://c8hwpbk0f5eo1" path="res://Assets/sounds/fist/whoosh_swish_high_fast_02.wav" id="2_6xf22"]
 [ext_resource type="Texture2D" uid="uid://k5orns7p7kfx" path="res://Assets/fist_short.png" id="2_wkow1"]
-[ext_resource type="AudioStream" uid="uid://2am8nx14mq6d" path="res://Assets/sounds/whoosh_swish_high_fast_03.wav" id="3_su6vs"]
+[ext_resource type="AudioStream" uid="uid://2am8nx14mq6d" path="res://Assets/sounds/fist/whoosh_swish_high_fast_03.wav" id="3_su6vs"]
 [ext_resource type="Resource" uid="uid://hye6t5sxe2yg" path="res://Resources/weapons/aim/closest.tres" id="3_wkow1"]
-[ext_resource type="AudioStream" uid="uid://ctxut6hbdtbi2" path="res://Assets/sounds/whoosh_swish_high_fast_04.wav" id="4_ki4yr"]
+[ext_resource type="AudioStream" uid="uid://ctxut6hbdtbi2" path="res://Assets/sounds/fist/whoosh_swish_high_fast_04.wav" id="4_ki4yr"]
 
 [resource]
 script = ExtResource("1_ukhvm")

@@ -1,9 +1,14 @@
-[gd_resource type="Resource" script_class="PistolWeapon" load_steps=5 format=3 uid="uid://0kk7tflomdcg"]
+[gd_resource type="Resource" script_class="ProjectileWeapon" load_steps=10 format=3 uid="uid://0kk7tflomdcg"]
 
 [ext_resource type="PackedScene" uid="uid://bbj577efimtbf" path="res://Systems/weapon/Projectile.tscn" id="1_120iq"]
+[ext_resource type="AudioStream" uid="uid://654dl1dnsap3" path="res://Assets/sounds/pistol/gun_pistol_shot_01.wav" id="1_f4eg0"]
 [ext_resource type="Script" uid="uid://c86g5wtgphef8" path="res://Systems/weapon/projectile_weapon.gd" id="1_yx5y6"]
+[ext_resource type="AudioStream" uid="uid://s2rx8mp7wb2v" path="res://Assets/sounds/pistol/gun_pistol_shot_02.wav" id="2_73ntf"]
 [ext_resource type="Texture2D" uid="uid://cwwo3072oyhsp" path="res://Assets/pistol.png" id="3_70ry1"]
+[ext_resource type="AudioStream" uid="uid://dlv3pv0il07y4" path="res://Assets/sounds/pistol/gun_pistol_shot_03.wav" id="3_j8ff2"]
 [ext_resource type="Resource" uid="uid://hye6t5sxe2yg" path="res://Resources/weapons/aim/closest.tres" id="3_v0y1f"]
+[ext_resource type="AudioStream" uid="uid://wnubldlwu557" path="res://Assets/sounds/pistol/gun_pistol_shot_04.wav" id="4_0amuu"]
+[ext_resource type="AudioStream" uid="uid://s0a40oeyfhnj" path="res://Assets/sounds/pistol/gun_pistol_shot_05.wav" id="5_side8"]
 
 [resource]
 script = ExtResource("1_yx5y6")
@@ -17,4 +22,5 @@ modifiers = {}
 target_selector = ExtResource("3_v0y1f")
 sprite = ExtResource("3_70ry1")
 sprite_offset = Vector2(0, 0)
+attack_sound = Array[Resource]([ExtResource("1_f4eg0"), ExtResource("2_73ntf"), ExtResource("3_j8ff2"), ExtResource("4_0amuu"), ExtResource("5_side8")])
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"

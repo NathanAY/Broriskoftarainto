@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene load_steps=18 format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_x3xnh"]
 [ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://Scripts/Spawner.gd" id="2_8r6kd"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="10_3jf1l"]
 [ext_resource type="PackedScene" uid="uid://co2jv4mljj5j0" path="res://Systems/Items/ItemPickup.tscn" id="11_356ba"]
 [ext_resource type="Resource" uid="uid://ws6ag135x60i" path="res://Resources/items/AttackSpeedOnKillBuff.tres" id="12_i4lct"]
+[ext_resource type="PackedScene" uid="uid://ba47mswx3itwk" path="res://Systems/altars/ItemSacrificeAltar.tscn" id="13_4q8tf"]
 [ext_resource type="Resource" uid="uid://yj870a0q32n1" path="res://Resources/items/CritGlass.tres" id="13_iyesh"]
 [ext_resource type="Resource" uid="uid://d28aq4yyk8v4l" path="res://Resources/items/SpreadShotIfStill.tres" id="14_i1pr2"]
 [ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://Scenes/Enemy.tscn" id="15_4f4ik"]
@@ -74,6 +75,12 @@ item = ExtResource("14_i1pr2")
 [node name="ItemPickup10" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
 position = Vector2(-299, 46)
 item = ExtResource("14_i1pr2")
+
+[node name="altars" type="Node" parent="Nodes"]
+
+[node name="ItemSacrificeAltar" parent="Nodes/altars" instance=ExtResource("13_4q8tf")]
+position = Vector2(182, -134)
+altar_item = ExtResource("4_rajel")
 
 [node name="Enemy" parent="." instance=ExtResource("15_4f4ik")]
 position = Vector2(0, 232)

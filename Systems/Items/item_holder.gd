@@ -65,4 +65,4 @@ func remove_item(item: Resource) -> void:
     items.erase(item)
     # Notify others
     if event_manager:
-        event_manager.emit_event("on_item_removed", [hold_owner, item])
+        event_manager.emit_event("on_item_removed", [{"hold_owner": hold_owner, "item": item, "items": items}])

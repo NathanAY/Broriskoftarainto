@@ -105,12 +105,13 @@ func _on_item_added(event: Dictionary) -> void:
     var l = Label.new()
     l.text = _item_display_name(item)
     items_container.add_child(l)
+    #_update_items()
 
-func _on_item_removed(args: Array) -> void:
-    var entity = args[0]
-    var item = args[1]
+func _on_item_removed(event: Dictionary) -> void:
+    var entity = event.get("hold_owner")
+    var item = event.get("item")
     if entity != tower:
-        return
+        return  
     _update_items()
 
 func _item_display_name(item: Resource) -> String:

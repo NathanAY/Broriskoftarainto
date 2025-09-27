@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://c8hwpbk0f5eo1"
-path="res://.godot/imported/whoosh_swish_high_fast_02.wav-6e98a6a48531b3caf2928b06ae2ff7d7.sample"
+path="res://.godot/imported/whoosh_swish_high_fast_02.wav-9eb4f985fefbdb6a7897f0bcf1ee96c3.sample"
 
 [deps]
 
-source_file="res://Assets/sounds/whoosh_swish_high_fast_02.wav"
-dest_files=["res://.godot/imported/whoosh_swish_high_fast_02.wav-6e98a6a48531b3caf2928b06ae2ff7d7.sample"]
+source_file="res://Assets/sounds/fist/whoosh_swish_high_fast_02.wav"
+dest_files=["res://.godot/imported/whoosh_swish_high_fast_02.wav-9eb4f985fefbdb6a7897f0bcf1ee96c3.sample"]
 
 [params]
 

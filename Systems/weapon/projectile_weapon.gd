@@ -5,6 +5,7 @@ class_name ProjectileWeapon
 @export var projectile_scene: PackedScene
 
 func try_shoot(targets: Array[Node]) -> void:
+    SoundManager.play(attack_sound.pick_random(), -10, 0.2)
     shoot_projectile(targets[0])
 
 func shoot_projectile(target: Node) -> Projectile:

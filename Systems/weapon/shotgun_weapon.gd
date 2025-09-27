@@ -6,6 +6,7 @@ class_name ShotgunWeapon
 @export var spread_angle: float = 15.0
 
 func try_shoot(targets: Array[Node]) -> void:
+    SoundManager.play(attack_sound.pick_random(), -15, 0.2)
     var dir = (targets[0].global_position - sprite_node.global_position).normalized()
     for i in range(pellet_count):
         var p: Projectile = shoot_projectile(targets[0])

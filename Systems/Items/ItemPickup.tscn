@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://co2jv4mljj5j0"]
 
 [ext_resource type="Script" uid="uid://dlvsuxap4lde1" path="res://Systems/Items/item_pickup.gd" id="1_tygwx"]
-[ext_resource type="Texture2D" uid="uid://blr76khcrsxby" path="res://Assets/torch.png" id="3_a070b"]
+[ext_resource type="Texture2D" uid="uid://dfijvipviha7m" path="res://Assets/item_box.png" id="2_2eft1"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_fnq6c"]
 radius = 50.01
@@ -10,7 +10,7 @@ radius = 50.01
 script = ExtResource("1_tygwx")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("3_a070b")
+texture = ExtResource("2_2eft1")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_fnq6c")

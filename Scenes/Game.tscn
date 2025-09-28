@@ -6,7 +6,7 @@
 [ext_resource type="Resource" uid="uid://s8a01h7xtfvy" path="res://Resources/items/AttackSpeedItem.tres" id="4_rajel"]
 [ext_resource type="Resource" uid="uid://mlfohgnnpkph" path="res://Resources/items/ExplosiveShot.tres" id="6_lbihj"]
 [ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://Resources/items/SpreadShot.tres" id="8_8e0uq"]
-[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Scenes/Tower.tscn" id="9_i0vto"]
+[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Scenes/Character.tscn" id="9_i0vto"]
 [ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="10_3jf1l"]
 [ext_resource type="PackedScene" uid="uid://co2jv4mljj5j0" path="res://Systems/Items/ItemPickup.tscn" id="11_356ba"]
 [ext_resource type="Resource" uid="uid://ws6ag135x60i" path="res://Resources/items/AttackSpeedOnKillBuff.tres" id="12_i4lct"]
@@ -26,11 +26,11 @@ script = ExtResource("2_8r6kd")
 
 [node name="SpawnerModifier" parent="Spawner" instance=ExtResource("3_alh3a")]
 
-[node name="Tower" parent="." instance=ExtResource("9_i0vto")]
+[node name="Character" parent="." instance=ExtResource("9_i0vto")]
 
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
 script = ExtResource("10_3jf1l")
-target = NodePath("../Tower")
+target = NodePath("../Character")
 
 [node name="Nodes" type="Node" parent="."]
 
@@ -87,8 +87,8 @@ position = Vector2(0, 232)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="TowerUi" parent="CanvasLayer" node_paths=PackedStringArray("tower") instance=ExtResource("16_khs3t")]
-tower = NodePath("../../Tower")
+[node name="CharacterUi" parent="CanvasLayer" node_paths=PackedStringArray("character") instance=ExtResource("16_khs3t")]
+character = NodePath("../../Character")
 
 [node name="InteractionManager" type="Node" parent="."]
 script = ExtResource("17_0iyqm")

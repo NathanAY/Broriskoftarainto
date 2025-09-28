@@ -1,7 +1,7 @@
-# TowerUI.gd
+# CharacterUI.gd
 extends Control
 
-@export var tower: Node  # assign the tower instance in the inspector
+@export var character: Node  # assign the character instance in the inspector
 
 @onready var stats_container: GridContainer = $PanelContainer/VBoxContainer/GridContainer
 @onready var items_container: VBoxContainer = $PanelContainer/VBoxContainer/Items
@@ -11,20 +11,20 @@ var item_holder: Node = null
 var value_labels: Dictionary = {}  # stat_name -> Label
 
 func _ready():
-    if not tower:
-        push_error("TowerUI: No tower assigned! Set the 'tower' export or call set_tower(tower).")
+    if not character:
+        push_error("CharacterUI: No character assigned! Set the 'character' export or call set_character(character).")
         return
 
-    stats_node = tower.get_node_or_null("Stats")
-    item_holder = tower.get_node_or_null("ItemHolder")
-    var em = tower.get_node_or_null("EventManager")
+    stats_node = character.get_node_or_null("Stats")
+    item_holder = character.get_node_or_null("ItemHolder")
+    var em = character.get_node_or_null("EventManager")
 
     # Setup stats UI and listeners
     if stats_node:
         _update_stats()
         if stats_node.has_signal("stat_changed"):
             stats_node.connect("stat_changed", Callable(self, "_on_stat_changed"))
-        # also subscribe to tower event manager if present (emits on_stat_changes)
+        # also subscribe to character event manager if present (emits on_stat_changes)
         if em:
             em.subscribe("on_stat_changes", Callable(self, "_on_stat_changed_event"))
 
@@ -99,8 +99,8 @@ func _update_items() -> void:
 func _on_item_added(event: Dictionary) -> void:
     var entity = event.get("hold_owner")
     var item = event.get("item")
-    # entity is the owner of the item; only update UI if it's the current tower
-    if entity != tower:
+    # entity is the owner of the item; only update UI if it's the current character
+    if entity != character:
         return
     var l = Label.new()
     l.text = _item_display_name(item)
@@ -110,7 +110,7 @@ func _on_item_added(event: Dictionary) -> void:
 func _on_item_removed(event: Dictionary) -> void:
     var entity = event.get("hold_owner")
     var item = event.get("item")
-    if entity != tower:
+    if entity != character:
         return  
     _update_items()
 
@@ -122,8 +122,8 @@ func _item_display_name(item: Resource) -> String:
         return str(item.resource_name)
     return str(item)
 
-# --- helper to set tower at runtime ----------------------------------------
+# --- helper to set character at runtime ----------------------------------------
 
-func set_tower(t: Node) -> void:
-    tower = t
+func set_character(t: Node) -> void:
+    character = t
     _ready()  # re-init (simple approach). If you call this at runtime you may want to disconnect previous connections first.

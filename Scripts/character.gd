@@ -1,17 +1,20 @@
-#tower.gd
+#character.gd
 extends CharacterBody2D
+class_name Character
 
 @onready var event_manager = $EventManager
 @onready var item_holder = $ItemHolder
 @onready var stats = $Stats
 @onready var weapon_holder = $WeaponHolder
+@onready var sprite: Sprite2D = $Node2D/Sprite2D
+@onready var anim_player: AnimationPlayer = $AnimationPlayer
 
 var current_target = null
 var fire_timer = 0.0
 var timer = Timer.new()
 
 func _ready():
-    add_to_group("tower")
+    add_to_group("character")
     add_to_group("damageable")
     for c in get_children():
         if c.has_method("attachEventManager"):
@@ -29,14 +32,14 @@ func _ready():
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
     $WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
     $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
-    $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
-    $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
-    $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
+    #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
+    #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
+    #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/SpreadShot.tres"))

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://byflsd6em57cu"]
+
+[ext_resource type="Script" uid="uid://bkjrqeb8y5n4" path="res://Systems/movement/bahaviour/wander_around_movement_behaviour.gd" id="1_wfaje"]
+
+[node name="MovementBehaviour" type="Node"]
+script = ExtResource("1_wfaje")

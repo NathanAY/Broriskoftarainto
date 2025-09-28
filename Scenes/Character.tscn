@@ -1,0 +1,65 @@
+[gd_scene load_steps=17 format=3 uid="uid://dw17weh8b5wc3"]
+
+[ext_resource type="Script" uid="uid://b476vr2gdauu8" path="res://Scripts/character.gd" id="1_cw27m"]
+[ext_resource type="Texture2D" uid="uid://co8tav7tulvwb" path="res://Assets/potato.png" id="2_xxe07"]
+[ext_resource type="Texture2D" uid="uid://b2lupjjff2cwj" path="res://Assets/multitasker_eyes.png" id="3_kw72g"]
+[ext_resource type="Texture2D" uid="uid://dp42e2ntmsk1t" path="res://Assets/multitasker_mouth.png" id="4_nxr2n"]
+[ext_resource type="Script" uid="uid://bxqxit15wxm0g" path="res://Systems/movement/button_input_movement.gd" id="5_uis85"]
+[ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://Systems/LocalEventManager.tscn" id="6_d4e0j"]
+[ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/stats/Stats.tscn" id="7_nn15e"]
+[ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/Health.tscn" id="8_wcxyp"]
+[ext_resource type="PackedScene" uid="uid://bymf3sqpkbdcr" path="res://Systems/Items/ItemHolder.tscn" id="9_wjmpa"]
+[ext_resource type="PackedScene" uid="uid://cskdgn6s7qlfo" path="res://Systems/weapon/WeaponHolder.tscn" id="10_b611v"]
+[ext_resource type="PackedScene" uid="uid://by0slo3uv1f0e" path="res://ui/numberspawn/DamageNumberSpawner.tscn" id="11_khphl"]
+[ext_resource type="PackedScene" uid="uid://bfv23hn20a0ia" path="res://ui/numberspawn/HealNumberSpawner.tscn" id="12_fdd6p"]
+[ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://ui/HealthBar.tscn" id="13_mogpt"]
+[ext_resource type="PackedScene" uid="uid://jsw2vxmrn6yc" path="res://Scenes/particles/ParticleEffectManager.tscn" id="14_yw36p"]
+[ext_resource type="PackedScene" uid="uid://cx3p26icyy5wu" path="res://animations/animation_player.tscn" id="15_g0or5"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7ibl6"]
+radius = 30.0
+
+[node name="Character" type="CharacterBody2D"]
+script = ExtResource("1_cw27m")
+
+[node name="Node2D" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
+texture = ExtResource("2_xxe07")
+
+[node name="eyes" type="Sprite2D" parent="Node2D/Sprite2D"]
+texture = ExtResource("3_kw72g")
+
+[node name="mouth" type="Sprite2D" parent="Node2D/Sprite2D"]
+texture = ExtResource("4_nxr2n")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_7ibl6")
+
+[node name="Movement" type="Node" parent="."]
+script = ExtResource("5_uis85")
+
+[node name="EventManager" parent="." instance=ExtResource("6_d4e0j")]
+
+[node name="Stats" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("7_nn15e")]
+event_manager = NodePath("../EventManager")
+
+[node name="Health" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_wcxyp")]
+event_manager = NodePath("../EventManager")
+
+[node name="ItemHolder" parent="." instance=ExtResource("9_wjmpa")]
+
+[node name="WeaponHolder" parent="." instance=ExtResource("10_b611v")]
+
+[node name="DamageNumberSpawner" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("11_khphl")]
+event_manager = NodePath("../EventManager")
+
+[node name="HealNumberSpawner" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("12_fdd6p")]
+event_manager = NodePath("../EventManager")
+
+[node name="HealthBar" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("13_mogpt")]
+event_manager = NodePath("../EventManager")
+
+[node name="ParticleEffectManager" parent="." instance=ExtResource("14_yw36p")]
+
+[node name="AnimationPlayer" parent="." instance=ExtResource("15_g0or5")]

@@ -4,7 +4,7 @@ class_name InteractionManager
 
 var interactables: Array[Node] = []
 var current: Node = null
-@onready var tower: Node2D = get_tree().current_scene.get_node_or_null("Tower")
+@onready var character: Node2D = get_tree().current_scene.get_node_or_null("Character")
 
 func register(interactable: Node) -> void:
     if not interactables.has(interactable):
@@ -22,12 +22,12 @@ func _unhandled_input(event):
         current.cancel_action()
 
 func _process(delta):
-    if not tower or interactables.is_empty():
+    if not character or interactables.is_empty():
         return
     var closest: Node = null
     var closest_dist := INF
     for i in interactables:
-        var dist = tower.global_position.distance_to(i.global_position)
+        var dist = character.global_position.distance_to(i.global_position)
         if dist < i.interaction_radius and dist < closest_dist:
             closest = i
             closest_dist = dist

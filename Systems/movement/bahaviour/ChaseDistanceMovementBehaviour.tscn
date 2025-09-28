@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://x036pxnqk432"]
+
+[ext_resource type="Script" uid="uid://cwfb37k3ir216" path="res://Systems/movement/bahaviour/chase_distance_movement_behaviour.gd" id="1_07os0"]
+
+[node name="MovementBehaviour" type="Node"]
+script = ExtResource("1_07os0")

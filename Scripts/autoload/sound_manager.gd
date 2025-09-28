@@ -1,4 +1,4 @@
-#class_name SoundManager2d
+#class_name SoundManager
 extends Node
 
 enum {SOUND, VOLUME, PITCH_RAND, POSITION}
@@ -6,7 +6,7 @@ enum {SOUND, VOLUME, PITCH_RAND, POSITION}
 const MAX_SOUNDS = 32
 
 var num_players = 12
-var bus = "Sound"
+var bus = "SFX"
 
 var players_available: Array[AudioStreamPlayer]  = []
 var players_available2d: Array[AudioStreamPlayer2D]  = []

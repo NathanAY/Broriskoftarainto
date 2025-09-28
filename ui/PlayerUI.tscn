@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cfoaow3ldbe7n" path="res://ui/player_ui.gd" id="1_fosbm"]
 [ext_resource type="PackedScene" uid="uid://byaxfk2256h15" path="res://ui/BuffUi.tscn" id="2_h3d8y"]
 
-[node name="TowerUi" type="Control"]
+[node name="CharacterUi" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

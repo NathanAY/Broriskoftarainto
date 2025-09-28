@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bo2o0mwe3usc3"]
+[gd_scene load_steps=3 format=3 uid="uid://bo2o0mwe3usc3"]
 
 [ext_resource type="Script" uid="uid://u1vqm6gmpjwc" path="res://Scripts/pause_menu.gd" id="1_lj4oq"]
+[ext_resource type="PackedScene" uid="uid://6mpb7db144uh" path="res://Scenes/OptionsMenu.tscn" id="2_qwhev"]
 
 [node name="PauseMenu" type="CanvasLayer"]
 process_mode = 3
@@ -50,10 +51,12 @@ text = "Restart"
 layout_mode = 2
 text = "New run"
 
-[node name="WindowButton" type="Button" parent="Control/VBoxContainer"]
+[node name="OptionsButton" type="Button" parent="Control/VBoxContainer"]
 layout_mode = 2
-text = "Window size"
+text = "Options"
 
 [node name="ExitButton" type="Button" parent="Control/VBoxContainer"]
 layout_mode = 2
 text = "Exit"
+
+[node name="OptionsMenu" parent="." instance=ExtResource("2_qwhev")]

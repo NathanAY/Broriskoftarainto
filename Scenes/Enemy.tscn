@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://nss5i2h1avqj"]
+[gd_scene load_steps=18 format=3 uid="uid://nss5i2h1avqj"]
 
 [ext_resource type="Script" uid="uid://cs2dub84x6wjd" path="res://Scripts/Enemy.gd" id="1_wovta"]
 [ext_resource type="Texture2D" uid="uid://dbviainil2yci" path="res://Assets/spitter.png" id="2_uoxpr"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/Health.tscn" id="7_6bs3c"]
 [ext_resource type="PackedScene" uid="uid://jsw2vxmrn6yc" path="res://Scenes/particles/ParticleEffectManager.tscn" id="9_0o0ue"]
 [ext_resource type="PackedScene" uid="uid://cx3p26icyy5wu" path="res://animations/animation_player.tscn" id="9_idouy"]
+[ext_resource type="PackedScene" uid="uid://c0miaq2nbp3m6" path="res://Systems/movement/bahaviour/ChaseMovementBehaviour.tscn" id="11_6s1gy"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_kpr8r"]
 radius = 41.0
@@ -178,3 +179,5 @@ libraries = {
 &"": SubResource("AnimationLibrary_27ry8")
 }
 autoplay = ""
+
+[node name="MovementBehaviour" parent="." instance=ExtResource("11_6s1gy")]

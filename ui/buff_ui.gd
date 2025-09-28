@@ -1,7 +1,7 @@
 #Shows buffs and debuffs
 extends Control
 
-var tower: Node  # assigned from TowerUI
+var character: Node  # assigned from CharacterUI
 
 @onready var buffs_container: HBoxContainer = $PanelContainer/HBoxContainer
 @onready var debuffs_container: HBoxContainer = $PanelContainer2/HBoxContainer
@@ -11,14 +11,14 @@ var active_buffs: Dictionary = {}
 var active_debuffs: Dictionary = {}
 
 func _ready():
-    tower = get_parent().tower
-    if not tower:
-        push_error("BuffUI: No tower assigned! Use set_tower().")
+    character = get_parent().character
+    if not character:
+        push_error("BuffUI: No character assigned! Use set_character().")
         return
     
-    var em = tower.get_node_or_null("EventManager")
+    var em = character.get_node_or_null("EventManager")
     if not em:
-        push_warning("BuffUI: tower has no EventManager")
+        push_warning("BuffUI: character has no EventManager")
         return
     
     em.subscribe("on_buff_added", Callable(self, "_on_buff_added"))

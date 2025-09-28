@@ -26,9 +26,9 @@ func cancel_action():
     _on_destroy()
 
 func _on_pickup():
-    var tower = get_tree().current_scene.get_node_or_null("Tower")
-    if tower:
-        var holder = tower.get_node_or_null("ItemHolder")
+    var character = get_tree().current_scene.get_node_or_null("Character")
+    if character:
+        var holder = character.get_node_or_null("ItemHolder")
         if holder:
             holder.add_item(item)
     queue_free()

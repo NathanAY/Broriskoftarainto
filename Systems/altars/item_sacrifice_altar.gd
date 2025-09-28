@@ -28,10 +28,10 @@ func _update_menu_text():
         _populate_menu(interaction_menu)
 
 func default_action():
-    var tower = get_tree().current_scene.get_node_or_null("Tower")
-    if not tower:
+    var character = get_tree().current_scene.get_node_or_null("Character")
+    if not character:
         return
-    var holder: ItemHolder = tower.get_node_or_null("ItemHolder")
+    var holder: ItemHolder = character.get_node_or_null("ItemHolder")
     if not holder:
         return
     if holder.items.size() < sacrifice_cost:

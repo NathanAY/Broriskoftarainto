@@ -31,16 +31,16 @@ func _on_spawn_timer_timeout():
     spawn_enemy()
 
 func spawn_enemy():
-    var tower = get_parent().get_node_or_null("Tower")
-    if not tower:
+    var character = get_parent().get_node_or_null("Character")
+    if not character:
         return
     var enemy = enemy_scene.instantiate()
-    var tower_position: Vector2 = tower.global_position
+    var character_position: Vector2 = character.global_position
     # Pick a random angle in radians
     var angle = randf_range(0, TAU)
     var radius = 500.0
-    # Calculate spawn position in a circle around tower
-    var spawn_position = tower_position + Vector2(cos(angle), sin(angle)) * radius
+    # Calculate spawn position in a circle around character
+    var spawn_position = character_position + Vector2(cos(angle), sin(angle)) * radius
     enemy.global_position = spawn_position
 
     # ✅ Apply global modifiers (from child nodes)
@@ -51,7 +51,7 @@ func spawn_enemy():
     _apply_scaling(enemy)
 
     add_child(enemy)
-    enemy.set_target_position(tower_position)
+    enemy.set_target_position(character)
 
 func _apply_scaling(enemy: Node) -> void:
     var stats = enemy.get_node_or_null("Stats")

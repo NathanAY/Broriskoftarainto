@@ -7,8 +7,10 @@ extends CharacterBody2D
 @onready var item_holder: ItemHolder = $ItemHolder
 @onready var collisition_shape: CollisionShape2D = $CollisionShape2D
 @onready var anim_player: AnimationPlayer = get_node("AnimationPlayer")
-@onready var sprite: Sprite2D = $Node2D/Sprite2D  # change path if needed
-var target_position: Vector2 = Vector2.ZERO
+@onready var sprite: Sprite2D = $Node2D/Sprite2D
+@onready var behaviour: MovementBehaviour = $MovementBehaviour
+
+var target: Node = null
 var _alive: bool = true
 
 func _ready():
@@ -35,31 +37,16 @@ func _ready():
     #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
     #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
     #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
-    target_position = global_position
     event_manager.subscribe("on_death", Callable(self, "_die"))
 
-func set_target_position(new_target: Vector2):
-    target_position = new_target
+func set_target_position(new_target: Node):
+    target = new_target
+    
 
 func _physics_process(delta):
     if !_alive:
         return
-    if global_position.distance_to(target_position) < 5:
-        #queue_free()
-        #print("Enemy reached target!")
-        anim_player.play("idle") 
-        return
-    anim_player.play("move")
-    var direction = (target_position - global_position).normalized()
-    # ✅ Use stats for movement speed
-    var move_speed = stats.get_stat("movement_speed")
-    velocity = direction * move_speed
-    # Flip horizontally
-    if direction.x < -0.1:
-        sprite.flip_h = true
-    elif direction.x > 0.1:
-        sprite.flip_h = false
-    var collision = move_and_slide()
+    behaviour.process_movement(self, delta)
 
 func _die(event: Dictionary):
     _alive = false

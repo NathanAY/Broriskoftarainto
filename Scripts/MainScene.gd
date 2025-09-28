@@ -1,12 +1,12 @@
 extends Node2D
 
-@onready var tower = $Tower
+@onready var character = $Character
 @onready var spawner = $Spawner
 
 @onready var pause_menu: CanvasLayer = $PauseMenu
 
 func _ready():
-    # Set the tower position to center
+    # Set the character position to center
     var screen_size = get_viewport().get_visible_rect().size
 
 

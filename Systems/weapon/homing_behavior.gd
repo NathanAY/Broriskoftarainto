@@ -20,7 +20,7 @@ func _ready():
         target_position = target.global_position
 
 func _physics_process(delta):
-    if not projectile:
+    if not projectile or not holder:
         return
 
     if not target or not is_instance_valid(target):

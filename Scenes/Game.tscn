@@ -26,6 +26,11 @@ script = ExtResource("2_8r6kd")
 
 [node name="SpawnerModifier" parent="Spawner" instance=ExtResource("3_alh3a")]
 
+[node name="Enemies" type="Node" parent="Spawner"]
+
+[node name="Enemy" parent="Spawner/Enemies" instance=ExtResource("15_4f4ik")]
+position = Vector2(0, 232)
+
 [node name="Character" parent="." instance=ExtResource("9_i0vto")]
 
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
@@ -81,9 +86,6 @@ item = ExtResource("14_i1pr2")
 [node name="ItemSacrificeAltar" parent="Nodes/altars" instance=ExtResource("13_4q8tf")]
 position = Vector2(182, -134)
 altar_item = ExtResource("4_rajel")
-
-[node name="Enemy" parent="." instance=ExtResource("15_4f4ik")]
-position = Vector2(0, 232)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

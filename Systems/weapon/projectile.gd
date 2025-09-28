@@ -1,7 +1,6 @@
 extends Area2D
 class_name Projectile
 
-# New
 var pierce_left: int = 0   # how many enemies it can pass through
 var properties := {}       # scalable dictionary for future (bounce, chain, etc.)
 var base_speed = 300
@@ -9,7 +8,6 @@ var direction = Vector2.ZERO
 @export var damage: float = 0
 
 var event_manager: EventManager = null
-
 # groups to ignore (friendly fire)
 var ignore_groups: Array = []
 # Optional target (only used by homing behaviors)
@@ -24,6 +22,10 @@ func _ready():
     add_child(timer)
     timer.timeout.connect(Callable(self, "_on_timeout"))
     timer.start()
+    if base_speed > 800:       
+        var stretch = 1.0 + base_speed / 500
+        scale.x = scale.x * stretch # elongate along X axis
+
 
 func _on_timeout():
     queue_free()
@@ -46,6 +48,7 @@ func set_direction(target_direction: Vector2):
     direction = target_direction.normalized()
     if not event_manager:
         print("Projectile.gd: no event_manager")
+    rotation = direction.angle()
 
 # ✅ new method for assigning a target (used by homing behaviors or effects)
 func set_target(t: Node):

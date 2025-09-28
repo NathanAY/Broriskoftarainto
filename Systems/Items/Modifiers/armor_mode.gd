@@ -24,9 +24,9 @@ func _on_before_take_damage(event):
     var multiplier: float = 1.0
 
     if armor >= 0:
-        multiplier = 100.0 / (100.0 + armor)
+        multiplier = 10.0 / (10.0 + armor)
     else:
-        multiplier = 1.0 + (-armor / 100.0)  # handles negatives correctly
+        multiplier = 1.0 + (-armor / 10.0)  # handles negatives correctly
 
     ctx.final_amount *= multiplier
     ctx.armor_applied = armor   # optional, for debugging/logging

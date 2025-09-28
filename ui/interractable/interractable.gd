@@ -13,6 +13,15 @@ func _ready():
     # Register into manager
     var manager = get_tree().current_scene.get_node("InteractionManager")
     manager.register(self)
+    var timer := Timer.new()
+    timer.one_shot = true
+    timer.wait_time = 100.0
+    add_child(timer)
+    timer.timeout.connect(Callable(self, "_on_timeout"))
+    timer.start()
+
+func _on_timeout():
+    queue_free()
 
 func _exit_tree():
     var manager = get_tree().current_scene.get_node_or_null("InteractionManager")

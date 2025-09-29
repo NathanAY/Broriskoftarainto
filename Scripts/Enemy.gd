@@ -17,12 +17,9 @@ func _ready():
     add_to_group("enemies")  # Add enemy to a group
     add_to_group("damageable")
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
-    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
-    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     item_holder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))
-    #item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))
     #item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))
     #item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))
     #item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))
@@ -30,9 +27,7 @@ func _ready():
     item_holder.add_item(load("res://Resources/items/EnergyShieldBlock.tres"))
     item_holder.add_item(load("res://Resources/items/MinusArmorOnHitDebuff.tres"))
     item_holder.add_item(load("res://Resources/items/HomingShot.tres"))
-    #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
-    #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
-    #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
+    #item_holder.add_item(load("res://Resources/items/Knockback.tres"))
     #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
     #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
     #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
@@ -40,8 +35,7 @@ func _ready():
     event_manager.subscribe("on_death", Callable(self, "_die"))
 
 func set_target_position(new_target: Node):
-    target = new_target
-    
+    target = new_target  
 
 func _physics_process(delta):
     if !_alive:

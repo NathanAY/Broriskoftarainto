@@ -26,6 +26,8 @@ func attack(dir: Vector2) -> void:
     if attacking:
         print("Skip")
         return
+    if event_manager:
+        event_manager.emit_event("on_attack", [{"weapon": weapon_data}])    
     attacking = true
     forward_swing = true  # reset for this attack
     origin_pos = position

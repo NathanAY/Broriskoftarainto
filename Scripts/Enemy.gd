@@ -16,8 +16,9 @@ var _alive: bool = true
 func _ready():
     add_to_group("enemies")  # Add enemy to a group
     add_to_group("damageable")
+    $WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
     item_holder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))
     #item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))

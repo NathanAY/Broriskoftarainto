@@ -35,5 +35,5 @@ func _on_attack(data: Dictionary):
         bounce.holder = holder
         bounce.max_bounces = max_bounces
         bounce.bounce_range = bounce_range
-        bounce.weapon = data.get("weapon", null)   # ✅ pass weapon for target_selector
+        bounce.target_selector = data.get("weapon", null).target_selector if data.has("weapon") else null
         projectile.add_child(bounce)

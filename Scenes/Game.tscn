@@ -29,7 +29,13 @@ script = ExtResource("2_8r6kd")
 [node name="Enemies" type="Node" parent="Spawner"]
 
 [node name="Enemy" parent="Spawner/Enemies" instance=ExtResource("15_4f4ik")]
-position = Vector2(0, 232)
+position = Vector2(202, -16)
+
+[node name="Enemy2" parent="Spawner/Enemies" instance=ExtResource("15_4f4ik")]
+position = Vector2(409, -11)
+
+[node name="Enemy3" parent="Spawner/Enemies" instance=ExtResource("15_4f4ik")]
+position = Vector2(-24, -276)
 
 [node name="Character" parent="." instance=ExtResource("9_i0vto")]
 
@@ -89,8 +95,9 @@ altar_item = ExtResource("4_rajel")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="CharacterUi" parent="CanvasLayer" node_paths=PackedStringArray("character") instance=ExtResource("16_khs3t")]
+[node name="CharacterUi" parent="CanvasLayer" node_paths=PackedStringArray("character", "spawner") instance=ExtResource("16_khs3t")]
 character = NodePath("../../Character")
+spawner = NodePath("../../Spawner")
 
 [node name="InteractionManager" type="Node" parent="."]
 script = ExtResource("17_0iyqm")

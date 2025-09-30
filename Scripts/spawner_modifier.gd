@@ -4,6 +4,7 @@ extends Node
 @export var explosion_scene = preload("res://Scenes/Explosion.tscn")
 @export var pickup_scene: PackedScene = preload("res://Systems/Items/ItemPickup.tscn")
 @export var altar_scene: PackedScene = preload("res://Systems/altars/ItemSacrificeAltar.tscn")
+@export var death_mark_scene: PackedScene = preload("res://Systems/damage/DeathMarkX.tscn")
 
 @export var possible_items: Array[Resource] = []
 @onready var itemFactory: ItemFactory = $ItemFactory
@@ -24,6 +25,7 @@ func attach_effects(event: Dictionary):
     # Use deferred spawn to avoid physics flushing error
     call_deferred("_spawn_explosion", event.get("self").global_position)
     call_deferred("_spawn_item", event.get("self").global_position)
+    call_deferred("_spawn_death_mark", event.get("self").global_position)
 
 func _spawn_explosion(position: Vector2):
     var explosion = explosion_scene.instantiate()
@@ -46,3 +48,17 @@ func _spawn_item(position: Vector2):
         pickup.global_position = position
         pickup.item = item
         get_tree().current_scene.get_node("Nodes/pickups").add_child(pickup)
+
+func _spawn_death_mark(position: Vector2):
+    if death_mark_scene == null:
+        push_warning("DeathMarkModifier: death_mark_scene not assigned!")
+        return
+    var mark = death_mark_scene.instantiate()
+    mark.global_position = position
+    # Add to a specific node for organization
+    var parent_node = get_tree().current_scene.get_node_or_null("Nodes/death_marks")
+    if not parent_node:
+        parent_node = Node2D.new()
+        parent_node.name = "death_marks"
+        get_tree().current_scene.add_child(parent_node)
+    parent_node.add_child(mark)

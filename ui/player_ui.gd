@@ -1,14 +1,25 @@
 # CharacterUI.gd
 extends Control
 
-@export var character: Node  # assign the character instance in the inspector
+@export var character: Character  # assign the character instance in the inspector
+@export var spawner: Spawner
 
 @onready var stats_container: GridContainer = $PanelContainer/VBoxContainer/GridContainer
 @onready var items_container: VBoxContainer = $PanelContainer/VBoxContainer/Items
+@onready var stageTimer: Label = $StageTimer
 
 var stats_node: Stats = null
 var item_holder: Node = null
 var value_labels: Dictionary = {}  # stat_name -> Label
+
+func _process(delta: float) -> void:
+    var current_staget = "Stage " + str(spawner.current_stage)
+    var stage_time_elapsed = spawner.stage_time_elapsed
+    var stage_duration = str(int(spawner.stage_duration - stage_time_elapsed))
+    var health_growth_per_stage = "enemy health +" + str(spawner.health_growth_per_stage * (spawner.current_stage - 1))
+    var damage_growth_per_stage = " damage +" + str(spawner.damage_growth_per_stage * (spawner.current_stage - 1))
+    stageTimer.text = current_staget + " - " + stage_duration + health_growth_per_stage + damage_growth_per_stage
+    
 
 func _ready():
     if not character:

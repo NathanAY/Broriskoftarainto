@@ -1,0 +1,66 @@
+[gd_scene load_steps=12 format=3 uid="uid://dvphvkk5rwuc2"]
+
+[ext_resource type="Script" uid="uid://c8nf0sbkg5s7c" path="res://Systems/weapon/projectile.gd" id="1_cshb7"]
+[ext_resource type="Texture2D" uid="uid://bauno1ffuofrk" path="res://Assets/projectiles/bullet_lightning_0000.png" id="2_cshb7"]
+[ext_resource type="Texture2D" uid="uid://cg1qqv6h8ocyd" path="res://Assets/projectiles/bullet_lightning_0001.png" id="3_d6df2"]
+[ext_resource type="Texture2D" uid="uid://cd5cb57legtwl" path="res://Assets/projectiles/bullet_lightning_0002.png" id="4_fy4fg"]
+[ext_resource type="Texture2D" uid="uid://bvfb47xhisip8" path="res://Assets/projectiles/bullet_lightning_0003.png" id="5_soykk"]
+[ext_resource type="Texture2D" uid="uid://cendyymk41oa8" path="res://Assets/projectiles/bullet_lightning_0004.png" id="6_76pbn"]
+[ext_resource type="Texture2D" uid="uid://cdm4lhm6qh5fv" path="res://Assets/projectiles/bullet_lightning_0006.png" id="7_6mmy0"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_y0kec"]
+
+[sub_resource type="Animation" id="Animation_vax4l"]
+length = 0.01
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("2_cshb7")]
+}
+
+[sub_resource type="Animation" id="Animation_rhxdf"]
+resource_name = "fire"
+length = 0.1
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.02, 0.04, 0.06, 0.08, 0.1),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [ExtResource("2_cshb7"), ExtResource("3_d6df2"), ExtResource("4_fy4fg"), ExtResource("5_soykk"), ExtResource("6_76pbn"), ExtResource("7_6mmy0")]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_h00n0"]
+_data = {
+&"RESET": SubResource("Animation_vax4l"),
+&"fire": SubResource("Animation_rhxdf")
+}
+
+[node name="Projectile" type="Area2D"]
+scale = Vector2(0.5, 0.5)
+script = ExtResource("1_cshb7")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_cshb7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(2.465, 2.465)
+shape = SubResource("CircleShape2D_y0kec")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_h00n0")
+}
+autoplay = "fire"

@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://boqeser38k20p"]
+
+[node name="DeathMarkX" type="Node2D"]
+
+[node name="Label" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 22.3333
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "x"

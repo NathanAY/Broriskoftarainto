@@ -1,13 +1,14 @@
 extends Node
 class_name Spawner
 
-@export var spawn_interval = 3.0        # base interval in seconds
+@export var spawn_interval = 3          # base interval in seconds
 @export var base_target_enemy_count = 5 # initial target enemies per stage
-@export var stage_duration = 30.0       # seconds per stage
-@export var health_growth_per_stage: float = 20.0
-@export var damage_growth_per_stage: float = 5.0
+@export var stage_duration = 5         # seconds per stage
+@export var health_growth_per_stage: float = 20
+@export var damage_growth_per_stage: float = 5
+@export var character: Character
 
-var enemy_scene = preload("res://Scenes/Enemy.tscn")
+var enemy_scene = preload("res://Systems/Enemy.tscn")
 var spawn_timer: Timer = null
 var modifiers: Array = []
 var enemiesNode: Node = null
@@ -25,13 +26,10 @@ func _ready():
     spawn_timer.timeout.connect(_on_spawn_timer_timeout)
     add_child(spawn_timer)
     spawn_timer.start()
-    
     enemiesNode = get_node("Enemies")
-    
     for c in get_children():
         if c.has_method("attach_to_enemy"):
             modifiers.append(c)
-    
     target_enemy_count = base_target_enemy_count
 
 func _process(delta: float) -> void:
@@ -54,7 +52,6 @@ func _on_spawn_timer_timeout():
         spawn_timer.stop()
 
 func spawn_enemy():
-    var character = get_parent().get_node_or_null("Character")
     if not character:
         return
     
@@ -67,7 +64,7 @@ func spawn_enemy():
 
     # Apply modifiers
     for mod in modifiers:
-        mod.attach_to_enemy(enemy)
+        mod.attach_to_enemy(enemy, character)
     
     # Apply stage-based scaling
     _apply_stage_scaling(enemy)
@@ -100,6 +97,26 @@ func _adjust_spawn_rate():
 
 func _end_stage():
     stage_active = false
+    # Show stage end menu
+    var menu: ShopMenu = get_tree().current_scene.get_node_or_null("UI/ShopMenu")
+    if menu:
+        menu.show_menu()
+        menu.next_stage_pressed.connect(_on_next_stage_confirmed, CONNECT_ONE_SHOT)
+        _clean_game_area()
+
+func _clean_game_area():
+    # cleanup stage-specific nodes (death marks, etc.)
+    var death_marks_parent = get_tree().current_scene.get_node_or_null("Nodes/death_marks")
+    for child in death_marks_parent.get_children():
+        child.queue_free()
+    var pickups = get_tree().current_scene.get_node_or_null("Nodes/pickups")
+    for child in pickups.get_children():
+        child.queue_free()
+    var altars = get_tree().current_scene.get_node_or_null("Nodes/altars")
+    for child in altars.get_children():
+        child.queue_free()
+    
+func _on_next_stage_confirmed():
     current_stage += 1
     target_enemy_count = base_target_enemy_count + current_stage - 1
     stage_time_elapsed = 0.0

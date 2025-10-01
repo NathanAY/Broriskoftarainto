@@ -10,18 +10,20 @@ extends Node
 @onready var itemFactory: ItemFactory = $ItemFactory
 
 var randomGenerator = RandomNumberGenerator.new()
+var character: Character = null
 
-func attach_to_enemy(entity: Node):
-    var health: Health = entity.get_node_or_null("Health")
+func attach_to_enemy(enemy: Node, new_character: Character):
+    var health: Health = enemy.get_node_or_null("Health")
+    character = new_character
     if health and health.event_manager:
         health.event_manager.subscribe("on_death", Callable(self, "attach_effects"))
     else:
         push_warning("ExplosionModifier: Entity has no Health or EventManager!")
 
 func attach_effects(event: Dictionary):
-    if explosion_scene == null:
-        push_warning("ExplosionModifier: explosion_scene not assigned!")
-        return
+    # award money to character
+    if character and character.stats:
+        character.stats.set_base_stat("money", character.stats.stats.get("money", 0) + 1)
     # Use deferred spawn to avoid physics flushing error
     call_deferred("_spawn_explosion", event.get("self").global_position)
     call_deferred("_spawn_item", event.get("self").global_position)
@@ -57,8 +59,4 @@ func _spawn_death_mark(position: Vector2):
     mark.global_position = position
     # Add to a specific node for organization
     var parent_node = get_tree().current_scene.get_node_or_null("Nodes/death_marks")
-    if not parent_node:
-        parent_node = Node2D.new()
-        parent_node.name = "death_marks"
-        get_tree().current_scene.add_child(parent_node)
     parent_node.add_child(mark)

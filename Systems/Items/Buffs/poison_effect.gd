@@ -83,4 +83,7 @@ func _on_tick() -> void:
         sorce_em.emit_event("after_deal_damage", [{"damage_context": ctx}])   
 
 func _on_expire() -> void:
+    _tick_timer.queue_free()
+    _lifetime_timer.queue_free()
     queue_free()
+    

@@ -27,6 +27,7 @@ func apply_to(holder: Node) -> void:
     holder_ref = weakref(holder)
     event_manager = holder.get_node_or_null("EventManager")
     stats = holder.get_node_or_null("Stats")
+    ignore_groups = holder.get_groups().filter(func(g): return g != "damageable")
 
     # create and start timer
     timer = Timer.new()

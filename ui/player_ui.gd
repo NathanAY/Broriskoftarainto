@@ -16,10 +16,9 @@ func _process(delta: float) -> void:
     var current_staget = "Stage " + str(spawner.current_stage)
     var stage_time_elapsed = spawner.stage_time_elapsed
     var stage_duration = str(int(spawner.stage_duration - stage_time_elapsed))
-    var health_growth_per_stage = "enemy health +" + str(spawner.health_growth_per_stage * (spawner.current_stage - 1))
+    var health_growth_per_stage = " enemy health +" + str(spawner.health_growth_per_stage * (spawner.current_stage - 1))
     var damage_growth_per_stage = " damage +" + str(spawner.damage_growth_per_stage * (spawner.current_stage - 1))
     stageTimer.text = current_staget + " - " + stage_duration + health_growth_per_stage + damage_growth_per_stage
-    
 
 func _ready():
     if not character:

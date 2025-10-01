@@ -1,28 +1,30 @@
-[gd_scene load_steps=18 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene load_steps=19 format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_x3xnh"]
-[ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://Scripts/Spawner.gd" id="2_8r6kd"]
-[ext_resource type="PackedScene" uid="uid://itfoa856jd22" path="res://Scenes/SpawnerModifier.tscn" id="3_alh3a"]
+[ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://Scripts/stage_spawner.gd" id="2_8r6kd"]
+[ext_resource type="PackedScene" uid="uid://itfoa856jd22" path="res://Systems/SpawnerModifier.tscn" id="3_alh3a"]
 [ext_resource type="Resource" uid="uid://s8a01h7xtfvy" path="res://Resources/items/AttackSpeedItem.tres" id="4_rajel"]
 [ext_resource type="Resource" uid="uid://mlfohgnnpkph" path="res://Resources/items/ExplosiveShot.tres" id="6_lbihj"]
 [ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://Resources/items/SpreadShot.tres" id="8_8e0uq"]
-[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Scenes/Character.tscn" id="9_i0vto"]
+[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Systems/Character.tscn" id="9_i0vto"]
 [ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="10_3jf1l"]
 [ext_resource type="PackedScene" uid="uid://co2jv4mljj5j0" path="res://Systems/Items/ItemPickup.tscn" id="11_356ba"]
 [ext_resource type="Resource" uid="uid://ws6ag135x60i" path="res://Resources/items/AttackSpeedOnKillBuff.tres" id="12_i4lct"]
 [ext_resource type="PackedScene" uid="uid://ba47mswx3itwk" path="res://Systems/altars/ItemSacrificeAltar.tscn" id="13_4q8tf"]
 [ext_resource type="Resource" uid="uid://yj870a0q32n1" path="res://Resources/items/CritGlass.tres" id="13_iyesh"]
 [ext_resource type="Resource" uid="uid://d28aq4yyk8v4l" path="res://Resources/items/SpreadShotIfStill.tres" id="14_i1pr2"]
-[ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://Scenes/Enemy.tscn" id="15_4f4ik"]
+[ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://Systems/Enemy.tscn" id="15_4f4ik"]
 [ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://ui/PlayerUI.tscn" id="16_khs3t"]
 [ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://ui/interractable/interaction_manager.gd" id="17_0iyqm"]
-[ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://Scenes/PauseMenu.tscn" id="18_jn8rg"]
+[ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://Scenes/menu/PauseMenu.tscn" id="18_jn8rg"]
+[ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://Scenes/menu/ShopMenu.tscn" id="18_x3xnh"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_x3xnh")
 
-[node name="Spawner" type="Node" parent="."]
+[node name="Spawner" type="Node" parent="." node_paths=PackedStringArray("character")]
 script = ExtResource("2_8r6kd")
+character = NodePath("../Character")
 
 [node name="SpawnerModifier" parent="Spawner" instance=ExtResource("3_alh3a")]
 
@@ -93,14 +95,20 @@ item = ExtResource("14_i1pr2")
 position = Vector2(182, -134)
 altar_item = ExtResource("4_rajel")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-
-[node name="CharacterUi" parent="CanvasLayer" node_paths=PackedStringArray("character", "spawner") instance=ExtResource("16_khs3t")]
-character = NodePath("../../Character")
-spawner = NodePath("../../Spawner")
+[node name="death_marks" type="Node" parent="Nodes"]
 
 [node name="InteractionManager" type="Node" parent="."]
 script = ExtResource("17_0iyqm")
 
-[node name="PauseMenu" parent="." instance=ExtResource("18_jn8rg")]
+[node name="UI" type="Node" parent="."]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="UI"]
+
+[node name="CharacterUi" parent="UI/CanvasLayer" node_paths=PackedStringArray("character", "spawner") instance=ExtResource("16_khs3t")]
+character = NodePath("../../../Character")
+spawner = NodePath("../../../Spawner")
+
+[node name="ShopMenu" parent="UI" instance=ExtResource("18_x3xnh")]
+
+[node name="PauseMenu" parent="UI" instance=ExtResource("18_jn8rg")]
 visible = false

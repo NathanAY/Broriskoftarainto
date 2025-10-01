@@ -54,7 +54,7 @@ func _on_options_pressed():
 
 func _on_new_run_pressed():
     toggle_pause()
-    get_tree().change_scene_to_file("res://Scenes/StarterMenu.tscn")
+    get_tree().change_scene_to_file("res://Scenes/menu/StarterMenu.tscn")
 
 func _on_exit_pressed():
     get_tree().quit()

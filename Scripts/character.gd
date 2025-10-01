@@ -32,10 +32,11 @@ func _ready():
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Thorns.tres"))
     $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
     $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
@@ -63,13 +64,7 @@ func _ready():
     #$ItemHolder.add_item(load("res://Resources/items/CritGlass.tres"))
     $ItemHolder.add_item(load("res://Resources/items/PlusDamageItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
-    event_manager.subscribe("on_death", Callable(self, "_die"))
-
-func _draw():
-    # Draw a circle showing the attack range (for debugging)
-    #draw_circle(Vector2.ZERO, stats.get_stat("attack_range"), Color(1, 0, 0, 0.02))
-    draw_circle(Vector2.ZERO, 100, Color(1, 0, 0, 0.02))
-    pass
+    event_manager.subscribe("on_death", Callable(self, "_die"))   
 
 func _on_area_2d_area_entered(area: Area2D) -> void:
     if area.get_parent().is_in_group("enemies"):

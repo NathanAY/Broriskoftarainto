@@ -27,11 +27,11 @@ func setup(holder: Node, target: Node, mod: Dictionary, duration: float):
     var t := Timer.new()
     t.wait_time = duration
     t.one_shot = true
-    t.timeout.connect(_on_expire)
+    t.timeout.connect(_on_expire.bind(t))
     target.add_child(t)
     t.start()
 
-func _on_expire():
+func _on_expire(t: Timer):
     if target_stats:
         target_stats.remove_modifier(modifiers)
     if target_em:
@@ -40,4 +40,6 @@ func _on_expire():
             "holder": holder,
             "target": target
         }])
+    t.queue_free()
     queue_free()
+    

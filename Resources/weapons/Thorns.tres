@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ContactWeapon" load_steps=3 format=3 uid="uid://bai6x23uxk0rk"]
+
+[ext_resource type="Script" uid="uid://dvdh213vyghat" path="res://Systems/weapon/contact_weapon.gd" id="1_6tgmt"]
+[ext_resource type="Resource" uid="uid://88gqpdee82ou" path="res://Resources/weapons/aim/all.tres" id="3_lldkg"]
+
+[resource]
+script = ExtResource("1_6tgmt")
+name = "Thorns"
+description = "Contact weapon"
+base_attack_speed = 2.0
+base_damage = 5.0
+range = 400.0
+modifiers = {}
+target_selector = ExtResource("3_lldkg")
+sprite_offset = Vector2(0, 0)
+attack_sound = Array[Resource]([])
+metadata/_custom_type_script = "uid://2vl1rp4agc1u"

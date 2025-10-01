@@ -3,6 +3,7 @@ extends Area2D
 class_name Interactable
 
 @export var interaction_radius: float = 100.0
+var destroy_timeout = 100 # interractable destroys after 100 seconds
 var interaction_menu: Control
 
 func _ready():
@@ -15,7 +16,7 @@ func _ready():
     manager.register(self)
     var timer := Timer.new()
     timer.one_shot = true
-    timer.wait_time = 100.0
+    timer.wait_time = destroy_timeout
     add_child(timer)
     timer.timeout.connect(Callable(self, "_on_timeout"))
     timer.start()

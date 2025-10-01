@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://dw17weh8b5wc3"]
+[gd_scene load_steps=18 format=3 uid="uid://dw17weh8b5wc3"]
 
 [ext_resource type="Script" uid="uid://b476vr2gdauu8" path="res://Scripts/character.gd" id="1_cw27m"]
 [ext_resource type="Texture2D" uid="uid://co8tav7tulvwb" path="res://Assets/potato.png" id="2_xxe07"]
@@ -16,10 +16,15 @@
 [ext_resource type="PackedScene" uid="uid://jsw2vxmrn6yc" path="res://Scenes/particles/ParticleEffectManager.tscn" id="14_yw36p"]
 [ext_resource type="PackedScene" uid="uid://cx3p26icyy5wu" path="res://animations/animation_player.tscn" id="15_g0or5"]
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_cw27m"]
+radius = 36.1248
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_7ibl6"]
 radius = 30.0
 
 [node name="Character" type="CharacterBody2D"]
+collision_layer = 3
+collision_mask = 2
 script = ExtResource("1_cw27m")
 
 [node name="Node2D" type="Node2D" parent="."]
@@ -32,6 +37,11 @@ texture = ExtResource("3_kw72g")
 
 [node name="mouth" type="Sprite2D" parent="Node2D/Sprite2D"]
 texture = ExtResource("4_nxr2n")
+
+[node name="Hitbox" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("CircleShape2D_cw27m")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_7ibl6")

@@ -5,9 +5,7 @@ extends Node
 @export var pickup_scene: PackedScene = preload("res://Systems/Items/ItemPickup.tscn")
 @export var altar_scene: PackedScene = preload("res://Systems/altars/ItemSacrificeAltar.tscn")
 @export var death_mark_scene: PackedScene = preload("res://Systems/damage/DeathMarkX.tscn")
-
-@export var possible_items: Array[Resource] = []
-@onready var itemFactory: ItemFactory = $ItemFactory
+@export var itemFactory: ItemFactory = null
 
 var randomGenerator = RandomNumberGenerator.new()
 var character: Character = null

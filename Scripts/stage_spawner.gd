@@ -91,30 +91,37 @@ func _adjust_spawn_rate():
         multiplier = 1.0 + float(target_enemy_count - current_enemies)
     elif current_enemies > target_enemy_count:
         multiplier = max(0.1, float(target_enemy_count) / current_enemies)
-    
     spawn_timer.wait_time = spawn_interval / multiplier
     spawn_timer.start()
 
 func _end_stage():
     stage_active = false
-    # Show stage end menu
     var menu: ShopMenu = get_tree().current_scene.get_node_or_null("UI/ShopMenu")
     if menu:
+        menu.character = character
         menu.show_menu()
         menu.next_stage_pressed.connect(_on_next_stage_confirmed, CONNECT_ONE_SHOT)
         _clean_game_area()
 
 func _clean_game_area():
-    # cleanup stage-specific nodes (death marks, etc.)
+    # cleanup stage-specific nodes (death marks, altars etc.)
     var death_marks_parent = get_tree().current_scene.get_node_or_null("Nodes/death_marks")
     for child in death_marks_parent.get_children():
-        child.queue_free()
-    var pickups = get_tree().current_scene.get_node_or_null("Nodes/pickups")
-    for child in pickups.get_children():
         child.queue_free()
     var altars = get_tree().current_scene.get_node_or_null("Nodes/altars")
     for child in altars.get_children():
         child.queue_free()
+    # collect pickups
+    var pickups = get_tree().current_scene.get_node_or_null("Nodes/pickups")
+    if pickups:
+        var items: Array = []
+        for child in pickups.get_children():
+            items.append(child.item)
+            child.queue_free()
+
+        var menu: ShopMenu = get_tree().current_scene.get_node_or_null("UI/ShopMenu")
+        if menu:
+            menu.load_items(items)
     
 func _on_next_stage_confirmed():
     current_stage += 1

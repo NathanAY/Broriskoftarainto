@@ -1,10 +1,11 @@
-[gd_scene load_steps=19 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene load_steps=20 format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_x3xnh"]
 [ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://Scripts/stage_spawner.gd" id="2_8r6kd"]
 [ext_resource type="PackedScene" uid="uid://itfoa856jd22" path="res://Systems/SpawnerModifier.tscn" id="3_alh3a"]
 [ext_resource type="Resource" uid="uid://s8a01h7xtfvy" path="res://Resources/items/AttackSpeedItem.tres" id="4_rajel"]
 [ext_resource type="Resource" uid="uid://mlfohgnnpkph" path="res://Resources/items/ExplosiveShot.tres" id="6_lbihj"]
+[ext_resource type="PackedScene" uid="uid://bmqxtyoaqbpks" path="res://Systems/Items/ItemFactory.tscn" id="7_8r6kd"]
 [ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://Resources/items/SpreadShot.tres" id="8_8e0uq"]
 [ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Systems/Character.tscn" id="9_i0vto"]
 [ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="10_3jf1l"]
@@ -26,7 +27,8 @@ script = ExtResource("1_x3xnh")
 script = ExtResource("2_8r6kd")
 character = NodePath("../Character")
 
-[node name="SpawnerModifier" parent="Spawner" instance=ExtResource("3_alh3a")]
+[node name="SpawnerModifier" parent="Spawner" node_paths=PackedStringArray("itemFactory") instance=ExtResource("3_alh3a")]
+itemFactory = NodePath("../../ItemFactory")
 
 [node name="Enemies" type="Node" parent="Spawner"]
 
@@ -44,6 +46,8 @@ position = Vector2(-24, -276)
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
 script = ExtResource("10_3jf1l")
 target = NodePath("../Character")
+
+[node name="ItemFactory" parent="." instance=ExtResource("7_8r6kd")]
 
 [node name="Nodes" type="Node" parent="."]
 
@@ -108,7 +112,8 @@ script = ExtResource("17_0iyqm")
 character = NodePath("../../../Character")
 spawner = NodePath("../../../Spawner")
 
-[node name="ShopMenu" parent="UI" instance=ExtResource("18_x3xnh")]
+[node name="ShopMenu" parent="UI" node_paths=PackedStringArray("item_factory") instance=ExtResource("18_x3xnh")]
+item_factory = NodePath("../../ItemFactory")
 
 [node name="PauseMenu" parent="UI" instance=ExtResource("18_jn8rg")]
 visible = false

@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/stats/Stats.tscn" id="5_qv8uo"]
 [ext_resource type="PackedScene" uid="uid://bymf3sqpkbdcr" path="res://Systems/Items/ItemHolder.tscn" id="6_0lngm"]
 [ext_resource type="PackedScene" uid="uid://cskdgn6s7qlfo" path="res://Systems/weapon/WeaponHolder.tscn" id="7_hvdt1"]
-[ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/Health.tscn" id="8_uvjna"]
+[ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/damage/Health.tscn" id="8_uvjna"]
 [ext_resource type="PackedScene" uid="uid://jsw2vxmrn6yc" path="res://Scenes/particles/ParticleEffectManager.tscn" id="9_yw6dd"]
 [ext_resource type="PackedScene" uid="uid://cx3p26icyy5wu" path="res://animations/animation_player.tscn" id="10_58ao5"]
 [ext_resource type="AnimationLibrary" uid="uid://cwclbp73qaped" path="res://animations/enemy_animations.res" id="11_r1xls"]

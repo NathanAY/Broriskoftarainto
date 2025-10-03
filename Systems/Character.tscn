@@ -7,7 +7,7 @@
 [ext_resource type="Script" uid="uid://bxqxit15wxm0g" path="res://Systems/movement/button_input_movement.gd" id="5_uis85"]
 [ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://Systems/LocalEventManager.tscn" id="6_d4e0j"]
 [ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/stats/Stats.tscn" id="7_nn15e"]
-[ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/Health.tscn" id="8_wcxyp"]
+[ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/damage/Health.tscn" id="8_wcxyp"]
 [ext_resource type="PackedScene" uid="uid://bymf3sqpkbdcr" path="res://Systems/Items/ItemHolder.tscn" id="9_wjmpa"]
 [ext_resource type="PackedScene" uid="uid://cskdgn6s7qlfo" path="res://Systems/weapon/WeaponHolder.tscn" id="10_b611v"]
 [ext_resource type="PackedScene" uid="uid://by0slo3uv1f0e" path="res://ui/numberspawn/DamageNumberSpawner.tscn" id="11_khphl"]

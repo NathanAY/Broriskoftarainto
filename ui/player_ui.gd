@@ -2,7 +2,7 @@
 extends Control
 
 @export var character: Character  # assign the character instance in the inspector
-@export var spawner: Spawner
+@export var stage_manager: StageManager
 
 @onready var stats_container: GridContainer = $PanelContainer/VBoxContainer/GridContainer
 @onready var items_container: VBoxContainer = $PanelContainer/VBoxContainer/Items
@@ -13,11 +13,11 @@ var item_holder: Node = null
 var value_labels: Dictionary = {}  # stat_name -> Label
 
 func _process(delta: float) -> void:
-    var current_staget = "Stage " + str(spawner.current_stage)
-    var stage_time_elapsed = spawner.stage_time_elapsed
-    var stage_duration = str(int(spawner.stage_duration - stage_time_elapsed))
-    var health_growth_per_stage = " enemy health +" + str(spawner.health_growth_per_stage * (spawner.current_stage - 1))
-    var damage_growth_per_stage = " damage +" + str(spawner.damage_growth_per_stage * (spawner.current_stage - 1))
+    var current_staget = "Stage " + str(stage_manager.current_stage)
+    var stage_time_elapsed = stage_manager.stage_time_elapsed
+    var stage_duration = str(int(stage_manager.stage_duration - stage_time_elapsed))
+    var health_growth_per_stage = " enemy health +" + str(stage_manager.enemy_spawner.health_growth_per_stage * (stage_manager.current_stage - 1))
+    var damage_growth_per_stage = " damage +" + str(stage_manager.enemy_spawner.damage_growth_per_stage * (stage_manager.current_stage - 1))
     stageTimer.text = current_staget + " - " + stage_duration + health_growth_per_stage + damage_growth_per_stage
 
 func _ready():

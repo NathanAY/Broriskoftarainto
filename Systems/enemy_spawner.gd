@@ -1,23 +1,19 @@
 extends Node
-class_name Spawner
+class_name EnemySpawner
 
-@export var spawn_interval = 3          # base interval in seconds
-@export var base_target_enemy_count = 5 # initial target enemies per stage
-@export var stage_duration = 5         # seconds per stage
+@export var character: Character
+@export var spawn_interval = 3 #3 enemies per second if base_target_enemy_count == current number of enemies
 @export var health_growth_per_stage: float = 20
 @export var damage_growth_per_stage: float = 5
-@export var character: Character
+@export var base_target_enemy_count = 5 # initial target enemies per stage
+@export var current_stage: int = 1
+@export var spawn_active: bool = true
 
 var enemy_scene = preload("res://Systems/Enemy.tscn")
-var spawn_timer: Timer = null
-var modifiers: Array = []
 var enemiesNode: Node = null
-
-@export var stage_time_elapsed: float = 0.0
-@export var current_stage: int = 1
+var modifiers: Array = []
 var target_enemy_count: int
-
-var stage_active: bool = true
+var spawn_timer: Timer = null
 
 func _ready():
     spawn_timer = Timer.new()
@@ -26,25 +22,14 @@ func _ready():
     spawn_timer.timeout.connect(_on_spawn_timer_timeout)
     add_child(spawn_timer)
     spawn_timer.start()
-    enemiesNode = get_node("Enemies")
+    enemiesNode = get_node("../../Nodes/Enemies")
+    target_enemy_count = base_target_enemy_count
     for c in get_children():
         if c.has_method("attach_to_enemy"):
             modifiers.append(c)
-    target_enemy_count = base_target_enemy_count
-
-func _process(delta: float) -> void:
-    if not stage_active:
-        return
-    
-    stage_time_elapsed += delta
-    
-    # End stage if time expired and all enemies dead
-    if stage_time_elapsed >= stage_duration:
-        if enemiesNode.get_child_count() == 0:
-            _end_stage()
 
 func _on_spawn_timer_timeout():
-    if stage_time_elapsed < stage_duration:
+    if spawn_active:
         spawn_enemy()
         _adjust_spawn_rate()
     else:
@@ -76,11 +61,9 @@ func _apply_stage_scaling(enemy: Node) -> void:
     var stats = enemy.get_node_or_null("Stats")
     if not stats:
         return
-
     # Scale only by stage
     var extra_health = health_growth_per_stage * (current_stage - 1)
     var extra_damage = damage_growth_per_stage * (current_stage - 1)
-
     stats.set_base_stat("health", stats.stats["health"] + extra_health)
     stats.set_base_stat("damage", stats.stats["damage"] + extra_damage)
 
@@ -94,39 +77,8 @@ func _adjust_spawn_rate():
     spawn_timer.wait_time = spawn_interval / multiplier
     spawn_timer.start()
 
-func _end_stage():
-    stage_active = false
-    var menu: ShopMenu = get_tree().current_scene.get_node_or_null("UI/ShopMenu")
-    if menu:
-        menu.character = character
-        menu.show_menu()
-        menu.next_stage_pressed.connect(_on_next_stage_confirmed, CONNECT_ONE_SHOT)
-        _clean_game_area()
-
-func _clean_game_area():
-    # cleanup stage-specific nodes (death marks, altars etc.)
-    var death_marks_parent = get_tree().current_scene.get_node_or_null("Nodes/death_marks")
-    for child in death_marks_parent.get_children():
-        child.queue_free()
-    var altars = get_tree().current_scene.get_node_or_null("Nodes/altars")
-    for child in altars.get_children():
-        child.queue_free()
-    # collect pickups
-    var pickups = get_tree().current_scene.get_node_or_null("Nodes/pickups")
-    if pickups:
-        var items: Array = []
-        for child in pickups.get_children():
-            items.append(child.item)
-            child.queue_free()
-
-        var menu: ShopMenu = get_tree().current_scene.get_node_or_null("UI/ShopMenu")
-        if menu:
-            menu.load_items(items)
-    
-func _on_next_stage_confirmed():
+func _on_next_stage():
     current_stage += 1
     target_enemy_count = base_target_enemy_count + current_stage - 1
-    stage_time_elapsed = 0.0
-    stage_active = true
     spawn_timer.start()
     print("Stage %d started! Target enemies: %d" % [current_stage, target_enemy_count])

@@ -1,7 +1,6 @@
 extends Node2D
 
 @onready var character = $Character
-@onready var spawner = $Spawner
 
 @onready var pause_menu: CanvasLayer = $UI/PauseMenu
 

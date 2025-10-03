@@ -1,9 +1,10 @@
-[gd_scene load_steps=20 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene load_steps=21 format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_x3xnh"]
-[ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://Scripts/stage_spawner.gd" id="2_8r6kd"]
+[ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://Scripts/stage_manager.gd" id="2_8r6kd"]
 [ext_resource type="PackedScene" uid="uid://itfoa856jd22" path="res://Systems/SpawnerModifier.tscn" id="3_alh3a"]
 [ext_resource type="Resource" uid="uid://s8a01h7xtfvy" path="res://Resources/items/AttackSpeedItem.tres" id="4_rajel"]
+[ext_resource type="PackedScene" uid="uid://fp7phnel5lkc" path="res://Systems/EnemySpawner.tscn" id="4_tfod6"]
 [ext_resource type="Resource" uid="uid://mlfohgnnpkph" path="res://Resources/items/ExplosiveShot.tres" id="6_lbihj"]
 [ext_resource type="PackedScene" uid="uid://bmqxtyoaqbpks" path="res://Systems/Items/ItemFactory.tscn" id="7_8r6kd"]
 [ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://Resources/items/SpreadShot.tres" id="8_8e0uq"]
@@ -23,23 +24,15 @@
 [node name="Main" type="Node2D"]
 script = ExtResource("1_x3xnh")
 
-[node name="Spawner" type="Node" parent="." node_paths=PackedStringArray("character")]
+[node name="StageManager" type="Node" parent="." node_paths=PackedStringArray("character")]
 script = ExtResource("2_8r6kd")
 character = NodePath("../Character")
 
-[node name="SpawnerModifier" parent="Spawner" node_paths=PackedStringArray("itemFactory") instance=ExtResource("3_alh3a")]
-itemFactory = NodePath("../../ItemFactory")
+[node name="EnemySpawner" parent="StageManager" node_paths=PackedStringArray("character") instance=ExtResource("4_tfod6")]
+character = NodePath("../../Character")
 
-[node name="Enemies" type="Node" parent="Spawner"]
-
-[node name="Enemy" parent="Spawner/Enemies" instance=ExtResource("15_4f4ik")]
-position = Vector2(202, -16)
-
-[node name="Enemy2" parent="Spawner/Enemies" instance=ExtResource("15_4f4ik")]
-position = Vector2(409, -11)
-
-[node name="Enemy3" parent="Spawner/Enemies" instance=ExtResource("15_4f4ik")]
-position = Vector2(-24, -276)
+[node name="SpawnerModifier" parent="StageManager/EnemySpawner" node_paths=PackedStringArray("itemFactory") instance=ExtResource("3_alh3a")]
+itemFactory = NodePath("../../../ItemFactory")
 
 [node name="Character" parent="." instance=ExtResource("9_i0vto")]
 
@@ -101,6 +94,17 @@ altar_item = ExtResource("4_rajel")
 
 [node name="death_marks" type="Node" parent="Nodes"]
 
+[node name="Enemies" type="Node" parent="Nodes"]
+
+[node name="Enemy" parent="Nodes/Enemies" instance=ExtResource("15_4f4ik")]
+position = Vector2(202, -16)
+
+[node name="Enemy2" parent="Nodes/Enemies" instance=ExtResource("15_4f4ik")]
+position = Vector2(409, -11)
+
+[node name="Enemy3" parent="Nodes/Enemies" instance=ExtResource("15_4f4ik")]
+position = Vector2(-24, -276)
+
 [node name="InteractionManager" type="Node" parent="."]
 script = ExtResource("17_0iyqm")
 
@@ -108,11 +112,12 @@ script = ExtResource("17_0iyqm")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="UI"]
 
-[node name="CharacterUi" parent="UI/CanvasLayer" node_paths=PackedStringArray("character", "spawner") instance=ExtResource("16_khs3t")]
+[node name="CharacterUi" parent="UI/CanvasLayer" node_paths=PackedStringArray("character", "stage_manager") instance=ExtResource("16_khs3t")]
 character = NodePath("../../../Character")
-spawner = NodePath("../../../Spawner")
+stage_manager = NodePath("../../../StageManager")
 
 [node name="ShopMenu" parent="UI" node_paths=PackedStringArray("item_factory") instance=ExtResource("18_x3xnh")]
+visible = false
 item_factory = NodePath("../../ItemFactory")
 
 [node name="PauseMenu" parent="UI" instance=ExtResource("18_jn8rg")]

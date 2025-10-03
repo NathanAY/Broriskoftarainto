@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://ba47mswx3itwk"]
 
 [ext_resource type="Script" uid="uid://pa7083hcvmmr" path="res://Systems/altars/item_sacrifice_altar.gd" id="1_jssss"]
-[ext_resource type="Texture2D" uid="uid://blr76khcrsxby" path="res://Assets/torch.png" id="2_gbu3b"]
+[ext_resource type="Texture2D" uid="uid://cdjxvfeeak3qv" path="res://Assets/wandering_bot_icon.png" id="2_jssss"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_qcnxv"]
 radius = 48.0937
@@ -10,7 +10,7 @@ radius = 48.0937
 script = ExtResource("1_jssss")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_gbu3b")
+texture = ExtResource("2_jssss")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_qcnxv")

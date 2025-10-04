@@ -5,6 +5,7 @@ var pierce_left: int = 0   # how many enemies it can pass through
 var properties := {}       # scalable dictionary for future (bounce, chain, etc.)
 var base_speed = 300
 var direction = Vector2.ZERO
+var life_time = 3
 @export var damage: float = 0
 
 var event_manager: EventManager = null
@@ -18,7 +19,7 @@ func _ready():
     # Automatically remove projectile after 3 seconds if it doesn't hit anything
     var timer := Timer.new()
     timer.one_shot = true
-    timer.wait_time = 3.0
+    timer.wait_time = life_time
     add_child(timer)
     timer.timeout.connect(Callable(self, "_on_timeout"))
     timer.start()

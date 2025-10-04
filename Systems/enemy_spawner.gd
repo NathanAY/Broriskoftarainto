@@ -3,10 +3,10 @@ class_name EnemySpawner
 
 @export var character: Character
 @export var spawn_interval = 3 #3 enemies per second if base_target_enemy_count == current number of enemies
-@export var health_growth_per_stage: float = 20
-@export var damage_growth_per_stage: float = 5
+@export var health_growth_per_loop: float = 20
+@export var damage_growth_per_loop: float = 5
 @export var base_target_enemy_count = 5 # initial target enemies per stage
-@export var current_stage: int = 1
+@export var current_loop: int = 1
 @export var spawn_active: bool = true
 
 var enemy_scene = preload("res://Systems/Enemy.tscn")
@@ -62,8 +62,8 @@ func _apply_stage_scaling(enemy: Node) -> void:
     if not stats:
         return
     # Scale only by stage
-    var extra_health = health_growth_per_stage * (current_stage - 1)
-    var extra_damage = damage_growth_per_stage * (current_stage - 1)
+    var extra_health = health_growth_per_loop * (current_loop - 1)
+    var extra_damage = damage_growth_per_loop * (current_loop - 1)
     stats.set_base_stat("health", stats.stats["health"] + extra_health)
     stats.set_base_stat("damage", stats.stats["damage"] + extra_damage)
 
@@ -78,7 +78,7 @@ func _adjust_spawn_rate():
     spawn_timer.start()
 
 func _on_next_stage():
-    current_stage += 1
-    target_enemy_count = base_target_enemy_count + current_stage - 1
+    current_loop += 1
+    target_enemy_count = base_target_enemy_count + current_loop - 1
     spawn_timer.start()
-    print("Stage %d started! Target enemies: %d" % [current_stage, target_enemy_count])
+    print("Stage %d started! Target enemies: %d" % [current_loop, target_enemy_count])

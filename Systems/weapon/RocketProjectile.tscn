@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://dama33idg0ecs"]
+
+[ext_resource type="Script" uid="uid://c8nf0sbkg5s7c" path="res://Systems/weapon/projectile.gd" id="1_cpi2h"]
+[ext_resource type="Texture2D" uid="uid://dl6q3wjrpo8mp" path="res://Assets/rocket.png" id="2_4veav"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_y0kec"]
+
+[node name="Projectile" type="Area2D"]
+scale = Vector2(0.5, 0.5)
+script = ExtResource("1_cpi2h")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_4veav")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(2.465, 2.465)
+shape = SubResource("CircleShape2D_y0kec")

@@ -1,17 +1,18 @@
-[gd_scene load_steps=21 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene load_steps=22 format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_x3xnh"]
 [ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://Scripts/stage_manager.gd" id="2_8r6kd"]
 [ext_resource type="PackedScene" uid="uid://itfoa856jd22" path="res://Systems/SpawnerModifier.tscn" id="3_alh3a"]
 [ext_resource type="Resource" uid="uid://s8a01h7xtfvy" path="res://Resources/items/AttackSpeedItem.tres" id="4_rajel"]
 [ext_resource type="PackedScene" uid="uid://fp7phnel5lkc" path="res://Systems/EnemySpawner.tscn" id="4_tfod6"]
+[ext_resource type="PackedScene" uid="uid://bib03hwkomn6a" path="res://Systems/BossSpawner.tscn" id="5_rajel"]
 [ext_resource type="Resource" uid="uid://mlfohgnnpkph" path="res://Resources/items/ExplosiveShot.tres" id="6_lbihj"]
 [ext_resource type="PackedScene" uid="uid://bmqxtyoaqbpks" path="res://Systems/Items/ItemFactory.tscn" id="7_8r6kd"]
 [ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://Resources/items/SpreadShot.tres" id="8_8e0uq"]
 [ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Systems/Character.tscn" id="9_i0vto"]
 [ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="10_3jf1l"]
 [ext_resource type="PackedScene" uid="uid://co2jv4mljj5j0" path="res://Systems/Items/ItemPickup.tscn" id="11_356ba"]
-[ext_resource type="Resource" uid="uid://ws6ag135x60i" path="res://Resources/items/AttackSpeedOnKillBuff.tres" id="12_i4lct"]
+[ext_resource type="Resource" uid="uid://ws6ag135x60i" path="res://Resources/items/AttackSpeedOnHitBuff.tres" id="12_i4lct"]
 [ext_resource type="PackedScene" uid="uid://ba47mswx3itwk" path="res://Systems/altars/ItemSacrificeAltar.tscn" id="13_4q8tf"]
 [ext_resource type="Resource" uid="uid://yj870a0q32n1" path="res://Resources/items/CritGlass.tres" id="13_iyesh"]
 [ext_resource type="Resource" uid="uid://d28aq4yyk8v4l" path="res://Resources/items/SpreadShotIfStill.tres" id="14_i1pr2"]
@@ -33,6 +34,9 @@ character = NodePath("../../Character")
 
 [node name="SpawnerModifier" parent="StageManager/EnemySpawner" node_paths=PackedStringArray("itemFactory") instance=ExtResource("3_alh3a")]
 itemFactory = NodePath("../../../ItemFactory")
+
+[node name="BossSpawner" parent="StageManager" node_paths=PackedStringArray("character") instance=ExtResource("5_rajel")]
+character = NodePath("../../Character")
 
 [node name="Character" parent="." instance=ExtResource("9_i0vto")]
 

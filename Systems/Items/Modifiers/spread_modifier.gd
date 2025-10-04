@@ -1,4 +1,5 @@
 extends Node
+class_name SpreadModifier
 
 @export var projectile_scene = preload("res://Systems/weapon/Projectile.tscn")
 

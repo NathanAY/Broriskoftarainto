@@ -36,6 +36,7 @@ func _physics_process(delta):
 
     # Apply new direction
     projectile.direction = projectile.direction.rotated(angle_diff).normalized()
+    projectile.rotation = projectile.direction.angle()
 
 func _find_target() -> Node:
     var closest_target: Node = null

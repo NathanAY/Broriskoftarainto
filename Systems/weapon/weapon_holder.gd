@@ -1,4 +1,5 @@
 extends Node
+class_name WeaponHolder
 
 @onready var hold_owner: Node = get_parent()
 @onready var event_manager: Node = hold_owner.get_node_or_null("EventManager")

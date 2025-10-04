@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://cqlbwfn1qp6ba"]
+
+[ext_resource type="Script" uid="uid://bk0skngti1685" path="res://Systems/Items/Modifiers/homing_rocket_modifier.gd" id="1_14ndn"]
+[ext_resource type="PackedScene" uid="uid://dama33idg0ecs" path="res://Systems/weapon/RocketProjectile.tscn" id="2_d3r2p"]
+
+[node name="HomingRocketModifier" type="Node"]
+script = ExtResource("1_14ndn")
+projectile_scene = ExtResource("2_d3r2p")

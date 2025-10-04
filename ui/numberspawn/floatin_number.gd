@@ -1,4 +1,5 @@
 extends Node2D
+class_name FloatingNumber
 
 @export var lifetime: float = 0.8
 @export var rise_distance: float = 30.0

@@ -51,7 +51,5 @@ func _update_max_shield(event):
 
 func _emit_shield_changed(amount: float):
     if event_manager:
-        event_manager.emit_event("on_shield_changed", [{"self": get_parent(),
-                                                        "amount": amount,
-                                                        "current_shield": current_shield,
-                                                        "max_shield": max_shield}])
+        event_manager.emit_event("on_shield_changed", [{"self": get_parent(), "amount": amount,
+         "current_shield": current_shield, "max_shield": max_shield}])

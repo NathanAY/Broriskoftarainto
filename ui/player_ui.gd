@@ -11,14 +11,18 @@ extends Control
 var stats_node: Stats = null
 var item_holder: Node = null
 var value_labels: Dictionary = {}  # stat_name -> Label
+var _show_stage_scaleing: bool = false
 
 func _process(delta: float) -> void:
-    var current_staget = "Stage " + str(stage_manager.current_stage)
+    var current_staget = "Loop " + str(stage_manager.current_loop)
     var stage_time_elapsed = stage_manager.stage_time_elapsed
     var stage_duration = str(int(stage_manager.stage_duration - stage_time_elapsed))
-    var health_growth_per_stage = " enemy health +" + str(stage_manager.enemy_spawner.health_growth_per_stage * (stage_manager.current_stage - 1))
-    var damage_growth_per_stage = " damage +" + str(stage_manager.enemy_spawner.damage_growth_per_stage * (stage_manager.current_stage - 1))
-    stageTimer.text = current_staget + " - " + stage_duration + health_growth_per_stage + damage_growth_per_stage
+    if _show_stage_scaleing:
+        var health_growth_per_stage = " enemy health +" + str(stage_manager.enemy_spawner.health_growth_per_loop * (stage_manager.enemy_spawner.current_loop))
+        var damage_growth_per_stage = " damage +" + str(stage_manager.enemy_spawner.damage_growth_per_loop * (stage_manager.enemy_spawner.current_loop))
+        stageTimer.text = current_staget + " Survive " + stage_duration + " scaling " + health_growth_per_stage + damage_growth_per_stage
+    else:
+        stageTimer.text = current_staget + " Survive " + stage_duration
 
 func _ready():
     if not character:

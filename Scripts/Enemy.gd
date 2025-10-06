@@ -24,9 +24,9 @@ func _ready():
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
     item_holder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))
-    #item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))
-    #item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))
-    #item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))
+    item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))
+    item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))
+    item_holder.add_item(load("res://Resources/items/RegenPassive.tres"))
     #item_holder.add_item(load("res://Resources/items/ArmorPlate.tres"))
     item_holder.add_item(load("res://Resources/items/EnergyShieldBlock.tres"))
     item_holder.add_item(load("res://Resources/items/MinusArmorOnHitDebuff.tres"))
@@ -34,9 +34,17 @@ func _ready():
     #item_holder.add_item(load("res://Resources/items/HomingProjectileOnHit.tres"))
     #item_holder.add_item(load("res://Resources/items/HomingShot.tres"))
     #item_holder.add_item(load("res://Resources/items/Knockback.tres"))
+    item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
     #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
-    #item_holder.add_item(load("res://Resources/items/HealthMeat.tres"))
+    
+    collision_layer = 2
+    collision_mask = 0 | 2
+    
+    $Hitbox.collision_layer = 4
+    $Hitbox.collision_mask = 5
+    
     event_manager.subscribe("on_death", Callable(self, "_die"))
+    event_manager.subscribe("before_take_damage", Callable(self, "_flash"))
 
 func set_target_position(new_target: Node):
     target = new_target  
@@ -45,6 +53,13 @@ func _physics_process(delta):
     if !_alive:
         return
     behaviour.process_movement(self, delta)
+
+func _flash(event):
+    var sprite = $Node2D/Sprite2D
+    var tween = create_tween()
+    tween.tween_property(sprite, "modulate", Color(1, 4, 1), 0.2)
+    tween.tween_property(sprite, "modulate", Color(4, 1, 1, 0), 0.2).from(Color(1, 1, 4))
+    tween.tween_property(sprite, "modulate", Color(1, 1, 1, 1), 0.0)
 
 func _die(event: Dictionary):
     _alive = false

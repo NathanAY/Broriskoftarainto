@@ -1,5 +1,7 @@
 extends CanvasLayer
+class_name RunEndScreen
 
+@onready var label: Label = $Control/VBoxContainer/Label
 @onready var new_run_button: Button = $Control/VBoxContainer/NewRunButton
 @onready var exit_button: Button = $Control/VBoxContainer/ExitButton
 

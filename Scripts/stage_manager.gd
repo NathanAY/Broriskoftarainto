@@ -12,13 +12,14 @@ class_name StageManager
 @onready var boss_spawner: BossSpawner   = $BossSpawner
 
 var shop_portal_scene = preload("res://Systems/ShopPortal.tscn")
-var win_screen_scene = preload("res://Scenes/menu/WinScreen.tscn") 
+var run_end_screen = preload("res://Scenes/menu/RunEndScreen.tscn") 
 
 var enemiesNode: Node = null
 var stage_active: bool = true
 
 func _ready():
     enemiesNode = get_node("../Nodes/Enemies")
+    character.character_died.connect(_on_character_died)
     # Start first stage explicitly
     go_to_stage(1)
 
@@ -148,6 +149,14 @@ func go_to_stage(stage: int) -> void:
 
 func _show_win_screen():
     print("YOU WIN!")
-    var win_screen = win_screen_scene.instantiate()
-    get_tree().current_scene.get_node("UI").add_child(win_screen)
+    var run_end: RunEndScreen = run_end_screen.instantiate()
+    get_tree().current_scene.get_node("UI").add_child(run_end)
+    run_end.label.text = "YOU WIN!"
+    stage_active = false
+
+func _on_character_died():
+    print("YOU LOOSE!")
+    var run_end: RunEndScreen = run_end_screen.instantiate()
+    get_tree().current_scene.get_node("UI").add_child(run_end)
+    run_end.label.text = "D.E.F.E.T.E.D"
     stage_active = false

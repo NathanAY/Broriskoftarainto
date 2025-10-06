@@ -9,6 +9,8 @@ var origin_pos: Vector2
 var direction: Vector2 = Vector2.RIGHT
 var ignore_groups: Array = []
 var forward_swing = true
+# --- optional: store original hitbox/sprite scale for restoration
+var _original_scale_x: float = 1.0
 
 @onready var sprite_node: Sprite2D = $Sprite2D
 @onready var hitbox: Area2D = $Area2D
@@ -21,6 +23,7 @@ func setup(data: MeleeWeapon, h: Node, em: Node) -> void:
     sprite_node.texture = data.sprite
     hitbox.body_entered.connect(_on_body_entered)
     origin_pos = sprite_node.global_position
+    _original_scale_x = hitbox.scale.x
 
 func attack(dir: Vector2) -> void:
     if attacking:
@@ -46,6 +49,10 @@ func attack(dir: Vector2) -> void:
     # Forward
     var speed = weapon_data.range * weapon_data._current_attack_speed
     var duration = weapon_data.range / speed
+
+    # ✅ Stretch hitbox proportionally to swing speed
+    _adjust_hitbox_stretch(speed)
+    
     tween.tween_property(self, "position", origin_pos + direction * weapon_data.range, duration / 3).set_trans(Tween.TRANS_EXPO)
     # Mark forward as false after reaching max
     tween.tween_callback(Callable(self, "_on_forward_finished"))
@@ -53,6 +60,7 @@ func attack(dir: Vector2) -> void:
     tween.tween_property(self, "position", origin_pos, duration / 2).set_trans(Tween.TRANS_SINE)
     tween.finished.connect(func():
         attacking = false
+        _reset_hitbox_scale()  # ✅ restore hitbox scale
         if weapon_data.sprite_node and is_instance_valid(weapon_data.sprite_node):
             weapon_data.sprite_node.visible = true
         sprite_node.visible = false
@@ -86,3 +94,18 @@ func do_damage(body):
         event_manager.emit_event("after_deal_damage", [{"melee": self, "body": body, "damage_context": ctx}])
     if event_manager:
         event_manager.emit_event("on_hit", [{"melee": self, "body": body, "damage_context": ctx}])
+
+func _adjust_hitbox_stretch(speed: float) -> void:
+    var stretch := 1.0
+    if speed > 10000:
+        stretch = 1.0 + speed / 100
+    elif speed > 800:
+        stretch = 1.0 + speed / 1000
+
+    # Elongate along X (swing direction)
+    hitbox.scale.x = _original_scale_x * stretch
+    sprite_node.scale.x = stretch
+    
+func _reset_hitbox_scale() -> void:
+    hitbox.scale.x = _original_scale_x
+    sprite_node.scale.x = 1.0

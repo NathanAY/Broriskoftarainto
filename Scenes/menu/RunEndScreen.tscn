@@ -1,10 +1,10 @@
 [gd_scene load_steps=2 format=3 uid="uid://b6iqmep0h5pm"]
 
-[ext_resource type="Script" uid="uid://cfnuri6xv0jhu" path="res://Scenes/menu/win_screen.gd" id="1_a1fom"]
+[ext_resource type="Script" uid="uid://cfnuri6xv0jhu" path="res://Scenes/menu/run_end_screen.gd" id="1_mqxu1"]
 
-[node name="WinScreen" type="CanvasLayer"]
+[node name="RunEndScreen" type="CanvasLayer"]
 process_mode = 3
-script = ExtResource("1_a1fom")
+script = ExtResource("1_mqxu1")
 
 [node name="Control" type="Control" parent="."]
 layout_mode = 3

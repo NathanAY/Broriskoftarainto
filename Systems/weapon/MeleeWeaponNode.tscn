@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://vipiolfmurkt"]
+
+[ext_resource type="Script" uid="uid://kl22lveffmpt" path="res://Systems/weapon/melee_weapon_node.gd" id="1_hy7l4"]
+[ext_resource type="Texture2D" uid="uid://k5orns7p7kfx" path="res://Assets/fist_short.png" id="2_23bra"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kptp8"]
+size = Vector2(98, 28)
+
+[node name="MelleeWeaponNode" type="Node2D"]
+script = ExtResource("1_hy7l4")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_23bra")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 21
+collision_mask = 15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_kptp8")

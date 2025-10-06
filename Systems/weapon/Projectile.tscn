@@ -7,6 +7,8 @@
 
 [node name="Projectile" type="Area2D"]
 scale = Vector2(0.2, 0.2)
+collision_layer = 5
+collision_mask = 7
 script = ExtResource("1_i11y1")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]

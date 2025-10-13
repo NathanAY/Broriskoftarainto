@@ -5,7 +5,8 @@ class_name Buff
 @export var duration: float = 3.0
 @export var max_stacks: int = 10
 @export var modifiers: Dictionary = {
-    "attack_speed": {"flat": 0.15, "percent": 0.2}
+    #"attack_speed": {"flat": 0.15, "percent": 0.2}
+    "attack_speed": {"flat": 0.5}
 }
 
 var holder: Node = null

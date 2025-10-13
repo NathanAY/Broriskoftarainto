@@ -81,8 +81,8 @@ func do_damage(body):
     var ctx = DamageContext.new()
     ctx.source = self
     ctx.target = body
-    ctx.base_amount = weapon_data.base_damage
-    ctx.final_amount = weapon_data.base_damage
+    ctx.base_amount = weapon_data._current_damage
+    ctx.final_amount = weapon_data._current_damage
     ctx.tags.append("melee")
     if event_manager: 
         event_manager.emit_event("before_deal_damage", [{"damage_context": ctx}])

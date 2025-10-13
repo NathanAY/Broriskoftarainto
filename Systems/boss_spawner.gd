@@ -6,7 +6,7 @@ class_name BossSpawner
 @export var boss_scene: PackedScene = preload("res://Systems/EnemyBoss.tscn")
 @export var current_loop: int = 1
 @export var health_growth_per_loop: float = 500
-@export var damage_growth_per_loop: float = 30
+@export var damage_growth_per_loop: float = 1
 
 var enemiesNode: Node = null
 var boss_instance: Enemy = null

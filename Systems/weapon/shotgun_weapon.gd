@@ -13,5 +13,5 @@ func try_shoot(targets: Array[Node]) -> void:
         var angle = deg_to_rad(randf_range(-spread_angle, spread_angle))
         var rotated = dir.rotated(angle)
         p.set_direction(rotated)
-        p.damage = base_damage / pellet_count * 2
+        p.damage = _current_damage / pellet_count * 2
         p.base_speed = randf_range(p.base_speed * 0.9, p.base_speed * 1.1)

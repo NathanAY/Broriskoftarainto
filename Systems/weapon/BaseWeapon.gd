@@ -13,7 +13,9 @@ class_name BaseWeapon
 @export var sprite_offset: Vector2 = Vector2.ZERO  # for fine positioning if needed
 @export var attack_sound: Array[Resource] = []
 
+var _current_damage = base_damage  # (base_damge + get_stat("flat_damage")) * get_stat("damage")
 var _current_attack_speed
+
 var holder_ref: WeakRef
 var stats: Stats
 var event_manager: Node
@@ -76,7 +78,7 @@ func _update_timer_wait() -> void:
     var stats_node: Node = holder.get_node_or_null("Stats") if holder else null
 
     var base_weapon_speed := base_attack_speed
-    var owner_speed = stats_node.get_stat("attack_speed") if stats_node and stats_node.has_method("get_stat") else 1.0
+    var owner_speed = stats.get_stat("attack_speed") if stats else 1.0
     _current_attack_speed = owner_speed * base_weapon_speed
     if _current_attack_speed <= 0.001:
         _current_attack_speed = 0.001
@@ -84,6 +86,7 @@ func _update_timer_wait() -> void:
 
 func _on_stat_changes(_event) -> void:
     _update_timer_wait()
+    _current_damage = (base_damage + stats.get_stat("flat_damage")) * stats.get_stat("damage")
 
 func aim() -> void:
     if not sprite_node or not is_instance_valid(sprite_node):

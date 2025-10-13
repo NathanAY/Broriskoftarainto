@@ -40,7 +40,7 @@ func _spawn_item(position: Vector2):
         altar.global_position = position
         get_tree().current_scene.get_node("Nodes/altars").add_child(altar)
     else:
-        if randf() < 0.6:
+        if randf() < 0.75: # for balace set 0.75
             return
         var item = itemFactory.get_item_from_pool_or_generate()
         if not item:

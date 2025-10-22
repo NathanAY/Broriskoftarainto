@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="Item" load_steps=2 format=3 uid="uid://cd3dtl31bxvj1"]
+
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_f3c55"]
+
+[resource]
+script = ExtResource("2_f3c55")
+name = "Proj speed"
+description = "Proj speed"
+modifiers = {
+"armor": {
+"flat": 100
+},
+"projectile_speed_multiplier": {
+"flat": 4.0
+}
+}
+effect_scene = Array[PackedScene]([])
+effect_scene_condition = Array[String]([])
+condition_managers = Array[PackedScene]([])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

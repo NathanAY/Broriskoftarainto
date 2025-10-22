@@ -9,12 +9,14 @@ class_name HomingOnHitModifier
 @export var life_time: int = 5
 @export var trigger_event: String = "before_take_damage" #"on_attack", "on_hit", "before_take_damage"
 
+
 var modifier_meta = "spawned_by_HomingOnHitModifier"
 var event_manager: EventManager
 var holder: Node
 var stats: Stats
 var ignore_groups: Array = []
 var stacks: Array[bool] = []
+var _current_projectile_speed_multiplier: int = 1
 
 func attachEventManager(em: EventManager):
     event_manager = em
@@ -22,6 +24,7 @@ func attachEventManager(em: EventManager):
     stats = holder.get_node("Stats")
     ignore_groups = holder.get_groups().filter(func(g): return g != "damageable")
     em.subscribe(trigger_event, Callable(self, "_on_triger"))
+    em.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func add_stack(active: bool):
     stacks.append(active)
@@ -67,7 +70,7 @@ func _on_triger(event: Dictionary) -> void:
 func _spawn_homing_projectile(source: Node, damage: int, next_target: Node2D) -> void:
     var new_projectile: Projectile = projectile_scene.instantiate()
     new_projectile.damage = damage
-    new_projectile.base_speed = projectile_speed
+    new_projectile.base_speed = projectile_speed * _current_projectile_speed_multiplier
     new_projectile.ignore_groups = ignore_groups
     new_projectile.life_time = life_time
     new_projectile.attachEventManager(event_manager)
@@ -85,3 +88,6 @@ func _spawn_homing_projectile(source: Node, damage: int, next_target: Node2D) ->
     homing.homing_range = homing_range
     new_projectile.add_child(homing)
     get_tree().current_scene.add_child(new_projectile)
+
+func _on_stat_changes(_event) -> void:
+    _current_projectile_speed_multiplier = stats.get_stat("projectile_speed_multiplier")

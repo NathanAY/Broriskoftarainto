@@ -1,19 +1,21 @@
 extends Node
-class_name ChainModifier
+class_name HomingFromTargetModifier
 
 @export var projectile_scene: PackedScene
 @export var target_selector: TargetSelector
-@export var max_bounces: int = 3
-@export var bounce_range: float = 1000
-@export var projectile_speed: float = 2000
+@export var homing_strength: float = 2.0
+@export var homing_range: int = 600
+@export var projectile_speed: int = 250
+@export var life_time: int = 5
 @export var trigger_event: String = "on_hit" #"on_attack", "on_hit", "before_take_damage"
 
-var event_manager: EventManager = null
+
+var modifier_meta = "spawned_by_HomingfromTargetModifier"
+var event_manager: EventManager
 var holder: Node
 var stats: Stats
 var ignore_groups: Array = []
-var modifier_meta = "spawned_by_ChainModifier"
-
+var stacks: Array[bool] = []
 var _current_projectile_speed_multiplier: int = 1
 
 func attachEventManager(em: EventManager):
@@ -24,6 +26,17 @@ func attachEventManager(em: EventManager):
     em.subscribe(trigger_event, Callable(self, "_on_triger"))
     em.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
+func add_stack(active: bool):
+    stacks.append(active)
+
+func remove_stack(index: int):
+    if index >= 0 and index < stacks.size():
+        stacks.remove_at(index)
+
+func set_stack_active(index: int, active: bool):
+    if index >= 0 and index < stacks.size():
+        stacks[index] = active
+
 func _on_triger(event: Dictionary) -> void:
     # Skip if this projectile was already spawned by this modifier
     if event.has("projectile"):
@@ -31,29 +44,28 @@ func _on_triger(event: Dictionary) -> void:
         if projectile.get_meta(modifier_meta, false):
             return
 
+    var target = null
     var damage: int = 0
-    var spawn_position: Vector2
     if event.has("damage_context"):
         var damage_ctx: DamageContext = event["damage_context"]
-        if damage_ctx.target != holder: 
-            spawn_position = damage_ctx.target.global_position
         damage = max(damage_ctx.base_amount, damage_ctx.final_amount)
+        if damage_ctx.target != holder: 
+            target = damage_ctx.target
+        elif damage_ctx.source != holder:
+            target = damage_ctx.source
     elif event.has("weapon"):
         var weapon: BaseWeapon = event["weapon"]
         damage = weapon.base_damage
+
     if damage == 0:
         damage = stats.get_stat("damage")
 
-    if !spawn_position:
-        spawn_position = holder.global_position
+    var active_count = stacks.count(true)
+    if active_count == 0:
+        return
 
-    var ignore_enemy: Node = null
-    if event.has("body"):
-        ignore_enemy = event["body"]
-
-    var next_target = _find_next_target(ignore_enemy)
-    call_deferred("_spawn_chain_projectile", damage, spawn_position, next_target, ignore_enemy)
-
+    var next_target: Node = _find_next_target(target)
+    call_deferred("_spawn_homing_projectile", target, damage, next_target)
 
 func _find_next_target(exclude: Node) -> Node:
     if not target_selector:
@@ -64,39 +76,31 @@ func _find_next_target(exclude: Node) -> Node:
     var sprite_node: Node2D = holder_node.get_node_or_null("Sprite") if holder_node else null
     if not sprite_node:
         sprite_node = holder_node
-    var candidates = target_selector.find_targets(sprite_node, bounce_range, holder_node)
+    var candidates = target_selector.find_targets(sprite_node, 500, holder_node)
     candidates = candidates.filter(func(t): return t != exclude)
     return candidates[0] if candidates.size() > 0 else null
 
-func _spawn_chain_projectile(damage: int, spawn_position: Vector2, next_target: Node2D, ignore_enemy: Node) -> void:
+func _spawn_homing_projectile(source: Node, damage: int, next_target: Node2D) -> void:
     var new_projectile: Projectile = projectile_scene.instantiate()
     new_projectile.damage = damage
     new_projectile.base_speed = projectile_speed * _current_projectile_speed_multiplier
     new_projectile.ignore_groups = ignore_groups
+    new_projectile.life_time = life_time
     new_projectile.attachEventManager(event_manager)
-    new_projectile.global_position = spawn_position
-    
-    var dir: Vector2
-    if next_target:
-        dir = (next_target.global_position - spawn_position).normalized()
-    else:
-        dir = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)).normalized()
-    new_projectile.set_direction(dir)
+    new_projectile.global_position = source.global_position
+
+    var random_dir = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)).normalized()
+    new_projectile.set_direction(random_dir)
     new_projectile.set_target(next_target)
     new_projectile.set_meta(modifier_meta, true)
+    new_projectile.set_meta("ignore_enemy", source)
 
-    var bounce = preload("res://Systems/weapon/projectile_bounce_behavior.gd").new()
-    bounce.holder = holder
-    bounce.max_bounces = max_bounces
-    bounce.bounce_range = bounce_range
-    bounce.target_selector = target_selector
-
-    # ✅ seed history with last two: previous and current
-    if ignore_enemy:
-        bounce.hit_history.append(ignore_enemy)  # the last hit
-    if next_target:
-        bounce.hit_history.append(next_target)   # the current chain target
-    new_projectile.add_child(bounce)
+    # ✅ Add homing behavior
+    var homing = preload("res://Systems/weapon/homing_behavior.gd").new()
+    homing.holder = holder
+    homing.homing_strength = homing_strength
+    homing.homing_range = homing_range
+    new_projectile.add_child(homing)
     get_tree().current_scene.add_child(new_projectile)
 
 func _on_stat_changes(_event) -> void:

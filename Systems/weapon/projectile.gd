@@ -32,7 +32,6 @@ func _ready():
         scale.x = scale.x * stretch # elongate along X axis
         return
 
-
 func _on_timeout():
     queue_free()
 
@@ -64,13 +63,12 @@ func _on_area_entered(body):
     for group in ignore_groups:
         if body.is_in_group(group):
             return
-    var ignore_enemy: Node = null
-    if has_meta("ignore_enemy"):
-        var path: NodePath = get_meta("ignore_enemy")
-        ignore_enemy = get_node_or_null(path)
-    if body == ignore_enemy:
-        print("Projectile ignoring enemy:", body.name)
-        return
+    
+    if has_meta("ignore_enemy") and get_meta("ignore_enemy"):
+        var ignore_enemy: Node = get_meta("ignore_enemy")
+        if body == ignore_enemy:
+            print("Projectile ignoring enemy:", body.name)
+            return
     if body.has_node("Health"):
         do_damage(body)
     else:

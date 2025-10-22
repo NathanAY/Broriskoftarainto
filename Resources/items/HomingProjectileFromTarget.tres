@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://bp8lqhhqhw6cp"]
+
+[ext_resource type="PackedScene" uid="uid://d0enhfct2hog4" path="res://Systems/Items/Modifiers/HomingRocketFromTargetModifier.tscn" id="1_opx2j"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_bahsm"]
+
+[resource]
+script = ExtResource("2_bahsm")
+name = "Homing projectile from target"
+description = "Homing projectile from target"
+modifiers = {}
+effect_scene = Array[PackedScene]([ExtResource("1_opx2j")])
+effect_scene_condition = Array[String]([])
+condition_managers = Array[PackedScene]([])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

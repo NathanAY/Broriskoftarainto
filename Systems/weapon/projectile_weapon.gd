@@ -4,6 +4,8 @@ class_name ProjectileWeapon
 
 @export var projectile_scene: PackedScene
 
+var _current_projectile_speed_multiplier: int = 1
+
 func try_shoot(targets: Array[Node]) -> void:
     SoundManager.play(attack_sound.pick_random(), -10, 0.2)
     shoot_projectile(targets[0])
@@ -13,7 +15,7 @@ func shoot_projectile(target: Node) -> Projectile:
     if not holder or not projectile_scene: return
     
     var p: Projectile = projectile_scene.instantiate()
-    
+        
     # get weapon’s sprite node
     var holder_weapon_holder = holder.get_node("WeaponHolder")
     var sprite_node: Node2D = holder_weapon_holder.weapon_templates.get(self, null)
@@ -31,6 +33,7 @@ func shoot_projectile(target: Node) -> Projectile:
     }
     p.set_properties(projectile_props)
     
+    p.base_speed = p.base_speed * _current_projectile_speed_multiplier
     p.damage = _current_damage
     if p.has_method("set_ignore_groups"):
         var ignoreGroups = holder.get_groups().filter(func(g): return g != "damageable")
@@ -43,3 +46,8 @@ func shoot_projectile(target: Node) -> Projectile:
     holder.get_tree().current_scene.add_child(p)
     event_manager.emit_event("on_attack", [{"projectile": p, "weapon": self}])
     return p
+
+func _on_stat_changes(_event) -> void:
+    super._on_stat_changes(_event)
+    _current_projectile_speed_multiplier = stats.get_stat("projectile_speed_multiplier")
+    

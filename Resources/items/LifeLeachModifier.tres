@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://de6ogvrjir1vd"]
+
+[ext_resource type="PackedScene" uid="uid://bud3pw1awaumf" path="res://Systems/Items/Modifiers/LifeLeachModifier.tscn" id="1_wunj1"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_05jwy"]
+
+[resource]
+script = ExtResource("2_05jwy")
+name = "Heal on event"
+description = "Heal on event"
+modifiers = {}
+effect_scene = Array[PackedScene]([ExtResource("1_wunj1")])
+effect_scene_condition = Array[String]([])
+condition_managers = Array[PackedScene]([])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

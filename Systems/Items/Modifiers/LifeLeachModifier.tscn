@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bud3pw1awaumf"]
+
+[ext_resource type="Script" uid="uid://coetiqpafvu3x" path="res://Systems/Items/Modifiers/life_leach_modifier.gd" id="1_ewj0l"]
+
+[node name="lifeLeach" type="Node"]
+script = ExtResource("1_ewj0l")

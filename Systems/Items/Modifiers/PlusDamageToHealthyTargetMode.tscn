@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bwjrecptr5o61"]
+
+[ext_resource type="Script" uid="uid://cd4v0cfsq2ntj" path="res://Systems/Items/Modifiers/plus_damage_to_healthy_target_mode.gd" id="1_s1aqn"]
+
+[node name="plusDamageToHealthyTargetMode" type="Node"]
+script = ExtResource("1_s1aqn")

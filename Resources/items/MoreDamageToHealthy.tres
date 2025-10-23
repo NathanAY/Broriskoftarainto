@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://b018yu6qubele"]
+
+[ext_resource type="PackedScene" uid="uid://bwjrecptr5o61" path="res://Systems/Items/Modifiers/PlusDamageToHealthyTargetMode.tscn" id="1_1x4ll"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_88hva"]
+
+[resource]
+script = ExtResource("2_88hva")
+name = "More damage to health"
+description = "More damage to health"
+modifiers = {}
+effect_scene = Array[PackedScene]([ExtResource("1_1x4ll")])
+effect_scene_condition = Array[String]([])
+condition_managers = Array[PackedScene]([])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cx4vy6rd3q5ph"]
+
+[ext_resource type="Script" uid="uid://2dxu4hgfdbop" path="res://Systems/Items/Modifiers/emergency_heal_modifier.gd" id="1_vmc45"]
+
+[node name="emergencyHealModifier" type="Node"]
+script = ExtResource("1_vmc45")

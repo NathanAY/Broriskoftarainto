@@ -5,15 +5,22 @@ extends Area2D
 @export var damage: int = 10
 @export var duration: float = 0.15
 var time_passed: float = 0.0
+
 var event_manager: EventManager = null 
+var holder: Node = null
+var stats: Stats = null
 
 func _ready():
-    #radius = $CollisionShape2D.shape.radius
+    if stats:
+        var area_multiplier: float = stats.get_stat("area_size_multiplier")
+        radius *= area_multiplier
     $CollisionShape2D.shape.radius = radius
     connect("body_entered", Callable(self, "_on_body_entered"))
 
 func attachEventManager(em: EventManager):
     event_manager = em
+    holder = em.get_parent()
+    stats = holder.get_node_or_null("Stats")
 
 func _process(delta: float):
     time_passed += delta

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dw4aqf4k6qtdb"]
+
+[ext_resource type="Script" uid="uid://dhs0j8ty0tdxq" path="res://Systems/Items/Modifiers/life_on_kill_modifier.gd" id="1_8g8lo"]
+
+[node name="lifeOnKill" type="Node"]
+script = ExtResource("1_8g8lo")

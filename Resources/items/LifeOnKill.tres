@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://c47d40v3qp6rs"]
+
+[ext_resource type="PackedScene" uid="uid://dw4aqf4k6qtdb" path="res://Systems/Items/Modifiers/LifeOnKillModifier.tscn" id="1_7p2xx"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_t7tpf"]
+
+[resource]
+script = ExtResource("2_t7tpf")
+name = "Life on kill"
+description = "Life on kill"
+modifiers = {}
+effect_scene = Array[PackedScene]([ExtResource("1_7p2xx")])
+effect_scene_condition = Array[String]([])
+condition_managers = Array[PackedScene]([])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

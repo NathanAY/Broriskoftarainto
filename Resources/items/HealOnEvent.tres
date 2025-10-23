@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://d11fah746ohq0"]
+
+[ext_resource type="PackedScene" uid="uid://ckunysabqicus" path="res://Systems/Items/Modifiers/HealOnEventModifier.tscn" id="1_y76dx"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_ixhk8"]
+
+[resource]
+script = ExtResource("2_ixhk8")
+name = "Heal on event"
+description = "Heal on event"
+modifiers = {}
+effect_scene = Array[PackedScene]([ExtResource("1_y76dx")])
+effect_scene_condition = Array[String]([])
+condition_managers = Array[PackedScene]([])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

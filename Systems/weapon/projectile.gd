@@ -3,7 +3,7 @@ class_name Projectile
 
 var pierce_left: int = 0   # how many enemies it can pass through
 var properties := {}       # scalable dictionary for future (bounce, chain, etc.)
-var base_speed = 300
+var base_speed = 700
 var direction = Vector2.ZERO
 var life_time = 3
 @export var damage: float = 0

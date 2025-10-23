@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://k8xmy6nqt0sb"]
+[gd_scene load_steps=4 format=3 uid="uid://k8xmy6nqt0sb"]
 
 [ext_resource type="Script" uid="uid://ws2s341i1lxo" path="res://Scripts/explosion.gd" id="1_mbc3v"]
+[ext_resource type="PackedScene" uid="uid://d0enhfct2hog4" path="res://Systems/Items/Modifiers/HomingRocketFromTargetModifier.tscn" id="2_i4n8h"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mbc3v"]
 
@@ -9,3 +10,5 @@ script = ExtResource("1_mbc3v")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_mbc3v")
+
+[node name="HomingRocketFromTargetModifier" parent="." instance=ExtResource("2_i4n8h")]

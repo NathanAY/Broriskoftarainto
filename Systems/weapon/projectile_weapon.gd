@@ -4,7 +4,7 @@ class_name ProjectileWeapon
 
 @export var projectile_scene: PackedScene
 
-var _current_projectile_speed_multiplier: int = 1
+var _current_projectile_speed_multiplier: float = 1
 
 func try_shoot(targets: Array[Node]) -> void:
     SoundManager.play(attack_sound.pick_random(), -10, 0.2)

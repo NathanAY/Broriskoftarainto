@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://be34rs6hm73sy"]
+
+[ext_resource type="Texture2D" uid="uid://dt8svhy0upyp8" path="res://Assets/dynamite_icon.png" id="1_7dain"]
+
+[node name="Bomb" type="Node2D"]
+z_index = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.38, 0.38)
+texture = ExtResource("1_7dain")

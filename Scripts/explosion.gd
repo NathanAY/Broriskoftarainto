@@ -1,10 +1,11 @@
-# Explosion.gd
 extends Area2D
+class_name Explosion
 
 @export var radius: float = 100.0
 @export var damage: int = 10
 @export var duration: float = 0.15
 var time_passed: float = 0.0
+var damage_tags: Array[String] = []
 
 var event_manager: EventManager = null 
 var holder: Node = null
@@ -37,7 +38,6 @@ func _on_body_entered(body: Node):
         do_damage(body)
     else:
         print("Explosion.gd: Body has no Health node!")
-    
 
 func do_damage(body):
     var ctx = DamageContext.new()
@@ -46,6 +46,7 @@ func do_damage(body):
     ctx.base_amount = damage
     ctx.final_amount = damage
     ctx.tags.append("explosion")
+    ctx.tags.append_array(damage_tags)
     if event_manager: 
         event_manager.emit_event("before_deal_damage", [{"damage_context": ctx}])
     var bodyHealth: Health = body.get_node("Health")

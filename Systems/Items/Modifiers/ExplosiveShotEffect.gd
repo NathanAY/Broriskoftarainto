@@ -31,9 +31,6 @@ func _spawn_explosion(position: Vector2):
 
 func _on_stat_changes(stat_name: String, value: float):
     match stat_name:
-        "area_size":
-            explosion_radius = value
-            print("ExplosiveShotEffect: explosion radius updated ->", value)
         "damage":
             explosion_damage = value
             print("ExplosiveShotEffect: explosion damage updated ->", value)

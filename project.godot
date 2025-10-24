@@ -21,10 +21,6 @@ config/icon="res://icon.svg"
 SoundManager="*res://Scripts/autoload/sound_manager.gd"
 GlobalGameState="*res://Scripts/autoload/global_game_state.gd"
 
-[display]
-
-window/size/initial_position_type=3
-
 [dotnet]
 
 project/assembly_name="Test1"

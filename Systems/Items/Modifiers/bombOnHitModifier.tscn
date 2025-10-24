@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c4efhb8o3qhik"]
+
+[ext_resource type="Script" uid="uid://bw3jkynoga1a1" path="res://Systems/Items/Modifiers/bomb_on_hit_modifier.gd" id="1_aut2y"]
+
+[node name="BombOnHit" type="Node2D"]
+script = ExtResource("1_aut2y")

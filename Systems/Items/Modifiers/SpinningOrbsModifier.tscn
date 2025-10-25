@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://byqp45swd5fmh"]
+
+[ext_resource type="Script" uid="uid://c5aataxui0suq" path="res://Systems/Items/Modifiers/spinning_orbs_modifier.gd" id="1_50fi5"]
+
+[node name="SprinningOrbs" type="Node"]
+script = ExtResource("1_50fi5")

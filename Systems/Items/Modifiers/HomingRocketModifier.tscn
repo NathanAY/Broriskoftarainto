@@ -1,8 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://cqlbwfn1qp6ba"]
+[gd_scene load_steps=5 format=3 uid="uid://cqlbwfn1qp6ba"]
 
 [ext_resource type="Script" uid="uid://bk0skngti1685" path="res://Systems/Items/Modifiers/homing_rocket_modifier.gd" id="1_14ndn"]
-[ext_resource type="PackedScene" uid="uid://dama33idg0ecs" path="res://Systems/weapon/RocketProjectile.tscn" id="2_d3r2p"]
+[ext_resource type="PackedScene" uid="uid://dvphvkk5rwuc2" path="res://Systems/weapon/LightningProjectile.tscn" id="2_nnbg1"]
+[ext_resource type="Script" uid="uid://4jtig3thlogl" path="res://Systems/weapon/target/closest_target_selector.gd" id="3_nnbg1"]
+
+[sub_resource type="Resource" id="Resource_7ery6"]
+script = ExtResource("3_nnbg1")
+metadata/_custom_type_script = "uid://4jtig3thlogl"
 
 [node name="HomingRocketModifier" type="Node"]
 script = ExtResource("1_14ndn")
-projectile_scene = ExtResource("2_d3r2p")
+projectile_scene = ExtResource("2_nnbg1")
+target_selector = SubResource("Resource_7ery6")

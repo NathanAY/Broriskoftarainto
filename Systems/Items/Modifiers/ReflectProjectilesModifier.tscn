@@ -1,0 +1,14 @@
+[gd_scene load_steps=5 format=3 uid="uid://di5ksgmjj6o0w"]
+
+[ext_resource type="Script" uid="uid://c48xu15o7sop1" path="res://Systems/Items/Modifiers/reflect_projectiles_modifier.gd" id="1_gbfjk"]
+[ext_resource type="PackedScene" uid="uid://dvphvkk5rwuc2" path="res://Systems/weapon/LightningProjectile.tscn" id="2_mqhb2"]
+[ext_resource type="Script" uid="uid://4jtig3thlogl" path="res://Systems/weapon/target/closest_target_selector.gd" id="3_xwphw"]
+
+[sub_resource type="Resource" id="Resource_04igt"]
+script = ExtResource("3_xwphw")
+metadata/_custom_type_script = "uid://4jtig3thlogl"
+
+[node name="ReflectProjectiles" type="Node"]
+script = ExtResource("1_gbfjk")
+projectile_scene = ExtResource("2_mqhb2")
+target_selector = SubResource("Resource_04igt")

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Item" load_steps=3 format=3 uid="uid://ylm8bud5g2xo"]
+
+[ext_resource type="PackedScene" uid="uid://byqp45swd5fmh" path="res://Systems/Items/Modifiers/SpinningOrbsModifier.tscn" id="1_lof36"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_xkn81"]
+
+[resource]
+script = ExtResource("2_xkn81")
+name = "Spining orb on kill"
+description = "Spining orb on kill"
+modifiers = {}
+effect_scene = Array[PackedScene]([ExtResource("1_lof36")])
+effect_scene_condition = Array[String]([])
+condition_managers = Array[PackedScene]([])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

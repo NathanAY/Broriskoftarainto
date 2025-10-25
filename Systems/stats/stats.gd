@@ -9,6 +9,7 @@ class_name Stats
     "health": 40.0,
     "energy_shield": 0,
     "damage": 1.0,
+    "base_damage": 5,
     "flat_damage": 0,
     "attack_speed": 1.0,
     "area_radius": 1.0,

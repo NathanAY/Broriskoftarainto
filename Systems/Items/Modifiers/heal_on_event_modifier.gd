@@ -1,14 +1,21 @@
 extends Node
-class_name HealtOnEventModifier
+class_name HealOnEventModifier
 
 var event_manager: EventManager = null
 var holder: Node = null
 var stats: Stats = null
-var on_cooldown: bool = false
-var trigger_event: String = "on_hit" #"on_attack", "on_hit", "after_take_damage", "before_take_damage"
+# Format:
+# { "event_name": { "variable_name": value, ... } }
+var possible_trigger_event := {
+    "on_attack": {"default_heal": 1},
+    "on_hit": {"default_heal": 2},
+    "on_crit": {"default_heal": 8},
+    "after_take_damage": {"default_heal": 5},
+    "before_take_damage": {"default_heal": 3}
+}
+var trigger_event: String = "on_crit"
 var stacks: Array[bool] = []  # each entry = active/inactive
-
-const default_heal := 1     # 25% HP
+var default_heal := 1
 
 func attachEventManager(em: Node):
     event_manager = em

@@ -67,12 +67,12 @@ func _ready():
     $ItemHolder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/BootsOfSpeed.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/HomingShot.tres"))
-    $ItemHolder.add_item(load("res://Resources/items/HealthMeat.tres"))
-    $ItemHolder.add_item(load("res://Resources/items/HealthMeat.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/EnergyShieldBlock.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/CritGlass.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/PlusDamageItem.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
+    $ItemHolder.add_item(load("res://Resources/items/HealthMeat.tres"))
+    $ItemHolder.add_item(load("res://Resources/items/HealthMeat.tres"))
     
     collision_layer = 1
     collision_mask = 0   # doesn't need to collide with anything

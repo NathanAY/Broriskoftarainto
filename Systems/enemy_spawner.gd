@@ -2,7 +2,7 @@ extends Node
 class_name EnemySpawner
 
 @export var character: Character
-@export var spawn_interval = 33 #3 enemies per second if base_target_enemy_count == current number of enemies
+@export var spawn_interval = 3 #3 enemies per second if base_target_enemy_count == current number of enemies
 @export var health_growth_per_loop: float = 20
 @export var damage_growth_per_loop: float = 1
 @export var base_target_enemy_count = 5 # initial target enemies per stage

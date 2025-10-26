@@ -11,7 +11,7 @@ func _show_damage(event: Dictionary) -> void:
     var ctx: DamageContext = event["damage_context"]
     var damage = ctx.final_amount + ctx.energy_shield_absorbed
     var body = ctx.target
-    var dmg_num = damage_number_scene.instantiate()
+    var dmg_num: FloatingNumber = damage_number_scene.instantiate()
     get_tree().current_scene.add_child(dmg_num)  # add to world/layer
     var random_offset = Vector2(
         randf_range(-spawn_offset, spawn_offset),
@@ -22,4 +22,7 @@ func _show_damage(event: Dictionary) -> void:
     if (ctx.tags.has("explosion")):
         dmg_num.color = Color.YELLOW
     dmg_num.global_position = body.global_position + random_offset
-    dmg_num.show_damage(damage)
+    if (ctx.is_crit):
+        dmg_num.show_text("%s!" % [int(damage)])
+    else:
+        dmg_num.show_damage(damage)

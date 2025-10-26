@@ -14,17 +14,14 @@ var buff_scenes: Array[PackedScene] = []
 var debuff_scene: PackedScene = null
 
 func _ready():
-    _load_effect_scenes()
+    _load_scenes_from_dir("res://Systems/Items/Modifiers", effect_scenes)
     buff_scenes.append(load("res://Systems/Items/Buffs/buff.tscn"))
     debuff_scene = load("res://Systems/Items/Buffs/DebuffSource.tscn")
 
 
 # -------------------
 # Scene Loading
-# -------------------
-func _load_effect_scenes():
-    _load_scenes_from_dir("res://Systems/Items/Modifiers", effect_scenes)
-
+# -------------------   
 func _load_scenes_from_dir(path: String, out_array: Array):
     var dir := DirAccess.open(path)
     if not dir:
@@ -80,7 +77,7 @@ func generate_random_item() -> Item:
     var stat_threshold := float(stats_amount) / total
     var effect_threshold := float(stats_amount + effect_amount) / total
 
-    return _generate_debuff_item()#TODO : remove
+    return _generate_effect_item()
     if roll < 0.4:
         return _generate_stat_item()
     elif roll < 0.7:
@@ -89,8 +86,6 @@ func generate_random_item() -> Item:
         return _generate_buff_item()
     elif roll < 1:
         return _generate_debuff_item()    
-
-
 
 func _generate_stat_item() -> Item:
     var stat_names = stats.stats.keys()
@@ -109,21 +104,64 @@ func _generate_stat_item() -> Item:
 
 
 func _generate_effect_item() -> Item:
-    if effect_scenes.is_empty():
-        return null
     var item := Item.new()
     var chosen_scene: PackedScene = effect_scenes.pick_random()
+    #var chosen_scene: PackedScene = effect_scenes.get(7)# 6 = explosive_shot, 7 = HealOnEvent
 
+    # Try to configure dynamic parameters like trigger_event
+    var configured_scene: PackedScene = _configure_dynamic_modifier(chosen_scene)
+    
     item.name = _generate_effect_name(chosen_scene.resource_path)
     item.description = "Grants special effect: %s" % item.name
-    item.effect_scene = [chosen_scene]
+
+    var temp_instance = configured_scene.instantiate()
+    var props := []
+    for p in temp_instance.get_property_list():
+        props.append(p.name)
+    if "trigger_event" in props:
+        var trig = temp_instance.get("trigger_event")
+        if trig != null:
+            item.description += " (Triggers on %s)" % str(trig).replace("_", " ")
+    temp_instance.queue_free()
+    
+    item.effect_scene = [configured_scene]
     return item
 
+func _configure_dynamic_modifier(scene: PackedScene) -> PackedScene:
+    var instance = scene.instantiate()
+    
+    # gather property names safely
+    var props: Array = []
+    for p in instance.get_property_list():
+        props.append(p.name)
+    
+    # Only proceed if possible_trigger_event exists and is a Dictionary
+    if "possible_trigger_event" in props and typeof(instance.get("possible_trigger_event")) == TYPE_DICTIONARY:
+        var possible: Dictionary = instance.get("possible_trigger_event")
+        var event_names: Array = possible.keys()
+        var chosen_event: String = event_names.pick_random()
+        # set trigger_event if that property exists
+        if "trigger_event" in props:
+            instance.set("trigger_event", chosen_event)
+
+        # Apply overrides (only set properties that exist)
+        var overrides: Dictionary = possible[chosen_event]
+        for key in overrides.keys():
+            if key in props:
+                instance.set(key, overrides[key])
+                print("Configured:", scene.resource_path, "->", key, "=", overrides[key], "(for event:", chosen_event, ")")
+            else:
+                print("Skipping override:", key, " — property not found on", scene.resource_path)
+    else:
+        return scene
+    # Future: easily extend this logic to support other dynamic fields
+    # e.g., if instance.has_variable("damage_bonus"), randomize range
+    # Repack it as new scene
+    var packed := PackedScene.new()
+    packed.pack(instance)
+    return packed
 
 func _generate_buff_item() -> Item:
-    if buff_scenes.is_empty():
-        return null
-
     var stat_names = stats.stats.keys()
     if stat_names.is_empty():
         return null

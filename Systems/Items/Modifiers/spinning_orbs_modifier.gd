@@ -39,7 +39,7 @@ func set_stack_active(index: int, active: bool):
         stacks[index] = active
 
 func _on_triger(event: Dictionary):
-    if triger == "oh_hit":
+    if triger == "on_hit":
         var dc: DamageContext = event.get("damage_context")
         if dc.tags.has(modifier_meta):
             return

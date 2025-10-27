@@ -7,7 +7,9 @@ var stats: Stats = null
 var on_cooldown: bool = false
 var stacks: Array[bool] = []  # each entry = active/inactive
 
-const default_life := 1
+var change_stat_name: String = "health"
+
+const default_add_amount := 1
 
 func attachEventManager(em: Node):
     event_manager = em
@@ -32,5 +34,5 @@ func set_stack_active(index: int, active: bool):
 func _on_event(event: Dictionary):
     if not stats:
         return
-    var add_life = default_life * stacks.count(true)
-    stats.set_base_stat("health", stats.stats.get("health") + add_life)
+    var add_amount = default_add_amount * stacks.count(true)
+    stats.set_base_stat(change_stat_name, stats.stats.get(change_stat_name) + add_amount)

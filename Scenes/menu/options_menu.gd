@@ -22,10 +22,10 @@ func _ready():
     sfx_slider.value_changed.connect(_on_sfx_volume_changed)
 
     # set defaults %
-    sound_slider.value = 15
+    sound_slider.value = 5
     music_slider.value = 100
     sfx_slider.value = 100
-    _apply_sound_volume(15)
+    _apply_sound_volume(5)
     _apply_music_volume(100)
     _apply_sfx_volume(100)
 

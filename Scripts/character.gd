@@ -30,11 +30,10 @@ func _ready():
     for item_path in items:
         $ItemHolder.add_item(load(item_path)) 
  
-    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
+    $WeaponHolder.add_weapon(load("res://Resources/weapons/Fist.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Knife.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Thorns.tres"))
-    $WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
-    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
+    #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
 
     #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedOnHitBuff.tres"))
@@ -49,10 +48,10 @@ func _ready():
     #$ItemHolder.add_item(load("res://Resources/items/LifeOnKill.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/MoreDamageToHealthy.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/BombOnHit.tres"))
-    $ItemHolder.add_item(load("res://Resources/items/ReflectProjectile.tres"))
+    #$ItemHolder.add_item(load("res://Resources/items/ReflectProjectile.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/ExplosiveShot.tres"))
-    $ItemHolder.add_item(load("res://Resources/items/SpiningOrb.tres"))
-    $ItemHolder.add_item(load("res://Resources/items/SpiningOrb.tres"))
+    #$ItemHolder.add_item(load("res://Resources/items/SpiningOrb.tres"))
+    #$ItemHolder.add_item(load("res://Resources/items/SpiningOrb.tres"))
     $ItemHolder.add_item(load("res://Resources/items/RegenPassive.tres"))
     $ItemHolder.add_item(load("res://Resources/items/RegenPassive.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/HealOnEvent.tres"))

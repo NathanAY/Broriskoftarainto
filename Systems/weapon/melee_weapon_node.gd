@@ -53,6 +53,9 @@ func attack(dir: Vector2) -> void:
     # ✅ Stretch hitbox proportionally to swing speed
     _adjust_hitbox_stretch(speed)
     
+    # ✅ NEW: detect overlaps immediately on attack start
+    _check_existing_overlaps()
+    
     tween.tween_property(self, "position", origin_pos + direction * weapon_data.range, duration / 3).set_trans(Tween.TRANS_EXPO)
     # Mark forward as false after reaching max
     tween.tween_callback(Callable(self, "_on_forward_finished"))
@@ -68,6 +71,12 @@ func attack(dir: Vector2) -> void:
 
 func _on_forward_finished():
     forward_swing = false
+
+func _check_existing_overlaps() -> void:
+    var overlapping := hitbox.get_overlapping_bodies()
+    for body in overlapping:
+        # same filters as _on_body_entered
+        _on_body_entered(body)
 
 func _on_body_entered(body: Node) -> void:
     if not attacking: return

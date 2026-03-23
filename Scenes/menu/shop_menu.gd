@@ -43,6 +43,7 @@ func load_items(items: Array):
     for item in items:
         _add_item_entry(item)
     _update_money_label()
+    _check_phase_progression()
 
 # ------------------- PHASE 1 (collected pickups) -------------------
 func _add_item_entry(item: Item):

@@ -36,7 +36,9 @@ func _ready():
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://Resources/weapons/Shotgun.tres"))
 
-    #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedOnHitBuff.tres"))
+    $ItemHolder.add_item(load("res://Resources/items/AttackSpeedOnHitBuff.tres"))
+    $ItemHolder.add_item(load("res://Resources/items/AttackSpeedOnHitBuff.tres"))
+    $ItemHolder.add_item(load("res://Resources/items/AttackSpeedOnHitBuff.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/ProjSpeed.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/HomingProjectileOnHit.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/HomingProjectileFromTarget.tres"))
@@ -69,7 +71,11 @@ func _ready():
     #$ItemHolder.add_item(load("res://Resources/items/EnergyShieldBlock.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/CritGlass.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/PlusDamageItem.tres"))
-    #$ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
+    # $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
+    # $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
+    # $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
+    # $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
+    # $ItemHolder.add_item(load("res://Resources/items/AttackSpeedItem.tres"))
     $ItemHolder.add_item(load("res://Resources/items/HealthMeat.tres"))
     $ItemHolder.add_item(load("res://Resources/items/HealthMeat.tres"))
     

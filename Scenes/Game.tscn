@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene format=3 uid="uid://d2n8kw8wey5oa"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://Scripts/MainScene.gd" id="1_x3xnh"]
 [ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://Scripts/stage_manager.gd" id="2_8r6kd"]
@@ -22,107 +22,107 @@
 [ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://Scenes/menu/PauseMenu.tscn" id="18_jn8rg"]
 [ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://Scenes/menu/ShopMenu.tscn" id="18_x3xnh"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=1823240247]
 script = ExtResource("1_x3xnh")
 
-[node name="StageManager" type="Node" parent="." node_paths=PackedStringArray("character")]
+[node name="StageManager" type="Node" parent="." unique_id=1313808278 node_paths=PackedStringArray("character")]
 script = ExtResource("2_8r6kd")
 character = NodePath("../Character")
 
-[node name="EnemySpawner" parent="StageManager" node_paths=PackedStringArray("character") instance=ExtResource("4_tfod6")]
+[node name="EnemySpawner" parent="StageManager" unique_id=357063823 node_paths=PackedStringArray("character") instance=ExtResource("4_tfod6")]
 character = NodePath("../../Character")
 
-[node name="SpawnerModifier" parent="StageManager/EnemySpawner" node_paths=PackedStringArray("itemFactory") instance=ExtResource("3_alh3a")]
+[node name="SpawnerModifier" parent="StageManager/EnemySpawner" unique_id=571715030 node_paths=PackedStringArray("itemFactory") instance=ExtResource("3_alh3a")]
 itemFactory = NodePath("../../../ItemFactory")
 
-[node name="BossSpawner" parent="StageManager" node_paths=PackedStringArray("character") instance=ExtResource("5_rajel")]
+[node name="BossSpawner" parent="StageManager" unique_id=1173319054 node_paths=PackedStringArray("character") instance=ExtResource("5_rajel")]
 character = NodePath("../../Character")
 
-[node name="Character" parent="." instance=ExtResource("9_i0vto")]
+[node name="Character" parent="." unique_id=1846662333 instance=ExtResource("9_i0vto")]
 
-[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=243920994 node_paths=PackedStringArray("target")]
 script = ExtResource("10_3jf1l")
 target = NodePath("../Character")
 
-[node name="ItemFactory" parent="." instance=ExtResource("7_8r6kd")]
+[node name="ItemFactory" parent="." unique_id=690131520 instance=ExtResource("7_8r6kd")]
 
-[node name="Nodes" type="Node" parent="."]
+[node name="Nodes" type="Node" parent="." unique_id=537186329]
 
-[node name="pickups" type="Node" parent="Nodes"]
+[node name="pickups" type="Node" parent="Nodes" unique_id=2142654372]
 
-[node name="ItemPickup" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+[node name="ItemPickup" parent="Nodes/pickups" unique_id=1688751257 instance=ExtResource("11_356ba")]
 position = Vector2(-248, -268)
 item = ExtResource("4_rajel")
 
-[node name="ItemPickup2" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+[node name="ItemPickup2" parent="Nodes/pickups" unique_id=278954582 instance=ExtResource("11_356ba")]
 position = Vector2(-465, -270)
 item = ExtResource("4_rajel")
 
-[node name="ItemPickup3" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+[node name="ItemPickup3" parent="Nodes/pickups" unique_id=1014886835 instance=ExtResource("11_356ba")]
 position = Vector2(-352, -271)
 item = ExtResource("4_rajel")
 
-[node name="ItemPickup4" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+[node name="ItemPickup4" parent="Nodes/pickups" unique_id=1643510961 instance=ExtResource("11_356ba")]
 position = Vector2(-240, -131)
 item = ExtResource("12_i4lct")
 
-[node name="ItemPickup5" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+[node name="ItemPickup5" parent="Nodes/pickups" unique_id=1601955679 instance=ExtResource("11_356ba")]
 position = Vector2(-244, -194)
 item = ExtResource("6_lbihj")
 
-[node name="ItemPickup6" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+[node name="ItemPickup6" parent="Nodes/pickups" unique_id=278090211 instance=ExtResource("11_356ba")]
 position = Vector2(-240, -62)
 item = ExtResource("13_iyesh")
 
-[node name="ItemPickup7" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+[node name="ItemPickup7" parent="Nodes/pickups" unique_id=1727730956 instance=ExtResource("11_356ba")]
 position = Vector2(-240, -8)
 item = ExtResource("8_8e0uq")
 
-[node name="ItemPickup8" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+[node name="ItemPickup8" parent="Nodes/pickups" unique_id=578732858 instance=ExtResource("11_356ba")]
 position = Vector2(-301, -4)
 item = ExtResource("8_8e0uq")
 
-[node name="ItemPickup9" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+[node name="ItemPickup9" parent="Nodes/pickups" unique_id=1169041485 instance=ExtResource("11_356ba")]
 position = Vector2(-240, 46)
 item = ExtResource("14_i1pr2")
 
-[node name="ItemPickup10" parent="Nodes/pickups" instance=ExtResource("11_356ba")]
+[node name="ItemPickup10" parent="Nodes/pickups" unique_id=1093253388 instance=ExtResource("11_356ba")]
 position = Vector2(-299, 46)
 item = ExtResource("14_i1pr2")
 
-[node name="altars" type="Node" parent="Nodes"]
+[node name="altars" type="Node" parent="Nodes" unique_id=177934839]
 
-[node name="ItemSacrificeAltar" parent="Nodes/altars" instance=ExtResource("13_4q8tf")]
+[node name="ItemSacrificeAltar" parent="Nodes/altars" unique_id=1987796064 instance=ExtResource("13_4q8tf")]
 position = Vector2(182, -134)
 altar_item = ExtResource("4_rajel")
 
-[node name="death_marks" type="Node" parent="Nodes"]
+[node name="death_marks" type="Node" parent="Nodes" unique_id=255365751]
 
-[node name="Enemies" type="Node" parent="Nodes"]
+[node name="Enemies" type="Node" parent="Nodes" unique_id=1778048857]
 
-[node name="Enemy" parent="Nodes/Enemies" instance=ExtResource("15_4f4ik")]
+[node name="Enemy" parent="Nodes/Enemies" unique_id=647416259 instance=ExtResource("15_4f4ik")]
 position = Vector2(202, -16)
 
-[node name="Enemy2" parent="Nodes/Enemies" instance=ExtResource("15_4f4ik")]
+[node name="Enemy2" parent="Nodes/Enemies" unique_id=1044101357 instance=ExtResource("15_4f4ik")]
 position = Vector2(409, -11)
 
-[node name="Enemy3" parent="Nodes/Enemies" instance=ExtResource("15_4f4ik")]
+[node name="Enemy3" parent="Nodes/Enemies" unique_id=738365130 instance=ExtResource("15_4f4ik")]
 position = Vector2(-24, -276)
 
-[node name="InteractionManager" type="Node" parent="."]
+[node name="InteractionManager" type="Node" parent="." unique_id=1353302931]
 script = ExtResource("17_0iyqm")
 
-[node name="UI" type="Node" parent="."]
+[node name="UI" type="Node" parent="." unique_id=1966663554]
 
-[node name="CanvasLayer" type="CanvasLayer" parent="UI"]
+[node name="CanvasLayer" type="CanvasLayer" parent="UI" unique_id=599040960]
 
-[node name="CharacterUi" parent="UI/CanvasLayer" node_paths=PackedStringArray("character", "stage_manager") instance=ExtResource("16_khs3t")]
+[node name="CharacterUi" parent="UI/CanvasLayer" unique_id=2052482479 node_paths=PackedStringArray("character", "stage_manager") instance=ExtResource("16_khs3t")]
 character = NodePath("../../../Character")
 stage_manager = NodePath("../../../StageManager")
 
-[node name="ShopMenu" parent="UI" node_paths=PackedStringArray("item_factory") instance=ExtResource("18_x3xnh")]
+[node name="ShopMenu" parent="UI" unique_id=1750656272 node_paths=PackedStringArray("item_factory") instance=ExtResource("18_x3xnh")]
 visible = false
 item_factory = NodePath("../../ItemFactory")
 
-[node name="PauseMenu" parent="UI" instance=ExtResource("18_jn8rg")]
+[node name="PauseMenu" parent="UI" unique_id=738036707 instance=ExtResource("18_jn8rg")]
 visible = false

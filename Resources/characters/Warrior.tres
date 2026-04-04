@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://qfn4wn1sxlgq"]
+
+[ext_resource type="Script" uid="uid://b174fx02jtd8q" path="res://Systems/characters/CharacterData.gd" id="1_p574n"]
+
+[resource]
+script = ExtResource("1_p574n")
+display_name = "Warrior"
+description = "Tough melee starter: more HP, moderate damage."
+base_stats = {
+"health": 80.0,
+"movement_speed": 45.0,
+"damage": 1.0
+}
+modifiers = [{
+"damage": {
+"percent": 0.3
+}
+}]
+metadata/_custom_type_script = "uid://b174fx02jtd8q"

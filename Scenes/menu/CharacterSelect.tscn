@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://cxb41y0j0lnop"]
+
+[ext_resource type="Script" uid="uid://dlwqicklrvrmo" path="res://Scenes/menu/character_select.gd" id="1_cs"]
+
+[node name="CharacterSelect" type="CanvasLayer" unique_id=1186732355]
+process_mode = 3
+script = ExtResource("1_cs")
+
+[node name="Control" type="Control" parent="." unique_id=993315954]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="Control" unique_id=240669488]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.2509804)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=882208976]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Details" type="Label" parent="Control/VBoxContainer" unique_id=2053508792]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+text = "Select a character to see details"
+horizontal_alignment = 1
+
+[node name="CharsList" type="VBoxContainer" parent="Control/VBoxContainer" unique_id=1776945714]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=362694812]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+
+[node name="Confirm" type="Button" parent="Control/VBoxContainer/HBoxContainer" unique_id=57670592]
+layout_mode = 2
+text = "Confirm"
+
+[node name="Cancel" type="Button" parent="Control/VBoxContainer/HBoxContainer" unique_id=1407745697]
+layout_mode = 2
+text = "Cancel"

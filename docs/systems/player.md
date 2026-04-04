@@ -6,6 +6,7 @@ Purpose
 Key scripts / scenes
 - `Scripts/character.gd` (`Character` class)
 - Scenes: `Scenes/Character.tscn` / children: `Stats`, `EventManager`, `WeaponHolder`, `ItemHolder`, `Hitbox`, `AnimationPlayer` (onready nodes referenced in script).
+ - Character selection/data: `Systems/characters/CharacterData.gd`, `Resources/characters/*.tres`, and `Scenes/menu/CharacterSelect.tscn` — the selection UI writes `GlobalGameState.starting_character` and `CharacterInitializer` applies the data to `Stats` on spawn.
 
 Data flow
 - Inputs: player input (not fully shown), starting items/weapons from `GlobalGameState`, events from EventManager.

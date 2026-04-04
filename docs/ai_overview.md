@@ -8,6 +8,8 @@ Short description
 Major systems
 - Event Manager (LocalEventManager)
 - Player / Character (`Scripts/character.gd`)
+ - Player / Character (`Scripts/character.gd`)
+ - Character selection / data (`docs/systems/characters.md`, `Scenes/menu/CharacterSelect.tscn`)
 - Enemies (`Scripts/Enemy.gd`, `Systems/Enemy.tscn`)
 - Stats system (`Systems/stats/stats.gd`)
 - Weapons (`Systems/weapon/*`, WeaponHolder)
@@ -30,13 +32,13 @@ Architecture docs in next file
 - Scene structure, design patterns, script responsibilities docs/architecture.md
 
 Major systems (event manager, player, enemies, stats, weapons, items, itemFactory, modifiers, etc.) docs in folder docs/systems/*
-- docs/systems/enemies.md
-- docs/systems/event_manager.md
-- systems/item_factory.md
-- systems/items.md
-- docs/systems/player.md
-- systems/spawners.md
-- systems/stage_manager.md
-- systems/stats.md
-- docs/systems/ui_shop_portal.md
-- systems/weapons.md
+- enemies.md
+- event_manager.md
+- item_factory.md
+- items.md
+- player.md
+- spawners.md
+- stage_manager.md
+- stats.md
+- ui_shop_portal.md
+- weapons.md

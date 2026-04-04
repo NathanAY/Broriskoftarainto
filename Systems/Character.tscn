@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dp42e2ntmsk1t" path="res://Assets/multitasker_mouth.png" id="4_nxr2n"]
 [ext_resource type="Script" uid="uid://bxqxit15wxm0g" path="res://Systems/movement/button_input_movement.gd" id="5_uis85"]
 [ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://Systems/LocalEventManager.tscn" id="6_d4e0j"]
+[ext_resource type="Script" uid="uid://cmjc3ga2pwjpx" path="res://Systems/characters/CharacterInitializer.gd" id="6_qo35n"]
 [ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/stats/Stats.tscn" id="7_nn15e"]
 [ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://Systems/damage/Health.tscn" id="8_wcxyp"]
 [ext_resource type="PackedScene" uid="uid://bymf3sqpkbdcr" path="res://Systems/Items/ItemHolder.tscn" id="9_wjmpa"]
@@ -46,6 +47,9 @@ shape = SubResource("CircleShape2D_7ibl6")
 
 [node name="Movement" type="Node" parent="." unique_id=1623533462]
 script = ExtResource("5_uis85")
+
+[node name="CharacterInitializer" type="Node" parent="." unique_id=344934495]
+script = ExtResource("6_qo35n")
 
 [node name="EventManager" parent="." unique_id=2098865466 instance=ExtResource("6_d4e0j")]
 

@@ -3,6 +3,7 @@
 Scene structure (main scenes & roles)
 - `Scenes/Game.tscn` — main gameplay scene (entry after starter menu).
 - `Scenes/MainScene` / `Scripts/MainScene.gd` — root helper for scene-level behaviors and UI access.
+ - `Scenes/menu/CharacterSelect.tscn` — character selection UI (data-driven CharacterData resources in `Resources/characters`).
 - `Nodes/Enemies` — runtime container for spawned enemies (used by spawners and StageManager).
 - `Systems/*` — reusable system scenes and scripts (spawners, boss, shop portal, item factory).
 - `UI/*` — in-scene UI (ShopMenu, PauseMenu, Player UI).

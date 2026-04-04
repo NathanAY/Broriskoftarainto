@@ -1,12 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://cnearl6ardcar"]
+[gd_scene format=3 uid="uid://cnearl6ardcar"]
 
 [ext_resource type="Script" uid="uid://de8clrwu2mq0w" path="res://Scenes/menu/starter_menu.gd" id="1_dmgkn"]
 
-[node name="StarterMenu" type="CanvasLayer"]
+[node name="StarterMenu" type="CanvasLayer" unique_id=1837554978]
 process_mode = 3
 script = ExtResource("1_dmgkn")
 
-[node name="Control" type="Control" parent="."]
+[node name="Control" type="Control" parent="." unique_id=622154818]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -14,7 +14,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ColorRect" type="ColorRect" parent="Control"]
+[node name="ColorRect" type="ColorRect" parent="Control" unique_id=403458655]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,7 +23,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 1, 1, 0.25)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=1912362309]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -35,74 +35,74 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="WeaponsLabel" type="Label" parent="Control/VBoxContainer"]
+[node name="WeaponsLabel" type="Label" parent="Control/VBoxContainer" unique_id=1348247599]
 layout_mode = 2
 text = "Choose your starting weapons"
 horizontal_alignment = 1
 
-[node name="Weapons" type="HBoxContainer" parent="Control/VBoxContainer"]
+[node name="Weapons" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=1970394690]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ChooseScroll" type="ScrollContainer" parent="Control/VBoxContainer/Weapons"]
+[node name="ChooseScroll" type="ScrollContainer" parent="Control/VBoxContainer/Weapons" unique_id=1880279963]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="SelectList" type="VBoxContainer" parent="Control/VBoxContainer/Weapons/ChooseScroll"]
+[node name="SelectList" type="VBoxContainer" parent="Control/VBoxContainer/Weapons/ChooseScroll" unique_id=510521557]
 layout_mode = 2
 alignment = 1
 
-[node name="ResultScroll" type="ScrollContainer" parent="Control/VBoxContainer/Weapons"]
+[node name="ResultScroll" type="ScrollContainer" parent="Control/VBoxContainer/Weapons" unique_id=1099294689]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="ResultList" type="ItemList" parent="Control/VBoxContainer/Weapons/ResultScroll"]
+[node name="ResultList" type="ItemList" parent="Control/VBoxContainer/Weapons/ResultScroll" unique_id=893375326]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 auto_width = true
 auto_height = true
 
-[node name="Items" type="HBoxContainer" parent="Control/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="ChooseScroll" type="ScrollContainer" parent="Control/VBoxContainer/Items"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="SelectList" type="VBoxContainer" parent="Control/VBoxContainer/Items/ChooseScroll"]
-layout_mode = 2
-alignment = 1
-
-[node name="ResultScroll" type="ScrollContainer" parent="Control/VBoxContainer/Items"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="ResultList" type="ItemList" parent="Control/VBoxContainer/Items/ResultScroll"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-auto_width = true
-auto_height = true
-
-[node name="ItemsLabel" type="Label" parent="Control/VBoxContainer"]
+[node name="ItemsLabel" type="Label" parent="Control/VBoxContainer" unique_id=283957509]
 layout_mode = 2
 text = "Choose your starting items"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer"]
+[node name="Items" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=296507566]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChooseScroll" type="ScrollContainer" parent="Control/VBoxContainer/Items" unique_id=1290589328]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SelectList" type="VBoxContainer" parent="Control/VBoxContainer/Items/ChooseScroll" unique_id=1823524265]
+layout_mode = 2
+alignment = 1
+
+[node name="ResultScroll" type="ScrollContainer" parent="Control/VBoxContainer/Items" unique_id=895545231]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ResultList" type="ItemList" parent="Control/VBoxContainer/Items/ResultScroll" unique_id=485095017]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+auto_width = true
+auto_height = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=1955187041]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="Clear" type="Button" parent="Control/VBoxContainer/HBoxContainer"]
+[node name="Clear" type="Button" parent="Control/VBoxContainer/HBoxContainer" unique_id=1483075535]
 layout_mode = 2
 text = "Clear all"
 
-[node name="Play" type="Button" parent="Control/VBoxContainer/HBoxContainer"]
+[node name="Play" type="Button" parent="Control/VBoxContainer/HBoxContainer" unique_id=1361683055]
 layout_mode = 2
 text = "Play"

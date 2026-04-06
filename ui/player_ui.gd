@@ -14,9 +14,12 @@ var value_labels: Dictionary = {}  # stat_name -> Label
 var _show_stage_scaleing: bool = false
 
 func _process(delta: float) -> void:
+    if !stage_manager:
+        return
     var current_staget = "Loop " + str(stage_manager.current_loop)
     var stage_time_elapsed = stage_manager.stage_time_elapsed
     var stage_duration = str(int(stage_manager.stage_duration - stage_time_elapsed))
+    
     if _show_stage_scaleing:
         var health_growth_per_stage = " enemy health +" + str(stage_manager.enemy_spawner.health_growth_per_loop * (stage_manager.enemy_spawner.current_loop))
         var damage_growth_per_stage = " damage +" + str(stage_manager.enemy_spawner.damage_growth_per_loop * (stage_manager.enemy_spawner.current_loop))

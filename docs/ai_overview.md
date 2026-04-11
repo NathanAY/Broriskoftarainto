@@ -1,4 +1,4 @@
-# AI Overview
+# Overview
 
 Short description
 - Genre: Top-down arena roguelite (wave-based shooter with boss and shop loops).

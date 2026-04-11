@@ -7,6 +7,8 @@ extends CanvasLayer
 @onready var exit_button: Button = $Control/VBoxContainer/ExitButton
 
 @onready var options_menu: CanvasLayer = $OptionsMenu
+var configure_panel_inst = null
+var configure_menu_scene: PackedScene = null
 
 var window_modes := [
     Vector2i(1280, 720),
@@ -20,6 +22,13 @@ func _ready():
     restart_button.pressed.connect(_on_restart_pressed)
     new_run_button.pressed.connect(_on_new_run_pressed)
     options_button.pressed.connect(_on_options_pressed)
+    # Add Configure button dynamically so the scene file doesn't need editing
+    var cfg_btn = Button.new()
+    cfg_btn.text = "Configure"
+    cfg_btn.pressed.connect(_on_configure_pressed)
+    $Control/VBoxContainer.add_child(cfg_btn)
+    # preload ConfigureMenu scene so it behaves like options_menu
+    configure_menu_scene = load("res://Scenes/menu/ConfigureMenu.tscn")
     exit_button.pressed.connect(_on_exit_pressed)
     options_menu.visible = false
 
@@ -51,6 +60,30 @@ func _on_restart_pressed():
 func _on_options_pressed():
     $Control.visible = false
     options_menu.visible = true
+
+func _on_configure_pressed():
+    # Show configure menu similarly to options_menu
+    if configure_panel_inst and is_instance_valid(configure_panel_inst):
+        configure_panel_inst.visible = true
+        $Control.visible = false
+        return
+    if not configure_menu_scene:
+        push_warning("ConfigureMenu scene not found")
+        return
+    configure_panel_inst = configure_menu_scene.instantiate()
+    # Add as a child of this node so visibility toggling mirrors options_menu usage
+    add_child(configure_panel_inst)
+    $Control.visible = false
+    configure_panel_inst.visible = true
+    if configure_panel_inst.has_signal("closed"):
+        configure_panel_inst.connect("closed", Callable(self, "_on_configure_closed"))
+
+func _on_configure_closed():
+    # When configure panel is closed, show main pause controls again and free panel
+    $Control.visible = true
+    if configure_panel_inst and is_instance_valid(configure_panel_inst):
+        configure_panel_inst.queue_free()
+    configure_panel_inst = null
 
 func _on_new_run_pressed():
     toggle_pause()

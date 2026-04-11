@@ -1,0 +1,213 @@
+[gd_scene format=3 uid="uid://configuremenu"]
+
+[ext_resource type="Script" uid="uid://bobl5esp431pf" path="res://Scenes/menu/configure_panel.gd" id="1_cfg"]
+
+[node name="ConfigureMenu" type="CanvasLayer" unique_id=100000]
+script = ExtResource("1_cfg")
+
+[node name="Control" type="Control" parent="." unique_id=100001]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="Control" unique_id=100002]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=100003]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="Control/VBoxContainer" unique_id=100004]
+layout_mode = 2
+text = "Configure — Weapons & Items (Debug)"
+horizontal_alignment = 1
+
+[node name="WeaponsAndItemsContainer" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=100005]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="WeaponsContainer" type="VBoxContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer" unique_id=100006]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.7
+
+[node name="WeaponsLabel" type="Label" parent="Control/VBoxContainer/WeaponsAndItemsContainer/WeaponsContainer" unique_id=100007]
+layout_mode = 2
+text = "Available Weapons"
+horizontal_alignment = 1
+
+[node name="WeaponsHBox" type="VBoxContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/WeaponsContainer" unique_id=1986841210]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AvailableWeaponsScroll" type="ScrollContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/WeaponsContainer/WeaponsHBox" unique_id=100009]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="AvailableWeaponsList" type="VBoxContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/WeaponsContainer/WeaponsHBox/AvailableWeaponsScroll" unique_id=100010]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="EquippedWeaponsLabel" type="Label" parent="Control/VBoxContainer/WeaponsAndItemsContainer/WeaponsContainer/WeaponsHBox" unique_id=100011]
+layout_mode = 2
+text = "Equipped Weapons"
+horizontal_alignment = 1
+
+[node name="EquippedWeaponsScroll" type="ScrollContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/WeaponsContainer/WeaponsHBox" unique_id=2106747679]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="EquippedWeaponsList" type="VBoxContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/WeaponsContainer/WeaponsHBox/EquippedWeaponsScroll" unique_id=100012]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ItemsContainer" type="VBoxContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer" unique_id=100013]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ItemsLabel" type="Label" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer" unique_id=100014]
+layout_mode = 2
+text = "Available Items"
+horizontal_alignment = 1
+
+[node name="ItemsHBox" type="VBoxContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer" unique_id=1180204719]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AvailableItemsScroll" type="ScrollContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox" unique_id=100016]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="AvailableItemsList" type="VBoxContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll" unique_id=100017]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatSeparator" type="HSeparator" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList" unique_id=100025]
+layout_mode = 2
+
+[node name="StatCreatorLabel" type="Label" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList" unique_id=100026]
+layout_mode = 2
+text = "Create Stat Item"
+
+[node name="StatCreatorBox" type="HBoxContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList" unique_id=100027]
+layout_mode = 2
+
+[node name="StatSelect" type="OptionButton" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList/StatCreatorBox" unique_id=100028]
+layout_mode = 2
+
+[node name="StatValue" type="SpinBox" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList/StatCreatorBox" unique_id=100029]
+layout_mode = 2
+min_value = -1000.0
+max_value = 1000.0
+value = 1.0
+
+[node name="StatAddButton" type="Button" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList/StatCreatorBox" unique_id=100030]
+layout_mode = 2
+text = "Add Stat Item"
+
+[node name="BuffSeparator" type="HSeparator" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList" unique_id=100031]
+layout_mode = 2
+
+[node name="BuffCreatorLabel" type="Label" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList" unique_id=100032]
+layout_mode = 2
+text = "Create Buff Item"
+
+[node name="BuffCreatorBox" type="HBoxContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList" unique_id=100033]
+layout_mode = 2
+
+[node name="BuffSelect" type="OptionButton" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList/BuffCreatorBox" unique_id=100034]
+layout_mode = 2
+
+[node name="BuffValue" type="SpinBox" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList/BuffCreatorBox" unique_id=100035]
+layout_mode = 2
+min_value = -1000.0
+max_value = 1000.0
+value = 1.0
+
+[node name="BuffAddButton" type="Button" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList/BuffCreatorBox" unique_id=100036]
+layout_mode = 2
+text = "Add Buff Item"
+
+[node name="DebuffSeparator" type="HSeparator" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList" unique_id=100037]
+layout_mode = 2
+
+[node name="DebuffCreatorLabel" type="Label" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList" unique_id=100038]
+layout_mode = 2
+text = "Create Debuff Item"
+
+[node name="DebuffCreatorBox" type="HBoxContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList" unique_id=100039]
+layout_mode = 2
+
+[node name="DebuffSelect" type="OptionButton" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList/DebuffCreatorBox" unique_id=100040]
+layout_mode = 2
+
+[node name="DebuffValue" type="SpinBox" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList/DebuffCreatorBox" unique_id=100041]
+layout_mode = 2
+min_value = -1000.0
+max_value = 1000.0
+value = 1.0
+
+[node name="DebuffAddButton" type="Button" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList/DebuffCreatorBox" unique_id=100042]
+layout_mode = 2
+text = "Add Debuff Item"
+
+[node name="EffectSeparator" type="HSeparator" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList" unique_id=100043]
+layout_mode = 2
+
+[node name="EffectLabel" type="Label" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList" unique_id=100044]
+layout_mode = 2
+text = "Effect Modifiers"
+
+[node name="EffectList" type="VBoxContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList" unique_id=100045]
+layout_mode = 2
+
+[node name="EquippedItemsLabel" type="Label" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox" unique_id=100018]
+layout_mode = 2
+text = "Equipped Items"
+horizontal_alignment = 1
+
+[node name="EquippedItemsScroll" type="ScrollContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox" unique_id=100019]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.6
+
+[node name="EquippedItemsList" type="VBoxContainer" parent="Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/EquippedItemsScroll" unique_id=100020]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Footer" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=100021]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Close" type="Button" parent="Control/VBoxContainer/Footer" unique_id=100022]
+layout_mode = 2
+text = "Close"
+
+[node name="CreateSimpleItem" type="Button" parent="Control/VBoxContainer/Footer" unique_id=100023]
+layout_mode = 2
+text = "Create Simple Item"
+
+[node name="ClearAll" type="Button" parent="Control/VBoxContainer/Footer" unique_id=100024]
+layout_mode = 2
+text = "Clear all"

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="MeleeWeapon" load_steps=9 format=3 uid="uid://dj8an5x7vxx4e"]
+[gd_resource type="Resource" script_class="MeleeWeapon" format=3 uid="uid://dj8an5x7vxx4e"]
 
 [ext_resource type="PackedScene" uid="uid://vipiolfmurkt" path="res://Systems/weapon/MeleeWeaponNode.tscn" id="1_gd444"]
 [ext_resource type="AudioStream" uid="uid://by5d7u7fkkp2d" path="res://Assets/sounds/fist/whoosh_swish_high_fast_01.wav" id="1_sjfbb"]
@@ -12,14 +12,11 @@
 [resource]
 script = ExtResource("1_ukhvm")
 melee_scene = ExtResource("1_gd444")
-name = ""
-description = ""
-base_attack_speed = 1.0
+name = "Fist"
+description = "Fist"
 base_damage = 10.0
 range = 300.0
-modifiers = {}
 target_selector = ExtResource("3_wkow1")
 sprite = ExtResource("2_wkow1")
-sprite_offset = Vector2(0, 0)
 attack_sound = Array[Resource]([ExtResource("1_sjfbb"), ExtResource("2_6xf22"), ExtResource("3_su6vs"), ExtResource("4_ki4yr")])
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"

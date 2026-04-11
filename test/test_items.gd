@@ -36,18 +36,18 @@ func test_item_damage_doubler():
     assert_eq(final_damage, 1)
 
     # 2. Add Items
-    await wait_seconds(2)
+    # await wait_seconds(2)
     c_item_holder.add_item(doubler_item)
     final_damage = c_stats.get_stat("damage")
     assert_eq(final_damage, 1)
-    await wait_seconds(2)
+    # await wait_seconds(2)
     
     c_item_holder.add_item(damage_item)
     # 3. Verify Stats
     # Assuming stats.get_stat("damage") reflects applied modifiers
     final_damage = c_stats.get_stat("damage")
     assert_eq(final_damage, 21)
-    await wait_seconds(2)
+    # await wait_seconds(2)
 
 func test_item_health_50_percent_bonus():
     var test_scene = load("res://test/TestScene.tscn").instantiate()
@@ -85,15 +85,15 @@ func test_item_health_50_percent_bonus():
     assert_eq(stat_value, 2040)
 
     # 2. Add Items
-    await wait_seconds(2)
+    # await wait_seconds(2)
     c_item_holder.add_item(doubler_item)
     stat_value = c_stats.get_stat("health")
     assert_eq(stat_value, 2040)
-    await wait_seconds(2)
+    # await wait_seconds(2)
     
     c_item_holder.add_item(stat_item)
     # 3. Verify Stats
     # Assuming stats.get_stat("damage") reflects applied modifiers
     stat_value = c_stats.get_stat("health")
     assert_eq(stat_value, 2190)
-    await wait_seconds(2)
+    # await wait_seconds(2)

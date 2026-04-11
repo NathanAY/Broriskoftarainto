@@ -14,7 +14,7 @@ base_stats = {
 }
 modifiers = [{
 "attack_speed": {
-"percent": 0.2
+"percent": 0.5
 }
 }]
 metadata/_custom_type_script = "uid://b174fx02jtd8q"

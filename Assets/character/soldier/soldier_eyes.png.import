@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://s7hcv801yxij"
-path="res://.godot/imported/circular_saw.png-951eb3152b11d1c6a1534ca0d5e5fb7c.ctex"
+uid="uid://drs5gp8a0svqg"
+path="res://.godot/imported/soldier_eyes.png-5a2d2f2458040e693836f80f6f8d45ca.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/circular_saw.png"
-dest_files=["res://.godot/imported/circular_saw.png-951eb3152b11d1c6a1534ca0d5e5fb7c.ctex"]
+source_file="res://Assets/character/soldier/soldier_eyes.png"
+dest_files=["res://.godot/imported/soldier_eyes.png-5a2d2f2458040e693836f80f6f8d45ca.ctex"]
 
 [params]
 

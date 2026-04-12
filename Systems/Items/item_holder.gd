@@ -13,6 +13,12 @@ func add_item(item: Item) -> void:
     if item == null:
         return
     items.append(item)
+    if hold_owner == null:
+        hold_owner = get_parent()
+    if stats == null:
+        stats = hold_owner.get_node_or_null("Stats")
+    if event_manager == null:
+        event_manager = hold_owner.get_node_or_null("EventManager")
 
     if item is Item and item.effect_scene:
         var effect_scene = item.effect_scene[0]

@@ -1,19 +1,22 @@
 [gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://qfn4wn1sxlgq"]
 
 [ext_resource type="Script" uid="uid://b174fx02jtd8q" path="res://Systems/characters/CharacterData.gd" id="1_p574n"]
+[ext_resource type="Texture2D" uid="uid://clo6jgloq0p0g" path="res://Assets/character/multitasker/multitasker_icon.png" id="2_8ciq2"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="3_k5k41"]
 
 [resource]
 script = ExtResource("1_p574n")
-display_name = "Warrior"
+display_name = "Multitasker"
 description = "Tough melee starter: more HP, moderate damage."
 base_stats = {
+"damage": 1.0,
 "health": 80.0,
-"movement_speed": 45.0,
-"damage": 1.0
+"movement_speed": 45.0
 }
 modifiers = [{
 "damage": {
 "percent": 0.3
 }
 }]
+small_icon = ExtResource("2_8ciq2")
 metadata/_custom_type_script = "uid://b174fx02jtd8q"

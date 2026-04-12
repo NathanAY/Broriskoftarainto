@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dp42e2ntmsk1t"
-path="res://.godot/imported/multitasker_mouth.png-ad6c78dfcccb7507b7d796f127659dfc.ctex"
+uid="uid://d2tsnu8r6kxlc"
+path="res://.godot/imported/ranger_eyes.png-08cef362aa878e7363bb0a61d33de337.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/multitasker_mouth.png"
-dest_files=["res://.godot/imported/multitasker_mouth.png-ad6c78dfcccb7507b7d796f127659dfc.ctex"]
+source_file="res://Assets/character/ranger/ranger_eyes.png"
+dest_files=["res://.godot/imported/ranger_eyes.png-08cef362aa878e7363bb0a61d33de337.ctex"]
 
 [params]
 

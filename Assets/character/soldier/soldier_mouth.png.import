@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b2lupjjff2cwj"
-path="res://.godot/imported/multitasker_eyes.png-b2aaddacdaf8fdbd9ed2033bf251085b.ctex"
+uid="uid://mbosqo7n71jx"
+path="res://.godot/imported/soldier_mouth.png-ca2cce9771d9fba3e23cc8b983bcd0f8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/multitasker_eyes.png"
-dest_files=["res://.godot/imported/multitasker_eyes.png-b2aaddacdaf8fdbd9ed2033bf251085b.ctex"]
+source_file="res://Assets/character/soldier/soldier_mouth.png"
+dest_files=["res://.godot/imported/soldier_mouth.png-ca2cce9771d9fba3e23cc8b983bcd0f8.ctex"]
 
 [params]
 

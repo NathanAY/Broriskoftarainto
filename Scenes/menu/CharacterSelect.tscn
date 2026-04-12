@@ -32,21 +32,35 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="Details" type="Label" parent="Control/VBoxContainer" unique_id=2053508792]
+[node name="TopScrollContainer" type="ScrollContainer" parent="Control/VBoxContainer" unique_id=1357685]
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 6
-text = "Select a character to see details"
-horizontal_alignment = 1
+size_flags_vertical = 3
+scroll_hint_mode = 1
 
-[node name="CharsList" type="VBoxContainer" parent="Control/VBoxContainer" unique_id=1776945714]
+[node name="Details" type="Label" parent="Control/VBoxContainer/TopScrollContainer" unique_id=2053508792]
 layout_mode = 2
 size_flags_horizontal = 4
+size_flags_vertical = 1
+text = "Select a character to see details"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Control/VBoxContainer" unique_id=1924279257]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+scroll_hint_mode = 1
+
+[node name="CharsList" type="GridContainer" parent="Control/VBoxContainer/ScrollContainer" unique_id=1943008178]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 10
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=362694812]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 6
+size_flags_stretch_ratio = 0.25
 
 [node name="Confirm" type="Button" parent="Control/VBoxContainer/HBoxContainer" unique_id=57670592]
 layout_mode = 2

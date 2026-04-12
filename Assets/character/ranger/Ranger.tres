@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://bsbofljty6lo1"]
+
+[ext_resource type="Script" uid="uid://b174fx02jtd8q" path="res://Systems/characters/CharacterData.gd" id="1_4x4hb"]
+[ext_resource type="Texture2D" uid="uid://ct4wx8tej3qxc" path="res://Assets/character/ranger/ranger_icon.png" id="2_vhioj"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="3_v62tb"]
+
+[resource]
+script = ExtResource("1_4x4hb")
+display_name = "Ranger"
+description = "Fast and glassy: higher attack speed and damage, lower HP."
+base_stats = {
+"attack_speed": 1.25,
+"damage": 0.8,
+"health": 35.0,
+"movement_speed": 70.0
+}
+modifiers = [{
+"attack_speed": {
+"percent": 0.5
+}
+}]
+small_icon = ExtResource("2_vhioj")
+metadata/_custom_type_script = "uid://b174fx02jtd8q"

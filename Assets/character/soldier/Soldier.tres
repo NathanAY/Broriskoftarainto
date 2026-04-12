@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://ccyqacgb0trif"]
+
+[ext_resource type="Script" uid="uid://b174fx02jtd8q" path="res://Systems/characters/CharacterData.gd" id="1_c0k2j"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://Systems/Items/Item.gd" id="2_42oto"]
+[ext_resource type="Texture2D" uid="uid://du0bd5b64uami" path="res://Assets/character/soldier/soldier_icon.png" id="2_yhghj"]
+[ext_resource type="Resource" uid="uid://baxmpuw46mb6o" path="res://Resources/items/RegenPassive.tres" id="3_tsl2f"]
+
+[resource]
+script = ExtResource("1_c0k2j")
+display_name = "Soldier"
+description = "Slow and sturdy: lower attack speed and damage, higher HP."
+base_stats = {
+"armor": 10,
+"damage": 0.9,
+"health": 120.0,
+"movement_speed": 35.0
+}
+modifiers = [{
+"armor": {
+"flat": 2
+}
+}]
+starting_items = Array[ExtResource("2_42oto")]([ExtResource("3_tsl2f")])
+small_icon = ExtResource("2_yhghj")
+metadata/_custom_type_script = "uid://b174fx02jtd8q"

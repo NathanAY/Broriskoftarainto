@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://co8tav7tulvwb"
-path="res://.godot/imported/potato.png-64edac6e1173c57ce4289d7e66c57756.ctex"
+uid="uid://ct4wx8tej3qxc"
+path="res://.godot/imported/ranger_icon.png-2b7428b88e4d7698769daa96e1fc59d5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/potato.png"
-dest_files=["res://.godot/imported/potato.png-64edac6e1173c57ce4289d7e66c57756.ctex"]
+source_file="res://Assets/character/ranger/ranger_icon.png"
+dest_files=["res://.godot/imported/ranger_icon.png-2b7428b88e4d7698769daa96e1fc59d5.ctex"]
 
 [params]
 

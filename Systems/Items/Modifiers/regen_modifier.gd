@@ -27,10 +27,15 @@ func attachEventManager(em: EventManager):
 func _on_item_added(event):
     if event.get("item").resource_path.ends_with("RegenPassive.tres"):
         stacks += 1
+    elif event.get("item").name.contains("RegenModifier"):
+        stacks += 1
 
 func _on_item_removed(event):
     if event.get("item").resource_path.ends_with("RegenPassive.tres"):
         stacks = max(0, stacks - 1)
+    elif event.get("item").name.contains("RegenModifier.tres"):
+        stacks = max(0, stacks - 1)
+        
 
 func _on_regen_tick():
     if stacks <= 0:

@@ -23,3 +23,5 @@ Major systems (event manager, player, enemies, stats, weapons, items, itemFactor
 If you think that some of the doc files outdated or need some changes just suggest to update it.
 
 If you have questions or options for some implementation that ask about it.
+
+Always add types to variable like var nfield: Sprite2D = owner.pr

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cwwo3072oyhsp"
-path="res://.godot/imported/pistol.png-a7b9fa310653678c6c860430b6cf86b5.ctex"
+uid="uid://ba7qf7xi6qke7"
+path="res://.godot/imported/wildling_icon.png-de4de643aa8fd707c1063f3be73f903f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/pistol.png"
-dest_files=["res://.godot/imported/pistol.png-a7b9fa310653678c6c860430b6cf86b5.ctex"]
+source_file="res://Assets/character/wildling/wildling_icon.png"
+dest_files=["res://.godot/imported/wildling_icon.png-de4de643aa8fd707c1063f3be73f903f.ctex"]
 
 [params]
 

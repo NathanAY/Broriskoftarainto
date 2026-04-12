@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://k5orns7p7kfx"
-path="res://.godot/imported/fist_short.png-ad498a23cadccb44c21f6f02fd4161ea.ctex"
+path="res://.godot/imported/fist_short.png-bceaaa25b33daad99922d84a6c03976c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/fist_short.png"
-dest_files=["res://.godot/imported/fist_short.png-ad498a23cadccb44c21f6f02fd4161ea.ctex"]
+source_file="res://Assets/weapons/fist_short.png"
+dest_files=["res://.godot/imported/fist_short.png-bceaaa25b33daad99922d84a6c03976c.ctex"]
 
 [params]
 

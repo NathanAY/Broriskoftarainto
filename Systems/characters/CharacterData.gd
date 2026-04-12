@@ -12,3 +12,9 @@ class_name CharacterData
 # Each entry should be a dictionary matching Stats.add_modifier format,
 # e.g. {"attack_speed": {"percent": 0.2}, "condition": { ... }}
 @export var modifiers: Array = []
+
+# Starting items for the character
+@export var starting_items: Array[Item] = []
+
+@export var small_icon: Texture2D    # assign in .tres
+@export var sprite: Texture2D    # assign in .tres

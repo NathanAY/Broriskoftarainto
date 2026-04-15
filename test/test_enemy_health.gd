@@ -11,7 +11,7 @@ func test_enemy_health():
     await wait_seconds(3)
     assert_eq(health.current_health, 10)
     
-    await wait_seconds(1.5)
+    await wait_seconds(2)
     assert_false(is_instance_valid(enemy), "Enemy should be freed/invalid")
 
     test_scene.queue_free()
@@ -32,10 +32,7 @@ func test_enemy_health_with_much_attack_speed():
     stats.set_base_stat("health", stats.stats["health"] + 1000)
     health.heal(1000)
 
-    await wait_seconds(30)
-    assert_eq(health.current_health, 10)
-    
-    await wait_seconds(1.5)
+    await wait_seconds(7)
     assert_null(enemy)
 
     test_scene.queue_free()

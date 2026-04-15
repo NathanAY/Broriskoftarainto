@@ -48,6 +48,7 @@ func test_item_damage_doubler():
     final_damage = c_stats.get_stat("damage")
     assert_eq(final_damage, 21)
     # await wait_seconds(2)
+    test_scene.queue_free()
 
 func test_item_health_50_percent_bonus():
     var test_scene = load("res://test/TestScene.tscn").instantiate()
@@ -97,3 +98,4 @@ func test_item_health_50_percent_bonus():
     stat_value = c_stats.get_stat("health")
     assert_eq(stat_value, 2190)
     # await wait_seconds(2)
+    test_scene.queue_free()

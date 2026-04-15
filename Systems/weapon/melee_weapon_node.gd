@@ -77,18 +77,18 @@ func attack(dir: Vector2) -> void:
     _check_existing_overlaps()
 
     # Split forward swing into segments and check overlaps after each step
-    var segments: int = 4
+    var segments: int = 6
     var forward_total_time = duration / 3.0
     var seg_time = forward_total_time / segments
     for i in range(segments):
         var t = float(i + 1) / segments
         var target_pos = origin_pos + direction * weapon_data.range * t
-        tween.tween_property(self, "position", target_pos, seg_time).set_trans(Tween.TRANS_EXPO)
+        tween.tween_property(self, "position", target_pos, seg_time).set_trans(Tween.TRANS_LINEAR)
         tween.tween_callback(Callable(self, "_check_existing_overlaps"))
     # Mark forward as finished after the last segment
     tween.tween_callback(Callable(self, "_on_forward_finished"))
     # Backward
-    tween.tween_property(self, "position", origin_pos, duration / 2).set_trans(Tween.TRANS_SINE)
+    tween.tween_property(self, "position", origin_pos, duration / 2).set_trans(Tween.TRANS_LINEAR)
     tween.finished.connect(func():
         attacking = false
         _reset_hitbox_scale()  # Restore hitbox scale

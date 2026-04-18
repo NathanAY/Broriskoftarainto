@@ -3,10 +3,14 @@ extends CanvasLayer
 @onready var resume_button: Button = $Control/VBoxContainer/ResumeButton
 @onready var restart_button: Button = $Control/VBoxContainer/RestartButton
 @onready var new_run_button: Button = $Control/VBoxContainer/NewRunButton
+@onready var character_button: Button = $Control/VBoxContainer/CharacterButton
 @onready var options_button: Button = $Control/VBoxContainer/OptionsButton
 @onready var exit_button: Button = $Control/VBoxContainer/ExitButton
 
 @onready var options_menu: CanvasLayer = $OptionsMenu
+@onready var character_menu: Control = $CharacterUi
+
+
 var configure_panel_inst = null
 var configure_menu_scene: PackedScene = null
 
@@ -21,6 +25,7 @@ func _ready():
     resume_button.pressed.connect(_on_resume_pressed)
     restart_button.pressed.connect(_on_restart_pressed)
     new_run_button.pressed.connect(_on_new_run_pressed)
+    character_button.pressed.connect(_on_character_pressed)
     options_button.pressed.connect(_on_options_pressed)
     # Add Configure button dynamically so the scene file doesn't need editing
     var cfg_btn = Button.new()
@@ -31,6 +36,7 @@ func _ready():
     configure_menu_scene = load("res://Scenes/menu/ConfigureMenu.tscn")
     exit_button.pressed.connect(_on_exit_pressed)
     options_menu.visible = false
+    character_menu.visible = false
 
 func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("ui_cancel"): # Esc by default
@@ -56,6 +62,10 @@ func _on_resume_pressed():
 func _on_restart_pressed():
     get_tree().paused = false
     get_tree().reload_current_scene()
+
+func _on_character_pressed():
+    $Control.visible = false
+    character_menu.visible = true
 
 func _on_options_pressed():
     $Control.visible = false

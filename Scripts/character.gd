@@ -21,7 +21,8 @@ func _ready():
     for c in get_children():
         if c.has_method("attachEventManager"):
             c.attachEventManager(event_manager)
-
+    
+    GlobalGameState.current_character = self
     var weapons = GlobalGameState.starting_weapons
     for weapon_path in weapons:
         $WeaponHolder.add_weapon(load(weapon_path))

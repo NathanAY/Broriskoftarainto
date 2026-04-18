@@ -2,7 +2,7 @@ extends Node
 class_name WeaponHolder
 
 @onready var hold_owner: Node = get_parent()
-@onready var event_manager: Node = hold_owner.get_node_or_null("EventManager")
+@onready var event_manager: EventManager = hold_owner.get_node_or_null("EventManager")
 @export var weapons: Array[BaseWeapon] = []   # list of Weapon .tres resources (templates)
 # visual placement config
 @export var weapon_orbit_radius: float = 60.0
@@ -34,6 +34,7 @@ func add_weapon(weapon_resource: BaseWeapon) -> void:
     _equip_weapon(weapon_inst)
     if event_manager:
         event_manager.emit_event("on_weapon_added", [hold_owner, weapon_inst])
+        event_manager.emit_event("on_weapon_changes", [{"weapon_inst": weapon_inst}])
 
 func remove_weapon(weapon_inst: BaseWeapon) -> void:
     if not weapon_inst:
@@ -60,6 +61,7 @@ func remove_weapon(weapon_inst: BaseWeapon) -> void:
     _reposition_weapons()
     if event_manager:
         event_manager.emit_event("on_weapon_removed", [hold_owner, weapon_inst])
+        event_manager.emit_event("on_weapon_changes", [hold_owner, weapon_inst])
 
 func _equip_weapon(weapon_inst: BaseWeapon) -> void:
     # Apply modifiers and set holder on the weapon instance (Weapon.apply_to expects holder)

@@ -1,31 +1,17 @@
-# playerUI.gd
+# CharacterUI.gd
 extends Control
 
-@export var character: Character  # assign the character instance in the inspector
-@export var stage_manager: StageManager
+@onready var items_container: VBoxContainer = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/ItemsScroll/ItemsList
+@onready var stats_container: VBoxContainer = $VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsHBox/StatsScroll/StatsList
+@onready var weapons_container: GridContainer = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/WeaponsScroll/WeaponsList
+@onready var back_button: Button = $VBoxContainer/Footer/Close
 
-@onready var stats_container: GridContainer = $PanelContainer/VBoxContainer/GridContainer
-@onready var items_container: VBoxContainer = $PanelContainer/VBoxContainer/Items
-@onready var stageTimer: Label = $StageTimer
-
+var character: Character
 var stats_node: Stats = null
-var item_holder: Node = null
+var item_holder: ItemHolder = null
+var weapon_holder: WeaponHolder = null
 var value_labels: Dictionary = {}  # stat_name -> Label
-var _show_stage_scaleing: bool = false
 
-func _process(delta: float) -> void:
-    if !stage_manager:
-        return
-    var current_staget = "Loop " + str(stage_manager.current_loop)
-    var stage_time_elapsed = stage_manager.stage_time_elapsed
-    var stage_duration = str(int(stage_manager.stage_duration - stage_time_elapsed))
-    
-    if _show_stage_scaleing:
-        var health_growth_per_stage = " enemy health +" + str(stage_manager.enemy_spawner.health_growth_per_loop * (stage_manager.enemy_spawner.current_loop))
-        var damage_growth_per_stage = " damage +" + str(stage_manager.enemy_spawner.damage_growth_per_loop * (stage_manager.enemy_spawner.current_loop))
-        stageTimer.text = current_staget + " Survive " + stage_duration + " scaling " + health_growth_per_stage + damage_growth_per_stage
-    else:
-        stageTimer.text = current_staget + " Survive " + stage_duration
 
 func _ready():
     character = GlobalGameState.current_character
@@ -33,9 +19,11 @@ func _ready():
         push_error("CharacterUI: No character assigned! Set the 'character' export or call set_character(character).")
         return
 
+    back_button.pressed.connect(_on_back_pressed)
     stats_node = character.get_node_or_null("Stats")
     item_holder = character.get_node_or_null("ItemHolder")
-    var em = character.get_node_or_null("EventManager")
+    weapon_holder = character.get_node_or_null("WeaponHolder")
+    var em: EventManager = character.get_node_or_null("EventManager")
 
     # Setup stats UI and listeners
     if stats_node:
@@ -52,6 +40,10 @@ func _ready():
         if em:
             em.subscribe("on_item_added", Callable(self, "_on_item_added"))
             em.subscribe("on_item_removed", Callable(self, "_on_item_removed"))
+    if weapon_holder:
+        _update_weapons()
+        em.subscribe("on_weapon_changes", Callable(self, "_on_weapon_changed"))
+
 
 # --- utilities ---------------------------------------------------------------
 
@@ -99,6 +91,32 @@ func _on_stat_changed(event) -> void:
 func _on_stat_changed_event(event) -> void:
     _on_stat_changed(event)
 
+# --- weapon UI ---------------------------------------------------------------
+
+func _update_weapons() -> void:
+    _clear_container(weapons_container)
+    value_labels.clear()
+    if not weapon_holder:
+        return
+
+    # iterate over base stat keys (Stats.gd stores a `stats` dict)
+    if not weapon_holder.weapons:
+        return
+
+    for weapon in weapon_holder.weapons:
+        var value_label = Label.new()
+        value_label.text = "%s" % [weapon.name]
+        value_label.name = "value_" + str(weapon)
+        weapons_container.add_child(value_label)
+
+        value_labels[weapon] = value_label
+
+# Called when weapons emits its signal (weapon_changed(weapon_name, new_value))
+func _on_weapon_changed(event) -> void:
+    print("Character_ui, _on_weapon_changed", event)
+    _update_weapons()
+
+
 # --- items UI ---------------------------------------------------------------
 
 func _update_items() -> void:
@@ -140,8 +158,6 @@ func _item_display_name(item: Resource) -> String:
         return str(item.resource_name)
     return str(item)
 
-# --- helper to set character at runtime ----------------------------------------
-
-func set_character(t: Node) -> void:
-    character = t
-    _ready()  # re-init (simple approach). If you call this at runtime you may want to disconnect previous connections first.
+func _on_back_pressed():
+    visible = false
+    get_parent().get_node("Control").visible = true

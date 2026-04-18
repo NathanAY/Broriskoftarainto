@@ -1,12 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://6mpb7db144uh"]
+[gd_scene format=3 uid="uid://6mpb7db144uh"]
 
 [ext_resource type="Script" uid="uid://bi0lglln23krd" path="res://Scenes/menu/options_menu.gd" id="1_jrbyj"]
 
-[node name="OptionsMenu" type="CanvasLayer"]
+[node name="OptionsMenu" type="CanvasLayer" unique_id=854644811]
 process_mode = 3
 script = ExtResource("1_jrbyj")
 
-[node name="Control" type="Control" parent="."]
+[node name="Control" type="Control" parent="." unique_id=1354663216]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -14,7 +14,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ColorRect" type="ColorRect" parent="Control"]
+[node name="ColorRect" type="ColorRect" parent="Control" unique_id=186208476]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,7 +23,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 1, 1, 0.247059)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=1923242381]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -38,19 +38,19 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="WindowButton" type="Button" parent="Control/VBoxContainer"]
+[node name="WindowButton" type="Button" parent="Control/VBoxContainer" unique_id=664449591]
 layout_mode = 2
 text = "Window"
 
-[node name="SoundSlider" type="HSlider" parent="Control/VBoxContainer"]
+[node name="SoundSlider" type="HSlider" parent="Control/VBoxContainer" unique_id=1219337990]
 layout_mode = 2
 
-[node name="MusicSlider" type="HSlider" parent="Control/VBoxContainer"]
+[node name="MusicSlider" type="HSlider" parent="Control/VBoxContainer" unique_id=1243731778]
 layout_mode = 2
 
-[node name="SfxSlider" type="HSlider" parent="Control/VBoxContainer"]
+[node name="SfxSlider" type="HSlider" parent="Control/VBoxContainer" unique_id=375940325]
 layout_mode = 2
 
-[node name="BackButton" type="Button" parent="Control/VBoxContainer"]
+[node name="BackButton" type="Button" parent="Control/VBoxContainer" unique_id=82364102]
 layout_mode = 2
 text = "Back"

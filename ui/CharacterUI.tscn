@@ -1,0 +1,123 @@
+[gd_scene format=3 uid="uid://1oycydgaehxf"]
+
+[ext_resource type="Script" uid="uid://b5e0o1bn4r0k8" path="res://ui/character_ui.gd" id="1_8yaid"]
+[ext_resource type="PackedScene" uid="uid://byaxfk2256h15" path="res://ui/BuffUi.tscn" id="2_13l2c"]
+
+[node name="CharacterUi" type="Control" unique_id=227911457]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_8yaid")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=413147549]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7529412)
+
+[node name="BuffUi" parent="." unique_id=781729372 instance=ExtResource("2_13l2c")]
+layout_mode = 1
+anchors_preset = 0
+anchor_left = 0.0
+anchor_right = 0.0
+offset_left = 200.0
+offset_right = 200.0
+grow_horizontal = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=405805458]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="VBoxContainer" unique_id=2055939749]
+layout_mode = 2
+text = "Character Menu"
+horizontal_alignment = 1
+
+[node name="WeaponsAndItemsContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1103208866]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftContainer" type="VBoxContainer" parent="VBoxContainer/WeaponsAndItemsContainer" unique_id=2047185757]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="LeftHBox" type="VBoxContainer" parent="VBoxContainer/WeaponsAndItemsContainer/LeftContainer" unique_id=222413114]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemsLabel" type="Label" parent="VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox" unique_id=1028410410]
+layout_mode = 2
+text = "Items"
+horizontal_alignment = 1
+
+[node name="ItemsScroll" type="ScrollContainer" parent="VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox" unique_id=1391026365]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ItemsList" type="VBoxContainer" parent="VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/ItemsScroll" unique_id=923923406]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="WeaponsLabel" type="Label" parent="VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox" unique_id=558682373]
+layout_mode = 2
+text = "Weapons"
+horizontal_alignment = 1
+
+[node name="WeaponsScroll" type="ScrollContainer" parent="VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox" unique_id=1019204288]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="WeaponsList" type="GridContainer" parent="VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/WeaponsScroll" unique_id=1552394063]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 10
+
+[node name="StatsContainer" type="VBoxContainer" parent="VBoxContainer/WeaponsAndItemsContainer" unique_id=706823881]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ItemsLabel" type="Label" parent="VBoxContainer/WeaponsAndItemsContainer/StatsContainer" unique_id=651598495]
+layout_mode = 2
+text = "Stats"
+horizontal_alignment = 1
+
+[node name="StatsHBox" type="VBoxContainer" parent="VBoxContainer/WeaponsAndItemsContainer/StatsContainer" unique_id=14878825]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="StatsScroll" type="ScrollContainer" parent="VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsHBox" unique_id=369699610]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.6
+
+[node name="StatsList" type="VBoxContainer" parent="VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsHBox/StatsScroll" unique_id=174602794]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Footer" type="HBoxContainer" parent="VBoxContainer" unique_id=1196033052]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Close" type="Button" parent="VBoxContainer/Footer" unique_id=1842159438]
+layout_mode = 2
+text = "Close"

@@ -21,6 +21,7 @@ func emit_event(event_name: String, args: Array = []) -> void:
             l.callv(args)
 
 #on_stat_changes
+#on_weapon_changes
 #on_item_added
 #on_item_removed
 

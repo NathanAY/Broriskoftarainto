@@ -13,6 +13,8 @@ var active_debuffs: Dictionary = {}
 func _ready():
     character = get_parent().character
     if not character:
+        character = GlobalGameState.current_character
+    if not character:
         push_error("BuffUI: No character assigned! Use set_character().")
         return
     

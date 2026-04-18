@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://pv8pdtie8vq5"]
+[gd_scene format=3 uid="uid://pv8pdtie8vq5"]
 
 [ext_resource type="Script" uid="uid://cfoaow3ldbe7n" path="res://ui/player_ui.gd" id="1_fosbm"]
 [ext_resource type="PackedScene" uid="uid://byaxfk2256h15" path="res://ui/BuffUi.tscn" id="2_h3d8y"]
 
-[node name="CharacterUi" type="Control"]
+[node name="CharacterUi" type="Control" unique_id=227911457]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,33 +12,33 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_fosbm")
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=238211153]
 layout_mode = 0
 offset_top = 40.0
 offset_right = 91.0
 offset_bottom = 106.0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=1179908289]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer" unique_id=1029921237]
 layout_mode = 2
 text = "Tower Stats"
 
-[node name="GridContainer" type="GridContainer" parent="PanelContainer/VBoxContainer"]
+[node name="GridContainer" type="GridContainer" parent="PanelContainer/VBoxContainer" unique_id=2101756480]
 layout_mode = 2
 
-[node name="HSeparator" type="HSeparator" parent="PanelContainer/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/VBoxContainer" unique_id=12968074]
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer"]
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer" unique_id=675049397]
 layout_mode = 2
 text = "Items"
 
-[node name="Items" type="VBoxContainer" parent="PanelContainer/VBoxContainer"]
+[node name="Items" type="VBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=1498239123]
 layout_mode = 2
 
-[node name="BuffUi" parent="." instance=ExtResource("2_h3d8y")]
+[node name="BuffUi" parent="." unique_id=781729372 instance=ExtResource("2_h3d8y")]
 layout_mode = 1
 anchors_preset = 0
 anchor_left = 0.0
@@ -47,7 +47,7 @@ offset_left = 200.0
 offset_right = 200.0
 grow_horizontal = 1
 
-[node name="StageTimer" type="Label" parent="."]
+[node name="StageTimer" type="Label" parent="." unique_id=470332621]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5

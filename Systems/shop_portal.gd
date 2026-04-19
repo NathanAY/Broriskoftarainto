@@ -4,7 +4,7 @@ class_name ShopPortal
 @export var label_text: String = "Go to Shop"
 
 func _populate_menu(menu: Control):
-    var label: Label = menu.get_node("Label")
+    var label: Label = menu.get_node("Description/Label")
     label.text = "🛒 %s" % label_text
 
     var go_button: Button = menu.get_node("Button")

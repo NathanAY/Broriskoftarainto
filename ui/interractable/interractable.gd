@@ -30,6 +30,8 @@ func _exit_tree():
         manager.unregister(self)
 
 func show_menu():
+    if interaction_menu.visible:
+        return
     interaction_menu.visible = true
     interaction_menu.global_position = global_position + Vector2(0, -40)
     _populate_menu(interaction_menu)

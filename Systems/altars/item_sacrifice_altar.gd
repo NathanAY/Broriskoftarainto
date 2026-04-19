@@ -10,7 +10,7 @@ func add_item(item: Item):
     _update_menu_text()
 
 func _populate_menu(menu: Control):
-    var label: Label = menu.get_node("Label")
+    var label: Label = menu.get_node("Description/Label")
     label.text = "🪔 Sacrifice Altar\nOffering required: %d item(s)\n\nReward:\n%s\n%s" % [
             sacrifice_cost,
             altar_item.name,

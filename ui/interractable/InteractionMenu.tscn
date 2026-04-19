@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dljplvstuesm1"]
 
-[node name="InteractionMenu" type="Control"]
+[node name="InteractionMenu" type="Control" unique_id=485626872]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -9,26 +9,24 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 
-[node name="Label" type="Label" parent="."]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
-text = "Thats label"
-
-[node name="Button" type="Button" parent="."]
+[node name="Button" type="Button" parent="." unique_id=417684309]
 layout_mode = 0
 offset_top = -66.0
 offset_right = 34.0
 offset_bottom = -35.0
 text = "E"
 
-[node name="Button2" type="Button" parent="."]
+[node name="Button2" type="Button" parent="." unique_id=659866723]
 layout_mode = 0
 offset_top = -31.0
 offset_right = 35.0
 text = "F"
 
-[node name="Buttons" type="VBoxContainer" parent="."]
+[node name="Description" type="VBoxContainer" parent="." unique_id=1711067902]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="Description" unique_id=1258157701]
+layout_mode = 2
+text = "Thats label"

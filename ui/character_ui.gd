@@ -65,15 +65,30 @@ func _update_stats() -> void:
         return
 
     for stat_name in stats_node.stats.keys():
+        var hbox = HBoxContainer.new()
+
+        # Add Icon
+        var icon_texture: Texture2D = Stats.get_stat_icon(stat_name)
+        var icon_rect = TextureRect.new()
+        icon_rect.texture = icon_texture
+        icon_rect.custom_minimum_size = Vector2(24, 24)
+        icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+        icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+        hbox.add_child(icon_rect)
+
+        # Add Value Label
         var value_label = Label.new()
         var name_label = str(stat_name).capitalize()
-        
+
         var val = stats_node.get_stat(stat_name)
         value_label.text = "%s: %.2f" % [name_label, val]
         value_label.name = "value_" + str(stat_name)
-        stats_container.add_child(value_label)
+        hbox.add_child(value_label)
+
+        stats_container.add_child(hbox)
 
         value_labels[stat_name] = value_label
+
 
 # Called when Stats emits its signal (stat_changed(stat_name, new_value))
 func _on_stat_changed(event) -> void:
@@ -81,7 +96,7 @@ func _on_stat_changed(event) -> void:
     var new_value: float = event["final_value"]
     var lbl = value_labels.get(stat_name, null)
     if lbl:
-        lbl.text = "%s: %.2f" % [stat_name, new_value]
+        lbl.text = "%s: %.2f" % [str(stat_name).capitalize(), new_value]
     else:
         # new stat not present in UI — rebuild full list
         _update_stats()

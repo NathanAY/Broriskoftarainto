@@ -134,3 +134,9 @@ func _update_condition_managers() -> void:
     for manager in condition_managers:
         if manager.has_method("update"):
             manager.update(condition_update_interval)
+
+static func get_stat_icon(stat_name: String) -> Texture2D:
+    var path = "res://Assets/stats/%s.png" % stat_name
+    if ResourceLoader.exists(path):
+        return load(path)
+    return load("res://Assets/stats/_default.png")

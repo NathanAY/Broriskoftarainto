@@ -51,7 +51,7 @@ func _ready():
     #$ItemHolder.add_item(load("res://Resources/items/ExplosiveShot.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/SpiningOrb.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/SpiningOrb.tres"))
-    #$ItemHolder.add_item(load("res://Resources/items/RegenPassive.tres"))
+    $ItemHolder.add_item(load("res://Resources/items/RegenPassive.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/RegenPassive.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/HealOnEvent.tres"))
     #$ItemHolder.add_item(load("res://Resources/items/LifeLeachModifier.tres"))

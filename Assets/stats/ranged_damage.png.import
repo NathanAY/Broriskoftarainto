@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dbviainil2yci"
-path="res://.godot/imported/spitter.png-ec214fb2df7af416addf757484aed8ae.ctex"
+uid="uid://b1xm5qibgdkp8"
+path="res://.godot/imported/ranged_damage.png-11a0914f46801e67f6d7a02f50d66cb8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/spitter.png"
-dest_files=["res://.godot/imported/spitter.png-ec214fb2df7af416addf757484aed8ae.ctex"]
+source_file="res://Assets/stats/ranged_damage.png"
+dest_files=["res://.godot/imported/ranged_damage.png-11a0914f46801e67f6d7a02f50d66cb8.ctex"]
 
 [params]
 

@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 @onready var window_button: Button = $Control/VBoxContainer/WindowButton
+@onready var show_stats_button: CheckButton = $Control/VBoxContainer/ShowStats
 @onready var sound_slider: HSlider = $Control/VBoxContainer/SoundSlider
 @onready var music_slider: HSlider = $Control/VBoxContainer/MusicSlider
 @onready var sfx_slider: HSlider = $Control/VBoxContainer/SfxSlider
@@ -15,6 +16,7 @@ var current_index := 0
 
 func _ready():
     window_button.pressed.connect(_on_window_toggle_pressed)
+    show_stats_button.pressed.connect(_apply_show_stats)
     back_button.pressed.connect(_on_back_pressed)
 
     sound_slider.value_changed.connect(_on_sound_volume_changed)
@@ -30,6 +32,7 @@ func _ready():
     _apply_sfx_volume(100)
 
     _apply_window_mode()
+    _apply_show_stats()
 
 func _on_window_toggle_pressed():
     current_index = (current_index + 1) % window_modes.size()
@@ -47,6 +50,11 @@ func _apply_window_mode():
         var new_pos = (screen_size - mode) / 2
         DisplayServer.window_set_position(Vector2i(new_pos.x, new_pos.y))
         window_button.text = str(mode.x) + "x" + str(mode.y)
+
+func _apply_show_stats():
+    self.get_parent().get_parent().get_child(0)
+    var charactUI: Control = self.get_parent().get_parent().get_node("CanvasLayer/CharacterUi/PanelContainer")
+    charactUI.visible = show_stats_button.button_pressed
 
 
 # ------------------ AUDIO ------------------

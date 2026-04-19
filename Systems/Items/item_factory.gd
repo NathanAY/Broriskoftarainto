@@ -76,7 +76,6 @@ func generate_random_item() -> Item:
     var stat_threshold := float(stats_amount) / total
     var effect_threshold := float(stats_amount + effect_amount) / total
 
-    return _generate_debuff_item()
     if roll < 0.4:
         return _generate_stat_item()
     elif roll < 0.7:
@@ -84,7 +83,8 @@ func generate_random_item() -> Item:
     elif roll < 0.85:
         return _generate_buff_item()
     elif roll < 1:
-        return _generate_debuff_item()    
+        return _generate_debuff_item()
+    return _generate_debuff_item()            
 
 func _generate_stat_item() -> Item:
     var stat_names = stats.stats.keys()

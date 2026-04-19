@@ -1,0 +1,91 @@
+[gd_scene format=3 uid="uid://2k8onda6wbvc"]
+
+[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Systems/Character.tscn" id="1_tx3ie"]
+[ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://ui/PlayerUI.tscn" id="3_kv8st"]
+[ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://Scenes/menu/ShopMenu.tscn" id="4_2n8o5"]
+[ext_resource type="PackedScene" uid="uid://co2jv4mljj5j0" path="res://Systems/Items/ItemPickup.tscn" id="5_d8atx"]
+[ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://Scenes/menu/PauseMenu.tscn" id="5_l7prb"]
+[ext_resource type="Resource" uid="uid://s8a01h7xtfvy" path="res://Resources/items/AttackSpeedItem.tres" id="6_0d1d1"]
+[ext_resource type="Resource" uid="uid://ws6ag135x60i" path="res://Resources/items/AttackSpeedOnHitBuff.tres" id="7_b4bu2"]
+[ext_resource type="Resource" uid="uid://mlfohgnnpkph" path="res://Resources/items/ExplosiveShot.tres" id="8_pwvhh"]
+[ext_resource type="Resource" uid="uid://yj870a0q32n1" path="res://Resources/items/CritGlass.tres" id="9_q50fh"]
+[ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://Resources/items/SpreadShot.tres" id="10_4lkj1"]
+[ext_resource type="Resource" uid="uid://d28aq4yyk8v4l" path="res://Resources/items/SpreadShotIfStill.tres" id="11_eo6hi"]
+[ext_resource type="PackedScene" uid="uid://ba47mswx3itwk" path="res://Systems/altars/ItemSacrificeAltar.tscn" id="12_ndyrj"]
+[ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="13_v5woa"]
+[ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://ui/interractable/interaction_manager.gd" id="14_0d1d1"]
+
+[node name="TestScene" type="Node2D" unique_id=34987921]
+
+[node name="Character" parent="." unique_id=502610022 instance=ExtResource("1_tx3ie")]
+position = Vector2(100, 100)
+
+[node name="UI" type="Node" parent="." unique_id=91677476]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="UI" unique_id=1115870019]
+
+[node name="CharacterUi" parent="UI/CanvasLayer" unique_id=1923297542 node_paths=PackedStringArray("character") instance=ExtResource("3_kv8st")]
+character = NodePath("../../../Character")
+
+[node name="ShopMenu" parent="UI" unique_id=784457306 instance=ExtResource("4_2n8o5")]
+visible = false
+
+[node name="PauseMenu" parent="UI" unique_id=1515925164 instance=ExtResource("5_l7prb")]
+visible = false
+
+[node name="Nodes" type="Node" parent="." unique_id=1385444731]
+
+[node name="pickups" type="Node" parent="Nodes" unique_id=829605179]
+
+[node name="ItemPickup" parent="Nodes/pickups" unique_id=890728401 instance=ExtResource("5_d8atx")]
+position = Vector2(-248, -268)
+item = ExtResource("6_0d1d1")
+
+[node name="ItemPickup2" parent="Nodes/pickups" unique_id=305909537 instance=ExtResource("5_d8atx")]
+position = Vector2(-465, -270)
+item = ExtResource("6_0d1d1")
+
+[node name="ItemPickup3" parent="Nodes/pickups" unique_id=770802547 instance=ExtResource("5_d8atx")]
+position = Vector2(-352, -271)
+item = ExtResource("6_0d1d1")
+
+[node name="ItemPickup4" parent="Nodes/pickups" unique_id=114362186 instance=ExtResource("5_d8atx")]
+position = Vector2(-240, -131)
+item = ExtResource("7_b4bu2")
+
+[node name="ItemPickup5" parent="Nodes/pickups" unique_id=2094771815 instance=ExtResource("5_d8atx")]
+position = Vector2(-244, -194)
+item = ExtResource("8_pwvhh")
+
+[node name="ItemPickup6" parent="Nodes/pickups" unique_id=1751852222 instance=ExtResource("5_d8atx")]
+position = Vector2(-240, -62)
+item = ExtResource("9_q50fh")
+
+[node name="ItemPickup7" parent="Nodes/pickups" unique_id=1629846139 instance=ExtResource("5_d8atx")]
+position = Vector2(-240, -8)
+item = ExtResource("10_4lkj1")
+
+[node name="ItemPickup8" parent="Nodes/pickups" unique_id=164082198 instance=ExtResource("5_d8atx")]
+position = Vector2(-301, -4)
+item = ExtResource("10_4lkj1")
+
+[node name="ItemPickup9" parent="Nodes/pickups" unique_id=1724868517 instance=ExtResource("5_d8atx")]
+position = Vector2(-240, 46)
+item = ExtResource("11_eo6hi")
+
+[node name="ItemPickup10" parent="Nodes/pickups" unique_id=1452372159 instance=ExtResource("5_d8atx")]
+position = Vector2(-299, 46)
+item = ExtResource("11_eo6hi")
+
+[node name="altars" type="Node" parent="Nodes" unique_id=1121705523]
+
+[node name="ItemSacrificeAltar" parent="Nodes/altars" unique_id=571604093 instance=ExtResource("12_ndyrj")]
+position = Vector2(182, -134)
+altar_item = ExtResource("6_0d1d1")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=418336662 node_paths=PackedStringArray("target")]
+script = ExtResource("13_v5woa")
+target = NodePath("../Character")
+
+[node name="InteractionManager" type="Node" parent="." unique_id=2017284370]
+script = ExtResource("14_0d1d1")

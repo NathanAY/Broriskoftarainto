@@ -1,7 +1,7 @@
-[gd_scene load_steps=15 format=3 uid="uid://52umdyewf730"]
+[gd_scene format=3 uid="uid://52umdyewf730"]
 
 [ext_resource type="Script" uid="uid://cs2dub84x6wjd" path="res://Scripts/Enemy.gd" id="1_h6yb1"]
-[ext_resource type="Texture2D" uid="uid://bo2xxloh5bi8g" path="res://Assets/diplocaulus.png" id="2_h6yb1"]
+[ext_resource type="Texture2D" uid="uid://bo2xxloh5bi8g" path="res://Assets/enemies/diplocaulus.png" id="2_h6yb1"]
 [ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://Systems/LocalEventManager.tscn" id="3_44j8u"]
 [ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://ui/HealthBar.tscn" id="4_p71a3"]
 [ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://Systems/stats/Stats.tscn" id="5_ule8x"]

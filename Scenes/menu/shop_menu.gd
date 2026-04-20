@@ -1,10 +1,13 @@
 extends CanvasLayer
 class_name ShopMenu
 
-@onready var next_stage_button: Button = $Control/NextStageButton
-@onready var reroll_button: Button = $Control/RerollButton
+@onready var next_stage_button: Button = $Control/BottomContainer/ButtonsContainer/NextStageButton
+@onready var reroll_button: Button = $Control/BottomContainer/ButtonsContainer/RerollButton
 @onready var money_label: Label = $Control/Money
-@onready var items_container: VBoxContainer = $Control/VBoxContainer/ItemsList
+@onready var items_container: VBoxContainer = $Control/ShopArea/ItemsList
+@onready var stats_container: VBoxContainer = $Control/RightSideContainer/StatsPanel/StatsScroll/StatsList
+@onready var collected_items_container: VBoxContainer = $Control/BottomContainer/ItemsContainer/ItemsScroll/List
+@onready var weapons_container: GridContainer = $Control/BottomContainer/WeaponsContainer/WeaponsScroll/List
 
 signal next_stage_pressed
 
@@ -13,6 +16,7 @@ var locked_items: Array = []   # items that persist between shops
 var character: Character = null
 @export var item_factory: ItemFactory = null
 var phase: int = 1  # 1 = collected pickups, 2 = generated shop items
+var value_labels: Dictionary = {}  # stat_name -> Label
 
 func _ready():
     visible = false
@@ -21,11 +25,37 @@ func _ready():
     reroll_button.pressed.connect(_on_reroll_pressed)
 
 func show_menu():
+    character = GlobalGameState.current_character
     get_tree().paused = true
     visible = true
     reroll_button.visible = false
     phase = 1
     _update_money_label()
+    _update_stats() # Update stats when opening the shop
+    _update_character_info() # Update items and weapons
+
+func _update_character_info() -> void:
+    if not character: return
+
+    # Update Items
+    var item_holder = character.get_node_or_null("ItemHolder")
+    if item_holder:
+        for child in collected_items_container.get_children():
+            child.queue_free()
+        for item in item_holder.items:
+            var l = Label.new()
+            l.text = item.name
+            collected_items_container.add_child(l)
+
+    # Update Weapons
+    var weapon_holder = character.get_node_or_null("WeaponHolder")
+    if weapon_holder:
+        for child in weapons_container.get_children():
+            child.queue_free()
+        for weapon in weapon_holder.weapons:
+            var l = Label.new()
+            l.text = weapon.name
+            weapons_container.add_child(l)
 
 func hide_menu():
     get_tree().paused = false
@@ -43,6 +73,7 @@ func load_items(items: Array):
     for item in items:
         _add_item_entry(item)
     _update_money_label()
+    _update_stats() # Update stats when loading items
     _check_phase_progression()
 
 # ------------------- PHASE 1 (collected pickups) -------------------
@@ -57,6 +88,8 @@ func _add_item_entry(item: Item):
         if holder:
             holder.add_item(item)
         hbox.queue_free()
+        _update_stats() # Update stats after taking item
+        _update_character_info()
         _check_phase_progression()
     )
     hbox.add_child(btn_take)
@@ -68,6 +101,7 @@ func _add_item_entry(item: Item):
         character.stats.set_base_stat("money", character.stats.stats.get("money", 0) + 1)
         hbox.queue_free()
         _update_money_label()
+        _update_stats() # Update stats after selling
         _check_phase_progression()
     )
     hbox.add_child(btn_sell)
@@ -100,6 +134,8 @@ func _add_shop_item_entry(item: Item):
             # remove this exact entry from locked list if it was there
             locked_items = locked_items.filter(func(li): return li.id != entry_id)
             _update_money_label()
+            _update_stats() # Update stats after buying
+            _update_character_info()
     )
     hbox.add_child(btn_buy)
 
@@ -133,6 +169,44 @@ func _update_money_label():
         money_label.text = "Money: %d" % money
     else:
         money_label.text = "Money: 0"
+
+# --- stats UI ---------------------------------------------------------------
+
+func _update_stats() -> void:
+    for child in stats_container.get_children():
+        child.queue_free()
+    value_labels.clear()
+
+    if not character or not character.has_node("Stats"):
+        return
+
+    var stats_node: Stats = character.get_node("Stats")
+    if not stats_node.stats:
+        return
+
+    for stat_name in stats_node.stats.keys():
+        var hbox = HBoxContainer.new()
+
+        # Add Icon
+        var icon_texture: Texture2D = Stats.get_stat_icon(stat_name)
+        var icon_rect = TextureRect.new()
+        icon_rect.texture = icon_texture
+        icon_rect.custom_minimum_size = Vector2(24, 24)
+        icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+        icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+        hbox.add_child(icon_rect)
+
+        # Add Value Label
+        var value_label = Label.new()
+        var name_label = str(stat_name).capitalize()
+
+        var val = stats_node.get_stat(stat_name)
+        value_label.text = "%s: %.2f" % [name_label, val]
+        value_label.name = "value_" + str(stat_name)
+        hbox.add_child(value_label)
+
+        stats_container.add_child(hbox)
+        value_labels[stat_name] = value_label
 
 func _check_phase_progression():
     # use active count (exclude queued-for-deletion nodes)
@@ -202,3 +276,4 @@ func _on_reroll_pressed():
 
     _refill_shop_items()
     _update_money_label()
+    _update_stats() # Update stats after reroll

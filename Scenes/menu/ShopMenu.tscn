@@ -1,22 +1,20 @@
-[gd_scene load_steps=2 format=3 uid="uid://d4dr0kikva8xx"]
+[gd_scene format=3 uid="uid://d4dr0kikva8xx"]
 
 [ext_resource type="Script" uid="uid://cagiju3alea6f" path="res://Scenes/menu/shop_menu.gd" id="1_rak5t"]
 
-[node name="ShopMenu" type="CanvasLayer"]
+[node name="ShopMenu" type="CanvasLayer" unique_id=142525685]
 process_mode = 3
 script = ExtResource("1_rak5t")
 
-[node name="Control" type="Control" parent="."]
+[node name="Control" type="Control" parent="." unique_id=596611347]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
 
-[node name="ColorRect" type="ColorRect" parent="Control"]
+[node name="ColorRect" type="ColorRect" parent="Control" unique_id=1165794587]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,64 +23,120 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.29219, 0.29219, 0.29219, 1)
 
-[node name="Money" type="Label" parent="Control"]
-layout_mode = 1
-offset_right = 70.0
-offset_bottom = 22.3333
-text = "Money: "
-
-[node name="Label" type="Label" parent="Control"]
+[node name="ShopTitle" type="Label" parent="Control" unique_id=895268690]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -35.0
+offset_top = 10.0
 offset_right = 35.0
-offset_bottom = 22.3333
+offset_bottom = 33.0
 grow_horizontal = 2
 text = "Shop"
 
-[node name="NextStageButton" type="Button" parent="Control"]
+[node name="Money" type="Label" parent="Control" unique_id=110472333]
 layout_mode = 1
-anchors_preset = 3
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 90.0
+offset_bottom = 43.0
+text = "Money: "
+
+[node name="ShopArea" type="ScrollContainer" parent="Control" unique_id=2079322486]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 60.0
+offset_right = 400.0
+offset_bottom = -150.0
+grow_vertical = 2
+
+[node name="ItemsList" type="VBoxContainer" parent="Control/ShopArea" unique_id=1765517940]
+layout_mode = 2
+
+[node name="RightSideContainer" type="VBoxContainer" parent="Control" unique_id=800000000]
+layout_mode = 1
+anchors_preset = 11
 anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = 60.0
+offset_right = -20.0
+offset_bottom = -70.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="StatsLabel" type="Label" parent="Control/RightSideContainer" unique_id=634139492]
+layout_mode = 2
+text = "Stats"
+horizontal_alignment = 1
+
+[node name="StatsPanel" type="PanelContainer" parent="Control/RightSideContainer" unique_id=67860012]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="StatsScroll" type="ScrollContainer" parent="Control/RightSideContainer/StatsPanel" unique_id=171772239]
+layout_mode = 2
+
+[node name="StatsList" type="VBoxContainer" parent="Control/RightSideContainer/StatsPanel/StatsScroll" unique_id=102135037]
+layout_mode = 2
+
+[node name="BottomContainer" type="HBoxContainer" parent="Control" unique_id=1405625670]
+layout_mode = 1
+anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -70.0
-offset_top = -31.0
-grow_horizontal = 0
-grow_vertical = 0
-text = "Go next"
-
-[node name="RerollButton" type="Button" parent="Control"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -35.0
-offset_top = -31.0
-offset_right = 35.0
+offset_left = 20.0
+offset_top = -140.0
+offset_right = -20.0
+offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
-text = "Reroll"
+theme_override_constants/separation = 20
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -35.0
-offset_top = -15.5
-offset_right = 35.0
-offset_bottom = 15.5
-grow_horizontal = 2
-grow_vertical = 2
+[node name="ItemsContainer" type="VBoxContainer" parent="Control/BottomContainer" unique_id=1040209961]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Control/BottomContainer/ItemsContainer" unique_id=992531300]
+layout_mode = 2
+text = "Collected Items"
+
+[node name="ItemsScroll" type="ScrollContainer" parent="Control/BottomContainer/ItemsContainer" unique_id=747746628]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="List" type="VBoxContainer" parent="Control/BottomContainer/ItemsContainer/ItemsScroll" unique_id=680904173]
+layout_mode = 2
+
+[node name="WeaponsContainer" type="VBoxContainer" parent="Control/BottomContainer" unique_id=1484268485]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Control/BottomContainer/WeaponsContainer" unique_id=1265122485]
+layout_mode = 2
+text = "Weapons"
+
+[node name="WeaponsScroll" type="ScrollContainer" parent="Control/BottomContainer/WeaponsContainer" unique_id=246990342]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="List" type="GridContainer" parent="Control/BottomContainer/WeaponsContainer/WeaponsScroll" unique_id=1529621285]
+layout_mode = 2
+columns = 5
+
+[node name="ButtonsContainer" type="VBoxContainer" parent="Control/BottomContainer" unique_id=169798210]
+layout_mode = 2
 alignment = 1
 
-[node name="ItemsList" type="VBoxContainer" parent="Control/VBoxContainer"]
+[node name="RerollButton" type="Button" parent="Control/BottomContainer/ButtonsContainer" unique_id=505766245]
 layout_mode = 2
+text = "Reroll"
+
+[node name="NextStageButton" type="Button" parent="Control/BottomContainer/ButtonsContainer" unique_id=1332428850]
+layout_mode = 2
+text = "Go next"

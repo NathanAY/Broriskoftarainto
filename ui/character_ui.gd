@@ -110,22 +110,32 @@ func _on_stat_changed_event(event) -> void:
 
 func _update_weapons() -> void:
     _clear_container(weapons_container)
-    value_labels.clear()
-    if not weapon_holder:
-        return
-
-    # iterate over base stat keys (Stats.gd stores a `stats` dict)
-    if not weapon_holder.weapons:
+    if not weapon_holder or not weapon_holder.weapons:
         return
 
     for weapon in weapon_holder.weapons:
-        var value_label = Label.new()
-        value_label.text = "%s" % [weapon.name]
-        value_label.name = "value_" + str(weapon)
-        weapons_container.add_child(value_label)
+        var vbox = VBoxContainer.new()
 
-        value_labels[weapon] = value_label
+        # Add Icon
+        var icon_rect = TextureRect.new()
+        icon_rect.custom_minimum_size = Vector2(48, 48)
+        icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+        icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 
+        if weapon.get("sprite"):
+            icon_rect.texture = weapon.sprite
+        else:
+            icon_rect.texture = load("res://Assets/weapons/_default.png")
+
+        vbox.add_child(icon_rect)
+
+        # Add Name
+        var name_label = Label.new()
+        name_label.text = weapon.name
+        name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        vbox.add_child(name_label)
+
+        weapons_container.add_child(vbox)
 # Called when weapons emits its signal (weapon_changed(weapon_name, new_value))
 func _on_weapon_changed(event) -> void:
     print("Character_ui, _on_weapon_changed", event)

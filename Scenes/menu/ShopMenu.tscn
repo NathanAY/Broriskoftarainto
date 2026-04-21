@@ -23,120 +23,99 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.29219, 0.29219, 0.29219, 1)
 
-[node name="ShopTitle" type="Label" parent="Control" unique_id=895268690]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=503543951]
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -35.0
-offset_top = 10.0
-offset_right = 35.0
-offset_bottom = 33.0
-grow_horizontal = 2
-text = "Shop"
-
-[node name="Money" type="Label" parent="Control" unique_id=110472333]
-layout_mode = 1
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 90.0
-offset_bottom = 43.0
-text = "Money: "
-
-[node name="ShopArea" type="ScrollContainer" parent="Control" unique_id=2079322486]
-layout_mode = 1
-anchors_preset = 9
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = 60.0
-offset_right = 400.0
-offset_bottom = -150.0
-grow_vertical = 2
-
-[node name="ItemsList" type="VBoxContainer" parent="Control/ShopArea" unique_id=1765517940]
-layout_mode = 2
-
-[node name="RightSideContainer" type="VBoxContainer" parent="Control" unique_id=800000000]
-layout_mode = 1
-anchors_preset = 11
-anchor_left = 1.0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -300.0
-offset_top = 60.0
-offset_right = -20.0
-offset_bottom = -70.0
-grow_horizontal = 0
+grow_horizontal = 2
 grow_vertical = 2
 
-[node name="StatsLabel" type="Label" parent="Control/RightSideContainer" unique_id=634139492]
-layout_mode = 2
-text = "Stats"
-horizontal_alignment = 1
-
-[node name="StatsPanel" type="PanelContainer" parent="Control/RightSideContainer" unique_id=67860012]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="StatsScroll" type="ScrollContainer" parent="Control/RightSideContainer/StatsPanel" unique_id=171772239]
-layout_mode = 2
-
-[node name="StatsList" type="VBoxContainer" parent="Control/RightSideContainer/StatsPanel/StatsScroll" unique_id=102135037]
-layout_mode = 2
-
-[node name="BottomContainer" type="HBoxContainer" parent="Control" unique_id=1405625670]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = -140.0
-offset_right = -20.0
-offset_bottom = -20.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_constants/separation = 20
-
-[node name="ItemsContainer" type="VBoxContainer" parent="Control/BottomContainer" unique_id=1040209961]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="Label" type="Label" parent="Control/BottomContainer/ItemsContainer" unique_id=992531300]
-layout_mode = 2
-text = "Collected Items"
-
-[node name="ItemsScroll" type="ScrollContainer" parent="Control/BottomContainer/ItemsContainer" unique_id=747746628]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="List" type="VBoxContainer" parent="Control/BottomContainer/ItemsContainer/ItemsScroll" unique_id=680904173]
-layout_mode = 2
-
-[node name="WeaponsContainer" type="VBoxContainer" parent="Control/BottomContainer" unique_id=1484268485]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="Label" type="Label" parent="Control/BottomContainer/WeaponsContainer" unique_id=1265122485]
-layout_mode = 2
-text = "Weapons"
-
-[node name="WeaponsScroll" type="ScrollContainer" parent="Control/BottomContainer/WeaponsContainer" unique_id=246990342]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="List" type="GridContainer" parent="Control/BottomContainer/WeaponsContainer/WeaponsScroll" unique_id=1529621285]
-layout_mode = 2
-columns = 5
-
-[node name="ButtonsContainer" type="VBoxContainer" parent="Control/BottomContainer" unique_id=169798210]
+[node name="TopHBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=421418436]
 layout_mode = 2
 alignment = 1
 
-[node name="RerollButton" type="Button" parent="Control/BottomContainer/ButtonsContainer" unique_id=505766245]
+[node name="Money" type="Label" parent="Control/VBoxContainer/TopHBoxContainer" unique_id=110472333]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+text = "Money: "
+
+[node name="ShopTitle" type="Label" parent="Control/VBoxContainer/TopHBoxContainer" unique_id=895268690]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 1
+text = "Shop"
+
+[node name="MidContainer" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=607262157]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.88
+
+[node name="ShopArea" type="ScrollContainer" parent="Control/VBoxContainer/MidContainer" unique_id=1856353605]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+
+[node name="ItemsList" type="VBoxContainer" parent="Control/VBoxContainer/MidContainer/ShopArea" unique_id=1365545612]
+layout_mode = 2
+
+[node name="StatsPanel" type="PanelContainer" parent="Control/VBoxContainer/MidContainer" unique_id=67860012]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="StatsScroll" type="ScrollContainer" parent="Control/VBoxContainer/MidContainer/StatsPanel" unique_id=171772239]
+layout_mode = 2
+
+[node name="StatsList" type="VBoxContainer" parent="Control/VBoxContainer/MidContainer/StatsPanel/StatsScroll" unique_id=102135037]
+layout_mode = 2
+
+[node name="BottomContainer" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=1510416218]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="ItemsContainer" type="VBoxContainer" parent="Control/VBoxContainer/BottomContainer" unique_id=127411644]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Control/VBoxContainer/BottomContainer/ItemsContainer" unique_id=1093820072]
+layout_mode = 2
+text = "Collected Items"
+
+[node name="ItemsScroll" type="ScrollContainer" parent="Control/VBoxContainer/BottomContainer/ItemsContainer" unique_id=873394318]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="List" type="VBoxContainer" parent="Control/VBoxContainer/BottomContainer/ItemsContainer/ItemsScroll" unique_id=748696048]
+layout_mode = 2
+
+[node name="WeaponsContainer" type="VBoxContainer" parent="Control/VBoxContainer/BottomContainer" unique_id=2093272286]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="Label" type="Label" parent="Control/VBoxContainer/BottomContainer/WeaponsContainer" unique_id=2052513678]
+layout_mode = 2
+text = "Weapons"
+
+[node name="WeaponsScroll" type="ScrollContainer" parent="Control/VBoxContainer/BottomContainer/WeaponsContainer" unique_id=250162999]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="List" type="GridContainer" parent="Control/VBoxContainer/BottomContainer/WeaponsContainer/WeaponsScroll" unique_id=1691484941]
+layout_mode = 2
+columns = 5
+
+[node name="ButtonsContainer" type="VBoxContainer" parent="Control/VBoxContainer/BottomContainer" unique_id=2083102255]
+layout_mode = 2
+alignment = 1
+
+[node name="RerollButton" type="Button" parent="Control/VBoxContainer/BottomContainer/ButtonsContainer" unique_id=405648332]
 layout_mode = 2
 text = "Reroll"
 
-[node name="NextStageButton" type="Button" parent="Control/BottomContainer/ButtonsContainer" unique_id=1332428850]
+[node name="NextStageButton" type="Button" parent="Control/VBoxContainer/BottomContainer/ButtonsContainer" unique_id=1073517102]
 layout_mode = 2
 text = "Go next"

@@ -89,7 +89,7 @@ size_flags_stretch_ratio = 0.5
 layout_mode = 2
 theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
-columns = 10
+columns = 5
 
 [node name="StatsContainer" type="VBoxContainer" parent="VBoxContainer/WeaponsAndItemsContainer" unique_id=706823881]
 layout_mode = 2

@@ -1,13 +1,13 @@
 extends CanvasLayer
 class_name ShopMenu
 
-@onready var next_stage_button: Button = $Control/BottomContainer/ButtonsContainer/NextStageButton
-@onready var reroll_button: Button = $Control/BottomContainer/ButtonsContainer/RerollButton
-@onready var money_label: Label = $Control/Money
-@onready var items_container: VBoxContainer = $Control/ShopArea/ItemsList
-@onready var stats_container: VBoxContainer = $Control/RightSideContainer/StatsPanel/StatsScroll/StatsList
-@onready var collected_items_container: VBoxContainer = $Control/BottomContainer/ItemsContainer/ItemsScroll/List
-@onready var weapons_container: GridContainer = $Control/BottomContainer/WeaponsContainer/WeaponsScroll/List
+@onready var next_stage_button: Button = $Control/VBoxContainer/BottomContainer/ButtonsContainer/NextStageButton
+@onready var reroll_button: Button = $Control/VBoxContainer/BottomContainer/ButtonsContainer/RerollButton
+@onready var money_label: Label = $Control/VBoxContainer/TopHBoxContainer/Money
+@onready var items_container: VBoxContainer = $Control/VBoxContainer/MidContainer/ShopArea/ItemsList
+@onready var stats_container: VBoxContainer = $Control/VBoxContainer/MidContainer/StatsPanel/StatsScroll/StatsList
+@onready var collected_items_container: VBoxContainer = $Control/VBoxContainer/BottomContainer/ItemsContainer/ItemsScroll/List
+@onready var weapons_container: GridContainer = $Control/VBoxContainer/BottomContainer/WeaponsContainer/WeaponsScroll/List
 
 signal next_stage_pressed
 
@@ -53,9 +53,26 @@ func _update_character_info() -> void:
         for child in weapons_container.get_children():
             child.queue_free()
         for weapon in weapon_holder.weapons:
-            var l = Label.new()
-            l.text = weapon.name
-            weapons_container.add_child(l)
+            var vbox = VBoxContainer.new()
+            # Add Icon
+            var icon_rect = TextureRect.new()
+            icon_rect.custom_minimum_size = Vector2(48, 48)
+            icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+            icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+
+            if weapon.get("sprite"):
+                icon_rect.texture = weapon.sprite
+            else:
+                icon_rect.texture = load("res://Assets/weapons/_default.png")
+            vbox.add_child(icon_rect)
+
+            # Add Name
+            var name_label = Label.new()
+            name_label.text = weapon.name
+            name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+            vbox.add_child(name_label)
+
+            weapons_container.add_child(vbox)
 
 func hide_menu():
     get_tree().paused = false

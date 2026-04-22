@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://boxbhnc0hf4sy"
-path="res://.godot/imported/shuriken.png-3683ffd067da2b40fd37e1d70c66572d.ctex"
+uid="uid://10iy4lvnq3fn"
+path="res://.godot/imported/coil_icon.png-173cb26b3256c3a00d0da7f6e33d1752.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/shuriken.png"
-dest_files=["res://.godot/imported/shuriken.png-3683ffd067da2b40fd37e1d70c66572d.ctex"]
+source_file="res://Assets/modifiers/coil_icon.png"
+dest_files=["res://.godot/imported/coil_icon.png-173cb26b3256c3a00d0da7f6e33d1752.ctex"]
 
 [params]
 

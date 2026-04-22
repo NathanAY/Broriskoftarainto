@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://be34rs6hm73sy"]
+[gd_scene format=3 uid="uid://be34rs6hm73sy"]
 
-[ext_resource type="Texture2D" uid="uid://dt8svhy0upyp8" path="res://Assets/dynamite_icon.png" id="1_7dain"]
+[ext_resource type="Texture2D" uid="uid://dt8svhy0upyp8" path="res://Assets/modifiers/dynamite_icon.png" id="1_7dain"]
 
 [node name="Bomb" type="Node2D"]
 z_index = 1

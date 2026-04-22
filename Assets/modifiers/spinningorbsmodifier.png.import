@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dt8svhy0upyp8"
-path="res://.godot/imported/dynamite_icon.png-c3ffd3f1a92489e5db415d296128a6ad.ctex"
+uid="uid://b73mxssvvec1h"
+path="res://.godot/imported/spinningorbsmodifier.png-cc094d304e19a47ba733b96fc3c6200a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/dynamite_icon.png"
-dest_files=["res://.godot/imported/dynamite_icon.png-c3ffd3f1a92489e5db415d296128a6ad.ctex"]
+source_file="res://Assets/modifiers/spinningorbsmodifier.png"
+dest_files=["res://.godot/imported/spinningorbsmodifier.png-cc094d304e19a47ba733b96fc3c6200a.ctex"]
 
 [params]
 

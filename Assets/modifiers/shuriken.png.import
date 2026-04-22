@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ettx46xalqw0"
-path="res://.godot/imported/glass_cannon_icon.png-55e191a9d3c5ab6b82bd69ca700da5ca.ctex"
+uid="uid://boxbhnc0hf4sy"
+path="res://.godot/imported/shuriken.png-7bfaf9ba04632478a173b7488793d65a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/glass_cannon_icon.png"
-dest_files=["res://.godot/imported/glass_cannon_icon.png-55e191a9d3c5ab6b82bd69ca700da5ca.ctex"]
+source_file="res://Assets/modifiers/shuriken.png"
+dest_files=["res://.godot/imported/shuriken.png-7bfaf9ba04632478a173b7488793d65a.ctex"]
 
 [params]
 

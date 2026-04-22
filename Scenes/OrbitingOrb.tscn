@@ -1,7 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://id6rlins530r"]
+[gd_scene format=3 uid="uid://id6rlins530r"]
 
 [ext_resource type="Script" uid="uid://5sbn8hnn8moa" path="res://Scenes/orbiting_orb.gd" id="1_6gwte"]
-[ext_resource type="Texture2D" uid="uid://boxbhnc0hf4sy" path="res://Assets/shuriken.png" id="2_6gwte"]
+[ext_resource type="Texture2D" uid="uid://boxbhnc0hf4sy" path="res://Assets/modifiers/shuriken.png" id="2_6gwte"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_6gwte"]
 radius = 12.0

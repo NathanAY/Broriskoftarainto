@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://clk31nwv5xqfb"
-path="res://.godot/imported/fairy_icon.png-db28b7e44bd9077aa384c97b543a69a8.ctex"
+uid="uid://gx07s3e704ln"
+path="res://.godot/imported/bombonhitmodifier.png-e67323cd3dfd810d238632d4e0923a3f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/fairy_icon.png"
-dest_files=["res://.godot/imported/fairy_icon.png-db28b7e44bd9077aa384c97b543a69a8.ctex"]
+source_file="res://Assets/modifiers/bombonhitmodifier.png"
+dest_files=["res://.godot/imported/bombonhitmodifier.png-e67323cd3dfd810d238632d4e0923a3f.ctex"]
 
 [params]
 

@@ -13,7 +13,7 @@ var weapon_holder: WeaponHolder = null
 var value_labels: Dictionary = {}  # stat_name -> Label
 
 
-func _ready():
+func _ready() -> void:
     character = GlobalGameState.current_character
     if not character:
         push_error("CharacterUI: No character assigned! Set the 'character' export or call set_character(character).")
@@ -153,9 +153,18 @@ func _update_items() -> void:
         return
 
     for item in item_holder.items:
+        var hbox = HBoxContainer.new()
+
+        # Add Icon
+        var icon_node = ItemIconGenerator.generate_icon(item)
+        hbox.add_child(icon_node)
+
+        # Add Label
         var l = Label.new()
         l.text = _item_display_name(item)
-        items_container.add_child(l)
+        l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+        hbox.add_child(l)
+        items_container.add_child(hbox)
 
 func _on_item_added(event: Dictionary) -> void:
     var entity = event.get("hold_owner")
@@ -163,9 +172,18 @@ func _on_item_added(event: Dictionary) -> void:
     # entity is the owner of the item; only update UI if it's the current character
     if entity != character:
         return
+    var hbox = HBoxContainer.new()
+
+    # Add Icon
+    var icon_node = ItemIconGenerator.generate_icon(item)
+    hbox.add_child(icon_node)
+
     var l = Label.new()
     l.text = _item_display_name(item)
-    items_container.add_child(l)
+    l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    hbox.add_child(l)
+
+    items_container.add_child(hbox)
     #_update_items()
 
 func _on_item_removed(event: Dictionary) -> void:

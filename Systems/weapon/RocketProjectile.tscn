@@ -1,7 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://dama33idg0ecs"]
+[gd_scene format=3 uid="uid://dama33idg0ecs"]
 
 [ext_resource type="Script" uid="uid://c8nf0sbkg5s7c" path="res://Systems/weapon/projectile.gd" id="1_cpi2h"]
-[ext_resource type="Texture2D" uid="uid://dl6q3wjrpo8mp" path="res://Assets/rocket.png" id="2_4veav"]
+[ext_resource type="Texture2D" uid="uid://dl6q3wjrpo8mp" path="res://Assets/modifiers/rocket.png" id="2_4veav"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_y0kec"]
 

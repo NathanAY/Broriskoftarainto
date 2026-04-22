@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://10iy4lvnq3fn"
-path="res://.godot/imported/coil_icon.png-4e2fe71e8d52767711181bc925ceca66.ctex"
+uid="uid://clk31nwv5xqfb"
+path="res://.godot/imported/fairy_icon.png-3c1c61c7867ac199419c032e78dd0843.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/coil_icon.png"
-dest_files=["res://.godot/imported/coil_icon.png-4e2fe71e8d52767711181bc925ceca66.ctex"]
+source_file="res://Assets/modifiers/fairy_icon.png"
+dest_files=["res://.godot/imported/fairy_icon.png-3c1c61c7867ac199419c032e78dd0843.ctex"]
 
 [params]
 

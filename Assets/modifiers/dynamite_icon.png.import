@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6tw7cdhq8xu3"
-path="res://.godot/imported/shuriken_icon.png-fb63210241b1ac85f6f799661a38b4ba.ctex"
+uid="uid://dt8svhy0upyp8"
+path="res://.godot/imported/dynamite_icon.png-f76380d4502b042d17a43a9ee7f12c4f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/shuriken_icon.png"
-dest_files=["res://.godot/imported/shuriken_icon.png-fb63210241b1ac85f6f799661a38b4ba.ctex"]
+source_file="res://Assets/modifiers/dynamite_icon.png"
+dest_files=["res://.godot/imported/dynamite_icon.png-f76380d4502b042d17a43a9ee7f12c4f.ctex"]
 
 [params]
 

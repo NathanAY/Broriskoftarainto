@@ -9,6 +9,14 @@ class_name EnemySpawner
 @export var current_loop: int = 1
 @export var spawn_active: bool = true
 
+# Group spawning parameters
+@export var group_size = 3  # number of enemies to spawn per group
+@export var group_spawn_radius = 120.0  # radius within which group members spawn around center
+@export var group_spawn_interval = 0.15  # delay between spawning enemies within a group
+@export var min_groups_per_spawn = 1  # minimum number of groups to spawn at once
+@export var max_groups_per_spawn = 2  # maximum number of groups to spawn at once (randomized)
+@export var use_group_spawning = true  # toggle between single spawn and group spawn mode
+
 var enemy_scene = preload("res://Systems/Enemy.tscn")
 var enemiesNode: Node = null
 var modifiers: Array = []
@@ -30,16 +38,54 @@ func _ready():
 
 func _on_spawn_timer_timeout():
     if spawn_active:
-        spawn_enemy()
+        if use_group_spawning:
+            spawn_enemy_group()
+        else:
+            spawn_enemy()
         _adjust_spawn_rate()
     else:
         # Stop spawning after stage time
         spawn_timer.stop()
 
+func spawn_enemy_group():
+    if not character:
+        return
+
+    var groups_to_spawn = randi_range(min_groups_per_spawn, max_groups_per_spawn)
+    for i in range(groups_to_spawn):
+        # Choose a center point for this group
+        var character_position: Vector2 = character.global_position
+        var group_center_angle = randf_range(0, TAU)
+        var group_center_radius = 500.0
+        var group_center = character_position + Vector2(cos(group_center_angle), sin(group_center_angle)) * group_center_radius
+
+        # Spawn enemies within the group
+        for j in range(group_size):
+            # Use a timer to stagger spawns within the group
+            var enemy = enemy_scene.instantiate()
+            var angle = randf_range(0, TAU)
+            var radius = randf_range(0, group_spawn_radius)
+            var spawn_position = group_center + Vector2(cos(angle), sin(angle)) * radius
+            enemy.global_position = spawn_position
+
+            # Apply modifiers
+            for mod in modifiers:
+                mod.attach_to_enemy(enemy, character)
+
+            # Apply stage-based scaling
+            _apply_stage_scaling(enemy)
+
+            enemiesNode.add_child(enemy)
+            enemy.set_target_position(character)
+
+            # Stagger spawning within the group
+            if j < group_size - 1:
+                await get_tree().create_timer(group_spawn_interval).timeout
+
 func spawn_enemy():
     if not character:
         return
-    
+
     var enemy = enemy_scene.instantiate()
     var character_position: Vector2 = character.global_position
     var angle = randf_range(0, TAU)
@@ -50,10 +96,10 @@ func spawn_enemy():
     # Apply modifiers
     for mod in modifiers:
         mod.attach_to_enemy(enemy, character)
-    
+
     # Apply stage-based scaling
     _apply_stage_scaling(enemy)
-    
+
     enemiesNode.add_child(enemy)
     enemy.set_target_position(character)
 

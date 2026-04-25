@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://buhw5wlm5ydo2"]
+
+[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Systems/Character.tscn" id="1_sljk1"]
+[ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://ui/PlayerUI.tscn" id="2_wqbla"]
+[ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://Scenes/menu/ShopMenu.tscn" id="3_c83ym"]
+[ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://Scenes/menu/PauseMenu.tscn" id="4_0e1t3"]
+[ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="5_nrdbl"]
+[ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://ui/interractable/interaction_manager.gd" id="6_ox5an"]
+[ext_resource type="PackedScene" uid="uid://bmqxtyoaqbpks" path="res://Systems/Items/ItemFactory.tscn" id="7_r3yi3"]
+[ext_resource type="PackedScene" uid="uid://ygv8thab1ic1" path="res://Systems/ShopPortal.tscn" id="8_wqbla"]
+
+[node name="SceneWithItemFactory" type="Node2D" unique_id=34987921]
+
+[node name="Character" parent="." unique_id=502610022 instance=ExtResource("1_sljk1")]
+position = Vector2(100, 100)
+
+[node name="UI" type="Node" parent="." unique_id=91677476]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="UI" unique_id=1115870019]
+
+[node name="CharacterUi" parent="UI/CanvasLayer" unique_id=1923297542 node_paths=PackedStringArray("character") instance=ExtResource("2_wqbla")]
+character = NodePath("../../../Character")
+
+[node name="ShopMenu" parent="UI" unique_id=784457306 node_paths=PackedStringArray("item_factory") instance=ExtResource("3_c83ym")]
+visible = false
+item_factory = NodePath("../../ItemFactory")
+
+[node name="PauseMenu" parent="UI" unique_id=1515925164 instance=ExtResource("4_0e1t3")]
+visible = false
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=418336662 node_paths=PackedStringArray("target")]
+script = ExtResource("5_nrdbl")
+target = NodePath("../Character")
+
+[node name="InteractionManager" type="Node" parent="." unique_id=2017284370]
+script = ExtResource("6_ox5an")
+
+[node name="ItemFactory" parent="." unique_id=959543981 instance=ExtResource("7_r3yi3")]
+
+[node name="Nodes" type="Node" parent="." unique_id=882484368]
+
+[node name="pickups" type="Node" parent="Nodes" unique_id=1074004141]
+
+[node name="altars" type="Node" parent="Nodes" unique_id=1202145624]
+
+[node name="death_marks" type="Node" parent="Nodes" unique_id=826601551]
+
+[node name="ShopPortal" parent="." unique_id=1064191240 instance=ExtResource("8_wqbla")]
+position = Vector2(241, 154)

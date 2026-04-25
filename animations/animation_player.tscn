@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://cx3p26icyy5wu"]
+[gd_scene format=3 uid="uid://cx3p26icyy5wu"]
 
 [sub_resource type="Animation" id="Animation_6lnvs"]
 length = 0.001
@@ -54,8 +54,6 @@ _data = {
 &"move": SubResource("Animation_sijes")
 }
 
-[node name="AnimationPlayer" type="AnimationPlayer"]
-libraries = {
-&"": SubResource("AnimationLibrary_6lnvs")
-}
-autoplay = "idle"
+[node name="AnimationPlayer" type="AnimationPlayer" unique_id=2107788984]
+libraries/ = SubResource("AnimationLibrary_6lnvs")
+autoplay = &"idle"

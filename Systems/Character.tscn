@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://co8tav7tulvwb" path="res://Assets/character/potato.png" id="2_xxe07"]
 [ext_resource type="Texture2D" uid="uid://b2lupjjff2cwj" path="res://Assets/character/multitasker/multitasker_eyes.png" id="3_kw72g"]
 [ext_resource type="Texture2D" uid="uid://dp42e2ntmsk1t" path="res://Assets/character/multitasker/multitasker_mouth.png" id="4_nxr2n"]
+[ext_resource type="Texture2D" uid="uid://ctnqca4j2iqdr" path="res://Assets/character/legs.png" id="5_rd1uo"]
 [ext_resource type="Script" uid="uid://bxqxit15wxm0g" path="res://Systems/movement/button_input_movement.gd" id="5_uis85"]
 [ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://Systems/LocalEventManager.tscn" id="6_d4e0j"]
 [ext_resource type="Script" uid="uid://cmjc3ga2pwjpx" path="res://Systems/characters/CharacterInitializer.gd" id="6_qo35n"]
@@ -15,7 +16,8 @@
 [ext_resource type="PackedScene" uid="uid://bfv23hn20a0ia" path="res://ui/numberspawn/HealNumberSpawner.tscn" id="12_fdd6p"]
 [ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://ui/HealthBar.tscn" id="13_mogpt"]
 [ext_resource type="PackedScene" uid="uid://jsw2vxmrn6yc" path="res://Scenes/particles/ParticleEffectManager.tscn" id="14_yw36p"]
-[ext_resource type="PackedScene" uid="uid://cx3p26icyy5wu" path="res://animations/animation_player.tscn" id="15_g0or5"]
+[ext_resource type="AnimationLibrary" uid="uid://cv7ddqsudqysx" path="res://animations/player_animations.res" id="17_rd1uo"]
+[ext_resource type="AnimationLibrary" uid="uid://cwclbp73qaped" path="res://animations/enemy_animations.res" id="18_tqakc"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_cw27m"]
 radius = 36.1248
@@ -29,6 +31,7 @@ script = ExtResource("1_cw27m")
 [node name="Node2D" type="Node2D" parent="." unique_id=764863756]
 
 [node name="Sprite2D" type="Sprite2D" parent="Node2D" unique_id=785441059]
+scale = Vector2(1e-05, 1e-05)
 texture = ExtResource("2_xxe07")
 
 [node name="eyes" type="Sprite2D" parent="Node2D/Sprite2D" unique_id=775786480]
@@ -36,6 +39,28 @@ texture = ExtResource("3_kw72g")
 
 [node name="mouth" type="Sprite2D" parent="Node2D/Sprite2D" unique_id=1695011891]
 texture = ExtResource("4_nxr2n")
+
+[node name="Legs" type="Node2D" parent="Node2D" unique_id=1523654154]
+show_behind_parent = true
+
+[node name="LegL" type="Node2D" parent="Node2D/Legs" unique_id=762858811]
+show_behind_parent = true
+position = Vector2(15, 18)
+
+[node name="Sprite" type="Sprite2D" parent="Node2D/Legs/LegL" unique_id=889352971]
+position = Vector2(-34, 7)
+texture = ExtResource("5_rd1uo")
+hframes = 2
+
+[node name="LegR" type="Node2D" parent="Node2D/Legs" unique_id=15983341]
+show_behind_parent = true
+position = Vector2(-16, 18)
+
+[node name="Sprite" type="Sprite2D" parent="Node2D/Legs/LegR" unique_id=1473910934]
+position = Vector2(35, 7)
+texture = ExtResource("5_rd1uo")
+hframes = 2
+frame = 1
 
 [node name="Hitbox" type="Area2D" parent="." unique_id=1713055501]
 
@@ -74,5 +99,8 @@ event_manager = NodePath("../EventManager")
 
 [node name="ParticleEffectManager" parent="." unique_id=311505823 instance=ExtResource("14_yw36p")]
 
-[node name="AnimationPlayer" parent="." unique_id=206052528 instance=ExtResource("15_g0or5")]
-autoplay = &"idle"
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=830458085]
+libraries/ = ExtResource("17_rd1uo")
+libraries/enemy_animations = ExtResource("18_tqakc")
+next/idle = &"idle"
+next/move = &"RESET"

@@ -170,6 +170,10 @@ func _add_shop_item_entry(item: Item):
     )
     hbox.add_child(btn_lock)
 
+    # Icon
+    var icon_node = ItemIconGenerator.generate_icon(item)
+    hbox.add_child(icon_node)
+
     # Label
     var label = Label.new()
     label.text = "%s - %s" % [item.name, item.description]

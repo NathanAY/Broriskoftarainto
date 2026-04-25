@@ -25,6 +25,7 @@ func _physics_process(delta: float) -> void:
             anim_player.play("move")
     else:
         if anim_player.current_animation != "idle":
+            anim_player.play("RESET")
             anim_player.play("idle")
 
 func flip_sprites_h(node: Node, flip: bool) -> void:

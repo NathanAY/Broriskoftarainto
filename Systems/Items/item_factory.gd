@@ -58,6 +58,14 @@ func get_item_from_pool_or_generate() -> Item:
         drop_pool.append(new_item)
         return new_item
 
+func get_item_by_type(type: String, index: int = -1) -> Item:
+    match type:
+        "stat": return _generate_stat_item_insexed(index)
+        "effect": return _generate_effect_item_insexed(index)
+        "buff": return _generate_buff_item_insexed(index)
+        "debuff": return _generate_debuff_item_insexed(index)
+    return null
+
 # -------------------
 # Item Generators
 # -------------------
@@ -137,6 +145,60 @@ func _generate_effect_item() -> Item:
     item.effect_scene = [configured_scene]
     return item
 
+func _generate_stat_item_insexed(index: int = -1) -> Item:
+    var stat_names = stats.stats.keys()
+    var index_to_use = index if index != -1 else rng.randi_range(0, stat_names.size() - 1)
+    var chosen_stat = stat_names[index_to_use]
+    var base_value = stats.stats[chosen_stat]
+    var value = _generate_stat_modifiers(chosen_stat, base_value)
+    
+    var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
+    var negative_base_value = stats.stats[negative_chosen_stat]
+    var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
+    negative_value.set("flat", -negative_value.get("flat"))
+    
+    var item: Item = Item.new()
+    item.name = _generate_item_name(chosen_stat)
+    item.description = "Increases %s for %s\nDecreasese %s for %s" % [chosen_stat, value, negative_chosen_stat, negative_value]
+    item.modifiers[chosen_stat] = value
+    item.modifiers[negative_chosen_stat] = negative_value
+    return item
+
+func _generate_effect_item_insexed(index: int = -1) -> Item:
+    var item := Item.new()
+    var chosen_scene: PackedScene
+    if index != -1:
+        chosen_scene = effect_scenes[index]
+    else:
+        chosen_scene = effect_scenes.pick_random()
+    
+    item.name = _generate_effect_name(chosen_scene.resource_path)
+    item.description = "Grants special effect: %s" % [item.name]
+    
+    # Try to configure dynamic parameters like trigger_event
+    var configured_scene: PackedScene = _configure_dynamic_modifier(chosen_scene)
+    var temp_instance = configured_scene.instantiate()
+    var props := []
+    for p in temp_instance.get_property_list():
+        props.append(p.name)
+    if "trigger_event" in props:
+        var trig = temp_instance.get("trigger_event")
+        if trig != null:
+            item.description += " (Triggers on %s)" % str(trig).replace("_", " ")
+    temp_instance.queue_free()
+    
+    #add negative effect
+    var stat_names = stats.stats.keys()
+    var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
+    var negative_base_value = stats.stats[negative_chosen_stat]
+    var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
+    negative_value.set("flat", -negative_value.get("flat") * 2)
+    item.description += "\nDecreasese %s for %s" % [negative_chosen_stat, negative_value]
+    item.modifiers[negative_chosen_stat] = negative_value
+    
+    item.effect_scene = [configured_scene]
+    return item
+
 func _generate_buff_item() -> Item:
     var stat_names = stats.stats.keys()
 
@@ -211,6 +273,94 @@ func _generate_debuff_item() -> Item:
     buff_instance.modifiers = {chosen_stat: modifier_value}
     buff_instance.name = item.name
 
+    # Store it as a pre-configured scene (ready to instance)
+    var packed = PackedScene.new()
+    packed.pack(buff_instance)
+    item.effect_scene = [packed]
+    return item
+
+func _generate_buff_item_insexed(index: int = -1) -> Item:
+    var stat_names = stats.stats.keys()
+    
+    # Choose a Buff scene
+    var chosen_scene: PackedScene
+    if index != -1:
+        chosen_scene = buff_scenes[index]
+    else:
+        chosen_scene = buff_scenes.pick_random()
+    
+    # Choose a random stat to affect
+    var chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
+    var base_value = stats.stats[chosen_stat]
+    
+    # Generate modifier value — same logic as stat items
+    var modifier_value = _generate_stat_modifiers(chosen_stat, base_value)
+    
+    var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
+    var negative_base_value = stats.stats[negative_chosen_stat]
+    var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
+    negative_value.set("flat", -negative_value.get("flat"))
+    
+    # Create item resource
+    var item := Item.new()
+    item.name = _generate_buff_name(chosen_scene.resource_path, chosen_stat)
+    item.description = "Grants a temporary buff: increases %s when triggered." % [chosen_stat]
+    item.description += "\nDecreasese %s for %s" % [negative_chosen_stat, negative_value]
+    item.effect_scene = [chosen_scene]
+    item.modifiers[negative_chosen_stat] = negative_value
+    
+    item.set_meta("type", "buff")
+    
+    # 💡 Create a Buff instance to inject dynamic modifiers
+    var buff_instance: Buff = chosen_scene.instantiate()
+    buff_instance.modifiers = {chosen_stat: modifier_value}
+    buff_instance.name = item.name
+    
+    # Store it as a pre-configured scene (ready to instance)
+    var packed = PackedScene.new()
+    packed.pack(buff_instance)
+    item.effect_scene = [packed]
+    return item
+
+func _generate_debuff_item_insexed(index: int = -1) -> Item:
+    var stat_names = stats.stats.keys()
+    
+    # Choose a Debuff scene
+    var chosen_scene: PackedScene
+    if index != -1:
+        chosen_scene = debuff_scene
+    else:
+        chosen_scene = debuff_scene
+    
+    # Choose a random stat to affect
+    var chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
+    var base_value = stats.stats[chosen_stat]
+    
+    # Generate modifier value — same logic as stat items and invert for debuff
+    var modifier_value: Dictionary = _generate_stat_modifiers(chosen_stat, base_value)
+    var value: float  = modifier_value.get("flat")
+    modifier_value.set("flat", -value)
+    
+    # Create item resource
+    var item := Item.new()
+    item.name = _generate_buff_name(chosen_scene.resource_path, chosen_stat)
+    item.description = "Grants a debuff: decreases %s when triggered." % chosen_stat
+    item.effect_scene = [chosen_scene]
+    item.set_meta("type", "debuff")
+    
+    # Add negative effect
+    var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
+    var negative_base_value = stats.stats[negative_chosen_stat]
+    var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
+    negative_value.set("flat", -negative_value.get("flat") * 2)
+    item.description += "\nDecreasese %s for %s" % [negative_chosen_stat, negative_value]
+    item.modifiers[negative_chosen_stat] = negative_value
+    
+    # 💡 Create a Buff instance to inject dynamic modifiers
+    var buff_instance: DebuffSource = chosen_scene.instantiate()
+    buff_instance.modifiers = {chosen_stat: modifier_value}
+    buff_instance.name = item.name
+    
     # Store it as a pre-configured scene (ready to instance)
     var packed = PackedScene.new()
     packed.pack(buff_instance)

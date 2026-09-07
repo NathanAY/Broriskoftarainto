@@ -6,6 +6,7 @@
 .import/
 export.cfg
 export_credentials.cfg
+reports/
 
 # Imported translations (automatically generated from CSV files)
 *.translation

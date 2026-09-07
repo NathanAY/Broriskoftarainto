@@ -1,0 +1,41 @@
+extends GutTest
+
+func test_item_factory():
+    var test_scene = load("res://test/SceneWithItemFactory.tscn").instantiate()
+    get_tree().root.add_child(test_scene)
+
+    var item_factory: ItemFactory = test_scene.get_node("ItemFactory")
+    var character: Character = test_scene.get_node("Character")
+    var c_stats: Stats = character.get_node_or_null("Stats")
+    var c_item_holder: ItemHolder = character.get_node_or_null("ItemHolder")
+    var c_health: Health = character.get_node("Health")
+    
+    var random_items: Array[Item] = []
+    for i in 100:
+        var random_item: Item = item_factory.generate_random_item()
+        random_items.append(random_item)
+    assert_eq(random_items.size(), 100)
+    test_scene.queue_free()
+
+func test_item_with_3_stats_has_3_image():
+     var test_scene = load("res://test/SceneWithItemFactory.tscn").instantiate()
+     get_tree().root.add_child(test_scene)
+
+     var item_factory: ItemFactory = test_scene.get_node("ItemFactory")
+     var character: Character = test_scene.get_node("Character")
+     var c_stats: Stats = character.get_node_or_null("Stats")
+     var c_item_holder: ItemHolder = character.get_node_or_null("ItemHolder")
+     var c_health: Health = character.get_node("Health")
+
+     var stat_item = Item.new()
+     stat_item.name = "5 stat Up"
+     stat_item.modifiers["health"] = {"flat": 100.0}
+     stat_item.modifiers["damage"] = {"flat": 100.0}
+     stat_item.modifiers["armor"] = {"flat": 100.0}
+     stat_item.modifiers["critical_chance"] = {"flat": 100.0}
+     stat_item.modifiers["movement_speed"] = {"flat": 100.0}
+     c_item_holder.add_item(stat_item)
+    
+     var items_list: VBoxContainer = test_scene.get_node("UI/PauseMenu/CharacterUi/VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/ItemsScroll/ItemsList")
+     await wait_seconds(30)
+     test_scene.queue_free()

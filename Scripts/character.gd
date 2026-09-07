@@ -11,7 +11,7 @@ class_name Character
 
 var current_target = null
 var fire_timer = 0.0
-var timer = Timer.new()
+# var timer = Timer.new()
 
 signal character_died
 

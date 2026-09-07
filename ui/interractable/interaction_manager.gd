@@ -4,7 +4,7 @@ class_name InteractionManager
 
 var interactables: Array[Node] = []
 var current: Node = null
-@onready var character: Node2D = get_tree().current_scene.get_node_or_null("Character")
+@onready var character: Node2D = get_parent().get_node_or_null("Character")
 
 func register(interactable: Node) -> void:
     if not interactables.has(interactable):

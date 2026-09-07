@@ -1,0 +1,1 @@
+1. added new tests to test/test_item_factory_gdunit4.gd file

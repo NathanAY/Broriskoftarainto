@@ -18,7 +18,7 @@ func _ready() -> void:
     for w in weapons:
         add_weapon(w)
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
     for weapon in weapons:
         if weapon:
             weapon.aim()

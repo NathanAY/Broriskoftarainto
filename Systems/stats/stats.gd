@@ -93,15 +93,15 @@ func add_condition_manager(manager: Node) -> void:
     if manager.has_method("set_stats_reference"):
         manager.set_stats_reference(self)
 
-func set_condition(name: String, value: float) -> void:
-    if conditions.get(name, -1) != value:
-        conditions[name] = value
+func set_condition(conditionName: String, value: float) -> void:
+    if conditions.get(conditionName, -1) != value:
+        conditions[conditionName] = value
         if event_manager:
-            event_manager.emit_event("on_stat_changes", [{"stat_name" :name, "final_value": value}])
-            event_manager.emit_event("on_condition_change", [{"name" :name, "value": value}])
+            event_manager.emit_event("on_stat_changes", [{"stat_name" :conditionName, "final_value": value}])
+            event_manager.emit_event("on_condition_change", [{"condition_name" :conditionName, "value": value}])
 
-func get_condition(name: String) -> float:
-    return conditions.get(name, 0.0)
+func get_condition(conditionName: String) -> float:
+    return conditions.get(conditionName, 0.0)
 
 # ----------------
 # Helpers

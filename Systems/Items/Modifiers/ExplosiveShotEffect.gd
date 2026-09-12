@@ -4,7 +4,7 @@ extends Node
 var explosionScene = preload("res://scenes/Explosion.tscn")
 
 var explosion_radius := 64.0
-var explosion_damage := 3
+var explosion_damage := 3.0
 
 var event_manager: EventManager = null 
 

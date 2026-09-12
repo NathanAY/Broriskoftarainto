@@ -31,7 +31,7 @@ func set_stack_active(index: int, active: bool):
         stacks[index] = active
     prints("set_stack_active", stacks)
 
-func _on_event(event: Dictionary):
+func _on_event(_event: Dictionary):
     if not stats:
         return
     var add_amount = default_add_amount * stacks.count(true)

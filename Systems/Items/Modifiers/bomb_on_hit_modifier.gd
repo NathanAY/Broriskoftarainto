@@ -39,7 +39,7 @@ func _on_hit(event: Dictionary):
         return
     _attach_bomb(ctx.target, ctx.final_amount)
 
-func _attach_bomb(target: Node, damage: int):
+func _attach_bomb(target: Node, damage: float):
     # ensure target has a place to attach
     if not is_instance_valid(target):
         return

@@ -3,8 +3,8 @@ class_name StatCreationBuffTest
 extends GdUnitTestSuite
 
 func test_stat_creation_buff() -> void:
-    var factory = ItemFactory.new()
-    factory._ready()
-    factory.stats = Stats.new()
+    var factory : ItemFactory = load("res://Systems/Items/ItemFactory.tscn").instantiate()
+    add_child(factory)
     var item = factory.get_item_by_type("buff")
     assert_object(item).is_not_null()
+    collect_orphan_node_details()

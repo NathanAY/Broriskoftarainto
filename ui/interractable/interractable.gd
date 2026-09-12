@@ -39,6 +39,6 @@ func show_menu():
 func hide_menu():
     interaction_menu.visible = false
 
-func _populate_menu(menu: Control):
+func _populate_menu(_menu: Control):
     # override in child
     pass

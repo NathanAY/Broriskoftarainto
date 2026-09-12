@@ -43,7 +43,7 @@ func _on_before_take_damage(event):
         _time_since_damage = 0.0  # reset recharge timer
         _emit_shield_changed(-damage_absorbed)
 
-func _update_max_shield(event):
+func _update_max_shield(_event):
     if stats:
         max_shield = stats.get_stat("energy_shield")
         current_shield = min(current_shield, max_shield)

@@ -31,7 +31,7 @@ func die(damage_context: DamageContext) -> void:
     if event_manager:
         event_manager.emit_event("on_death", [{"self": self.get_parent(), "damage_context": damage_context}])
 
-func _update_max_health(event):
+func _update_max_health(_event):
     max_health = stats.get_stat("health")
     _emit_on_health_changed_event(0)
 

@@ -16,7 +16,7 @@ var holder: Node
 var stats: Stats
 var ignore_groups: Array = []
 var stacks: Array[bool] = []
-var _current_projectile_speed_multiplier: int = 1
+var _current_projectile_speed_multiplier: float = 1
 
 func attachEventManager(em: EventManager):
     event_manager = em
@@ -45,7 +45,7 @@ func _on_triger(event: Dictionary) -> void:
             return
 
     var target = null
-    var damage: int = 0
+    var damage: float = 0
     if event.has("damage_context"):
         var damage_ctx: DamageContext = event["damage_context"]
         damage = max(damage_ctx.base_amount, damage_ctx.final_amount)

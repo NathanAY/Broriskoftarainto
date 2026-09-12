@@ -24,11 +24,11 @@ func _ready():
     timer.timeout.connect(Callable(self, "_on_timeout"))
     timer.start()
     if base_speed > 10000:       
-        var stretch = 1.0 + base_speed / 500
+        var stretch = 1.0 + float(base_speed) / 500
         scale.x = scale.x * stretch # elongate along X axis
         return
     if base_speed > 800:       
-        var stretch = 1.0 + base_speed / 5000
+        var stretch = 1.0 + float(base_speed) / 5000
         scale.x = scale.x * stretch # elongate along X axis
         return
 

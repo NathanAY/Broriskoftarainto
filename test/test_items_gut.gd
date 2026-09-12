@@ -7,7 +7,7 @@ func test_item_damage_doubler():
     var character: Character = test_scene.get_node("Character")
     var c_stats: Stats = character.get_node_or_null("Stats")
     var c_item_holder: ItemHolder = character.get_node_or_null("ItemHolder")
-    var c_health: Health = character.get_node("Health")
+    var _c_health: Health = character.get_node("Health")
     
     # 1. Setup Items
     var doubler_item = Item.new()
@@ -32,20 +32,20 @@ func test_item_damage_doubler():
     e_health.heal(100000)
     
     var final_damage = c_stats.get_stat("damage")
-    assert_eq(final_damage, 1)
+    assert_eq(final_damage, 1.0)
 
     # 2. Add Items
     # await wait_seconds(2)
     c_item_holder.add_item(doubler_item)
     final_damage = c_stats.get_stat("damage")
-    assert_eq(final_damage, 1)
+    assert_eq(final_damage, 1.0)
     # await wait_seconds(2)
     
     c_item_holder.add_item(damage_item)
     # 3. Verify Stats
     # Assuming stats.get_stat("damage") reflects applied modifiers
     final_damage = c_stats.get_stat("damage")
-    assert_eq(final_damage, 21)
+    assert_eq(final_damage, 21.0)
     # await wait_seconds(2)
     test_scene.queue_free()
 
@@ -56,7 +56,7 @@ func test_item_health_50_percent_bonus():
     var character: Character = test_scene.get_node("Character")
     var c_stats: Stats = character.get_node_or_null("Stats")
     var c_item_holder: ItemHolder = character.get_node_or_null("ItemHolder")
-    var c_health: Health = character.get_node("Health")
+    var _c_health: Health = character.get_node("Health")
     
     # 1. Setup Items
     var doubler_item = Item.new()
@@ -82,19 +82,19 @@ func test_item_health_50_percent_bonus():
     e_health.heal(100000)
     
     var stat_value = c_stats.get_stat("health")
-    assert_eq(stat_value, 2040)
+    assert_eq(stat_value, 2040.0)
     
      # 2. Add Items
     # await wait_seconds(2)
     c_item_holder.add_item(doubler_item)
     stat_value = c_stats.get_stat("health")
-    assert_eq(stat_value, 2040)
+    assert_eq(stat_value, 2040.0)
     # await wait_seconds(2)
-    
+
     c_item_holder.add_item(stat_item)
     # 3. Verify Stats
     # Assuming stats.get_stat("damage") reflects applied modifiers
     stat_value = c_stats.get_stat("health")
-    assert_eq(stat_value, 2190)
+    assert_eq(stat_value, 2190.0)
     # await wait_seconds(2)
     test_scene.queue_free()

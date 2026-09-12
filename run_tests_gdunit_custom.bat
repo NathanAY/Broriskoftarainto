@@ -12,7 +12,6 @@ echo ========================================
 echo GdUnit4 Test Runner
 echo Target: %TEST_TARGET%
 echo ========================================
-echo.
 
 echo [1/2] Checking test execution time...
 
@@ -47,7 +46,6 @@ if exist "%LOG_FILE%" del "%LOG_FILE%"
 
 echo.
 echo [2/2] Running tests with output...
-echo.
 
 "%GODOT_BIN%" --path . -s -d res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a "%TEST_TARGET%"
 

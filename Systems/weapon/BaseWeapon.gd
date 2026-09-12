@@ -6,7 +6,7 @@ class_name BaseWeapon
 @export var description: String
 @export var base_attack_speed: float = 1.0
 @export var base_damage: float = 5.0
-@export var range: float = 400.0
+@export var weapon_range: float = 400.0
 @export var modifiers: Dictionary = {}
 @export var target_selector: TargetSelector
 @export var sprite: Texture2D    # assign in .tres
@@ -42,7 +42,7 @@ func apply_to(holder: Node) -> void:
     if event_manager:
         event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
-func remove_from(holder: Node) -> void:
+func remove_from(_holder: Node) -> void:
     if timer and is_instance_valid(timer):
         timer.stop()
         timer.queue_free()
@@ -67,7 +67,7 @@ func _on_timeout() -> void:
 
     var targets: Array[Node] = []
     if target_selector:
-        targets = target_selector.find_targets(sprite_node, range, holder)
+        targets = target_selector.find_targets(sprite_node, weapon_range, holder)
 
     if targets.size() > 0:
         try_shoot(targets)
@@ -75,7 +75,7 @@ func _on_timeout() -> void:
 func _update_timer_wait() -> void:
     if not timer: return
     var holder = get_holder()
-    var stats_node: Node = holder.get_node_or_null("Stats") if holder else null
+    var _stats_node: Node = holder.get_node_or_null("Stats") if holder else null
 
     var base_weapon_speed := base_attack_speed
     var owner_speed = stats.get_stat("attack_speed") if stats else 1.0
@@ -96,7 +96,7 @@ func aim() -> void:
 
     var targets: Array[Node] = []
     if target_selector:
-        targets = target_selector.find_targets(sprite_node, range, holder)
+        targets = target_selector.find_targets(sprite_node, weapon_range, holder)
 
     if targets.size() == 0:
         return
@@ -107,5 +107,5 @@ func aim() -> void:
     sprite_node.flip_v = dir.x < 0
 
 # --- abstract shoot ---
-func try_shoot(targets: Array[Node]) -> void:
+func try_shoot(_targets: Array[Node]) -> void:
     push_warning("BaseWeapon: try_shoot not implemented for %s" % name)

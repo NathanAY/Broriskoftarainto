@@ -67,8 +67,8 @@ func attack(dir: Vector2) -> void:
     SoundManager.play(weapon_data.attack_sound.pick_random(), 0, 0)
 
     # Forward movement
-    var speed = weapon_data.range * weapon_data._current_attack_speed
-    var duration = weapon_data.range / speed
+    var speed = weapon_data.weapon_range * weapon_data._current_attack_speed
+    var duration = weapon_data.weapon_range / speed
 
     # Stretch hitbox proportionally to swing speed
     _adjust_hitbox_stretch(speed)
@@ -82,7 +82,7 @@ func attack(dir: Vector2) -> void:
     var seg_time = forward_total_time / segments
     for i in range(segments):
         var t = float(i + 1) / segments
-        var target_pos = origin_pos + direction * weapon_data.range * t
+        var target_pos = origin_pos + direction * weapon_data.weapon_range * t
         tween.tween_property(self, "position", target_pos, seg_time).set_trans(Tween.TRANS_LINEAR)
         tween.tween_callback(Callable(self, "_check_existing_overlaps"))
     # Mark forward as finished after the last segment
@@ -214,7 +214,7 @@ func _is_on_movement_line(target: Node) -> bool:
     var proj = to_target.dot(forward)
     if proj < 0.0:
         return false
-    var max_range = weapon_data.range if weapon_data and weapon_data.range else 0
+    var max_range = weapon_data.weapon_range if weapon_data and weapon_data.weapon_range else 0
     if max_range > 0 and proj > max_range * 1.1:
         return false
 

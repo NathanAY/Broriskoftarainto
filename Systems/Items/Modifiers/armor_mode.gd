@@ -29,7 +29,7 @@ func _on_before_take_damage(event):
         multiplier = 1.0 + (-armor / 10.0)  # handles negatives correctly
 
     ctx.final_amount *= multiplier
-    ctx.armor_applied = armor   # optional, for debugging/logging
+    ctx.armor_applied = int(armor)   # optional, for debugging/logging
     ctx.armor_damage_multiplier = multiplier
 
 func _on_stat_changes(_data):

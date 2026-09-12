@@ -16,8 +16,8 @@ var ignore_groups: Array[StringName] = []
 var stacks: Array[bool] = []
 var modifier_meta := "spawned_by_SpinningOrb"
 var triger := "on_hit"# "on_hit" "on_kill"
-var _current_base_damage: int
-var _current_damage_multiplier: int
+var _current_base_damage: float
+var _current_damage_multiplier: float
 
 func attachEventManager(em: Node):
     event_manager = em

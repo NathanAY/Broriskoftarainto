@@ -81,8 +81,8 @@ func generate_random_item() -> Item:
         return null
 
     var roll := rng.randf()
-    var stat_threshold := float(stats_amount) / total
-    var effect_threshold := float(stats_amount + effect_amount) / total
+    var _stat_threshold := float(stats_amount) / total
+    var _effect_threshold := float(stats_amount + effect_amount) / total
 
     if roll < 0.4:
         return _generate_stat_item()
@@ -414,7 +414,7 @@ func _configure_dynamic_modifier(scene: PackedScene) -> PackedScene:
     packed.pack(instance)
     return packed
 
-func _generate_stat_modifiers(chosen_stat, base_value) -> Dictionary:
+func _generate_stat_modifiers(_chosen_stat, base_value) -> Dictionary:
     var modifier_value = {}
     if base_value == 0:
         modifier_value["flat"] = 1

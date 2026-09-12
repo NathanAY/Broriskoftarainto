@@ -14,7 +14,7 @@ var stats: Stats
 var ignore_groups: Array = []
 var modifier_meta = "spawned_by_ChainModifier"
 
-var _current_projectile_speed_multiplier: int = 1
+var _current_projectile_speed_multiplier: float = 1
 
 func attachEventManager(em: EventManager):
     event_manager = em
@@ -31,7 +31,7 @@ func _on_triger(event: Dictionary) -> void:
         if projectile.get_meta(modifier_meta, false):
             return
 
-    var damage: int = 0
+    var damage: float = 0
     var spawn_position: Vector2
     if event.has("damage_context"):
         var damage_ctx: DamageContext = event["damage_context"]

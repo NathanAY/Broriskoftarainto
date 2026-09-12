@@ -3,7 +3,7 @@ class_name ReflectProjectileModifier
 
 @export var projectile_scene: PackedScene
 @export var target_selector: TargetSelector
-@export var range: float = 250
+@export var reflect_range: float = 250
 @export var projectile_speed: float = 2000
 @export var volley_projectile_count: int = 2
 @export var trigger_event: String = "before_take_damage"
@@ -36,15 +36,15 @@ func set_stack_active(index: int, active: bool):
     if index >= 0 and index < stacks.size():
         stacks[index] = active
 
-func _on_trigger(event: Dictionary) -> void:
+func _on_trigger(_event: Dictionary) -> void:
     var current_stacks: int = stacks.count(true)
     var stacks_multiplier = 5.0 / (4 + current_stacks)# +20% per stack
 
-    var targets = target_selector.find_targets(holder, range * stacks_multiplier, holder)
+    var targets = target_selector.find_targets(holder, reflect_range * stacks_multiplier, holder)
     if targets.is_empty():
         return
-    var damage: int = stats.get_stat("base_damage") * _current_damage_multiplier
-    var speed: int = projectile_speed * _current_projectile_speed_multiplier
+    var damage: float = stats.get_stat("base_damage") * _current_damage_multiplier
+    var speed: int = int(projectile_speed * _current_projectile_speed_multiplier)
     # spawn volley toward each target
     for i in range(min(volley_projectile_count + current_stacks, targets.size())):
         var target = targets.get(i)

@@ -84,13 +84,12 @@ func _on_area_2d_area_entered(area: Area2D) -> void:
         area.get_parent().queue_free()
         print("Enemy destroyed!")  
 
-func _flash(event):
-    var sprite = $Node2D/Sprite2D
+func _flash(_event):
     var tween = create_tween()
     tween.tween_property(sprite, "modulate", Color(1, 4, 1), 0.2)
     tween.tween_property(sprite, "modulate", Color(4, 1, 1, 0), 0.2).from(Color(1, 1, 4))
     tween.tween_property(sprite, "modulate", Color(1, 1, 1, 1), 0.0)
 
-func _die(event: Dictionary):
+func _die(_event: Dictionary):
     emit_signal("character_died")
     queue_free()

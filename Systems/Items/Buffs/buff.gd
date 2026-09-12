@@ -30,7 +30,7 @@ func _ready():
 
     event_manager.subscribe(trigger_event, Callable(self, "_on_trigger"))
 
-func _on_trigger(event_data):
+func _on_trigger(_event_data):
     if not stats:
         return
 

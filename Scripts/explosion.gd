@@ -2,7 +2,7 @@ extends Area2D
 class_name Explosion
 
 @export var radius: float = 100.0
-@export var damage: int = 10
+@export var damage: float = 10
 @export var duration: float = 0.15
 var time_passed: float = 0.0
 var damage_tags: Array[String] = []

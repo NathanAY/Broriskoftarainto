@@ -2,7 +2,7 @@ extends Node
 class_name PoisonModifier
 
 # Preload the PoisonEffect script (change path if you saved it elsewhere)
-const PoisonEffect = preload("res://Systems/Items/Buffs/poison_effect.gd")
+const _PoisonEffect = preload("res://Systems/Items/Buffs/poison_effect.gd")
 
 var event_manager: Node = null
 var holder: Node = null

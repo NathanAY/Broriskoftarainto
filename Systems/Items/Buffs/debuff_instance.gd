@@ -9,12 +9,12 @@ var target_em: EventManager
 var modifiers: Dictionary
 var duration: float
 
-func setup(holder: Node, target: Node, mod: Dictionary, duration: float):
-    self.holder = holder
-    self.target = target
-    self.target_stats = target.get_node_or_null("Stats")
-    self.target_em = target.get_node_or_null("EventManager")
-    self.duration = duration
+func setup(p_holder: Node, p_target: Node, mod: Dictionary, p_duration: float):
+    self.holder = p_holder
+    self.target = p_target
+    self.target_stats = p_target.get_node_or_null("Stats")
+    self.target_em = p_target.get_node_or_null("EventManager")
+    self.duration = p_duration
 
     # Apply unique modifier copy
     modifiers = {}

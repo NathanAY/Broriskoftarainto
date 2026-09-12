@@ -56,14 +56,13 @@ func _physics_process(delta):
         return
     behaviour.process_movement(self, delta)
 
-func _flash(event):
-    var sprite = $Node2D/Sprite2D
+func _flash(_event):
     var tween = create_tween()
     tween.tween_property(sprite, "modulate", Color(1, 4, 1), 0.2)
     tween.tween_property(sprite, "modulate", Color(4, 1, 1, 0), 0.2).from(Color(1, 1, 4))
     tween.tween_property(sprite, "modulate", Color(1, 1, 1, 1), 0.0)
 
-func _die(event: Dictionary):
+func _die(_event: Dictionary):
     _alive = false
     call_deferred("_disable_colision")
     anim_player.play("death")

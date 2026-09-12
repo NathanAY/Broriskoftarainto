@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://bfondvna102eu"]
 
-[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Systems/Character.tscn" id="1_xanh4"]
-[ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://ui/PlayerUI.tscn" id="2_dl4ru"]
-[ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://Scenes/menu/ShopMenu.tscn" id="3_fp8xn"]
-[ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://Scenes/menu/PauseMenu.tscn" id="4_8fxk3"]
-[ext_resource type="PackedScene" uid="uid://bmqxtyoaqbpks" path="res://Systems/Items/ItemFactory.tscn" id="7_vkjsc"]
-[ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://Scripts/camera_2d.gd" id="13_7y5rx"]
-[ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://ui/interractable/interaction_manager.gd" id="14_xkbms"]
+[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://src/Systems/Character.tscn" id="1_xanh4"]
+[ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://src/ui/PlayerUI.tscn" id="2_dl4ru"]
+[ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://src/Scenes/menu/ShopMenu.tscn" id="3_fp8xn"]
+[ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://src/Scenes/menu/PauseMenu.tscn" id="4_8fxk3"]
+[ext_resource type="PackedScene" uid="uid://bmqxtyoaqbpks" path="res://src/Systems/Items/ItemFactory.tscn" id="7_vkjsc"]
+[ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://src/Scripts/camera_2d.gd" id="13_7y5rx"]
+[ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://src/ui/interractable/interaction_manager.gd" id="14_xkbms"]
 
 [node name="SceneWithItemFactory" type="Node2D" unique_id=34987921]
 

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Item" format=3 uid="uid://mlfohgnnpkph"]
+
+[ext_resource type="PackedScene" uid="uid://c7lhp6cgkitqc" path="res://src/Systems/Items/Modifiers/ExplosiveShotEffect.tscn" id="1_0wg2o"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="1_civ83"]
+
+[resource]
+script = ExtResource("1_civ83")
+name = "Explosive Shot"
+description = "Your attacks explode on hit"
+effect_scene = Array[PackedScene]([ExtResource("1_0wg2o")])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

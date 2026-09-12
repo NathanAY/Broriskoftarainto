@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://hqy7se40myec"]
 
-[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://Systems/Character.tscn" id="1"]
-[ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://Systems/Enemy.tscn" id="2"]
-[ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://ui/PlayerUI.tscn" id="3_ads7n"]
-[ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://Scenes/menu/ShopMenu.tscn" id="4_oqut0"]
-[ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://Scenes/menu/PauseMenu.tscn" id="5_8bdmj"]
+[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://src/Systems/Character.tscn" id="1"]
+[ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://src/Systems/Enemy.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://src/ui/PlayerUI.tscn" id="3_ads7n"]
+[ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://src/Scenes/menu/ShopMenu.tscn" id="4_oqut0"]
+[ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://src/Scenes/menu/PauseMenu.tscn" id="5_8bdmj"]
 
 [node name="TestScene" type="Node2D" unique_id=34987921]
 

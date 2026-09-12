@@ -1,0 +1,70 @@
+[gd_scene format=3 uid="uid://bo2o0mwe3usc3"]
+
+[ext_resource type="Script" uid="uid://u1vqm6gmpjwc" path="res://src/Scenes/menu/pause_menu.gd" id="1_lj4oq"]
+[ext_resource type="PackedScene" uid="uid://1oycydgaehxf" path="res://src/ui/CharacterUI.tscn" id="2_4eb7s"]
+[ext_resource type="PackedScene" uid="uid://6mpb7db144uh" path="res://src/Scenes/menu/OptionsMenu.tscn" id="2_qwhev"]
+
+[node name="PauseMenu" type="CanvasLayer" unique_id=2044281697]
+process_mode = 3
+script = ExtResource("1_lj4oq")
+
+[node name="Control" type="Control" parent="." unique_id=566033694]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="Control" unique_id=1883821070]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.247059)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=298245907]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -35.0
+offset_top = -15.5
+offset_right = 35.0
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="ResumeButton" type="Button" parent="Control/VBoxContainer" unique_id=65616881]
+layout_mode = 2
+text = "Resume"
+
+[node name="RestartButton" type="Button" parent="Control/VBoxContainer" unique_id=733715336]
+layout_mode = 2
+text = "Restart"
+
+[node name="NewRunButton" type="Button" parent="Control/VBoxContainer" unique_id=440514636]
+layout_mode = 2
+text = "New run"
+
+[node name="CharacterButton" type="Button" parent="Control/VBoxContainer" unique_id=925289219]
+layout_mode = 2
+text = "Character"
+
+[node name="OptionsButton" type="Button" parent="Control/VBoxContainer" unique_id=1487591074]
+layout_mode = 2
+text = "Options"
+
+[node name="ExitButton" type="Button" parent="Control/VBoxContainer" unique_id=164848416]
+layout_mode = 2
+text = "Exit"
+
+[node name="CharacterUi" parent="." unique_id=227911457 instance=ExtResource("2_4eb7s")]
+
+[node name="OptionsMenu" parent="." unique_id=1263463800 instance=ExtResource("2_qwhev")]
+visible = false

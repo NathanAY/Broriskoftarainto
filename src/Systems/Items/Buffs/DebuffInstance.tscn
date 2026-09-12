@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://c26p1lsr3te1f"]
+
+[ext_resource type="Script" uid="uid://bhjygmp3vucfp" path="res://src/Systems/Items/Buffs/debuff_instance.gd" id="1_e48ty"]
+
+[node name="DebuffInstance" type="Node"]
+script = ExtResource("1_e48ty")

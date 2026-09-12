@@ -1,6 +1,5 @@
 # Godot 4+ specific ignores
 .godot/
-.nomedia
 
 # Godot-specific ignores
 .import/
@@ -8,11 +7,3 @@ export.cfg
 export_credentials.cfg
 addons/gdUnit4/GdUnitRunner.cfg
 reports/
-
-# Imported translations (automatically generated from CSV files)
-*.translation
-
-# Mono-specific ignores
-.mono/
-data_*/
-mono_crash.*.json

@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://cpaom6wp1sgxl"]
+
+[ext_resource type="Script" uid="uid://r4r74eiy7amb" path="res://src/Systems/Items/Modifiers/chain_modifier.gd" id="1_xfdg0"]
+[ext_resource type="PackedScene" uid="uid://dvphvkk5rwuc2" path="res://src/Systems/weapon/LightningProjectile.tscn" id="2_88vxd"]
+[ext_resource type="Resource" uid="uid://hye6t5sxe2yg" path="res://src/Resources/weapons/aim/closest.tres" id="3_ad53i"]
+
+[node name="ChainMod" type="Node"]
+script = ExtResource("1_xfdg0")
+projectile_scene = ExtResource("2_88vxd")
+target_selector = ExtResource("3_ad53i")

@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://6mpb7db144uh"]
+
+[ext_resource type="Script" uid="uid://bi0lglln23krd" path="res://src/Scenes/menu/options_menu.gd" id="1_jrbyj"]
+
+[node name="OptionsMenu" type="CanvasLayer" unique_id=854644811]
+process_mode = 3
+script = ExtResource("1_jrbyj")
+
+[node name="Control" type="Control" parent="." unique_id=1354663216]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="Control" unique_id=186208476]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.247059)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=1923242381]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -35.0
+offset_top = -15.5
+offset_right = 35.0
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="WindowButton" type="Button" parent="Control/VBoxContainer" unique_id=664449591]
+layout_mode = 2
+text = "Window"
+
+[node name="ShowStats" type="CheckButton" parent="Control/VBoxContainer" unique_id=1098469529]
+layout_mode = 2
+text = "Show stas"
+
+[node name="SoundSlider" type="HSlider" parent="Control/VBoxContainer" unique_id=1219337990]
+layout_mode = 2
+
+[node name="MusicSlider" type="HSlider" parent="Control/VBoxContainer" unique_id=1243731778]
+layout_mode = 2
+
+[node name="SfxSlider" type="HSlider" parent="Control/VBoxContainer" unique_id=375940325]
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="Control/VBoxContainer" unique_id=82364102]
+layout_mode = 2
+text = "Back"

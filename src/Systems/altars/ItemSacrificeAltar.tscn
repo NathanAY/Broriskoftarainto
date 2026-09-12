@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://ba47mswx3itwk"]
+
+[ext_resource type="Script" uid="uid://pa7083hcvmmr" path="res://src/Systems/altars/item_sacrifice_altar.gd" id="1_jssss"]
+[ext_resource type="Texture2D" uid="uid://cdjxvfeeak3qv" path="res://src/Assets/wandering_bot_icon.png" id="2_jssss"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_qcnxv"]
+radius = 48.0937
+
+[node name="ItemSacrificeAltar" type="Area2D" unique_id=1879810594]
+script = ExtResource("1_jssss")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1471454230]
+texture = ExtResource("2_jssss")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=357921721]
+shape = SubResource("CircleShape2D_qcnxv")

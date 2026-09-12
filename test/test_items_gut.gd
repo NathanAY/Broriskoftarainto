@@ -12,7 +12,7 @@ func test_item_damage_doubler():
     # 1. Setup Items
     var doubler_item = Item.new()
     doubler_item.name = "Damage Doubler"
-    var doubler_mod = preload("res://Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
+    var doubler_mod = preload("res://src/Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
     # Configure the multiplier
     doubler_mod.target_stat = "damage"
     doubler_mod.multiplier = 2.0
@@ -61,7 +61,7 @@ func test_item_health_50_percent_bonus():
     # 1. Setup Items
     var doubler_item = Item.new()
     doubler_item.name = "Helathier"
-    var doubler_mod = preload("res://Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
+    var doubler_mod = preload("res://src/Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
     # Configure the multiplier
     doubler_mod.target_stat = "health"
     doubler_mod.multiplier = 1.5

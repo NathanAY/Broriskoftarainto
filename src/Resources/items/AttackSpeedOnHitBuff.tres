@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Item" format=3 uid="uid://ws6ag135x60i"]
+
+[ext_resource type="PackedScene" uid="uid://c8l1agktutvbo" path="res://src/Systems/Items/Buffs/buff.tscn" id="1_gfjf4"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="2_ootio"]
+
+[resource]
+script = ExtResource("2_ootio")
+name = "Attack speed on hit"
+description = "Attack speed on hit buff desc"
+effect_scene = Array[PackedScene]([ExtResource("1_gfjf4")])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

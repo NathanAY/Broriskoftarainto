@@ -21,9 +21,9 @@ Soldier is currently a byte-for-byte clone of Wildling (`Assets/character/soldie
   - `{ "area_size_multiplier": { "percent": 0.3 } }`
   - (removes old `armor flat +2`)
 - `starting_items` (both already exist):
-  - `res://Resources/items/ExplosiveShot.tres` (`uid://mlfohgnnpkph`) — attacks explode on hit
-  - `res://Resources/items/BombOnHit.tres` (`uid://cx4lb8wpexm1m`) — attacks drop bombs on hit
-  - (removes `res://Resources/items/RegenPassive.tres` and its ext_resource entry)
+  - `res://src/Resources/items/ExplosiveShot.tres` (`uid://mlfohgnnpkph`) — attacks explode on hit
+  - `res://src/Resources/items/BombOnHit.tres` (`uid://cx4lb8wpexm1m`) — attacks drop bombs on hit
+  - (removes `res://src/Resources/items/RegenPassive.tres` and its ext_resource entry)
 
 ## Resulting identity vs. the other characters
 

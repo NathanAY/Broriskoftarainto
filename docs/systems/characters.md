@@ -29,7 +29,7 @@ modifiers = [{"attack_speed": {"percent": 0.2}}]
 ```
 
 ## How selection and application works
-1. Player chooses a character in `CharacterSelect`; on confirm the script sets `GlobalGameState.starting_character = "res://Resources/characters/Rogue.tres"` (string path).
+1. Player chooses a character in `CharacterSelect`; on confirm the script sets `GlobalGameState.starting_character = "res://src/Resources/characters/Rogue.tres"` (string path).
 2. The flow continues to `StarterMenu` to choose weapons/items; those values are also saved in `GlobalGameState`.
 3. When the game scene creates the player `Character` (instancing `Systems/Character.tscn`), the `CharacterInitializer` node reads `GlobalGameState.starting_character`, loads the resource, and:
    - Calls `Stats.set_base_stat` for each entry in `base_stats` (overwrites base values).

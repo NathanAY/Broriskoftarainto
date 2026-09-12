@@ -7,7 +7,7 @@ Key scripts / scenes
 - `Systems/Items/item_factory.gd` (class_name `ItemFactory`)
 
 Data flow
-- Inputs: reads available stats from `Stats` instance, loads PackedScenes from `res://Systems/Items/Modifiers` and buff/debuff scenes.
+- Inputs: reads available stats from `Stats` instance, loads PackedScenes from `res://src/Systems/Items/Modifiers` and buff/debuff scenes.
 - Processing: random roll decides between stat/effect/buff/debuff generators; creates `Item` resources with modifiers and optionally pre-configured PackedScenes.
 - Outputs: returns an `Item` instance (or `null` if no sources available); maintains `drop_pool` cache.
 

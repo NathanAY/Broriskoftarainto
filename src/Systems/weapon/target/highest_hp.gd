@@ -2,7 +2,7 @@
 extends TargetSelector
 class_name HighestHealthTargetSelector
 
-func find_targets(weapon: Node, range: float, holder: Node) -> Array[Node]:
+func find_targets(weapon: Node, find_range: float, holder: Node) -> Array[Node]:
     var best_target: Node = null
     var highest := 0
 
@@ -10,7 +10,7 @@ func find_targets(weapon: Node, range: float, holder: Node) -> Array[Node]:
         if node == holder:
             continue
         var dist = weapon.global_position.distance_to(node.global_position)
-        if dist > range:
+        if dist > find_range:
             continue
 
         var health_node = node.get_node_or_null("Health")

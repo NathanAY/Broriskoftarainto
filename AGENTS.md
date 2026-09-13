@@ -24,20 +24,20 @@
 
 # Project documentation.
 - This is top-down brotato style rogulike game project on godot 4.6.
-- If you think that some of the doc files outdated or need some changes just suggest to update it.
+- If docs outdatet than updated them.
 
 ## The most important docs located by those path:
-- \docs\ai_overview.md
-- \docs\architecture.md
+- docs/ai_overview.md
+- docs/architecture.md
 
-# Major systems (event manager, player, enemies, stats, weapons, items, itemFactory, modifiers, etc.) docs in folder docs/systems/*
-- enemies.md
-- event_manager.md
-- item_factory.md
-- items.md
-- player.md
-- spawners.md
-- stage_manager.md
-- stats.md
-- ui_shop_portal.md
-- weapons.md
+## Major systems (event manager, player, enemies, stats, weapons, items, itemFactory, modifiers, etc.) docs in folder docs/systems/*
+- docs/systems/enemies.md
+- docs/systems/event_manager.md
+- docs/systems/item_factory.md
+- docs/systems/items.md
+- docs/systems/player.md
+- docs/systems/spawners.md
+- docs/systems/stage_manager.md
+- docs/systems/stats.md
+- docs/systems/ui_shop_portal.md
+- docs/systems/weapons.md

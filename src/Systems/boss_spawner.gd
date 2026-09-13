@@ -28,14 +28,14 @@ func spawn_boss():
     enemiesNode.add_child(boss_instance)
 
     # Apply loop-based scaling
-    _apply_scaling(boss_instance)
+    _apply_scaling()
 
     if boss_instance.has_method("set_target_position"):
         boss_instance.set_target_position(character)
     
     print("Boss spawned!")
 
-func _apply_scaling(boss_instance: Enemy) -> void:
+func _apply_scaling() -> void:
     var stats = boss_instance.get_node_or_null("Stats")
     if not stats:
         return

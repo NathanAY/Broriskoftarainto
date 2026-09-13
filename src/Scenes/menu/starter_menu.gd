@@ -11,8 +11,8 @@ var selected_weapons: Array[String] = []
 var selected_items: Array[String] = []
 
 func _ready():
-    _load_resource_buttons("res://src/Resources/weapons", weapons_container, func(path, name): _add_weapon(path, name))
-    _load_resource_buttons("res://src/Resources/items", items_container, func(path, name): _add_item(path, name))
+    _load_resource_buttons("res://src/Resources/weapons", weapons_container, func(path, container): _add_weapon(path, container))
+    _load_resource_buttons("res://src/Resources/items", items_container, func(path, container): _add_item(path, container))
     clear_button.pressed.connect(_clear_all)
     play_button.pressed.connect(_on_play_pressed)
 
@@ -27,7 +27,7 @@ func _load_resource_buttons(base_path: String, container: VBoxContainer, callbac
     while file_name != "":
         if not dir.current_is_dir() and file_name.ends_with(".tres"):
             var path = base_path + "/" + file_name
-            var res: Resource = load(path)
+            var _res: Resource = load(path)
             var display_name := file_name.get_basename() # or res.name if defined
 
             var btn = Button.new()

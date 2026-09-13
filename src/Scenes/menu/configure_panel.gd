@@ -30,7 +30,7 @@ func _ready():
     # Populate UI from scene nodes
     var available_weapons = $Control/VBoxContainer/WeaponsAndItemsContainer/WeaponsContainer/WeaponsHBox/AvailableWeaponsScroll/AvailableWeaponsList
     var equipped_weapons = $Control/VBoxContainer/WeaponsAndItemsContainer/WeaponsContainer/WeaponsHBox/EquippedWeaponsScroll/EquippedWeaponsList
-    var available_items = $Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList
+    var _available_items = $Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/AvailableItemsScroll/AvailableItemsList
     var equipped_items = $Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/EquippedItemsScroll/EquippedItemsList
 
     # Setup weapon UI

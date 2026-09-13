@@ -188,7 +188,7 @@ func _on_item_added(event: Dictionary) -> void:
 
 func _on_item_removed(event: Dictionary) -> void:
     var entity = event.get("hold_owner")
-    var item = event.get("item")
+    var _item = event.get("item")
     if entity != character:
         return  
     _update_items()

@@ -1,1 +1,4 @@
 1. added new tests to test/test_item_factory_gdunit4.gd file
+2. added plan for CharacterUI item tooltip: docs/plans/character-ui-item-tooltip.md
+3. implemented CharacterUI item tooltip: src/ui/character_ui.gd, src/ui/CharacterUI.tscn, test/test_character_ui_tooltip.gd
+4. extracted tooltip into reusable component (TooltipUi) + added same tooltips to shop character info: src/ui/tooltip_ui.gd, src/ui/TooltipUi.tscn, src/ui/item_tooltip.gd, src/ui/character_ui.gd, src/ui/CharacterUI.tscn, src/Scenes/menu/shop_menu.gd, src/Scenes/menu/ShopMenu.tscn, test/test_character_ui_tooltip.gd, docs/plans/character-ui-item-tooltip.md

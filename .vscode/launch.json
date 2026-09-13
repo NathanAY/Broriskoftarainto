@@ -16,7 +16,7 @@
             "name": "Launch",
             "type": "godot",
             "request": "launch",
-            "scene": "Scenes/Game.tscn",
+            "scene": "src/Scenes/Game.tscn",
             // "scene": "Scenes/menu/StarterMenu.tscn"
             // "scene": "main|current|pinned|<path>",
         }

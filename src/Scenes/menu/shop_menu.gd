@@ -8,6 +8,7 @@ class_name ShopMenu
 @onready var stats_container: VBoxContainer = $Control/VBoxContainer/MidContainer/StatsPanel/StatsScroll/StatsList
 @onready var collected_items_container: VBoxContainer = $Control/VBoxContainer/BottomContainer/ItemsContainer/ItemsScroll/List
 @onready var weapons_container: GridContainer = $Control/VBoxContainer/BottomContainer/WeaponsContainer/WeaponsScroll/List
+@onready var tooltip: TooltipUi = $Tooltip
 
 signal next_stage_pressed
 
@@ -43,9 +44,13 @@ func _update_character_info() -> void:
         for child in collected_items_container.get_children():
             child.queue_free()
         for item in item_holder.items:
+            var hbox = HBoxContainer.new()
             var l = Label.new()
             l.text = item.name
-            collected_items_container.add_child(l)
+            l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+            hbox.add_child(l)
+            tooltip.bind_to_row(hbox, item)
+            collected_items_container.add_child(hbox)
 
     # Update Weapons
     var weapon_holder = character.get_node_or_null("WeaponHolder")
@@ -71,6 +76,8 @@ func _update_character_info() -> void:
             name_label.text = weapon.name
             name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
             vbox.add_child(name_label)
+
+            tooltip.bind_to_row(vbox, weapon)
 
             weapons_container.add_child(vbox)
 

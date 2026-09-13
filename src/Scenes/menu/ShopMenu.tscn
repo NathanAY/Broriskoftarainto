@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://d4dr0kikva8xx"]
 
 [ext_resource type="Script" uid="uid://cagiju3alea6f" path="res://src/Scenes/menu/shop_menu.gd" id="1_rak5t"]
+[ext_resource type="PackedScene" path="res://src/ui/TooltipUi.tscn" id="2_0tooltip"]
 
 [node name="ShopMenu" type="CanvasLayer" unique_id=142525685]
 process_mode = 3
@@ -119,3 +120,5 @@ text = "Reroll"
 [node name="NextStageButton" type="Button" parent="Control/VBoxContainer/BottomContainer/ButtonsContainer" unique_id=1073517102]
 layout_mode = 2
 text = "Go next"
+
+[node name="Tooltip" parent="." unique_id=345678901 instance=ExtResource("2_0tooltip")]

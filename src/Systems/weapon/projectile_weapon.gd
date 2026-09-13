@@ -18,18 +18,18 @@ func shoot_projectile(target: Node) -> Projectile:
         
     # get weapon’s sprite node
     var holder_weapon_holder = holder.get_node("WeaponHolder")
-    var sprite_node: Node2D = holder_weapon_holder.weapon_templates.get(self, null)
+    var holder_sprite_node: Node2D = holder_weapon_holder.weapon_templates.get(self, null)
 
-    if sprite_node:
-        p.global_position = sprite_node.global_position
+    if holder_sprite_node:
+        p.global_position = holder_sprite_node.global_position
     else:
         p.global_position = holder.global_position
     
     p.attachEventManager(event_manager)
     var projectile_props = {
-        "pierce": stats.get_stat("projectile_pierce") if stats.get_stat("projectile_pierce") else 0,
-        "bounce": stats.get_stat("projectile_bounce") if stats.get_stat("projectile_bounce") else 0,
-        "chain": stats.get_stat("projectile_chain") if stats.get_stat("projectile_chain") else 0
+        "pierce": stats.get_stat("projectile_pierce") if stats.get_stat("projectile_pierce") else 0.0,
+        "bounce": stats.get_stat("projectile_bounce") if stats.get_stat("projectile_bounce") else 0.0,
+        "chain": stats.get_stat("projectile_chain") if stats.get_stat("projectile_chain") else 0.0
     }
     p.set_properties(projectile_props)
     
@@ -39,7 +39,7 @@ func shoot_projectile(target: Node) -> Projectile:
         var ignoreGroups = holder.get_groups().filter(func(g): return g != "damageable")
         p.set_ignore_groups(ignoreGroups)
     if p.has_method("set_direction"):
-        var dir = (target.global_position - sprite_node.global_position).normalized()
+        var dir = (target.global_position - holder_sprite_node.global_position).normalized()
         p.set_direction(dir)
         p.set_target(target)
     

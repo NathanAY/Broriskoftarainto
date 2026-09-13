@@ -5,6 +5,7 @@ extends Control
 @onready var stats_container: VBoxContainer = $VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsHBox/StatsScroll/StatsList
 @onready var weapons_container: GridContainer = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/WeaponsScroll/WeaponsList
 @onready var back_button: Button = $VBoxContainer/Footer/Close
+@onready var tooltip: TooltipUi = $Tooltip
 
 var character: Character
 var stats_node: Stats = null
@@ -135,6 +136,8 @@ func _update_weapons() -> void:
         name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         vbox.add_child(name_label)
 
+        tooltip.bind_to_row(vbox, weapon)
+
         weapons_container.add_child(vbox)
 # Called when weapons emits its signal (weapon_changed(weapon_name, new_value))
 func _on_weapon_changed(event) -> void:
@@ -153,18 +156,24 @@ func _update_items() -> void:
         return
 
     for item in item_holder.items:
-        var hbox = HBoxContainer.new()
+        items_container.add_child(_build_item_row(item))
 
-        # Add Icon
-        var icon_node = ItemIconGenerator.generate_icon(item)
-        hbox.add_child(icon_node)
+func _build_item_row(item: Resource) -> HBoxContainer:
+    var hbox = HBoxContainer.new()
 
-        # Add Label
-        var l = Label.new()
-        l.text = _item_display_name(item)
-        l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-        hbox.add_child(l)
-        items_container.add_child(hbox)
+    # Add Icon
+    var icon_node = ItemIconGenerator.generate_icon(item)
+    hbox.add_child(icon_node)
+
+    # Add Label
+    var l = Label.new()
+    l.text = _item_display_name(item)
+    l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    hbox.add_child(l)
+
+    tooltip.bind_to_row(hbox, item)
+
+    return hbox
 
 func _on_item_added(event: Dictionary) -> void:
     var entity = event.get("hold_owner")
@@ -172,17 +181,7 @@ func _on_item_added(event: Dictionary) -> void:
     # entity is the owner of the item; only update UI if it's the current character
     if entity != character:
         return
-    var hbox = HBoxContainer.new()
-
-    # Add Icon
-    var icon_node = ItemIconGenerator.generate_icon(item)
-    hbox.add_child(icon_node)
-
-    var l = Label.new()
-    l.text = _item_display_name(item)
-    l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-    hbox.add_child(l)
-
+    var hbox = _build_item_row(item)
     items_container.add_child(hbox)
     #_update_items()
 

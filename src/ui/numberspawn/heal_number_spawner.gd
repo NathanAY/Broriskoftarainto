@@ -9,10 +9,16 @@ func _ready() -> void:
     event_manager.subscribe("on_heal", Callable(self, "_on_heal"))
     event_manager.subscribe("before_take_damage", Callable(self, "_before_take_damage"))
 
+func _spawn_parent() -> Node:
+    var scene: Node = get_tree().current_scene
+    if scene:
+        return scene
+    return get_parent()
+
 func _on_heal(event) -> void:
     var dmg_num = damage_number_scene.instantiate()
     dmg_num.color = Color(0, 1, 0)
-    get_tree().current_scene.add_child(dmg_num)  # add to world/layer
+    _spawn_parent().add_child(dmg_num)
     var random_offset = Vector2(
         randf_range(-spawn_offset, spawn_offset),
         randf_range(-spawn_offset, spawn_offset) - 10 # bias upward
@@ -24,7 +30,7 @@ func _before_take_damage(event: Dictionary) -> void:
     var dmg_num: FloatingNumber = damage_number_scene.instantiate()
     dmg_num.color = Color(1, 0, 0)
     dmg_num.start_scale = 3
-    get_tree().current_scene.add_child(dmg_num)  # add to world/layer
+    _spawn_parent().add_child(dmg_num)
     var random_offset = Vector2(
         randf_range(-spawn_offset, spawn_offset),
         randf_range(-spawn_offset, spawn_offset) - 10 # bias upward

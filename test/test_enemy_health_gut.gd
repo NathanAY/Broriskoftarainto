@@ -3,6 +3,7 @@ extends GutTest
 func test_enemy_health():
     var test_scene = load("res://test/TestScene.tscn").instantiate()
     get_tree().root.add_child(test_scene)
+    get_tree().current_scene = test_scene
     
     var enemy = test_scene.get_node("Enemy")
     var health: Health = enemy.get_node("Health")
@@ -19,6 +20,7 @@ func test_enemy_health():
 func test_enemy_health_with_much_attack_speed():
     var test_scene = load("res://test/TestScene.tscn").instantiate()
     get_tree().root.add_child(test_scene)
+    get_tree().current_scene = test_scene
     
     var character: Character = test_scene.get_node("Character")
     var c_stats: Stats = character.get_node_or_null("Stats")

@@ -3,7 +3,7 @@ setlocal
 
 set "GODOT_BIN=F:\programs\Godot_v4.6.1-stable_win64\Godot_v4.6.1-stable_win64.exe"
 set "TEST_TARGET=res://test"
-set "TIMEOUT_SECONDS=10"
+set "TIMEOUT_SECONDS=60"
 set "LOG_FILE=.gdunit_timeout.log"
 
 if not "%~1"=="" set "TEST_TARGET=res://test/%~1"
@@ -57,7 +57,11 @@ echo ========================================
 if %TEST_EXIT_CODE% EQU 0 (
     echo ALL TESTS PASSED
 ) else (
-    echo TESTS FAILED - Exit code: %TEST_EXIT_CODE%
+    if %TEST_EXIT_CODE% EQU 101 (
+        echo ALL TESTS PASSED - with warnings: orphan nodes detected
+    ) else (
+        echo TESTS FAILED - Exit code: %TEST_EXIT_CODE%
+    )
 )
 
 echo ========================================

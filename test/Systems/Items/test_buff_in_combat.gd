@@ -5,6 +5,7 @@ extends GdUnitTestSuite
 func test_add_buff_item_to_character_in_combat() -> void:
     var runner := scene_runner("res://test/TestScene.tscn")
     var test_scene := runner.scene()
+    get_tree().current_scene = test_scene
 
     var character: Character = test_scene.get_node("Character")
     

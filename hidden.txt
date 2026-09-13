@@ -16,12 +16,31 @@ Fix that problem, make the buff working.
 You can run this test by next command ".\run_tests_gdunit_custom.bat Systems/Items/test_buff_in_combat.gd"
 
 ======
-There is a test that working fine when I run it in test/Systems/Items/test_buff_in_combat.gd
 
-The test verify that the buff item is working.
-By default the buff should increase the attack_speed stat when on_hit event occurs.
-I see in the ui that the buff stacks, so the event occurs.
-The problem is that the character has no stat changes, so the buff do nothing by some reason.
-Fix that problem, make the buff working.
+Need to fix the the test.
+There is a test that working fine when I run it in Godot Gdunit test runner test/Systems/test_combat.gd
+It is also possible to run it from next next command ".\run_tests_gdunit_custom.bat Systems/test_combat.gd"
 
-You can run this test by next command ".\run_tests_gdunit_custom.bat Systems/Items/test_buff_in_combat.gd"
+When it runs via terminal, the test has an error and an infinite amout of logs like that:
+SCRIPT ERROR: Cannot call method 'add_child' on a null value.
+   at: HealNumberSpawner._on_heal (res://src/ui/numberspawn/heal_number_spawner.gd:15)
+   GDScript backtrace (most recent call first):
+       [0] _on_heal (res://src/ui/numberspawn/heal_number_spawner.gd:15)
+       [1] emit_event (res://src/Scripts/LocalEventManager.gd:21)
+       [2] heal (res://src/Systems/damage/health.gd:27)
+       [3] _on_regen_tick (res://src/Systems/Items/Modifiers/regen_modifier.gd:45)
+
+Debugger Break, Reason: 'Cannot call method 'add_child' on a null value.'
+*Frame 0 - res://src/ui/numberspawn/heal_number_spawner.gd:15 in function '_on_heal'
+Enter "help" for assistance.
+debug> 
+Debugger Break, Reason: 'Cannot call method 'add_child' on a null value.'
+*Frame 0 - res://src/ui/numberspawn/heal_number_spawner.gd:15 in function '_on_heal'
+Enter "help" for assistance.
+debug> 
+Debugger Break, Reason: 'Cannot call method 'add_child' on a null value.'
+*Frame 0 - res://src/ui/numberspawn/heal_number_spawner.gd:15 in function '_on_heal'
+Enter "help" for assistance.
+
+
+

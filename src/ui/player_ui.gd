@@ -13,7 +13,7 @@ var item_holder: Node = null
 var value_labels: Dictionary = {}  # stat_name -> Label
 var _show_stage_scaleing: bool = false
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
     if !stage_manager:
         return
     var current_staget = "Loop " + str(stage_manager.current_loop)
@@ -127,7 +127,7 @@ func _on_item_added(event: Dictionary) -> void:
 
 func _on_item_removed(event: Dictionary) -> void:
     var entity = event.get("hold_owner")
-    var item = event.get("item")
+    var _item = event.get("item")
     if entity != character:
         return  
     _update_items()

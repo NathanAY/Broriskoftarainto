@@ -31,5 +31,5 @@ func _before_take_damage(event: Dictionary) -> void:
     )
     var dc: DamageContext = event["damage_context"]
     dmg_num.global_position = event["damage_context"].target.global_position + random_offset
-    dmg_num.show_damage(dc.final_amount)
+    dmg_num.show_damage(int(dc.final_amount))
     

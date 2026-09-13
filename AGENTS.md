@@ -1,7 +1,6 @@
 # Main rules if changing project
 - After any feature implementation: 1. Create a test 2. Read failures 3. Fix the test/code 4. Run test again
 - Task -> Read relevant code -> Read testing rules/docs -> Write test -> RUN TEST -> Read error -> Fix -> RUN TEST again -> Done
-- After any changes add it it AGENTS_history.md file.
 - If you have questions or options for some implementation than ask about it.
 
 # Core systems

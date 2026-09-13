@@ -99,7 +99,7 @@ func _on_debuff_removed(event: Dictionary):
         _update_label_debuff(id)
 # --- update loop ---------------------------------------------------
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
     for id in active_buffs.keys():
         _update_label(id)
     for id in active_debuffs.keys():

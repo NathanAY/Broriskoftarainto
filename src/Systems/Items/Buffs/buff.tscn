@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" uid="uid://coe0e7lpackdi" path="res://src/Systems/Items/Buffs/buff.gd" id="1_ivxpu"]
 
-[node name="Buff" type="Node"]
+[node name="Buff" type="Node" unique_id=1273864142]
 script = ExtResource("1_ivxpu")

@@ -3,7 +3,7 @@ extends Node
 
 @onready var anim_player: AnimationPlayer = get_parent().get_node("AnimationPlayer")
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
     #get_parent().get_node("MovementBehaviour").process_movement(get_parent(), delta)
     var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
     var character: CharacterBody2D = get_parent()

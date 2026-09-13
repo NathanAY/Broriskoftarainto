@@ -50,7 +50,7 @@ func _update_bar() -> void:
     # --- Shield ---
     var shield_width_max = total_width * (max_shield / total_max)
     
-    var shield_ratio = (current_shield / max_shield) if max_shield > 0 else 0
+    var shield_ratio = (current_shield / max_shield) if max_shield > 0 else 0.0
     var shield_width = shield_width_max * shield_ratio
 
     shield_fill.size = Vector2(shield_width, total_height)

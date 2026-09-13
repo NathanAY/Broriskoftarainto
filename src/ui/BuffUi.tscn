@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://5uo1dvkic321" path="res://src/ui/buff_ui.gd" id="1_vahcb"]
 
-[node name="BuffUi" type="Control"]
+[node name="BuffUi" type="Control" unique_id=1898266096]
 layout_mode = 3
 anchors_preset = 5
 anchor_left = 0.5
@@ -10,19 +10,19 @@ anchor_right = 0.5
 grow_horizontal = 2
 script = ExtResource("1_vahcb")
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1166667761]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer" unique_id=214617585]
 layout_mode = 2
 
-[node name="PanelContainer2" type="PanelContainer" parent="."]
+[node name="PanelContainer2" type="PanelContainer" parent="." unique_id=996195609]
 layout_mode = 0
 offset_top = 40.0
 offset_right = 40.0
 offset_bottom = 80.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer2"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer2" unique_id=663320152]
 layout_mode = 2

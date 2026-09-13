@@ -8,7 +8,7 @@ extends MovementBehaviour
 var current_goal: Vector2 = Vector2.ZERO
 var flip_sprite: bool = true
 
-func process_movement(creature_self: CharacterBody2D, delta: float) -> void:
+func process_movement(creature_self: CharacterBody2D, _delta: float) -> void:
     if current_goal == Vector2.ZERO:
         _pick_new_goal(creature_self)
         return

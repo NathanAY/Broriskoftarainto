@@ -1,78 +1,27 @@
-run next command and check the test results: .\run_tests_gdunit_custom.bat test_stat_creation_stat.gd
+There is a test that creates an Item that applies a buff.
+It has one WARNING: Detected 1 orphan nodes.  <Node> Id:150961391423
+The Debugger, ObjectDb profiler shows that the orphan node is a node of type Buff with that has script buff.gd
 
-You need to fix the problems with orphan nodes.
-You can fetch example how to fix the orphan nodes from this page: https://godot-gdunit-labs.github.io/gdUnit4/latest/tutorials/fixing-orphan-nodes/
+You can run this test by next command ".\run_tests_gdunit_custom.bat Systems/Items/test_stat_creation_buff.gd"
 
+=======
+There is a test test/Systems/Items/test_buff_in_combat.gd
 
+The test verify that the buff item is working.
+By default the buff should increase the attack_speed stat when on_hit event occurs.
+I see in the ui that the buff stacks, so the event occurs.
+The problem is that the character has no stat changes, so the buff do nothing by some reason.
+Fix that problem, make the buff working.
 
+You can run this test by next command ".\run_tests_gdunit_custom.bat Systems/Items/test_buff_in_combat.gd"
 
+======
+There is a test that working fine when I run it in test/Systems/Items/test_buff_in_combat.gd
 
-func test_stat_creation_stat() -> void:
-    var factory = ItemFactory.new()
-    factory._ready()
-    factory.stats = Stats.new()
-    var item = factory.get_item_by_type("stat")
-    assert_object(item).is_not_null()
-    collect_orphan_node_details()
+The test verify that the buff item is working.
+By default the buff should increase the attack_speed stat when on_hit event occurs.
+I see in the ui that the buff stacks, so the event occurs.
+The problem is that the character has no stat changes, so the buff do nothing by some reason.
+Fix that problem, make the buff working.
 
-    # assert_int(2).is_equal(3)
-
-    var factory = auto_free(ItemFactory.new())
-    factory._ready()
-    if not has_node("Stats"):
-        var new_stats := Stats.new()
-        new_stats.name = "stats"
-        add_child(new_stats)
-    collect_orphan_node_details()
-    var item = factory.get_item_by_type("stat")
-    assert_object(item).is_not_null()
-
---THE FIX
--- Noramal fix
-func test_stat_creation_stat() -> void:
-    var factory : ItemFactory = auto_free(load("res://src/Systems/Items/ItemFactory.tscn").instantiate())
-    factory._ready()
-    var item = factory.get_item_by_type("stat")
-    assert_object(item).is_not_null()
-    collect_orphan_node_details()
-
-// LOCAL Qwen3.8:27b
-func test_stat_creation_stat() -> void:
-    var factory: ItemFactory = auto_free(ItemFactory.new())
-    var stats: Stats = Stats.new()
-    stats.name = "Stats"
-    factory.add_child(stats)
-    factory._ready()
-    var item = factory.get_item_by_type("stat")
-    assert_object(item).is_not_null()
-    collect_orphan_node_details()
-
---zen AI \big Pickle --AND-- MiMo V2.5 Free
-func test_stat_creation_stat() -> void:
-    var factory: ItemFactory = auto_free(ItemFactory.new())
-    factory._ready()
-    factory.stats = auto_free(Stats.new())
-    var item = factory.get_item_by_type("stat")
-    assert_object(item).is_not_null()
-    collect_orphan_node_details()
-
--- Muse spark 1.3 Free medium 55K token
-func test_stat_creation_stat() -> void:
-    var factory: ItemFactory = auto_free(ItemFactory.new())
-    var stats := Stats.new()
-    stats.name = "Stats"
-    factory.add_child(stats)
-    factory.stats = stats
-    factory._ready()
-    var item = factory.get_item_by_type("stat")
-    assert_object(item).is_not_null()
-
--- BEST FIX
-func test_stat_creation_stat() -> void:
-    var factory : ItemFactory = load("res://src/Systems/Items/ItemFactory.tscn").instantiate()
-    add_child(factory)
-    var item = factory.get_item_by_type("stat")
-    assert_object(item).is_not_null()
-    collect_orphan_node_details()
-
-
+You can run this test by next command ".\run_tests_gdunit_custom.bat Systems/Items/test_buff_in_combat.gd"

@@ -31,9 +31,6 @@ func add_item(item: Item) -> void:
         # 🔹 If not found, create new one
         if not effect:
             effect = effect_scene.instantiate()
-                        # Configure Buff BEFORE adding it to the tree
-            if effect is Buff:
-                effect.modifiers = item.get_meta("buff_modifiers", {})
 
             add_child(effect)
             item.apply_to(hold_owner)
@@ -47,7 +44,7 @@ func add_item(item: Item) -> void:
             if condition != "" and stats:
                 active = stats.get_condition(condition) > 0
                 var idx = effect.stacks.size() # about to add
-                event_manager.subscribe("on_condition_achange", func(ev):
+                event_manager.subscribe("on_condition_change", func(ev):
                     if effect.has_method("set_stack_active") and ev["name"] == condition:
                         effect.set_stack_active(idx, stats.get_condition(condition) > 0)
                 )

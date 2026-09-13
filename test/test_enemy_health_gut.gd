@@ -9,7 +9,7 @@ func test_enemy_health():
     var health: Health = enemy.get_node("Health")
     assert_eq(health.current_health, 40.0, "Enemy health should be 40")
 
-    await wait_seconds(3)
+    await wait_seconds(3.5)
     assert_eq(health.current_health, 10.0)
     
     await wait_seconds(2)

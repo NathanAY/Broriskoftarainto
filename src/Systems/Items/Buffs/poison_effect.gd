@@ -68,19 +68,19 @@ func _on_tick() -> void:
     if source:
         sorce_em = source.get_node_or_null("EventManager")
         if sorce_em:
-            sorce_em.emit_event("before_deal_damage", [{"damage_context": ctx}])
+            sorce_em.emit_event("before_deal_damage", {"damage_context": ctx})
     # Run through defender phase (so armor/resists can apply)
     var target_em: EventManager = target_health.event_manager
 
     if target_em:
-        target_em.emit_event("before_take_damage", [{"damage_context": ctx}])
+        target_em.emit_event("before_take_damage", {"damage_context": ctx})
     # Apply damage
     target_health.take_damage(ctx)
     if target_em:
-        target_em.emit_event("after_take_damage", [{"damage_context": ctx}])
+        target_em.emit_event("after_take_damage", {"damage_context": ctx})
 
     if source and source.get_node_or_null("EventManager"):
-        sorce_em.emit_event("after_deal_damage", [{"damage_context": ctx}])   
+        sorce_em.emit_event("after_deal_damage", {"damage_context": ctx})   
 
 func _on_expire() -> void:
     _tick_timer.queue_free()

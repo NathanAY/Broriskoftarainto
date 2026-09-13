@@ -1,3 +1,7 @@
+THIS FILE SHOULD BE IGNORED BY AI AGENTS, IT'S ONLY FOR PERSONAL NOTES
+===
+Remove 2 point from architecture-review.
+===
 There is a test that creates an Item that applies a buff.
 It has one WARNING: Detected 1 orphan nodes.  <Node> Id:150961391423
 The Debugger, ObjectDb profiler shows that the orphan node is a node of type Buff with that has script buff.gd
@@ -16,31 +20,26 @@ Fix that problem, make the buff working.
 You can run this test by next command ".\run_tests_gdunit_custom.bat Systems/Items/test_buff_in_combat.gd"
 
 ======
+There is a that fail when I run all tests by next command:
+.\run_tests_gdunit.bat   
+If I run only that test by command below, than it's passed.
+.\run_tests_gdunit_custom.bat Systems/ui/test_character_ui_tooltip.gd
 
-Need to fix the the test.
-There is a test that working fine when I run it in Godot Gdunit test runner test/Systems/test_combat.gd
-It is also possible to run it from next next command ".\run_tests_gdunit_custom.bat Systems/test_combat.gd"
-
-When it runs via terminal, the test has an error and an infinite amout of logs like that:
-SCRIPT ERROR: Cannot call method 'add_child' on a null value.
-   at: HealNumberSpawner._on_heal (res://src/ui/numberspawn/heal_number_spawner.gd:15)
+Here is the error log:
+SCRIPT ERROR: Invalid assignment of property or key 'current_character' with value of type 'previously freed' on a base object of type 'Node (global_game_state.gd)'.
+   at: CharacterUiTooltipTest.test_hover_shows_and_hides_tooltip (res://test/ui/test_character_ui_tooltip.gd:68)
    GDScript backtrace (most recent call first):
-       [0] _on_heal (res://src/ui/numberspawn/heal_number_spawner.gd:15)
-       [1] emit_event (res://src/Scripts/LocalEventManager.gd:21)
-       [2] heal (res://src/Systems/damage/health.gd:27)
-       [3] _on_regen_tick (res://src/Systems/Items/Modifiers/regen_modifier.gd:45)
-
-Debugger Break, Reason: 'Cannot call method 'add_child' on a null value.'
-*Frame 0 - res://src/ui/numberspawn/heal_number_spawner.gd:15 in function '_on_heal'
+       [0] test_hover_shows_and_hides_tooltip (res://test/ui/test_character_ui_tooltip.gd:68)
+       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:79)
+debug> 
+Debugger Break, Reason: 'Invalid assignment of property or key 'current_character' with value of type 'previously freed' on a base object of type 'Node (global_game_state.gd)'.'
+*Frame 0 - res://test/ui/test_character_ui_tooltip.gd:68 in function 'test_hover_shows_and_hides_tooltip'
 Enter "help" for assistance.
 debug> 
-Debugger Break, Reason: 'Cannot call method 'add_child' on a null value.'
-*Frame 0 - res://src/ui/numberspawn/heal_number_spawner.gd:15 in function '_on_heal'
+Debugger Break, Reason: 'Invalid assignment of property or key 'current_character' with value of type 'previously freed' on a base object of type 'Node (global_game_state.gd)'.'
+*Frame 0 - res://test/ui/test_character_ui_tooltip.gd:68 in function 'test_hover_shows_and_hides_tooltip'
 Enter "help" for assistance.
 debug> 
-Debugger Break, Reason: 'Cannot call method 'add_child' on a null value.'
-*Frame 0 - res://src/ui/numberspawn/heal_number_spawner.gd:15 in function '_on_heal'
-Enter "help" for assistance.
 
 
 

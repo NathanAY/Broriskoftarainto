@@ -51,7 +51,7 @@ func _on_trigger(_event_data):
     t.start()
 
     _active_stacks.append({"timer": t, "id": id})
-    event_manager.emit_event("on_buff_added", [{"buff": self, "holder": holder, "id": id}])
+    event_manager.emit_event("on_buff_added", {"buff": self, "holder": holder, "id": id})
 
 func _on_expire(id: int):
     # Find and remove expired stack
@@ -64,11 +64,11 @@ func _on_expire(id: int):
 func _expire_stack(stack: Dictionary):
     if stats:
         stats.remove_modifier(modifiers)
-    event_manager.emit_event("on_buff_removed", [{
+    event_manager.emit_event("on_buff_removed", {
         "buff": self,
         "holder": holder,
         "id": stack["id"],
         "stacks": _active_stacks.size()
-    }])
+    })
     if stack.has("timer"):
         stack["timer"].queue_free()

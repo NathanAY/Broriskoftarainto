@@ -29,7 +29,9 @@ func _spawn_explosion(position: Vector2):
     explosion.damage = explosion_damage
     get_tree().current_scene.add_child(explosion)
 
-func _on_stat_changes(stat_name: String, value: float):
+func _on_stat_changes(event: Dictionary):
+    var stat_name: String = event.get("stat_name", "")
+    var value: float = event.get("final_value", 0.0)
     match stat_name:
         "damage":
             explosion_damage = value

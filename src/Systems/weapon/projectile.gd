@@ -90,12 +90,12 @@ func do_damage(body):
     ctx.final_amount = damage
     ctx.tags.append("projectile")
     if event_manager: 
-        event_manager.emit_event("before_deal_damage", [{"damage_context": ctx}])
+        event_manager.emit_event("before_deal_damage", {"damage_context": ctx})
     var bodyHealth: Health = body.get_node("Health")
-    bodyHealth.event_manager.emit_event("before_take_damage", [{"damage_context": ctx}])
+    bodyHealth.event_manager.emit_event("before_take_damage", {"damage_context": ctx})
     bodyHealth.take_damage(ctx)
-    bodyHealth.event_manager.emit_event("after_take_damage", [{"damage_context": ctx}])
+    bodyHealth.event_manager.emit_event("after_take_damage", {"damage_context": ctx})
     if event_manager:
-        event_manager.emit_event("after_deal_damage", [{"projectile": self, "body": body, "damage_context": ctx}])
+        event_manager.emit_event("after_deal_damage", {"projectile": self, "body": body, "damage_context": ctx})
     if event_manager:
-        event_manager.emit_event("on_hit", [{"projectile": self, "body": body, "damage_context": ctx}])
+        event_manager.emit_event("on_hit", {"projectile": self, "body": body, "damage_context": ctx})

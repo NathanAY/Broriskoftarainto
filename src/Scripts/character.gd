@@ -93,3 +93,7 @@ func _flash(_event):
 func _die(_event: Dictionary):
     emit_signal("character_died")
     queue_free()
+
+func _exit_tree() -> void:
+    if GlobalGameState.current_character == self:
+        GlobalGameState.current_character = null

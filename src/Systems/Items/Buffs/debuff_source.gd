@@ -29,8 +29,8 @@ func _on_trigger(event: Dictionary):
     target.add_child(debuff_instance)
 
     if target_em:
-        target_em.emit_event("on_debuff_added", [{
+        target_em.emit_event("on_debuff_added", {
             "debuff": debuff_instance,
             "holder": holder,
             "target": target
-        }])
+        })

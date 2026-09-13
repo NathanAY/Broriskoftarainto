@@ -58,7 +58,7 @@ func get_stat(stat_name: String) -> float:
 func set_base_stat(stat_name: String, value: float):
     stats[stat_name] = value
     var final_value = get_stat(stat_name)
-    event_manager.emit_event("on_stat_changes", [{"stat_name" :stat_name, "final_value": final_value}])
+    event_manager.emit_event("on_stat_changes", {"stat_name" :stat_name, "final_value": final_value})
     return final_value
 
 func add_modifier(mod: Dictionary):
@@ -69,7 +69,7 @@ func add_modifier(mod: Dictionary):
             continue
         var final_value = get_stat(stat_name)
         if event_manager:
-            event_manager.emit_event("on_stat_changes", [{"stat_name" :stat_name, "final_value": final_value}])
+            event_manager.emit_event("on_stat_changes", {"stat_name" :stat_name, "final_value": final_value})
         else:
             print("Stats: No event manager")    
 
@@ -80,7 +80,7 @@ func remove_modifier(mod: Dictionary):
             continue
         var final_value = get_stat(stat_name)
         if event_manager:
-            event_manager.emit_event("on_stat_changes", [{"stat_name" :stat_name, "final_value": final_value}])
+            event_manager.emit_event("on_stat_changes", {"stat_name" :stat_name, "final_value": final_value})
 
 # -----------------
 # Conditions
@@ -97,8 +97,8 @@ func set_condition(conditionName: String, value: float) -> void:
     if conditions.get(conditionName, -1) != value:
         conditions[conditionName] = value
         if event_manager:
-            event_manager.emit_event("on_stat_changes", [{"stat_name" :conditionName, "final_value": value}])
-            event_manager.emit_event("on_condition_change", [{"condition_name" :conditionName, "value": value}])
+            event_manager.emit_event("on_stat_changes", {"stat_name" :conditionName, "final_value": value})
+            event_manager.emit_event("on_condition_change", {"condition_name" :conditionName, "value": value})
 
 func get_condition(conditionName: String) -> float:
     return conditions.get(conditionName, 0.0)

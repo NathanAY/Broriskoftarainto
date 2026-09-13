@@ -45,7 +45,7 @@ func add_item(item: Item) -> void:
                 active = stats.get_condition(condition) > 0
                 var idx = effect.stacks.size() # about to add
                 event_manager.subscribe("on_condition_change", func(ev):
-                    if effect.has_method("set_stack_active") and ev["name"] == condition:
+                    if effect.has_method("set_stack_active") and ev["condition_name"] == condition:
                         effect.set_stack_active(idx, stats.get_condition(condition) > 0)
                 )
 
@@ -56,7 +56,7 @@ func add_item(item: Item) -> void:
 
     # Notify others
     if event_manager:
-        event_manager.emit_event("on_item_added", [{"hold_owner": hold_owner, "item": item, "items": items}])
+        event_manager.emit_event("on_item_added", {"hold_owner": hold_owner, "item": item, "items": items})
  
 func remove_item(item: Resource) -> void:
     if not item:
@@ -72,4 +72,4 @@ func remove_item(item: Resource) -> void:
     items.erase(item)
     # Notify others
     if event_manager:
-        event_manager.emit_event("on_item_removed", [{"hold_owner": hold_owner, "item": item, "items": items}])
+        event_manager.emit_event("on_item_removed", {"hold_owner": hold_owner, "item": item, "items": items})

@@ -35,11 +35,11 @@ func _on_expire(t: Timer):
     if target_stats:
         target_stats.remove_modifier(modifiers)
     if target_em:
-        target_em.emit_event("on_debuff_removed", [{
+        target_em.emit_event("on_debuff_removed", {
             "debuff": self,
             "holder": holder,
             "target": target
-        }])
+        })
     t.queue_free()
     queue_free()
     

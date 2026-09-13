@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Architecture review — Broriskoftarainto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+      mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
+    </script>
+    <style>
+      .seam { stroke-dasharray: 4 4; }
+      .leak { stroke: #dc2626; }
+      .deep { background: linear-gradient(135deg, #0f172a, #1e293b); }
+      .module-box { box-shadow: 0 1px 2px rgba(15,23,42,.08); }
+    </style>
+  </head>
+  <body class="bg-stone-50 text-slate-900 font-sans">
+    <main class="max-w-5xl mx-auto px-6 py-12 space-y-12">
+
+      <!-- HEADER -->
+      <header class="space-y-4">
+        <p class="text-xs uppercase tracking-widest text-slate-500">architecture review · 14 Sep 2026</p>
+        <h1 class="text-3xl font-serif font-bold">Broriskoftarainto</h1>
+        <div class="flex flex-wrap gap-4 text-xs text-slate-600">
+          <span class="inline-flex items-center gap-2"><span class="inline-block w-4 h-4 border border-slate-900 rounded-sm module-box"></span> module</span>
+          <span class="inline-flex items-center gap-2"><svg width="22" height="10"><line x1="2" y1="5" x2="20" y2="5" stroke="#334155" stroke-width="2" class="seam"/></svg> seam</span>
+          <span class="inline-flex items-center gap-2"><svg width="22" height="10"><line x1="2" y1="5" x2="20" y2="5" stroke="#dc2626" stroke-width="2"/></svg> leakage</span>
+          <span class="inline-flex items-center gap-2"><span class="inline-block w-4 h-4 bg-slate-900 rounded-sm"></span> deep module</span>
+        </div>
+        <p class="text-sm text-slate-500 max-w-3xl">Six deepening candidates. Each card: the module as it is, the module it could be, and who wins. Domain terms from the code — <em>item, modifier, holder, DamageContext, weapon, event</em> — and architecture terms from the shared vocabulary: <em>module, interface, implementation, depth, seam, adapter, leverage, locality</em>.</p>
+      </header>
+
+      <!-- CANDIDATES -->
+      <section id="candidates" class="space-y-10">
+
+        <!-- =============== CANDIDATE 1 : DAMAGE PIPELINE =============== -->
+        <article class="rounded-xl border border-slate-200 bg-white module-box overflow-hidden">
+          <div class="p-6 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 class="text-xl font-serif font-bold">1. Collapse the damage pipeline into one deep module</h2>
+              <div class="flex gap-2">
+                <span class="px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">Strong</span>
+                <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">in-process</span>
+              </div>
+            </div>
+            <div class="font-mono text-sm text-slate-600">
+              src/Systems/weapon/projectile.gd:85-101 · melee_weapon_node.gd:255-271 · contact_weapon.gd:57-76 · area_weapon.gd:13-29 · src/Scripts/explosion.gd:42-59 · src/Systems/damage/health.gd · damage_context.gd
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <!-- BEFORE -->
+              <div class="rounded-lg border border-slate-200 bg-white p-4">
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-3">before · five copies, two event managers, no owner</p>
+                <div class="mermaid">
+flowchart LR
+  P[projectile.gd] --> H1[attacker EventManager]
+  M[melee_weapon_node] --> H1
+  C[contact_weapon] --> H1
+  A[area_weapon] --> H1
+  E[explosion.gd] --> H1
+  H1 --> D[DamageContext.final_amount mutated]
+  D --> H2[defender EventManager]
+  H2 --> H[health.take_damage]
+  H --> H1
+  H1 -.-> X[(after_deal_damage)]
+  style X fill:#fee2e2,stroke:#dc2626
+                </div>
+                <p class="text-xs text-slate-500 mt-3">The same 9-hop sequence written in 5 places. Event payload shapes disagree per emitter at src/Systems/weapon/projectile.gd:101, contact_weapon.gd:76, area_weapon.gd:29, explosion.gd:59 — and on_health_changed fires before target_take_persent_damage is written (health.gd:18-19).</p>
+              </div>
+
+              <!-- AFTER -->
+              <div class="rounded-lg border border-slate-800 p-4 deep">
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-3">after · one interface, ordering owned once</p>
+                <div class="flex items-center justify-center h-64">
+                  <div class="text-center">
+                    <div class="bg-slate-800 border border-slate-400 rounded p-3 px-6 inline-block text-slate-100 text-xs uppercase tracking-wider">
+                      deal_damage(source, target, amount, tags)
+                    </div>
+                    <div class="mx-auto my-2 w-px h-6 bg-slate-500"></div>
+                    <div class="bg-slate-900 border border-slate-600 rounded p-4 text-left text-[11px] text-slate-300 leading-5 max-w-[240px]">
+                      <div class="text-slate-500 text-[9px] uppercase tracking-wider mb-1">implementation (internal)</div>
+                      build DamageContext<br/>
+                      before_deal_damage · before_take_damage<br/>
+                      take_damage · after_take_damage<br/>
+                      after_deal_damage · on_hit<br/>
+                      <span class="text-emerald-300">ordering stated once, here</span>
+                    </div>
+                    <div class="mx-auto my-2 w-px h-6 bg-slate-500"></div>
+                    <div class="space-y-1 text-slate-300 text-[10px]">
+                      <div>projectile.hit → deal_damage</div>
+                      <div>melee swing → deal_damage</div>
+                      <div>contact / area / explosion → deal_damage</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Problem</p>
+                <p>The hit sequence has no owner: <span class="font-mono">do_damage</span> is re-implemented across 5 damage sources, each with its own <span class="font-mono">source</span> semantics and payload shape, while ordering between two event managers is an accident of listener order.</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Solution</p>
+                <p>Move the whole hop sequence behind one module the damage sources call. Its interface stays the same shape across all five callers; <span class="font-mono">final_amount</span> mutation and event ordering become its implementation.</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Wins</p>
+                <ul class="list-disc ml-4 space-y-1">
+                  <li>locality: ordering bugs fixed once</li>
+                  <li>tests hit one interface, whole pipe</li>
+                  <li>delete 4 shallow pass-throughs</li>
+                  <li>leverage: one pipe, 5 callers</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- =============== CANDIDATE 2 : EVENT CONTRACT =============== -->
+        <article class="rounded-xl border border-slate-200 bg-white module-box overflow-hidden">
+          <div class="p-6 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 class="text-xl font-serif font-bold">2. Turn the event contract into a checked seam</h2>
+              <div class="flex gap-2">
+                <span class="px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">Strong</span>
+                <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">in-process</span>
+              </div>
+            </div>
+            <div class="font-mono text-sm text-slate-600">
+              src/Scripts/LocalEventManager.gd · emitters: stats.gd, health.gd, weapon_holder.gd, item_holder.gd, projectile.gd, melee_weapon_node.gd, contact_weapon.gd, area_weapon.gd, explosion.gd · subscribers: ~40 modifier/UI call sites
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <!-- BEFORE : mass diagram, shallow -->
+              <div class="rounded-lg border border-slate-200 bg-white p-4">
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-3">before · interface as wide as the implementation</p>
+                <div class="flex items-end justify-center gap-4 h-64">
+                  <div class="text-center">
+                    <div class="w-24 bg-slate-200 border border-slate-400 rounded-t" style="height:56px"></div>
+                    <p class="text-[10px] mt-1">40-line implementation</p>
+                  </div>
+                  <div class="text-center">
+                    <div class="w-28 bg-emerald-200 border border-emerald-500 rounded-t module-box" style="height:210px"></div>
+                    <p class="text-[10px] mt-1">implied interface:<br/>~14 event names + payload shapes<br/><span class="text-slate-400">kept only in a comment</span></p>
+                  </div>
+                </div>
+                <p class="text-xs text-slate-500 mt-3">subscribe/unsubscribe/emit are tiny — but the load-bearing facts every caller must know (event names, payload keys, listener arity) live in a stale comment at LocalEventManager.gd:23-40. Mismatches verified across the codebase: <span class="font-mono">on_condition_change</span> emits <span class="font-mono">condition_name</span>, item_holder.gd:48 reads <span class="font-mono">ev["name"]</span> · two <span class="font-mono">on_stat_changes</span> subscribers expect two args, the emitter sends one dict · <span class="font-mono">on_weapon_changes</span> has two shapes.</p>
+              </div>
+
+              <!-- AFTER : mass diagram, deep -->
+              <div class="rounded-lg border border-slate-800 p-4 deep">
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-3">after · contract absorbed into the implementation</p>
+                <div class="flex items-end justify-center gap-4 h-64">
+                  <div class="text-center">
+                    <div class="bg-slate-800 border border-slate-400 rounded-t" style="height:150px"></div>
+                    <p class="text-[10px] mt-1 text-slate-400">event-name + payload registry,<br/>arity + key checks, one place</p>
+                  </div>
+                  <div class="text-center">
+                    <div class="w-28 bg-slate-200 border border-slate-400 rounded-t" style="height:44px"></div>
+                    <p class="text-[10px] mt-1">thinner interface</p>
+                  </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-3">The seam grows depth: payload schema becomes part of the module's implementation, surfaced as a violation at subscribe/emit time instead of silent no-ops three calls deep.</p>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Problem</p>
+                <p>The bus is deep on routing but shallow on <em>contract</em> — every event name, payload key, and listener arity is a fact leaked to callers, validated nowhere.</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Solution</p>
+                <p>Register declared event schemas behind the bus seam; <span class="font-mono">emit</span>/<span class="font-mono">subscribe</span> check payloads and arities when they cross it, so shape drift becomes immediate, local, catch-it-in-a-test errors.</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Wins</p>
+                <ul class="list-disc ml-4 space-y-1">
+                  <li>locality: one schema, N callers</li>
+                  <li>tests name payload shape, not silence</li>
+                  <li>two arity bugs surface as errors</li>
+                  <li>the comment becomes a runtime check</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- =============== CANDIDATE 3 : ENTITY COMPOSITION SEAM =============== -->
+        <article class="rounded-xl border border-slate-200 bg-white module-box overflow-hidden">
+          <div class="p-6 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 class="text-xl font-serif font-bold">3. Give entities a composition seam instead of string lookups</h2>
+              <div class="flex gap-2">
+                <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">Worth exploring</span>
+                <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">in-process</span>
+              </div>
+            </div>
+            <div class="font-mono text-sm text-slate-600">
+              src/Scripts/character.gd · src/Scripts/Enemy.gd · src/Systems/Items/item_holder.gd · weapon_holder.gd · BaseWeapon.gd · health.gd · projectile.gd · all of Modifiers/
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <!-- BEFORE -->
+              <div class="rounded-lg border border-slate-200 bg-white p-4">
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-3">before · modules discover the entity by tree shape</p>
+                <div class="mermaid">
+flowchart TB
+  E[Character / Enemy]
+  E --- S["Stats (node named &quot;Stats&quot;)"]
+  E --- EM["EventManager (node named &quot;EventManager&quot;)"]
+  E --- H["Health (node named &quot;Health&quot;)"]
+  MW[Weapons] -.get_node.-> S
+  IH[ItemHolder] -.get_node_or_null.-> EM
+  BD[Modifiers] -."event_manager.get_parent()".-> E
+  BU[Buff] -."get_parent().hold_owner".-> E
+  PJ[projectile.gd] -.get_node.-> H
+  classDef leak fill:#fee2e2,stroke:#dc2626;
+  class MW,IH,BD,BU,PJ leak
+                </div>
+                <p class="text-xs text-slate-500 mt-3">At least three different back-channels for "who is my holder": get_node on children, event_manager.get_parent(), get_parent().hold_owner. character.gd:21-23 attaches modifiers to every child, item_holder.gd:37-38 attaches them again.</p>
+              </div>
+              <!-- AFTER -->
+              <div class="rounded-lg border border-slate-800 p-4 deep">
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-3">after · parts cross one seam, injected at construction</p>
+                <div class="mermaid">
+flowchart LR
+  E[Character / Enemy] --> CTX["entity context (attribute access)"]
+  CTX --> S[Stats]
+  CTX --> EM[EventManager]
+  CTX --> H[Health]
+  MW["Weapons / Modifiers / Buffs / items"] --> CTX
+  PJ["projectile.gd"] --> CTX
+  style CTX fill:#1e293b,color:#e2e8f0
+                </div>
+                <p class="text-xs text-slate-400 mt-3">Tree-shape knowledge concentrates in one module each entity provides; every subsystem takes that context rather than walking nodes or reaching through parents.</p>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Problem</p>
+                <p>The "entity" concept is a wide, implicit node-name contract (<span class="font-mono">Stats</span>, <span class="font-mono">EventManager</span>, <span class="font-mono">Health</span>) rediscovered by ~30 call sites through different back-channels, plus a duplicated combatant body between character.gd and Enemy.gd.</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Solution</p>
+                <p>Entities expose their parts once, at a single seam; subsystems receive them as parameters. Character and Enemy keep one shared implementation of that seam (shared death/flash/collision wiring).</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Wins</p>
+                <ul class="list-disc ml-4 space-y-1">
+                  <li>locality: tree shape known in one place</li>
+                  <li>tests build entities without scenes</li>
+                  <li>identical Entity/Character bodies collapse</li>
+                  <li>the "holder" back-channel dies</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- =============== CANDIDATE 4 : ITEM FACTORY =============== -->
+        <article class="rounded-xl border border-slate-200 bg-white module-box overflow-hidden">
+          <div class="p-6 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 class="text-xl font-serif font-bold">4. Collapse ItemFactory to one generate interface</h2>
+              <div class="flex gap-2">
+                <span class="px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">Strong</span>
+                <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">local-substitutable</span>
+              </div>
+            </div>
+            <div class="font-mono text-sm text-slate-600">
+              src/Systems/Items/item_factory.gd (433 lines) · src/Systems/Items/item_holder.gd · test/Systems/Items/test_item_factory_gdunit4.gd
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <!-- BEFORE : call graph -->
+              <div class="rounded-lg border border-slate-200 bg-white p-4">
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-3">before · six entry points, four near-copy pairs</p>
+                <div class="mermaid">
+flowchart TD
+  G[get_item_by_type] --> S1[_generate_stat_item]
+  G --> S2[_generate_stat_item_insexed]
+  G --> E1[_generate_effect_item]
+  G --> E2[_generate_effect_item_insexed]
+  G --> B1[_generate_buff_item]
+  G --> B2[_generate_buff_item_insexed]
+  G --> D1[_generate_debuff_item]
+  G --> D2[_generate_debuff_item_insexed]
+  R[generate_random_item] --> G
+  P[get_item_from_pool_or_generate] --> R
+  S1 -.duplicate.-> S2
+  E1 -.duplicate.-> E2
+  B1 -.duplicate.-> B2
+  D1 -.duplicate.-> D2
+  classDef dup fill:#fee2e2,stroke:#dc2626;
+  class S1,S2,E1,E2,B1,B2,D1,D2 dup
+                </div>
+                <p class="text-xs text-slate-500 mt-3">The negative-stat + description block is copy-pasted ~8 times (040-108 typo "Decreasese" among them); _stat/_effect thresholds computed but never used; an unreachable branch at :95; _generate_stat_modifiers' elif is byte-identical to its else.</p>
+              </div>
+              <!-- AFTER : nested boxes -->
+              <div class="rounded-lg border border-slate-800 p-4 deep">
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-3">after · one generate, table-driven inside</p>
+                <div class="flex flex-col items-center h-64 justify-center">
+                  <div class="bg-slate-800 border border-slate-400 rounded px-4 py-2 text-slate-100 text-xs uppercase tracking-wider">generate(kind, index?)</div>
+                  <div class="mx-auto my-2 w-px h-5 bg-slate-500"></div>
+                  <div class="bg-slate-900 border border-slate-600 rounded p-4 text-left text-[11px] text-slate-300 leading-5">
+                    <div class="text-slate-500 text-[9px] uppercase tracking-wider mb-1">implementation (internal)</div>
+                    kind table → stat / effect / buff / debuff<br/>
+                    one "negative stat" helper, used 4x<br/>
+                    name + description built in one place<br/>
+                    <span class="text-emerald-300">indexes and randomness are one parameter</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Problem</p>
+                <p>The generator is shallow: six public entry points and near-copy ×2 variants for each item kind, so the interface takes as long to learn as the implementation takes to read. Every new item kind means the whole pattern repeats twice.</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Solution</p>
+                <p>One generate entry with a kind selector; index-or-random is a parameter, and stat/name/description/negative-stat work are shared helpers inside the module.</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Wins</p>
+                <ul class="list-disc ml-4 space-y-1">
+                  <li>interface shrinks 6 entry points → 1</li>
+                  <li>locality: negative-stat logic in one helper</li>
+                  <li>tests assert one coherent generation</li>
+                  <li>dead thresholds + branch removed</li>
+                </ul>
+              </div>
+            </div>
+            <div class="rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+              ItemFactory depends on a live <span class="font-mono">$Stats</span> child to enumerate stat keys — the factory's test seam is currently a whole scene. A data-driven source of stat names would make the single generate interface substitutable with an in-memory adapter.
+            </div>
+          </div>
+        </article>
+
+        <!-- =============== CANDIDATE 5 : ITEM APPLICATION POLICY =============== -->
+        <article class="rounded-xl border border-slate-200 bg-white module-box overflow-hidden">
+          <div class="p-6 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 class="text-xl font-serif font-bold">5. Own item application — dedup, stacking, and cleanup in one policy</h2>
+              <div class="flex gap-2">
+                <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">Worth exploring</span>
+                <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">in-process</span>
+              </div>
+            </div>
+            <div class="font-mono text-sm text-slate-600">
+              src/Systems/Items/item_holder.gd (add_item: 47 lines, 12 behaviors) · src/Systems/Items/Item.gd · src/Systems/Items/Buffs/ · test/Systems/Items/
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <!-- BEFORE -->
+              <div class="rounded-lg border border-slate-200 bg-white p-4">
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-3">before · one procedure carrying 3 bugs</p>
+                <div class="rounded border border-slate-300 p-4 font-mono text-[11px] text-slate-700 leading-6">
+                  add_item(item)<br/>
+                  <span class="text-slate-400">└ dedup by scene path </span><span class="text-red-600">✗ empty for factory items</span><br/>
+                  <span class="text-slate-400">└ apply_to(holder) </span><span class="text-red-600">✗ skipped on stacked effects</span><br/>
+                  <span class="text-slate-400">└ condition-gate stack</span> <span class="text-red-600">✗ reads wrong key</span><br/>
+                  <span class="text-slate-400">└ add_stack / attachEventManager</span><br/>
+                  <span class="text-slate-400">└ emit on_item_added</span><br/>
+                  remove_item(item)<br/>
+                  <span class="text-slate-400">└ stat modifiers removed</span><br/>
+                  <span class="text-slate-400">└ effect node, subscriptions, timers </span><span class="text-red-600">✗ left alive</span>
+                </div>
+              </div>
+              <!-- AFTER -->
+              <div class="rounded-lg border border-slate-800 p-4 deep">
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-3">after · stack policy is a deepened module</p>
+                <div class="flex flex-col items-center h-64 justify-center">
+                  <div class="bg-slate-800 border border-slate-400 rounded px-4 py-2 text-slate-100 text-xs uppercase tracking-wider">ItemHolder.add_item / remove_item</div>
+                  <div class="mx-auto my-2 w-px h-5 bg-slate-500"></div>
+                  <div class="bg-slate-900 border border-slate-600 rounded p-4 text-left text-[11px] text-slate-300 leading-5 max-w-[250px]">
+                    <div class="text-slate-500 text-[9px] uppercase tracking-wider mb-1">implementation (internal)</div>
+                    stable dedup key for .tres <i>and</i> packed scenes<br/>
+                    apply-on-stack always runs<br/>
+                    condition-gate reads the emitted key<br/>
+                    removal frees effect + subscriptions + timers
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Problem</p>
+                <p><span class="font-mono">add_item</span> is a 12-behavior procedure covering dedup, effect instantiation, duck-typed attachment, stacking, condition gates and events — and three of its decisions are currently wrong (see red ✗ above). Its interface hides nothing from the reader.</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Solution</p>
+                <p>Extract the stacking policy — dedup key, apply-on-stack, condition gate, removal cleanup — as a module behind the holder. The holder keeps the add/remove interface; the policy owns how stacks are decided and undone.</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Wins</p>
+                <ul class="list-disc ml-4 space-y-1">
+                  <li>locality: three bugs in one module</li>
+                  <li>the missing remove_item test finds a home</li>
+                  <li>stacking rules stated once</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- =============== CANDIDATE 6 : MODIFIER BASE =============== -->
+        <article class="rounded-xl border border-slate-200 bg-white module-box overflow-hidden">
+          <div class="p-6 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 class="text-xl font-serif font-bold">6. A shared base for 22 modifier adapters</h2>
+              <div class="flex gap-2">
+                <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">Worth exploring</span>
+                <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">local-substitutable</span>
+              </div>
+            </div>
+            <div class="font-mono text-sm text-slate-600">
+              src/Systems/Items/Modifiers/ (22 scripts, ~1310 lines) · attached by item_holder.gd:37-38 and character.gd:21-23
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <!-- BEFORE -->
+              <div class="rounded-lg border border-slate-200 bg-white p-4">
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-3">before · scaffolding copied 22 times, drifting</p>
+                <div class="grid grid-cols-4 gap-1.5">
+                  <div class="col-span-4 text-[10px] text-slate-400 mb-1">each modifier carries the same header + stack triad, written slightly differently each time:</div>
+                  <div class="col-span-4 border border-slate-300 rounded p-2 text-[10px] font-mono text-slate-600 leading-4">attachEventManager(em) · holder = em.get_parent() · stats = holder.get_node("Stats") · subscribe("on_hit", ...) · add_stack · remove_stack · set_stack_active</div>
+                  <div class="col-span-2 rounded border border-slate-300 p-2 text-center text-[10px] text-slate-500">14× stacks: Array[bool]</div>
+                  <div class="col-span-1 rounded border border-red-300 p-2 text-center text-[10px] text-slate-500">regen: int</div>
+                  <div class="col-span-1 rounded border border-red-300 p-2 text-center text-[10px] text-slate-500">8× no triad</div>
+                  <div class="col-span-4 rounded border border-red-300 p-2 text-center text-[10px] text-slate-500 bg-red-50">handler names jumbled: _on_triger · _on_trigger · _on_event · _on_on_hit</div>
+                </div>
+              </div>
+              <!-- AFTER -->
+              <div class="rounded-lg border border-slate-800 p-4 deep">
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-3">after · shared base, thin adapters</p>
+                <div class="flex flex-col items-center h-64 justify-center">
+                  <div class="bg-slate-800 border border-slate-400 rounded px-4 py-2 text-slate-100 text-xs uppercase tracking-wider">StackableModifier (base)</div>
+                  <div class="mx-auto my-2 w-px h-5 bg-slate-500"></div>
+                  <div class="bg-slate-900 border border-slate-600 rounded p-4 text-left text-[11px] text-slate-300 leading-5">
+                    <div class="text-slate-500 text-[9px] uppercase tracking-wider mb-1">implementation (internal)</div>
+                    attachEventManager + holder/stats discovery<br/>
+                    stacks + add/remove/set_stack_active (one type)<br/>
+                    on_stat_changes re-cache helper<br/>
+                    <span class="text-emerald-300">the event→response delta is the only thing an adapter keeps</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Problem</p>
+                <p>Twenty-two adapters sit at the same seam and re-write ~300 lines of identical attach/stack/cache scaffolding — with real drift (two stack types, four handler-name spellings, a debug <span class="font-mono">prints</span> that appears in some and not others). None extend a shared base.</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Solution</p>
+                <p>One base that owns attachment, stacking and stat-cache refresh — the parts that genuinely don't vary. Each modifier keeps only its event→response body, the two things that actually differ (as recommended in docs/ai_overview.md: "small, self-contained modules").</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Wins</p>
+                <ul class="list-disc ml-4 space-y-1">
+                  <li>locality: attach/stack fixed in one base</li>
+                  <li>~300 lines of drift absorbed</li>
+                  <li>one stack type, no spelling lottery</li>
+                  <li>leverage: new modifiers become thin</li>
+                </ul>
+              </div>
+            </div>
+            <div class="rounded border border-slate-300 bg-slate-50 p-3 text-sm text-slate-600">
+              One adapter would be a hypothetical seam — here there are 22, so the seam is real. The risk is a base that over-abstracts: the grilling loop should decide what stays behind it by deletion-testing each copied idiom against the one modifier that genuinely varies.
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- =============== TOP RECOMMENDATION =============== -->
+      <section id="top-recommendation" class="rounded-xl border-2 border-slate-900 bg-slate-900 text-slate-100 module-box overflow-hidden">
+        <div class="p-6 space-y-4">
+          <h2 class="text-xl font-serif font-bold">Top recommendation</h2>
+          <p class="text-sm leading-6">
+            Start with <a href="#candidates" class="text-emerald-300 underline">candidate 1 — the damage pipeline</a>.
+            It is where the codebase is deepest and owning exactly <em>nothing</em>: five identical copies of the same 9-hop sequence, each with its own payload shape
+            and <span class="font-mono">source</span> semantics, and the ordering bug in <span class="font-mono">health.gd:18-19</span> that a single module would fix once.
+            It is also the only candidate with a clean deletion test — every damage source (projectile, melee, contact, area, explosion) calls the same module, so
+            complexity concentrates instead of moving. And it pays for itself immediately with a test that exercises the entire pipe through one interface,
+            which is exactly what candidates 2 and 6 (the event contract and the modifier base) then build on.
+          </p>
+          <p class="text-sm text-slate-300 leading-6">
+            Working on items recently? Then <a href="#candidates" class="text-emerald-300 underline">candidate 4 — ItemFactory</a> is the best second pick;
+            it is self-contained, its interface change is backward-compatible with the shop, and it makes the generator testable without a full scene.
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>

@@ -20,7 +20,7 @@ func _on_before_deal_damage(event):
         var ctx: DamageContext = event["damage_context"]
         ctx.final_amount *= _current_crit_multiplier
         ctx.is_crit = true
-        event_manager.emit_event("on_crit", [{"damage_context": ctx}])
+        event_manager.emit_event("on_crit", {"damage_context": ctx})
 
 func _on_stat_changes(_event):
     _current_crit = stats.get_stat("critical_chance")

@@ -33,8 +33,7 @@ func add_weapon(weapon_resource: BaseWeapon) -> void:
     # Equip (create timer + start firing)
     _equip_weapon(weapon_inst)
     if event_manager:
-        event_manager.emit_event("on_weapon_added", [hold_owner, weapon_inst])
-        event_manager.emit_event("on_weapon_changes", [{"weapon_inst": weapon_inst}])
+        event_manager.emit_event("on_weapon_changes", {"weapon_inst": weapon_inst, "hold_owner": hold_owner})
 
 func remove_weapon(weapon_inst: BaseWeapon) -> void:
     if not weapon_inst:
@@ -60,8 +59,7 @@ func remove_weapon(weapon_inst: BaseWeapon) -> void:
     # reposition remaining visuals
     _reposition_weapons()
     if event_manager:
-        event_manager.emit_event("on_weapon_removed", [hold_owner, weapon_inst])
-        event_manager.emit_event("on_weapon_changes", [hold_owner, weapon_inst])
+        event_manager.emit_event("on_weapon_changes", {"weapon_inst": weapon_inst, "hold_owner": hold_owner})
 
 func _equip_weapon(weapon_inst: BaseWeapon) -> void:
     # Apply modifiers and set holder on the weapon instance (Weapon.apply_to expects holder)

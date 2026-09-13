@@ -13,4 +13,4 @@ func try_shoot(targets: Array[Node]) -> void:
     beam.look_at(targets[0].global_position)
 
     holder.get_tree().current_scene.add_child(beam)
-    event_manager.emit_event("on_attack", [{"beam": beam, "weapon": self}])
+    event_manager.emit_event("on_attack", {"beam": beam, "weapon": self})

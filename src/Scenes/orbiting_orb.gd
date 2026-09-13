@@ -68,13 +68,13 @@ func _deal_contact_damage():
         ctx.tags.append(modifier_meta)
 
         # apply global modifiers
-        event_manager.emit_event("before_deal_damage", [{"damage_context": ctx}])
+        event_manager.emit_event("before_deal_damage", {"damage_context": ctx})
 
         # apply to target
-        health.event_manager.emit_event("before_take_damage", [{"damage_context": ctx}])
+        health.event_manager.emit_event("before_take_damage", {"damage_context": ctx})
         health.take_damage(ctx)
-        health.event_manager.emit_event("after_take_damage", [{"damage_context": ctx}])
+        health.event_manager.emit_event("after_take_damage", {"damage_context": ctx})
 
-        event_manager.emit_event("after_deal_damage", [{"damage_context": ctx}])
-        event_manager.emit_event("on_hit", [{"damage_context": ctx}])
+        event_manager.emit_event("after_deal_damage", {"damage_context": ctx})
+        event_manager.emit_event("on_hit", {"damage_context": ctx, "body": body})
     overlapping_bodies.clear()

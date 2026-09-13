@@ -47,7 +47,7 @@ func attack(dir: Vector2) -> void:
         print("Skip")
         return
     if event_manager:
-        event_manager.emit_event("on_attack", [{"weapon": weapon_data}])
+        event_manager.emit_event("on_attack", {"weapon": weapon_data})
     attacking = true
     forward_swing = true  # reset for this attack
     origin_pos = position
@@ -260,15 +260,15 @@ func do_damage(body):
     ctx.final_amount = weapon_data._current_damage
     ctx.tags.append("melee")
     if event_manager: 
-        event_manager.emit_event("before_deal_damage", [{"damage_context": ctx}])
+        event_manager.emit_event("before_deal_damage", {"damage_context": ctx})
     var bodyHealth: Health = body.get_node("Health")
-    bodyHealth.event_manager.emit_event("before_take_damage", [{"damage_context": ctx}])
+    bodyHealth.event_manager.emit_event("before_take_damage", {"damage_context": ctx})
     bodyHealth.take_damage(ctx)
-    bodyHealth.event_manager.emit_event("after_take_damage", [{"damage_context": ctx}])
+    bodyHealth.event_manager.emit_event("after_take_damage", {"damage_context": ctx})
     if event_manager:
-        event_manager.emit_event("after_deal_damage", [{"melee": self, "body": body, "damage_context": ctx}])
+        event_manager.emit_event("after_deal_damage", {"melee": self, "body": body, "damage_context": ctx})
     if event_manager:
-        event_manager.emit_event("on_hit", [{"melee": self, "body": body, "damage_context": ctx}])
+        event_manager.emit_event("on_hit", {"melee": self, "body": body, "damage_context": ctx})
 
 func _adjust_hitbox_stretch(speed: float) -> void:
     hitbox.scale.x = _original_scale_x * speed

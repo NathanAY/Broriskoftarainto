@@ -44,7 +44,7 @@ func shoot_projectile(target: Node) -> Projectile:
         p.set_target(target)
     
     holder.get_tree().current_scene.add_child(p)
-    event_manager.emit_event("on_attack", [{"projectile": p, "weapon": self}])
+    event_manager.emit_event("on_attack", {"projectile": p, "weapon": self})
     return p
 
 func _on_stat_changes(_event) -> void:

@@ -18,13 +18,13 @@ func do_damage(body):
     ctx.final_amount = _current_damage
     ctx.tags.append("melee")
     if event_manager: 
-        event_manager.emit_event("before_deal_damage", [{"damage_context": ctx}])
+        event_manager.emit_event("before_deal_damage", {"damage_context": ctx})
     var bodyHealth: Health = body.get_node("Health")
-    bodyHealth.event_manager.emit_event("before_take_damage", [{"damage_context": ctx}])
+    bodyHealth.event_manager.emit_event("before_take_damage", {"damage_context": ctx})
     bodyHealth.take_damage(ctx)
-    bodyHealth.event_manager.emit_event("after_take_damage", [{"damage_context": ctx}])
+    bodyHealth.event_manager.emit_event("after_take_damage", {"damage_context": ctx})
     if event_manager:
-        event_manager.emit_event("after_deal_damage", [{"weapon": self, "body": body, "damage_context": ctx}])
-        event_manager.emit_event("on_attack", [{"weapon": self, "body": body, "damage_context": ctx}])
-        event_manager.emit_event("on_hit", [{"weapon": self, "body": body, "damage_context": ctx}])                     
+        event_manager.emit_event("after_deal_damage", {"weapon": self, "body": body, "damage_context": ctx})
+        event_manager.emit_event("on_attack", {"weapon": self, "body": body, "damage_context": ctx})
+        event_manager.emit_event("on_hit", {"weapon": self, "body": body, "damage_context": ctx})                     
     

@@ -77,7 +77,9 @@ func _detonate(target: Node, damage: int, bomb_visual: Node, timer: Timer):
     explosion.damage = damage * explosion_damage * stacks_multiplier
     get_tree().current_scene.add_child(explosion)
 
-func _on_stat_changes(stat_name: String, value: float):
+func _on_stat_changes(event: Dictionary):
+    var stat_name: String = event.get("stat_name", "")
+    var value: float = event.get("final_value", 0.0)
     match stat_name:
         "damage":
             explosion_damage = value

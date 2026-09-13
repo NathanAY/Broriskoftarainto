@@ -65,7 +65,7 @@ func test_hover_shows_and_hides_tooltip() -> void:
     row.emit_signal("mouse_exited")
     assert_bool(ui.tooltip.visible).is_false()
 
-    GlobalGameState.current_character = prev_character
+    GlobalGameState.current_character = prev_character if is_instance_valid(prev_character) else null
     ui.free()
     character.free()
 
@@ -125,3 +125,19 @@ func test_shop_menu_character_info_tooltips() -> void:
 
     shop.free()
     character.free()
+
+
+func test_freeing_character_clears_global() -> void:
+    # Regression: Character._ready publishes itself to GlobalGameState.current_character.
+    # It must retract that reference on free, otherwise the autoload dangles to a freed
+    # instance and the restore below raises "Invalid assignment ... 'previously freed'"
+    # (see test_hover_shows_and_hides_tooltip failing in full-suite runs).
+    var character = load("res://src/Systems/Character.tscn").instantiate()
+    add_child(character)
+    assert_that(GlobalGameState.current_character).is_same(character)
+
+    character.free()
+    # Re-assigning the stale autoload value is exactly what breaks in batch runs.
+    # With a live (mismatched) value this would corrupt the global, so assert null:
+    GlobalGameState.current_character = GlobalGameState.current_character
+    assert_that(GlobalGameState.current_character).is_null()

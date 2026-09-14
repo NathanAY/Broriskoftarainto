@@ -96,22 +96,12 @@ func _populate_available_weapons(container: VBoxContainer, cur_container: VBoxCo
     dir.list_dir_end()
 
 func _populate_effect_items(container: VBoxContainer, result_container: VBoxContainer) -> void:
-    var dir := DirAccess.open(EFFECTS_PATH)
-    if not dir:
-        push_warning("ConfigurePanel: cannot open " + EFFECTS_PATH)
-        return
-    dir.list_dir_begin()
-    var file_name = dir.get_next()
-    while file_name != "":
-        if not dir.current_is_dir() and file_name.ends_with(".tscn"):
-            var path = EFFECTS_PATH + "/" + file_name
-            var display_name := file_name.get_basename()
-            var btn = Button.new()
-            btn.text = "Add " + display_name
-            btn.pressed.connect(func(p=path, rc=result_container): _create_effect_item(p, rc))
-            container.add_child(btn)
-        file_name = dir.get_next()
-    dir.list_dir_end()
+    for scene in ItemBuilder.load_scenes_from_dir(EFFECTS_PATH):
+        var display_name := scene.resource_path.get_file().get_basename()
+        var btn = Button.new()
+        btn.text = "Add " + display_name
+        btn.pressed.connect(func(p=scene.resource_path, rc=result_container): _create_effect_item(p, rc))
+        container.add_child(btn)
 
 func _on_add_weapon(path: String, _avail_container: VBoxContainer, cur_container: VBoxContainer) -> void:
     var player = _get_player()
@@ -146,76 +136,54 @@ func _create_effect_item(effect_scene_path: String, result_container: VBoxContai
     if not effect_scene:
         push_warning("Could not load effect scene: " + effect_scene_path)
         return
-    
-    var item := Item.new()
-    var effect_name = effect_scene_path.get_file().get_basename()
-    item.name = "Effect: " + effect_name
-    item.description = "Grants effect: " + effect_name
-    item.effect_scene = [effect_scene]
 
-    var player = _get_player()
-    if player and player.has_node("ItemHolder"):
-        var ih = player.get_node("ItemHolder")
-        ih.add_item(item)
-        if result_container:
-            _refresh_equipped_items(result_container)
-    else:
-        push_warning("No player present to receive effect item")
+    var effect_name = effect_scene_path.get_file().get_basename()
+    var item := ItemBuilder.make_effect_item(
+        "Effect: " + effect_name,
+        "Grants effect: " + effect_name,
+        effect_scene
+    )
+    _add_item_to_holder(item, result_container)
 
 func _create_buff_item(stat_name: String, amount: float, result_container: VBoxContainer=null) -> void:
     var buff_scene: PackedScene = load(BUFF_PATH)
     if not buff_scene:
         push_warning("Could not load buff scene: " + BUFF_PATH)
         return
-    
-    var item := Item.new()
-    item.name = "Buff_%s_%s" % [stat_name, str(amount)]
-    item.description = "Buff: +%s %s" % [amount, stat_name]
-    item.effect_scene = [buff_scene]
-    item.set_meta("type", "buff")
-    
-    # Store modifier info for the buff
-    item.modifiers = {stat_name: {"flat": amount}}
 
-    var player = _get_player()
-    if player and player.has_node("ItemHolder"):
-        var ih = player.get_node("ItemHolder")
-        ih.add_item(item)
-        if result_container:
-            _refresh_equipped_items(result_container)
-    else:
-        push_warning("No player present to receive buff item")
+    var item := ItemBuilder.make_buff_item(
+        "Buff_%s_%s" % [stat_name, str(amount)],
+        "Buff: +%s %s" % [amount, stat_name],
+        stat_name,
+        {"flat": amount},
+        buff_scene
+    )
+    _add_item_to_holder(item, result_container)
 
 func _create_debuff_item(stat_name: String, amount: float, result_container: VBoxContainer=null) -> void:
     var debuff_scene: PackedScene = load(DEBUFF_PATH)
     if not debuff_scene:
         push_warning("Could not load debuff scene: " + DEBUFF_PATH)
         return
-    
-    var item := Item.new()
-    item.name = "Debuff_%s_%s" % [stat_name, str(amount)]
-    item.description = "Debuff: -%s %s" % [amount, stat_name]
-    item.effect_scene = [debuff_scene]
-    item.set_meta("type", "debuff")
-    
-    # Store modifier info for the debuff (negative)
-    item.modifiers = {stat_name: {"flat": -amount}}
 
-    var player = _get_player()
-    if player and player.has_node("ItemHolder"):
-        var ih = player.get_node("ItemHolder")
-        ih.add_item(item)
-        if result_container:
-            _refresh_equipped_items(result_container)
-    else:
-        push_warning("No player present to receive debuff item")
+    var item := ItemBuilder.make_debuff_item(
+        "Debuff_%s_%s" % [stat_name, str(amount)],
+        "Debuff: -%s %s" % [amount, stat_name],
+        stat_name,
+        {"flat": -amount},
+        debuff_scene
+    )
+    _add_item_to_holder(item, result_container)
 
 func _create_stat_item(stat_name: String, amount: float, result_container: VBoxContainer=null) -> void:
-    var item := Item.new()
-    item.name = "Debug_%s_%s" % [stat_name, str(amount)]
-    item.description = "%s %s (debug)" % [stat_name, amount]
-    item.modifiers = {stat_name: {"flat": amount}}
+    var item := ItemBuilder.make_stat_item(
+        "Debug_%s_%s" % [stat_name, str(amount)],
+        "%s %s (debug)" % [stat_name, amount],
+        {stat_name: {"flat": amount}}
+    )
+    _add_item_to_holder(item, result_container)
 
+func _add_item_to_holder(item: Item, result_container: VBoxContainer=null) -> void:
     var player = _get_player()
     if player and player.has_node("ItemHolder"):
         var ih = player.get_node("ItemHolder")
@@ -223,7 +191,7 @@ func _create_stat_item(stat_name: String, amount: float, result_container: VBoxC
         if result_container:
             _refresh_equipped_items(result_container)
     else:
-        push_warning("No player present to receive stat item (items are runtime-only)")
+        push_warning("No player present to receive item")
 
 func _refresh_equipped_list(container: VBoxContainer) -> void:
     # Clear old children
@@ -291,20 +259,11 @@ func _on_remove_item(item_inst, container: VBoxContainer) -> void:
 
 func _create_simple_item() -> void:
     # Create a tiny Item resource with one modifier and add it to the player's ItemHolder
-    var item := Item.new()
-    item.name = "Debug Simple Item"
-    item.description = "+5 damage (debug)"
-    item.modifiers = {"damage": {"flat": 5}}
-    var player = _get_player()
-    if player and player.has_node("ItemHolder"):
-        var ih = player.get_node("ItemHolder")
-        ih.add_item(item)
-        # refresh UI
-        if has_node("Control"):
-            var items_cur = $Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/EquippedItemsScroll/EquippedItemsList
-            _refresh_equipped_items(items_cur)
-    else:
-        push_warning("No player present to receive simple item")
+    var item := ItemBuilder.make_stat_item("Debug Simple Item", "+5 damage (debug)", {"damage": {"flat": 5}})
+    var items_cur: VBoxContainer = null
+    if has_node("Control"):
+        items_cur = $Control/VBoxContainer/WeaponsAndItemsContainer/ItemsContainer/ItemsHBox/EquippedItemsScroll/EquippedItemsList
+    _add_item_to_holder(item, items_cur)
 
 func _on_close_pressed():
     visible = false

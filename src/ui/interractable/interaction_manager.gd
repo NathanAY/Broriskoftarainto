@@ -21,7 +21,7 @@ func _unhandled_input(event):
     elif event.is_action_pressed("ui_focus_next"):
         current.cancel_action()
 
-func _process(delta):
+func _process(_delta):
     if not character or interactables.is_empty():
         return
     var closest: Node = null

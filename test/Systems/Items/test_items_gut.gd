@@ -10,20 +10,9 @@ func test_item_damage_doubler():
     var _c_health: Health = character.get_node("Health")
     
     # 1. Setup Items
-    var doubler_item = Item.new()
-    doubler_item.name = "Damage Doubler"
-    var doubler_mod = preload("res://src/Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
-    # Configure the multiplier
-    doubler_mod.target_stat = "damage"
-    doubler_mod.multiplier = 2.0
-    # Assuming Items can hold modifiers in effect_scene or a similar way as described in architecture
-    var packed = PackedScene.new()
-    packed.pack(doubler_mod)
-    doubler_item.effect_scene.append(packed)
+    var doubler_item = ItemBuilder.make_effect_item("Damage Doubler", "", _pack_doubler("damage", 2.0))
     
-    var damage_item = Item.new()
-    damage_item.name = "Damage Up"
-    damage_item.modifiers["damage"] = {"flat": 10.0}
+    var damage_item = ItemBuilder.make_stat_item("Damage Up", "", {"damage": {"flat": 10.0}})
     var enemy: Enemy = test_scene.get_node("Enemy")
     var e_stats: Stats = enemy.get_node_or_null("Stats")
     var e_health: Health = enemy.get_node("Health")
@@ -59,20 +48,9 @@ func test_item_health_50_percent_bonus():
     var _c_health: Health = character.get_node("Health")
     
     # 1. Setup Items
-    var doubler_item = Item.new()
-    doubler_item.name = "Helathier"
-    var doubler_mod = preload("res://src/Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
-    # Configure the multiplier
-    doubler_mod.target_stat = "health"
-    doubler_mod.multiplier = 1.5
-    # Assuming Items can hold modifiers in effect_scene or a similar way as described in architecture
-    var packed = PackedScene.new()
-    packed.pack(doubler_mod)
-    doubler_item.effect_scene.append(packed)
+    var doubler_item = ItemBuilder.make_effect_item("Helathier", "", _pack_doubler("health", 1.5))
     
-    var stat_item = Item.new()
-    stat_item.name = "Health Up"
-    stat_item.modifiers["health"] = {"flat": 100.0}
+    var stat_item = ItemBuilder.make_stat_item("Health Up", "", {"health": {"flat": 100.0}})
     
     var enemy: Enemy = test_scene.get_node("Enemy")
     var e_stats: Stats = enemy.get_node_or_null("Stats")
@@ -98,3 +76,9 @@ func test_item_health_50_percent_bonus():
     assert_eq(stat_value, 2190.0)
     # await wait_seconds(2)
     test_scene.queue_free()
+
+func _pack_doubler(target_stat: String, multiplier: float) -> PackedScene:
+    var doubler_mod = preload("res://src/Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
+    doubler_mod.target_stat = target_stat
+    doubler_mod.multiplier = multiplier
+    return ItemBuilder.pack_instance(doubler_mod)

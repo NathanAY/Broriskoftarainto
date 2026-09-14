@@ -9,37 +9,22 @@ The Debugger, ObjectDb profiler shows that the orphan node is a node of type Buf
 You can run this test by next command ".\run_tests_gdunit_custom.bat Systems/Items/test_stat_creation_buff.gd"
 
 =======
-There is a test test/Systems/Items/test_buff_in_combat.gd
+I have multiple places for item creation with duplicated logic.
 
-The test verify that the buff item is working.
-By default the buff should increase the attack_speed stat when on_hit event occurs.
-I see in the ui that the buff stacks, so the event occurs.
-The problem is that the character has no stat changes, so the buff do nothing by some reason.
-Fix that problem, make the buff working.
+Like this:
+test\Systems\Items\test_bounce_modifier.gd:34
+test\Systems\Items\test_buff_in_combat.gd:26
+test\Systems\Items\test_items_gut.gd
+test\Systems\altar\test_item_sacrifice_altar_gdunit4.gd
+test\Systems\Items\test_item_factory_gut.gd
+src\Systems\Items\item_factory.gd
+src\Scenes\menu\configure_panel.gd
 
-You can run this test by next command ".\run_tests_gdunit_custom.bat Systems/Items/test_buff_in_combat.gd"
+You need to designe few solution and think what will be the best for this project.
+Show me what solution do you designed at the end to choose
 
-======
-There is a that fail when I run all tests by next command:
-.\run_tests_gdunit.bat   
-If I run only that test by command below, than it's passed.
-.\run_tests_gdunit_custom.bat Systems/ui/test_character_ui_tooltip.gd
-
-Here is the error log:
-SCRIPT ERROR: Invalid assignment of property or key 'current_character' with value of type 'previously freed' on a base object of type 'Node (global_game_state.gd)'.
-   at: CharacterUiTooltipTest.test_hover_shows_and_hides_tooltip (res://test/ui/test_character_ui_tooltip.gd:68)
-   GDScript backtrace (most recent call first):
-       [0] test_hover_shows_and_hides_tooltip (res://test/ui/test_character_ui_tooltip.gd:68)
-       [1] _execute_test_case (res://addons/gdUnit4/src/core/_TestCase.gd:79)
-debug> 
-Debugger Break, Reason: 'Invalid assignment of property or key 'current_character' with value of type 'previously freed' on a base object of type 'Node (global_game_state.gd)'.'
-*Frame 0 - res://test/ui/test_character_ui_tooltip.gd:68 in function 'test_hover_shows_and_hides_tooltip'
-Enter "help" for assistance.
-debug> 
-Debugger Break, Reason: 'Invalid assignment of property or key 'current_character' with value of type 'previously freed' on a base object of type 'Node (global_game_state.gd)'.'
-*Frame 0 - res://test/ui/test_character_ui_tooltip.gd:68 in function 'test_hover_shows_and_hides_tooltip'
-Enter "help" for assistance.
-debug> 
+After the implementing do NOT run all tests in project for verification.
+Run only relevant one by one, for example by next command ".\run_tests_gdunit_custom.bat Systems/Items/test_bounce_modifier.gd"
 
 
-
+& "F:\programs\Godot_v4.6.1-stable_win64\Godot_v4.6.1-stable_win64.exe" -d -s --headless --path "." addons/gut/gut_cmdln.gd -gtest=res://test/Systems/Items/test_item_factory_gut.gd -gexit

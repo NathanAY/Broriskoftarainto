@@ -1,12 +1,12 @@
-# Player / Character
+# Player
 
 Purpose
-- Player entity and orchestration of equipment, stats and visuals.
+- The Player (the runtime combat entity the human controls) and orchestration of its equipment, stats and visuals.
 
 Key scripts / scenes
-- `Scripts/character.gd` (`Character` class)
+- `Scripts/character.gd` (`Character` class — the Player entity, see ADR-0001)
 - Scenes: `Scenes/Character.tscn` / children: `Stats`, `EventManager`, `WeaponHolder`, `ItemHolder`, `Hitbox`, `AnimationPlayer` (onready nodes referenced in script).
- - Character selection/data: `Systems/characters/CharacterData.gd`, `Resources/characters/*.tres`, and `Scenes/menu/CharacterSelect.tscn` — the selection UI writes `GlobalGameState.starting_character` and `CharacterInitializer` applies the data to `Stats` on spawn.
+ - Character (archetype) selection/data: `Systems/characters/CharacterData.gd`, `Resources/characters/*.tres`, and `Scenes/menu/CharacterSelect.tscn` — the selection UI writes `GlobalGameState.starting_character` and `CharacterInitializer` applies the data to `Stats` on spawn.
 
 Data flow
 - Inputs: player input (not fully shown), starting items/weapons from `GlobalGameState`, events from EventManager.

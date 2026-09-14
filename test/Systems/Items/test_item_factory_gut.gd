@@ -27,13 +27,13 @@ func test_item_with_3_stats_has_3_image():
     var c_item_holder: ItemHolder = character.get_node_or_null("ItemHolder")
     var _c_health: Health = character.get_node("Health")
 
-    var stat_item = Item.new()
-    stat_item.name = "5 stat Up"
-    stat_item.modifiers["health"] = {"flat": 100.0}
-    stat_item.modifiers["damage"] = {"flat": 100.0}
-    stat_item.modifiers["armor"] = {"flat": 100.0}
-    stat_item.modifiers["critical_chance"] = {"flat": 100.0}
-    stat_item.modifiers["movement_speed"] = {"flat": 100.0}
+    var stat_item = ItemBuilder.make_stat_item("5 stat Up", "", {
+        "health": {"flat": 100.0},
+        "damage": {"flat": 100.0},
+        "armor": {"flat": 100.0},
+        "critical_chance": {"flat": 100.0},
+        "movement_speed": {"flat": 100.0}
+    })
     c_item_holder.add_item(stat_item)
     
     var _items_list: VBoxContainer = test_scene.get_node("UI/PauseMenu/CharacterUi/VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/ItemsScroll/ItemsList")

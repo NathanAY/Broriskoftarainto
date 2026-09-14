@@ -33,8 +33,8 @@ func test_bouncing_modifier() -> void:
 
 func _create_item(modifier_name: String, amount: float) -> Item:
     var modifier_scene: PackedScene = load("res://src/Systems/Items/Modifiers/" + modifier_name)
-    var item := Item.new()
-    item.name = "Buff_%s_%s" % [modifier_name, str(amount)]
-    item.description = "Buff: +%s %s" % [amount, modifier_name]
-    item.effect_scene = [modifier_scene]
-    return item
+    return ItemBuilder.make_effect_item(
+        "Buff_%s_%s" % [modifier_name, str(amount)],
+        "Buff: +%s %s" % [amount, modifier_name],
+        modifier_scene
+    )

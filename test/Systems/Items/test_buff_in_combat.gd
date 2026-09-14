@@ -5,6 +5,7 @@ extends GdUnitTestSuite
 func test_add_buff_item_to_character_in_combat() -> void:
     var runner := scene_runner("res://test/TestScene.tscn")
     var test_scene := runner.scene()
+    runner.set_time_factor(5)
     get_tree().current_scene = test_scene
 
     var character: Character = test_scene.get_node("Character")
@@ -15,7 +16,7 @@ func test_add_buff_item_to_character_in_combat() -> void:
     var initial_attack_speed: float  = character.stats.get_stat("attack_speed")
     assert_float(initial_attack_speed).is_equal(1.0)
     
-    await runner.simulate_frames(60 * 2)
+    await runner.simulate_frames(60 * 2.2)
 
     var next_attack_speed: float  = character.stats.get_stat("attack_speed")
     assert_float(next_attack_speed).is_equal(2.0)

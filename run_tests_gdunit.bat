@@ -3,7 +3,7 @@ setlocal
 
 set "GODOT_BIN=F:\programs\Godot_v4.6.1-stable_win64\Godot_v4.6.1-stable_win64.exe"
 set "TEST_TARGET=res://test"
-set "TIMEOUT_SECONDS=60"
+set "TIMEOUT_SECONDS=20"
 set "LOG_FILE=.gdunit_timeout.log"
 
 if not "%~1"=="" set "TEST_TARGET=res://test/%~1"

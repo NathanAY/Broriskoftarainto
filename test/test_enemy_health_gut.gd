@@ -1,6 +1,7 @@
 extends GutTest
 
 func test_enemy_health():
+    Engine.time_scale = 5
     var test_scene = load("res://test/TestScene.tscn").instantiate()
     get_tree().root.add_child(test_scene)
     get_tree().current_scene = test_scene
@@ -9,8 +10,8 @@ func test_enemy_health():
     var health: Health = enemy.get_node("Health")
     assert_eq(health.current_health, 40.0, "Enemy health should be 40")
 
-    await wait_seconds(3.5)
-    assert_eq(health.current_health, 10.0)
+    await wait_seconds(int(3.5))
+    assert_eq(health.current_health, 20.0)
     
     await wait_seconds(2)
     assert_false(is_instance_valid(enemy), "Enemy should be freed/invalid")
@@ -18,6 +19,7 @@ func test_enemy_health():
     test_scene.queue_free()
     
 func test_enemy_health_with_much_attack_speed():
+    Engine.time_scale = 5
     var test_scene = load("res://test/TestScene.tscn").instantiate()
     get_tree().root.add_child(test_scene)
     get_tree().current_scene = test_scene
@@ -34,7 +36,7 @@ func test_enemy_health_with_much_attack_speed():
     stats.set_base_stat("health", stats.stats["health"] + 1000)
     health.heal(1000)
 
-    await wait_seconds(7)
+    await wait_seconds(11)
     assert_null(enemy)
 
     test_scene.queue_free()

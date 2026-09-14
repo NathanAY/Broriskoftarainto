@@ -3,9 +3,9 @@ extends CharacterBody2D
 class_name Character
 
 @onready var event_manager: EventManager = $EventManager
-@onready var item_holder = $ItemHolder
-@onready var stats = $Stats
-@onready var weapon_holder = $WeaponHolder
+@onready var item_holder: ItemHolder = $ItemHolder
+@onready var stats: Stats = $Stats
+@onready var weapon_holder: WeaponHolder = $WeaponHolder
 @onready var sprite: Sprite2D = $Node2D/Sprite2D
 @onready var anim_player: AnimationPlayer = $AnimationPlayer
 

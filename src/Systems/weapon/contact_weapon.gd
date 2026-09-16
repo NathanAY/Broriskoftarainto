@@ -31,7 +31,14 @@ func remove_from(holder: Node) -> void:
 func try_shoot(_targets: Array) -> void:
     if overlapping_bodies.is_empty():
         return
+    var holder := get_holder()
     for body in overlapping_bodies:
+        if not body or not is_instance_valid(body):
+            continue
+        if holder and body == holder:
+            continue
+        if _body_in_ignore_group(body):
+            continue
         if body and body.has_node("Health"):
             do_damage(body)
 
@@ -43,6 +50,8 @@ func _body_in_ignore_group(body: Node) -> bool:
 
 func _on_body_entered(body: Node) -> void:
     if not body: return
+    if body == get_holder():
+        return
     if _body_in_ignore_group(body):
         return
     if body in overlapping_bodies: 

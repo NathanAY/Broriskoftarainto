@@ -84,6 +84,8 @@ func _spawn_chain_projectile(damage: int, spawn_position: Vector2, next_target: 
     new_projectile.set_direction(dir)
     new_projectile.set_target(next_target)
     new_projectile.set_meta(modifier_meta, true)
+    if ignore_enemy and is_instance_valid(ignore_enemy):
+        new_projectile.set_meta("ignore_enemy", ignore_enemy)
 
     var bounce = preload("res://src/Systems/weapon/projectile_bounce_behavior.gd").new()
     bounce.holder = holder
@@ -91,11 +93,13 @@ func _spawn_chain_projectile(damage: int, spawn_position: Vector2, next_target: 
     bounce.bounce_range = bounce_range
     bounce.target_selector = target_selector
 
-    # ✅ seed history with last two: previous and current
+    # Seed history only with the already-hit enemy at the spawn point.
+    # The next_target must NOT be pre-seeded: it hasn't been hit yet, and
+    # pre-seeding it makes _find_next_target() return null after the
+    # spawn-point overlap triggers on_projectile_hit().
+    # The spawn-point overlap itself is avoided via the "ignore_enemy" meta.
     if ignore_enemy:
-        bounce.hit_history.append(ignore_enemy)  # the last hit
-    if next_target:
-        bounce.hit_history.append(next_target)   # the current chain target
+        bounce.hit_history.append(ignore_enemy)
     new_projectile.add_child(bounce)
     get_tree().current_scene.add_child(new_projectile)
 

@@ -9,22 +9,54 @@ The Debugger, ObjectDb profiler shows that the orphan node is a node of type Buf
 You can run this test by next command ".\run_tests_gdunit_custom.bat Systems/Items/test_stat_creation_buff.gd"
 
 =======
-I have multiple places for item creation with duplicated logic.
+Naming convention
+FOLDERS             snake_case
+.gd classes         PascalCase
+.tscn scenes        PascalCase
+.tres resources     PascalCase
 
-Like this:
-test\Systems\Items\test_bounce_modifier.gd:34
-test\Systems\Items\test_buff_in_combat.gd:26
-test\Systems\Items\test_items_gut.gd
-test\Systems\altar\test_item_sacrifice_altar_gdunit4.gd
-test\Systems\Items\test_item_factory_gut.gd
-src\Systems\Items\item_factory.gd
-src\Scenes\menu\configure_panel.gd
+functions           snake_case
+variables           snake_case
+signals             snake_case
+constants           CONSTANT_CASE
+enums               PascalCase
+enum values         CONSTANT_CASE
 
-You need to designe few solution and think what will be the best for this project.
-Show me what solution do you designed at the end to choose
+test files          PascalCase + Test
+test functions      test_snake_case
+
+PNG/JPG/WebP        snake_case
+WAV/OGG             snake_case
+JSON/CSV            snake_case
+fonts               snake_case
+raw imported assets  snake_case
+
+For example, your combat tests could look like:
+
+tests/
+└── combat/
+    ├── CombatTest.gd
+    ├── WeaponTest.gd
+    └── TargetSelectionTest.gd
+func test_enemy_health_after_attack():
+func test_attack_speed_affects_attack_interval():
+func test_spread_shot_hits_multiple_enemies():
+func test_chain_projectile_selects_next_target():
+=======
+I have a test test/Systems/weapon/test_thorns.gd
+that should check if the Thorn weapon works.
+
+But it's working incorrecly.
+I have debug this tests and I found some details.
+When the Character overlaps with the Enemy the src/Systems/weapon/contact_weapon.gd correctly see this in try_shoot method.
+But it call the do_damage method for yourself, and because of it the Thorn weapon damages Character instead of enemy.
+
+In the game the weapon could have both Character and the Enemy.
+This strange bug, because if check it add Thorn weapon to enemy it's working correctly, it do the damage to character only.
+The Thorn Weapon is working correctly for the Enemy, but not for the Character.
 
 After the implementing do NOT run all tests in project for verification.
-Run only relevant one by one, for example by next command ".\run_tests_gdunit_custom.bat Systems/Items/test_bounce_modifier.gd"
+Run only relevant one by one, for example by next command ".\run_tests_gdunit_custom.bat Systems/weapon/test_thorns.gd"
 
 
 & "F:\programs\Godot_v4.6.1-stable_win64\Godot_v4.6.1-stable_win64.exe" -d -s --headless --path "." addons/gut/gut_cmdln.gd -gtest=res://test/Systems/Items/test_item_factory_gut.gd -gexit

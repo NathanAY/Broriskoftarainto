@@ -1,4 +1,4 @@
-# ChainModifier.gd
+# CritMod.gd
 extends Node
 
 var event_manager: EventManager = null

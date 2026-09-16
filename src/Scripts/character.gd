@@ -75,7 +75,7 @@ func _ready():
     collision_mask = 0   # doesn't need to collide with anything
     
     $Hitbox.collision_layer = 3
-    $Hitbox.collision_mask = 5
+    $Hitbox.collision_mask = 7
     event_manager.subscribe("on_death", Callable(self, "_die"))   
     event_manager.subscribe("before_take_damage", Callable(self, "_flash"))
 

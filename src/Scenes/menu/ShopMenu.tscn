@@ -58,8 +58,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 3.0
 
-[node name="ItemsList" type="VBoxContainer" parent="Control/VBoxContainer/MidContainer/ShopArea" unique_id=1365545612]
+[node name="ItemsList" type="HBoxContainer" parent="Control/VBoxContainer/MidContainer/ShopArea" unique_id=1365545612]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+theme_override_constants/separation = 12
 
 [node name="StatsPanel" type="PanelContainer" parent="Control/VBoxContainer/MidContainer" unique_id=67860012]
 layout_mode = 2

@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://dve88vf3320kk"]
+
+[ext_resource type="Script" uid="uid://cbpfqahilum1m" path="res://test/test_shop_stage.gd" id="1_w0k5e"]
+[ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://src/Systems/Character.tscn" id="2_yufyw"]
+[ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://src/ui/PlayerUI.tscn" id="3_dwdo0"]
+[ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://src/Scenes/menu/ShopMenu.tscn" id="4_j3p81"]
+[ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://src/Scenes/menu/PauseMenu.tscn" id="5_f6qbp"]
+[ext_resource type="Script" uid="uid://jpi1pvx6vsir" path="res://src/Scripts/camera_2d.gd" id="6_nsipc"]
+[ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://src/ui/interractable/interaction_manager.gd" id="7_03xfg"]
+[ext_resource type="PackedScene" uid="uid://bmqxtyoaqbpks" path="res://src/Systems/Items/ItemFactory.tscn" id="8_wq0nc"]
+[ext_resource type="PackedScene" uid="uid://ygv8thab1ic1" path="res://src/Systems/ShopPortal.tscn" id="9_36xtd"]
+
+[node name="ShopStage" type="Node2D" unique_id=34987921]
+script = ExtResource("1_w0k5e")
+
+[node name="Character" parent="." unique_id=502610022 instance=ExtResource("2_yufyw")]
+position = Vector2(100, 100)
+
+[node name="UI" type="Node" parent="." unique_id=91677476]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="UI" unique_id=1115870019]
+
+[node name="CharacterUi" parent="UI/CanvasLayer" unique_id=1923297542 node_paths=PackedStringArray("character") instance=ExtResource("3_dwdo0")]
+character = NodePath("../../../Character")
+
+[node name="ShopMenu" parent="UI" unique_id=784457306 node_paths=PackedStringArray("item_factory") instance=ExtResource("4_j3p81")]
+visible = false
+item_factory = NodePath("../../ItemFactory")
+
+[node name="PauseMenu" parent="UI" unique_id=1515925164 instance=ExtResource("5_f6qbp")]
+visible = false
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=418336662 node_paths=PackedStringArray("target")]
+script = ExtResource("6_nsipc")
+target = NodePath("../Character")
+
+[node name="InteractionManager" type="Node" parent="." unique_id=2017284370]
+script = ExtResource("7_03xfg")
+
+[node name="ItemFactory" parent="." unique_id=959543981 instance=ExtResource("8_wq0nc")]
+
+[node name="Nodes" type="Node" parent="." unique_id=882484368]
+
+[node name="pickups" type="Node" parent="Nodes" unique_id=1074004141]
+
+[node name="altars" type="Node" parent="Nodes" unique_id=1202145624]
+
+[node name="death_marks" type="Node" parent="Nodes" unique_id=826601551]
+
+[node name="ShopPortal" parent="." unique_id=1064191240 instance=ExtResource("9_36xtd")]
+position = Vector2(241, 154)

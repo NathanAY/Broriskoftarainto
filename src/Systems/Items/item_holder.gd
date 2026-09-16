@@ -7,7 +7,7 @@ class_name ItemHolder
 @onready var stats: Stats = hold_owner.get_node_or_null("Stats")
 @onready var event_manager: EventManager = hold_owner.get_node_or_null("EventManager")
 
-@export var items: Array = []
+@export var items: Array[Item] = []
 
 func add_item(item: Item) -> void:
     if item == null:

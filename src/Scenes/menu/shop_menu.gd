@@ -4,13 +4,15 @@ class_name ShopMenu
 @onready var next_stage_button: Button = $Control/VBoxContainer/BottomContainer/ButtonsContainer/NextStageButton
 @onready var reroll_button: Button = $Control/VBoxContainer/BottomContainer/ButtonsContainer/RerollButton
 @onready var money_label: Label = $Control/VBoxContainer/TopHBoxContainer/Money
-@onready var items_container: VBoxContainer = $Control/VBoxContainer/MidContainer/ShopArea/ItemsList
+@onready var items_container: HBoxContainer = $Control/VBoxContainer/MidContainer/ShopArea/ItemsList
 @onready var stats_container: VBoxContainer = $Control/VBoxContainer/MidContainer/StatsPanel/StatsScroll/StatsList
 @onready var collected_items_container: VBoxContainer = $Control/VBoxContainer/BottomContainer/ItemsContainer/ItemsScroll/List
 @onready var weapons_container: GridContainer = $Control/VBoxContainer/BottomContainer/WeaponsContainer/WeaponsScroll/List
 @onready var tooltip: TooltipUi = $Tooltip
 
 signal next_stage_pressed
+
+const SHOP_ITEM_CARD_SCENE: PackedScene = preload("res://src/Scenes/menu/ShopItemCard.tscn")
 
 var staged_items: Array = []
 var locked_items: Array = []   # items that persist between shops
@@ -39,7 +41,7 @@ func _update_character_info() -> void:
     if not character: return
 
     # Update Items
-    var item_holder = character.get_node_or_null("ItemHolder")
+    var item_holder: ItemHolder = character.get_node_or_null("ItemHolder")
     if item_holder:
         for child in collected_items_container.get_children():
             child.queue_free()
@@ -102,91 +104,66 @@ func load_items(items: Array):
 
 # ------------------- PHASE 1 (collected pickups) -------------------
 func _add_item_entry(item: Item):
-    var hbox = HBoxContainer.new()
-
-    # Take button
-    var btn_take = Button.new()
-    btn_take.text = "Take"
-    btn_take.pressed.connect(func():
+    var card: ShopItemCard = SHOP_ITEM_CARD_SCENE.instantiate()
+    card.set_meta("item", item)
+    items_container.add_child(card)
+    card.set_item_display(item)
+    card.primary_button.text = "Take"
+    card.secondary_button.text = "Sell"
+    card.primary_button.pressed.connect(func():
         var holder: ItemHolder = character.get_node_or_null("ItemHolder")
         if holder:
             holder.add_item(item)
-        hbox.queue_free()
+        card.queue_free()
         _update_stats() # Update stats after taking item
         _update_character_info()
         _check_phase_progression()
     )
-    hbox.add_child(btn_take)
-
-    # Sell button
-    var btn_sell = Button.new()
-    btn_sell.text = "Sell"
-    btn_sell.pressed.connect(func():
+    card.secondary_button.pressed.connect(func():
         character.stats.set_base_stat("money", character.stats.stats.get("money", 0) + 1)
-        hbox.queue_free()
+        card.queue_free()
         _update_money_label()
         _update_stats() # Update stats after selling
         _check_phase_progression()
     )
-    hbox.add_child(btn_sell)
-
-    # Label
-    var label = Label.new()
-    label.text = "%s - %s" % [item.name, item.description]
-    hbox.add_child(label)
-
-    items_container.add_child(hbox)
 
 # ------------------- PHASE 2 (shop) -------------------
-func _add_shop_item_entry(item: Item):
-    var hbox = HBoxContainer.new()
-    var entry_id = _generate_entry_id()
-    hbox.set_meta("item", item)
-    hbox.set_meta("id", entry_id)
+func _add_shop_item_entry(item: Item, existing_id: String = ""):
+    var card: ShopItemCard = SHOP_ITEM_CARD_SCENE.instantiate()
+    var entry_id = existing_id if existing_id != "" else _generate_entry_id()
+    card.set_meta("item", item)
+    card.set_meta("id", entry_id)
+    items_container.add_child(card)
+    card.set_item_display(item)
 
     # Buy button
-    var btn_buy = Button.new()
-    btn_buy.text = "Buy"
-    btn_buy.pressed.connect(func():
+    card.primary_button.text = "Buy"
+    card.primary_button.pressed.connect(func():
         var money = character.stats.stats.get("money", 0)
         if money >= 1:
             character.stats.set_base_stat("money", money - 1)
             var holder: ItemHolder = character.get_node_or_null("ItemHolder")
             if holder:
                 holder.add_item(item)
-            hbox.queue_free()
+            card.queue_free()
             # remove this exact entry from locked list if it was there
             locked_items = locked_items.filter(func(li): return li.id != entry_id)
             _update_money_label()
             _update_stats() # Update stats after buying
             _update_character_info()
     )
-    hbox.add_child(btn_buy)
 
     # Lock/Unlock button
-    var btn_lock = Button.new()
     var is_locked = locked_items.any(func(li): return li.id == entry_id)
-    btn_lock.text = "Unlock" if is_locked else "Lock"
-    btn_lock.pressed.connect(func():
+    card.secondary_button.text = "Unlock" if is_locked else "Lock"
+    card.secondary_button.pressed.connect(func():
         if locked_items.any(func(li): return li.id == entry_id):
             locked_items = locked_items.filter(func(li): return li.id != entry_id)
-            btn_lock.text = "Lock"
+            card.secondary_button.text = "Lock"
         else:
             locked_items.append({"id": entry_id, "item": item})
-            btn_lock.text = "Unlock"
+            card.secondary_button.text = "Unlock"
     )
-    hbox.add_child(btn_lock)
-
-    # Icon
-    var icon_node = ItemIconGenerator.generate_icon(item)
-    hbox.add_child(icon_node)
-
-    # Label
-    var label = Label.new()
-    label.text = "%s - %s" % [item.name, item.description]
-    hbox.add_child(label)
-
-    items_container.add_child(hbox)
 
 
 # ------------------- Shared -------------------
@@ -263,7 +240,7 @@ func _start_shop_phase():
     # show locked items first (cap to 4 to avoid overflow)
     var locked_to_show = min(locked_items.size(), 4)
     for i in range(locked_to_show):
-        _add_shop_item_entry(locked_items[i].get("item"))
+        _add_shop_item_entry(locked_items[i].get("item"), locked_items[i].get("id", ""))
 
     # fill up to 4 active items
     while _active_item_count() < 4:
@@ -297,6 +274,9 @@ func _on_reroll_pressed():
 
     # remove all non-locked items by comparing IDs
     for child in items_container.get_children():
+        if not child.has_meta("id"):
+            child.queue_free()
+            continue
         var entry_id: String = child.get_meta("id")
         var is_locked = locked_items.any(func(li): return li.id == entry_id)
         if not is_locked:

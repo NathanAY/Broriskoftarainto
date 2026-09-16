@@ -60,3 +60,16 @@ Run only relevant one by one, for example by next command ".\run_tests_gdunit_cu
 
 
 & "F:\programs\Godot_v4.6.1-stable_win64\Godot_v4.6.1-stable_win64.exe" -d -s --headless --path "." addons/gut/gut_cmdln.gd -gtest=res://test/Systems/Items/test_item_factory_gut.gd -gexit
+
+
+In 
+
+There is a method _add_shop_item_entry in shop_menu.gd that creates "shopt card" for items that you can buy in shop.
+I don't like how it looks.
+Instead of this Ui created via code I want a prepared scene.
+The items in the items_container should looks like a rectangle.
+At the top of the shop card I want to have an icon, below icon i want to have a text.
+The text should look in the same way as for ItemTooltip that you can find in item_tooltip.gd
+
+The items in items_container should be placed in horizontal row instead of vertical.
+

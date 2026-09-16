@@ -5,7 +5,10 @@ extends CanvasLayer
 @onready var new_run_button: Button = $Control/VBoxContainer/NewRunButton
 @onready var character_button: Button = $Control/VBoxContainer/CharacterButton
 @onready var options_button: Button = $Control/VBoxContainer/OptionsButton
+@onready var main_menu_button: Button = $Control/VBoxContainer/MainMenuButton
 @onready var exit_button: Button = $Control/VBoxContainer/ExitButton
+
+const MAIN_MENU_SCENE_PATH := "res://src/Scenes/menu/Main.tscn"
 
 @onready var options_menu: CanvasLayer = $OptionsMenu
 @onready var character_menu: Control = $CharacterUi
@@ -34,6 +37,7 @@ func _ready():
     $Control/VBoxContainer.add_child(cfg_btn)
     # preload ConfigureMenu scene so it behaves like options_menu
     configure_menu_scene = load("res://src/Scenes/menu/ConfigureMenu.tscn")
+    main_menu_button.pressed.connect(_on_main_menu_pressed)
     exit_button.pressed.connect(_on_exit_pressed)
     options_menu.visible = false
     character_menu.visible = false
@@ -99,6 +103,10 @@ func _on_new_run_pressed():
     toggle_pause()
     # Start new run -> first pick character, then starter menu
     get_tree().change_scene_to_file("res://src/Scenes/menu/CharacterSelect.tscn")
+
+func _on_main_menu_pressed():
+    get_tree().paused = false
+    get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH)
 
 func _on_exit_pressed():
     get_tree().quit()

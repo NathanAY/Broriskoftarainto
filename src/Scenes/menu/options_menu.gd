@@ -52,8 +52,10 @@ func _apply_window_mode():
         window_button.text = str(mode.x) + "x" + str(mode.y)
 
 func _apply_show_stats():
-    self.get_parent().get_parent().get_child(0)
-    var charactUI: Control = self.get_parent().get_parent().get_node("CanvasLayer/CharacterUi/PanelContainer")
+    var ui_root: Node = get_parent().get_parent()
+    if ui_root == null or not ui_root.has_node("CanvasLayer/CharacterUi/PanelContainer"):
+        return
+    var charactUI: Control = ui_root.get_node("CanvasLayer/CharacterUi/PanelContainer")
     charactUI.visible = show_stats_button.button_pressed
 
 

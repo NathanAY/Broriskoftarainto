@@ -60,6 +60,10 @@ text = "Character"
 layout_mode = 2
 text = "Options"
 
+[node name="MainMenuButton" type="Button" parent="Control/VBoxContainer" unique_id=164848417]
+layout_mode = 2
+text = "Main menu"
+
 [node name="ExitButton" type="Button" parent="Control/VBoxContainer" unique_id=164848416]
 layout_mode = 2
 text = "Exit"

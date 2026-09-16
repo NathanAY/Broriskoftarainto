@@ -11,7 +11,7 @@ You can run this test by next command ".\run_tests_gdunit_custom.bat Systems/Ite
 =======
 Naming convention
 FOLDERS             snake_case
-.gd classes         PascalCase
+.gd classes         PascalCase ???? Maybe snake_case 
 .tscn scenes        PascalCase
 .tres resources     PascalCase
 

@@ -58,8 +58,8 @@ func _physics_process(delta):
 
 func _flash(_event):
     var tween = create_tween()
-    tween.tween_property(sprite, "modulate", Color(1, 4, 1), 0.2)
-    tween.tween_property(sprite, "modulate", Color(4, 1, 1, 0), 0.2).from(Color(1, 1, 4))
+    tween.tween_property(sprite, "modulate", Color(1, 4, 1), 0.1)
+    tween.tween_property(sprite, "modulate", Color(4, 1, 1, 0), 0.1).from(Color(1, 1, 4))
     tween.tween_property(sprite, "modulate", Color(1, 1, 1, 1), 0.0)
 
 func _die(_event: Dictionary):

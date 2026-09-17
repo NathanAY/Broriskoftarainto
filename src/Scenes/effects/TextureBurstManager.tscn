@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cmvgx8sqctngm"]
+
+[ext_resource type="Script" uid="uid://cttetbft6eu36" path="res://src/Scenes/effects/texture_burst_manager.gd" id="1"]
+
+[node name="TextureBurstManager" type="Node2D" unique_id=614046527]
+script = ExtResource("1")

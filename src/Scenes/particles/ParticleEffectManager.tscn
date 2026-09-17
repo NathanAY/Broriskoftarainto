@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" uid="uid://bjcer6a1km3l2" path="res://src/Scenes/particles/particle_effect_manager.gd" id="1_eiuov"]
 
-[node name="ParticleEffectManager" type="Node2D"]
+[node name="ParticleEffectManager" type="Node2D" unique_id=102448598]
 script = ExtResource("1_eiuov")

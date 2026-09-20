@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://vyf6m3sarx1i"]
+
+[ext_resource type="Script" uid="uid://d2m41ljb1ac38" path="res://src/Scenes/menu/character_card.gd" id="1_card"]
+
+[node name="CharacterCard" type="PanelContainer" unique_id=462281984]
+custom_minimum_size = Vector2(120, 132)
+size_flags_horizontal = 3
+script = ExtResource("1_card")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=94200715]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="Margin" unique_id=115190933]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="IconHolder" type="CenterContainer" parent="Margin/VBox" unique_id=925806004]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NameLabel" type="Label" parent="Margin/VBox" unique_id=379090110]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+text = "Name"
+horizontal_alignment = 1
+autowrap_mode = 2

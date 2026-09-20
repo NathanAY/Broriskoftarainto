@@ -10,7 +10,9 @@ This document explains the new character system (data, UI, and integration point
 ## Files of interest
 - `Systems/characters/CharacterData.gd` — Resource class for characters.
 - `Resources/characters/*.tres` — character definitions (examples: `Warrior.tres`, `Rogue.tres`, `Tank.tres`).
-- `Scenes/menu/CharacterSelect.tscn` + `Scenes/menu/character_select.gd` — character selection UI.
+- `Scenes/menu/CharacterSelect.tscn` + `Scenes/menu/character_select.gd` — character selection UI: top `DetailPanel` (icon + name + scrollable stats for the selected character) above a compact card grid (8 columns, fits 30+ characters). A shared `TooltipUi` node shows the full `ItemTooltip` stats on card hover, so details are visible without selecting.
+- `Scenes/menu/CharacterCard.tscn` + `Scenes/menu/character_card.gd` (`class_name CharacterCard`) — compact grid entry (120x132): icon + name only, whole card clickable (`selected` signal via `gui_input`/`select()`), gold highlight when selected. Full stats live in the top detail panel and the hover tooltip, not on the card.
+- `ui/character_tooltip.gd` (`class_name CharacterTooltip`) — static `tooltip_lines(CharacterData)` builder (name, description, `base <stat>`, flattened modifiers via `ItemTooltip.modifier_lines`, `starting item:` names).
 - `Scripts/autoload/global_game_state.gd` — holds `starting_character` (path or Resource).
 - `Systems/characters/CharacterInitializer.gd` — applies character data to the `Stats` node on character spawn.
 - `Systems/Character.tscn` — now contains a `CharacterInitializer` Node (instance) so application is automatic.
@@ -29,7 +31,7 @@ modifiers = [{"attack_speed": {"percent": 0.2}}]
 ```
 
 ## How selection and application works
-1. Player chooses a character in `CharacterSelect`; on confirm the script sets `GlobalGameState.starting_character = "res://src/Resources/characters/Rogue.tres"` (string path).
+1. Player picks a card in `CharacterSelect` (first character is pre-selected so the detail panel is never empty); the detail panel shows the full `CharacterTooltip` stats. On confirm the script sets `GlobalGameState.starting_character = "res://src/Resources/characters/Rogue.tres"` (string path).
 2. The flow continues to `StarterMenu` to choose weapons/items; those values are also saved in `GlobalGameState`.
 3. When the game scene creates the player `Character` (instancing `Systems/Character.tscn`), the `CharacterInitializer` node reads `GlobalGameState.starting_character`, loads the resource, and:
    - Calls `Stats.set_base_stat` for each entry in `base_stats` (overwrites base values).
@@ -43,7 +45,4 @@ This keeps character data separate from player logic and allows easy addition of
 3. No code changes needed — `CharacterSelect` scans the folder and will display the new entry.
 
 ## Extensibility ideas
-- Add an exported `Texture2D icon` to `CharacterData` for richer UI (thumbnails in selection). Update `Scenes/menu/CharacterSelect.tscn` accordingly.
-- Add per-character starting items/weapons by including `starting_items`/`starting_weapons` fields on the resource and updating `CharacterInitializer` or a small linker to apply them to `GlobalGameState` when confirming.
-
-If you'd like, I can add icons for the three existing characters and show them in the UI next.
+- Per-character starting items/weapons are already supported via `starting_items` on the resource (shown as `starting item:` lines on the card); wiring them into `GlobalGameState` on confirm is the remaining step.

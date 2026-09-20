@@ -20,7 +20,7 @@ func _ready():
     add_to_group("damageable")
     $WeaponHolder.add_weapon(load("res://src/Resources/weapons/Thorns.tres"))
     #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Fist.tres"))
-    $WeaponHolder.add_weapon(load("res://src/Resources/weapons/Pistol.tres"))
+    # $WeaponHolder.add_weapon(load("res://src/Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Knife.tres"))
     item_holder.add_item(load("res://src/Resources/items/BootsOfSpeed.tres"))

@@ -12,7 +12,7 @@ func _ready():
     get_tree().paused = true
 
 func _on_new_run_pressed():
-    get_tree().change_scene_to_file("res://src/Scenes/menu/StarterMenu.tscn")
+    get_tree().change_scene_to_file("res://src/Scenes/menu/CharacterSelect.tscn")
 
 func _on_exit_pressed():
     get_tree().quit()

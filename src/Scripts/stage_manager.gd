@@ -1,7 +1,7 @@
 extends Node
 class_name StageManager
 
-@export var stage_duration = 10         # seconds per (non-boss) stage
+@export var stage_duration = 20         # seconds per (non-boss) stage
 @export var character: Character
 @export var stage_time_elapsed: float = 0.0
 @export var max_loops: int = 3         # <--- after this player wins

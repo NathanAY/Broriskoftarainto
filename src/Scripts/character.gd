@@ -68,7 +68,7 @@ func _ready():
     #$ItemHolder.add_item(load("res://src/Resources/items/EnergyShieldBlock.tres"))
     #$ItemHolder.add_item(load("res://src/Resources/items/CritGlass.tres"))
     #$ItemHolder.add_item(load("res://src/Resources/items/PlusDamageItem.tres"))
-    $ItemHolder.add_item(load("res://src/Resources/items/HealthMeat.tres"))
+    # $ItemHolder.add_item(load("res://src/Resources/items/HealthMeat.tres"))
     $ItemHolder.add_item(load("res://src/Resources/items/HealthMeat.tres"))
     
     collision_layer = 1

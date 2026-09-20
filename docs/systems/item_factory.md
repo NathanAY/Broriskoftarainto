@@ -17,7 +17,7 @@ Dependencies
 Known limitations / TODOs
 - `_load_scenes_from_dir` uses DirAccess and assumes folder layout; missing/misnamed folders will produce warnings.
 - Random generation has some dead/experimental code paths (e.g., `return _generate_debuff_item()` placed before other roll checks) — indicates deliberate temporary behavior or debugging.
-- Some generator logic assumes properties exist on instantiated effect scenes (e.g., `possible_trigger_event`) and will skip overrides otherwise.
+- Generation-time randomization lives in the modifiers, not the factory: a modifier scene that supports it implements `randomize_for_generation(context) -> bool` (context: `{"rng": RandomNumberGenerator, "stats": Dictionary}`) and owns its own rolls — e.g., `HealOnEventModifier` picks from its `possible_trigger_event` table, `StatOnKillModifier` rolls a random `target_stat` from `Stats` plus a scaled `add_amount`. `ItemFactory._configure_dynamic_modifier` only builds the context, calls the hook when present, and repacks on mutation; scenes without the hook pass through untouched. Modifiers may also expose `get_generation_suffix()` so generated item names stay distinguishable (e.g., `Stat On Kill Modifier (movement_speed)`).
 
 Assumptions
 - The `Stats` reference exists and exposes `stats` keys used for generating stat modifiers.

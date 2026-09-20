@@ -19,7 +19,7 @@ func test_shop_stage_opens_shop_automatically() -> void:
     # Starting money is granted so buy/reroll work immediately.
     var character: Character = test_scene.get_node("Character")
     assert_object(GlobalGameState.current_character).is_equal(character)
-    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(10.0)
+    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(100.0)
 
     get_tree().paused = false
     test_scene.free()

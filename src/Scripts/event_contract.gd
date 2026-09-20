@@ -49,6 +49,9 @@ const SCHEMAS := {
 	"on_hit": {
 		"required": ["damage_context"],
 	},
+	"on_kill": {
+		"required": ["damage_context"],
+	},
 	# --- combat / attack ---
 	"on_attack": {
 		"required": ["weapon"],

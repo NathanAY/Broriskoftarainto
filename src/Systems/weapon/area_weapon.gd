@@ -26,5 +26,7 @@ func do_damage(body):
     if event_manager:
         event_manager.emit_event("after_deal_damage", {"weapon": self, "body": body, "damage_context": ctx})
         event_manager.emit_event("on_attack", {"weapon": self, "body": body, "damage_context": ctx})
-        event_manager.emit_event("on_hit", {"weapon": self, "body": body, "damage_context": ctx})                     
+        event_manager.emit_event("on_hit", {"weapon": self, "body": body, "damage_context": ctx})
+        if bodyHealth.current_health <= 0:
+            event_manager.emit_event("on_kill", {"weapon": self, "body": body, "damage_context": ctx})
     

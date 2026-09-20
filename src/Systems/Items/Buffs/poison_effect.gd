@@ -80,7 +80,9 @@ func _on_tick() -> void:
         target_em.emit_event("after_take_damage", {"damage_context": ctx})
 
     if source and source.get_node_or_null("EventManager"):
-        sorce_em.emit_event("after_deal_damage", {"damage_context": ctx})   
+        sorce_em.emit_event("after_deal_damage", {"damage_context": ctx})
+        if target_health.current_health <= 0:
+            sorce_em.emit_event("on_kill", {"damage_context": ctx, "body": ctx.target})
 
 func _on_expire() -> void:
     _tick_timer.queue_free()

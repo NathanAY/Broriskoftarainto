@@ -99,12 +99,18 @@ func _generate_effect_item(index: int = -1) -> Item:
     var item_name = _generate_effect_name(chosen_scene.resource_path)
     var description := "Grants special effect: %s" % [item_name]
 
-    # Try to configure dynamic parameters like trigger_event
+    # Let the modifier randomize itself for generation (if it supports it),
+    # then read back the actual configured values for naming.
     var configured_scene: PackedScene = _configure_dynamic_modifier(chosen_scene)
     var temp_instance = configured_scene.instantiate()
     var props := []
     for p in temp_instance.get_property_list():
         props.append(p.name)
+    # Modifiers that randomize into variants (e.g. StatOnKill) expose a
+    # suffix so generated items are distinguishable.
+    if temp_instance.has_method("get_generation_suffix"):
+        item_name += str(temp_instance.call("get_generation_suffix"))
+        description = "Grants special effect: %s" % [item_name]
     if "trigger_event" in props:
         var trig = temp_instance.get("trigger_event")
         if trig != null:
@@ -145,8 +151,9 @@ func _generate_buff_item(index: int = -1) -> Item:
     var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
     negative_value.set("flat", -negative_value.get("flat"))
 
-    # Buff triggers can be randomly generated (possible_trigger_event), so the
-    # packed instance's actual trigger is always read back at generation time.
+    # Modifiers may randomize themselves for generation (see
+    # randomize_for_generation); the packed instance's actual trigger is
+    # always read back at generation time.
     var configured_buff_scene: PackedScene = _configure_dynamic_modifier(chosen_scene)
     var buff_trigger := _read_scene_trigger(configured_buff_scene)
     var item_name = _generate_buff_name(chosen_scene.resource_path, chosen_stat)
@@ -234,47 +241,26 @@ func _read_scene_trigger(scene: PackedScene) -> String:
     instance.free()
     return trigger
 
-func _generate_item_name(stat: String) -> String:
-    match stat:
-        "health": return "Potion of Vitality"
-        "movement_speed": return "Boots of Swiftness"
-        "damage": return "Amulet of Power"
-        "attack_speed": return "Gloves of Haste"
-        "armor": return "Iron Skin"
-        "critical_chance": return "Lucky Charm"
-        _: return "Mystic " + stat.capitalize() + " Plus"
-
 func _configure_dynamic_modifier(scene: PackedScene) -> PackedScene:
+    # Delegation point: a modifier scene that supports generation-time
+    # randomization implements `randomize_for_generation(context) -> bool`
+    # and owns all of its own randomization (trigger tables, stat rolls,
+    # amount scaling). The factory only builds the context, repacks when
+    # the modifier reports a mutation, and otherwise returns the scene
+    # untouched. Scenes without the hook (most modifiers, buffs) pass
+    # through unchanged.
     var instance = scene.instantiate()
-
-    # gather property names safely
-    var props: Array = []
-    for p in instance.get_property_list():
-        props.append(p.name)
-
-    # Only proceed if possible_trigger_event exists and is a Dictionary
-    if "possible_trigger_event" in props and typeof(instance.get("possible_trigger_event")) == TYPE_DICTIONARY:
-        var possible: Dictionary = instance.get("possible_trigger_event")
-        var event_names: Array = possible.keys()
-        var chosen_event: String = event_names.pick_random()
-        # set trigger_event if that property exists
-        if "trigger_event" in props:
-            instance.set("trigger_event", chosen_event)
-
-        # Apply overrides (only set properties that exist)
-        var overrides: Dictionary = possible[chosen_event]
-        for key in overrides.keys():
-            if key in props:
-                instance.set(key, overrides[key])
-                print("Configured:", scene.resource_path, "->", key, "=", overrides[key], "(for event:", chosen_event, ")")
-            else:
-                print("Skipping override:", key, " — property not found on", scene.resource_path)
-    else:
+    if not instance.has_method("randomize_for_generation"):
         instance.free()
         return scene
-    # Future: easily extend this logic to support other dynamic fields
-    # e.g., if instance.has_variable("damage_bonus"), randomize range
-    # Repack it as new scene
+    var context := {
+        "rng": rng,
+        "stats": stats.stats if stats != null else {},
+    }
+    var mutated: bool = bool(instance.call("randomize_for_generation", context))
+    if not mutated:
+        instance.free()
+        return scene
     var repacked: PackedScene = ItemBuilder.pack_instance(instance)
     instance.free()
     return repacked
@@ -285,9 +271,12 @@ func _generate_stat_modifiers(_chosen_stat, base_value) -> Dictionary:
         modifier_value["flat"] = 1
     elif base_value == 1:
         modifier_value["flat"] = float("%.2f" % [base_value * rng.randf_range(0.05, 0.1)])
-    else:# Like 40
+    else:
         modifier_value["flat"] = float("%.2f" % [base_value * rng.randf_range(0.05, 0.1)])
     return modifier_value
+
+func _generate_item_name(stat: String) -> String:
+    return stat.capitalize() + " Plus"
 
 func _generate_effect_name(path: String) -> String:
     var fname = path.get_file().get_basename()

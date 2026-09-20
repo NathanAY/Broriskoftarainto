@@ -26,6 +26,23 @@ var stacks: Array[bool] = []  # each entry = active/inactive
 func get_tooltip_stats() -> String:
     return "Heals %s HP" % str(default_heal)
 
+## Generation-time hook (called by ItemFactory): pick a random trigger from
+## possible_trigger_event and apply its overrides to this instance.
+## Context: {"rng": RandomNumberGenerator, "stats": Dictionary}.
+## Returns true when this instance was mutated (factory repacks it).
+func randomize_for_generation(context: Dictionary) -> bool:
+    if possible_trigger_event.is_empty():
+        return false
+    var rng: RandomNumberGenerator = context.get("rng")
+    var event_names: Array = possible_trigger_event.keys()
+    var chosen_event: String = event_names[rng.randi_range(0, event_names.size() - 1)] if rng != null else str(event_names.pick_random())
+    trigger_event = chosen_event
+    var overrides: Dictionary = possible_trigger_event[chosen_event]
+    for key in overrides.keys():
+        set(key, overrides[key])
+    print("HealOnEventModifier randomized: trigger=", chosen_event, " overrides=", overrides)
+    return true
+
 func attachEventManager(em: Node):
     event_manager = em
     holder = em.get_parent()

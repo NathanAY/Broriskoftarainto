@@ -250,9 +250,23 @@ func test_knockback_tooltip() -> void:
         "effect: Knockback — Knocks back enemies with 300.0 force (Triggers on hit)")
 
 
-func test_life_on_kill_tooltip() -> void:
-    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/LifeOnKillModifier.tscn")).is_equal(
-        "effect: Life On Kill — Gain 1 max health per stack (Triggers on hit)")
+func test_stat_on_kill_tooltip() -> void:
+    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/StatOnKillModifier.tscn")).is_equal(
+        "effect: Stat On Kill — Gain 1 health per stack (Triggers on kill)")
+
+
+func test_stat_on_kill_tooltip_follows_configured_stat() -> void:
+    # Simulates factory randomization (target_stat/add_amount override):
+    # the tooltip must show the configured stat + amount, not defaults.
+    var scene: PackedScene = load("res://src/Systems/Items/Modifiers/StatOnKillModifier.tscn")
+    var inst: Node = scene.instantiate()
+    inst.set("target_stat", "damage")
+    inst.set("add_amount", 2.0)
+    var configured: PackedScene = ItemBuilder.pack_instance(inst)
+    inst.free()
+    var item: Item = ItemBuilder.make_effect_item("Stat On Kill", "flavor", configured, {})
+    var lines: PackedStringArray = ItemTooltip.tooltip_lines(item)
+    assert_that(lines).contains("effect: Stat On Kill — Gain 2 damage per stack (Triggers on kill)")
 
 
 func test_high_health_bonus_tooltip() -> void:

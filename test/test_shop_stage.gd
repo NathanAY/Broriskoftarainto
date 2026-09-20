@@ -3,7 +3,7 @@ extends Node2D
 ## Opens the ShopMenu automatically on start so the shop can be
 ## tested without playing through enemy/boss stages first.
 
-@export var starting_money: float = 10.0
+@export var starting_money: float = 100.0
 @export var auto_open_shop: bool = true
 
 @onready var character: Character = $Character

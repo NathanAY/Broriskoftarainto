@@ -25,7 +25,7 @@ Payload convention
 - Emitting an array (the legacy `[{...}]` form), a non-Dictionary value, an unregistered event name, or a payload missing a required key is a hard error in debug builds (event dropped / subscribe refused).
 
 Event schema (required keys; extra keys are tolerated)
-- Damage pipeline: `before_deal_damage`, `before_take_damage`, `after_take_damage`, `after_deal_damage`, `on_hit` -> `damage_context`
+- Damage pipeline: `before_deal_damage`, `before_take_damage`, `after_take_damage`, `after_deal_damage`, `on_hit`, `on_kill` -> `damage_context`
 - Combat: `on_attack` -> `weapon`
 - Stats / conditions: `on_stat_changes` -> `stat_name`, `final_value`; `on_condition_change` -> `condition_name`, `value`
 - Equipment / inventory: `on_weapon_changes` -> `weapon_inst`; `on_item_added` / `on_item_removed` -> `hold_owner`, `item`, `items`

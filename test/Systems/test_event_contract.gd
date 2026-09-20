@@ -86,7 +86,7 @@ func test_unsubscribe_stops_dispatch() -> void:
     assert_that(_called).is_false()
 
 func test_damage_events_require_damage_context() -> void:
-    for ev_name in ["before_deal_damage", "before_take_damage", "after_take_damage", "after_deal_damage", "on_hit", "on_crit"]:
+    for ev_name in ["before_deal_damage", "before_take_damage", "after_take_damage", "after_deal_damage", "on_hit", "on_kill", "on_crit"]:
         var res := em.emit_event(ev_name, {})
         assert_that(res.ok).is_false()
         assert_that(res.reason).is_equal(EventContracts.Reason.MISSING_REQUIRED)

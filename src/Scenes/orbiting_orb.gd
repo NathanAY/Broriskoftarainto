@@ -77,4 +77,6 @@ func _deal_contact_damage():
 
         event_manager.emit_event("after_deal_damage", {"damage_context": ctx})
         event_manager.emit_event("on_hit", {"damage_context": ctx, "body": body})
+        if health.current_health <= 0:
+            event_manager.emit_event("on_kill", {"damage_context": ctx, "body": body})
     overlapping_bodies.clear()

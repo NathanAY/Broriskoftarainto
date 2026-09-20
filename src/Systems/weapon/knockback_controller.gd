@@ -13,7 +13,13 @@ func start_knockback(force: Vector2, duration: float):
 func _physics_process(delta: float) -> void:
     if knockback_timer > 0:
         knockback_velocity = knockback_velocity.lerp(Vector2.ZERO, delta * 5.0)
-        get_parent().global_position += knockback_velocity * delta
+        # move_and_collide (not raw position +=) so knockback stops at arena
+        # walls instead of pushing bodies through the end of the ground.
+        var parent := get_parent()
+        if parent is PhysicsBody2D:
+            (parent as PhysicsBody2D).move_and_collide(knockback_velocity * delta)
+        else:
+            parent.global_position += knockback_velocity * delta
         knockback_timer -= delta
     else:
         knockback_velocity = Vector2.ZERO

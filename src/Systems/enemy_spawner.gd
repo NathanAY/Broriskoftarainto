@@ -2,6 +2,11 @@ extends Node
 class_name EnemySpawner
 
 @export var character: Character
+## Optional arena reference. Auto-resolved from the "arena" group in _ready.
+## When no arena exists (scenes without ground), spawns stay unclamped.
+@export var arena: Arena
+## Keep spawn points this far from the arena edge (enemy body radius ~41px).
+@export var arena_spawn_margin: float = 64.0
 @export var spawn_interval = 3 #3 enemies per second if base_target_enemy_count == current number of enemies
 @export var health_growth_per_loop: float = 20
 @export var damage_growth_per_loop: float = 1
@@ -32,6 +37,8 @@ func _ready():
     spawn_timer.start()
     enemiesNode = get_node("../../Nodes/Enemies")
     target_enemy_count = base_target_enemy_count
+    if arena == null:
+        arena = get_tree().get_first_node_in_group("arena") as Arena
     for c in get_children():
         if c.has_method("attach_to_enemy"):
             modifiers.append(c)
@@ -57,7 +64,7 @@ func spawn_enemy_group():
         var character_position: Vector2 = character.global_position
         var group_center_angle = randf_range(0, TAU)
         var group_center_radius = 500.0
-        var group_center = character_position + Vector2(cos(group_center_angle), sin(group_center_angle)) * group_center_radius
+        var group_center = clamp_spawn_position(character_position + Vector2(cos(group_center_angle), sin(group_center_angle)) * group_center_radius)
 
         # Spawn enemies within the group
         for j in range(group_size):
@@ -65,7 +72,7 @@ func spawn_enemy_group():
             var enemy = enemy_scene.instantiate()
             var angle = randf_range(0, TAU)
             var radius = randf_range(0, group_spawn_radius)
-            var spawn_position = group_center + Vector2(cos(angle), sin(angle)) * radius
+            var spawn_position = clamp_spawn_position(group_center + Vector2(cos(angle), sin(angle)) * radius)
             enemy.global_position = spawn_position
 
             # Apply modifiers
@@ -90,7 +97,7 @@ func spawn_enemy():
     var character_position: Vector2 = character.global_position
     var angle = randf_range(0, TAU)
     var radius = 500.0
-    var spawn_position = character_position + Vector2(cos(angle), sin(angle)) * radius
+    var spawn_position = clamp_spawn_position(character_position + Vector2(cos(angle), sin(angle)) * radius)
     enemy.global_position = spawn_position
 
     # Apply modifiers
@@ -102,6 +109,14 @@ func spawn_enemy():
 
     enemiesNode.add_child(enemy)
     enemy.set_target_position(character)
+
+## Clamp a spawn point inside the arena (no-op when no arena is present,
+## so scenes without ground keep the old ring-around-character behavior).
+func clamp_spawn_position(pos: Vector2) -> Vector2:
+    if arena == null or not is_instance_valid(arena):
+        return pos
+    return arena.clamp_to_arena(pos, arena_spawn_margin)
+
 
 func _apply_stage_scaling(enemy: Node) -> void:
     var stats = enemy.get_node_or_null("Stats")

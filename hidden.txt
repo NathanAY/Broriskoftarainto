@@ -43,33 +43,39 @@ func test_attack_speed_affects_attack_interval():
 func test_spread_shot_hits_multiple_enemies():
 func test_chain_projectile_selects_next_target():
 =======
-I have a test test/Systems/weapon/test_thorns.gd
-that should check if the Thorn weapon works.
+Please implement a ground for my game.
+I want that it will be simple, this dont need to be very complex now.
+For example just a medium/big size arena for comban in rectangle shape.
 
-But it's working incorrecly.
-I have debug this tests and I found some details.
-When the Character overlaps with the Enemy the src/Systems/weapon/contact_weapon.gd correctly see this in try_shoot method.
-But it call the do_damage method for yourself, and because of it the Thorn weapon damages Character instead of enemy.
+I have a src/Game.tscn scene that has game logic but there is no terrain/ground in my game.
+Please create in in new scene, for example in src/GameWithGround.scene .
 
-In the game the weapon could have both Character and the Enemy.
-This strange bug, because if check it add Thorn weapon to enemy it's working correctly, it do the damage to character only.
-The Thorn Weapon is working correctly for the Enemy, but not for the Character.
+You can take the assests and logic from one or two other projects that I have in those folders:
 
-After the implementing do NOT run all tests in project for verification.
-Run only relevant one by one, for example by next command ".\run_tests_gdunit_custom.bat Systems/weapon/test_thorns.gd"
+1) F:\programs\Godot projects\Brotato3.6
+This contain a simple minimalistic ground, that can be different size and colors.
+Made on old godot version 3.6
 
+2) F:\programs\Godot projects\Wild West
+This contain one static level in wild west style with desert/sand ground.
+Made on same godot version 4.6.
+But this game has some 3D assets and level object that I don't need to be used.
+=====
 
-& "F:\programs\Godot_v4.6.1-stable_win64\Godot_v4.6.1-stable_win64.exe" -d -s --headless --path "." addons/gut/gut_cmdln.gd -gtest=res://test/Systems/Items/test_item_factory_gut.gd -gexit
+Please implement a ground for my game.
+I want that it will be simple, this dont need to be very complex now.
+For example just a medium/big size arena for comban in rectangle shape.
 
+I have a src/Game.tscn scene that has game logic but there is no terrain/ground in my game.
+Please create in in new scene, for example in src/GameWithGround.scene .
 
-In 
+You can take the assests and logic from other project that I have in folder:
+F:\programs\Godot projects\Brotato3.6
+This contain a simple minimalistic ground, that can be different size and colors.
+Made on old godot version 3.6
 
-There is a method _add_shop_item_entry in shop_menu.gd that creates "shopt card" for items that you can buy in shop.
-I don't like how it looks.
-Instead of this Ui created via code I want a prepared scene.
-The items in the items_container should looks like a rectangle.
-At the top of the shop card I want to have an icon, below icon i want to have a text.
-The text should look in the same way as for ItemTooltip that you can find in item_tooltip.gd
-
-The items in items_container should be placed in horizontal row instead of vertical.
+   
+====
+In the Brotato folder there is a ground is made from tiles.
+"F:\programs\Godot projects\Brotato3.6\resources\tiles\tiles_1.png"
 

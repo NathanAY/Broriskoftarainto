@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://d2n8kw8wey5oa"]
+[gd_scene format=3 uid="uid://bfrry84k3oqn"]
 
 [ext_resource type="Script" uid="uid://bqb283ixtcp58" path="res://src/Scripts/MainScene.gd" id="1_x3xnh"]
 [ext_resource type="Script" uid="uid://db5d37kuor17y" path="res://src/Scripts/stage_manager.gd" id="2_8r6kd"]
@@ -12,9 +12,12 @@
 [ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://src/ui/interractable/interaction_manager.gd" id="17_0iyqm"]
 [ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://src/Scenes/menu/PauseMenu.tscn" id="18_jn8rg"]
 [ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://src/Scenes/menu/ShopMenu.tscn" id="18_x3xnh"]
+[ext_resource type="PackedScene" uid="uid://xn354lgrh8jk" path="res://src/Systems/Arena.tscn" id="20_arena"]
 
 [node name="Main" type="Node2D" unique_id=1823240247]
 script = ExtResource("1_x3xnh")
+
+[node name="Arena" parent="." unique_id=1644153133 instance=ExtResource("20_arena")]
 
 [node name="StageManager" type="Node" parent="." unique_id=1313808278 node_paths=PackedStringArray("character")]
 script = ExtResource("2_8r6kd")

@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://xn354lgrh8jk"]
+
+[ext_resource type="Script" uid="uid://856lu7cbw1gg" path="res://src/Systems/arena.gd" id="1_arena"]
+
+[node name="Arena" type="Node2D" unique_id=2006322663]
+z_index = -10
+script = ExtResource("1_arena")
+
+[node name="Outline" type="NinePatchRect" parent="." unique_id=676898619]
+
+[node name="Ground" type="TileMapLayer" parent="." unique_id=1067455391]
+
+[node name="Walls" type="StaticBody2D" parent="." unique_id=64725440]
+collision_layer = 8
+collision_mask = 0

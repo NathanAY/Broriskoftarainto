@@ -2,6 +2,11 @@ extends Node
 class_name BossSpawner
 
 @export var character: Character
+## Optional arena reference. Auto-resolved from the "arena" group in _ready.
+## When no arena exists (scenes without ground), spawns stay unclamped.
+@export var arena: Arena
+## Keep spawn points this far from the arena edge (boss body radius ~41px).
+@export var arena_spawn_margin: float = 64.0
 @export var spawn_active: bool = false
 @export var boss_scene: PackedScene = preload("res://src/Systems/EnemyBoss.tscn")
 @export var current_loop: int = 1
@@ -13,6 +18,8 @@ var boss_instance: Enemy = null
 
 func _ready():
     enemiesNode = get_node("../../Nodes/Enemies")
+    if arena == null:
+        arena = get_tree().get_first_node_in_group("arena") as Arena
 
 func spawn_boss():
     if boss_instance and is_instance_valid(boss_instance):
@@ -22,7 +29,7 @@ func spawn_boss():
     var character_position: Vector2 = character.global_position
     var angle = randf_range(0, TAU)
     var radius = 700.0
-    var spawn_position = character_position + Vector2(cos(angle), sin(angle)) * radius
+    var spawn_position = clamp_spawn_position(character_position + Vector2(cos(angle), sin(angle)) * radius)
     boss_instance.global_position = spawn_position
     
     enemiesNode.add_child(boss_instance)
@@ -34,6 +41,12 @@ func spawn_boss():
         boss_instance.set_target_position(character)
     
     print("Boss spawned!")
+
+## Clamp a spawn point inside the arena (no-op when no arena is present).
+func clamp_spawn_position(pos: Vector2) -> Vector2:
+    if arena == null or not is_instance_valid(arena):
+        return pos
+    return arena.clamp_to_arena(pos, arena_spawn_margin)
 
 func _apply_scaling() -> void:
     var stats = boss_instance.get_node_or_null("Stats")

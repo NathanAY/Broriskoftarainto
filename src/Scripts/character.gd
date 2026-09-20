@@ -72,7 +72,9 @@ func _ready():
     $ItemHolder.add_item(load("res://src/Resources/items/HealthMeat.tres"))
     
     collision_layer = 1
-    collision_mask = 0   # doesn't need to collide with anything
+    # Only collide with arena walls (layer 4) — stays inside the ground.
+    # Hit detection goes through the Hitbox Area2D, not the body.
+    collision_mask = Arena.WALL_LAYER_BIT
     
     $Hitbox.collision_layer = 3
     $Hitbox.collision_mask = 7

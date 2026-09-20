@@ -1,9 +1,15 @@
 extends Node
 class_name Shield
 
+@export var display_name: String = "Energy Shield"
+@export var trigger_event: String = "before_take_damage"
+
 var max_shield: float = 0.0
 @export var recharge_rate: float = 10.0         # per second
 @export var recharge_delay: float = 1.5         # seconds after last damage
+
+func get_tooltip_stats() -> String:
+    return "Shield absorbs damage, recharges %s per second after %ss" % [str(recharge_rate), str(recharge_delay)]
 var current_shield: float = 0.0
 var _time_since_damage: float = 0.0
 
@@ -19,7 +25,7 @@ func attachEventManager(em: Node):
     #current_shield = max_shield
     _update_max_shield([])
     if event_manager:
-        event_manager.subscribe("before_take_damage", Callable(self, "_on_before_take_damage"))
+        event_manager.subscribe(trigger_event, Callable(self, "_on_before_take_damage"))
         event_manager.subscribe("on_stat_changes", Callable(self, "_update_max_shield"))
 
 func _process(delta: float) -> void:

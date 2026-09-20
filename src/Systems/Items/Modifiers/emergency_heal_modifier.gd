@@ -7,8 +7,14 @@ var stats: Stats = null
 var on_cooldown: bool = false
 var stacks: Array[bool] = []  # each entry = active/inactive
 
+@export var display_name: String = "Emergency Heal"
+@export var trigger_event: String = "after_take_damage"
+
 const HEALTH_THRESHOLD := 0.25     # 25% HP
 const COOLDOWN_TIME := 60.0        # seconds
+
+func get_tooltip_stats() -> String:
+    return "Heals 75%% max HP below %d%% HP, %ss cooldown" % [int(round(HEALTH_THRESHOLD * 100.0)), str(COOLDOWN_TIME)]
 
 func attachEventManager(em: Node):
     event_manager = em
@@ -19,7 +25,7 @@ func attachEventManager(em: Node):
         push_warning("EmergencyHealModifier: missing EventManager!")
         return
 
-    event_manager.subscribe("after_take_damage", Callable(self, "_on_after_take_damage"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_after_take_damage"))
 
 func add_stack(active: bool):
     stacks.append(active)

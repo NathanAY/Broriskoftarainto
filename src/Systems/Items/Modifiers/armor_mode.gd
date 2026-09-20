@@ -1,6 +1,10 @@
 extends Node
 class_name ArmorModifier
 
+@export var display_name: String = "Armor"
+@export_multiline var tooltip_text: String = "Armor reduces incoming damage."
+@export var trigger_event: String = "before_take_damage"
+
 var event_manager: EventManager = null
 var holder: Node = null
 var stats: Stats = null
@@ -12,7 +16,7 @@ func attachEventManager(em: Node):
     if not stats:
         push_warning("ArmorModifier: Stats not found on holder %s" % holder.name)
         return
-    em.subscribe("before_take_damage", Callable(self, "_on_before_take_damage"))
+    em.subscribe(trigger_event, Callable(self, "_on_before_take_damage"))
     em.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func _on_before_take_damage(event):

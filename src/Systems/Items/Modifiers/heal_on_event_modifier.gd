@@ -13,9 +13,18 @@ var possible_trigger_event := {
     "after_take_damage": {"default_heal": 5},
     "before_take_damage": {"default_heal": 3}
 }
-var trigger_event: String = "on_crit"
+@export var display_name: String = "Heal On Event"
+# Exports (not plain vars) so factory-configured values survive
+# PackedScene.pack() when the dynamic trigger is randomized.
+@export var trigger_event: String = "on_crit"
 var stacks: Array[bool] = []  # each entry = active/inactive
-var default_heal := 1
+@export var default_heal := 1
+
+## Dynamic tooltip fragment: the heal amount is configured per trigger
+## at generation time (see possible_trigger_event), so it must be read
+## off the live instance, never baked into static text.
+func get_tooltip_stats() -> String:
+    return "Heals %s HP" % str(default_heal)
 
 func attachEventManager(em: Node):
     event_manager = em

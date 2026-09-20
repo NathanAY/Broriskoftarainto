@@ -8,13 +8,19 @@ var explosion_radius := 64.0
 var explosion_damage := 0.3 #30% of initional damage
 var detonation_delay := 3.0
 
+@export var display_name: String = "Bomb"
+@export var trigger_event: String = "on_hit"
+
 var _tag = "bomb_modifier"
 var event_manager: EventManager = null
 var stacks: Array[bool] = []  # each entry = active/inactive
 
+func get_tooltip_stats() -> String:
+    return "Attached bombs explode for %d%% of hit damage after %ss" % [int(round(explosion_damage * 100.0)), str(detonation_delay)]
+
 func attachEventManager(em: Node):
     event_manager = em
-    event_manager.subscribe("on_hit", Callable(self, "_on_hit"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_hit"))
     event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func add_stack(active: bool):

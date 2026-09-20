@@ -7,15 +7,21 @@ var stats: Stats = null
 var on_cooldown: bool = false
 var stacks: Array[bool] = []  # each entry = active/inactive
 
+@export var display_name: String = "Life On Kill"
+@export var trigger_event: String = "on_hit"
+
 var change_stat_name: String = "health"
 
 const default_add_amount := 1
+
+func get_tooltip_stats() -> String:
+    return "Gain %d max health per stack" % default_add_amount
 
 func attachEventManager(em: Node):
     event_manager = em
     holder = em.get_parent()
     stats = holder.get_node_or_null("Stats")
-    event_manager.subscribe("on_hit", Callable(self, "_on_event"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_event"))
 
 func add_stack(active: bool):
     stacks.append(active)

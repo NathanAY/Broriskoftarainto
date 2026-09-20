@@ -6,8 +6,14 @@ var holder: Node = null
 var stats: Stats = null
 var stacks: Array[bool] = []  # each entry = active/inactive
 
+@export var display_name: String = "High Health Bonus"
+@export var trigger_event: String = "before_deal_damage"
+
 const BONUS_MULTIPLIER := 0.3        # +30 % damage
 const HEALTH_THRESHOLD := 0.9        # target must be > 90 %
+
+func get_tooltip_stats() -> String:
+    return "Deals %d%% extra damage to targets above %d%% HP" % [int(round(BONUS_MULTIPLIER * 100.0)), int(round(HEALTH_THRESHOLD * 100.0))]
 
 func attachEventManager(em: Node):
     event_manager = em
@@ -18,7 +24,7 @@ func attachEventManager(em: Node):
         push_warning("HighHealthBonusDamage: missing EventManager!")
         return
 
-    event_manager.subscribe("before_deal_damage", Callable(self, "_on_before_deal_damage"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_before_deal_damage"))
     event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func add_stack(active: bool):

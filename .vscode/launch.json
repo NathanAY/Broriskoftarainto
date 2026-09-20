@@ -18,16 +18,18 @@
             "type": "godot",
             "request": "launch",
             "scene": "src/Scenes/TestGame.tscn",
-            // "scene": "Scenes/menu/StarterMenu.tscn"
-            // "scene": "main|current|pinned|<path>",
         },
         {
-            "name": "Launch",
+            "name": "Game",
             "type": "godot",
             "request": "launch",
             "scene": "src/Scenes/Game.tscn",
-            // "scene": "Scenes/menu/StarterMenu.tscn"
-            // "scene": "main|current|pinned|<path>",
+        },
+        {
+            "name": "TestShopStage",
+            "type": "godot",
+            "request": "launch",
+            "scene": "test/TestShopStage.tscn",
         }
     ]
 }

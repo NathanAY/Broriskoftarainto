@@ -3,6 +3,10 @@ class_name SpreadModifier
 
 @export var projectile_scene = preload("res://src/Systems/weapon/Projectile.tscn")
 
+@export var display_name: String = "Spread"
+@export_multiline var tooltip_text: String = "Spawn 2 extra projectiles"
+@export var trigger_event: String = "on_attack"
+
 var event_manager: EventManager
 var stacks: Array[bool] = []  # each entry = active/inactive
 

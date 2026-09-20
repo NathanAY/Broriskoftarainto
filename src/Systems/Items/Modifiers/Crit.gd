@@ -5,6 +5,10 @@ var event_manager: EventManager = null
 var holder: Node = null
 var stats: Stats = null
 
+@export var display_name: String = "Crit"
+@export_multiline var tooltip_text: String = "Critical hits deal extra damage based on your critical chance and multiplier."
+@export var trigger_event: String = "before_deal_damage"
+
 var _current_crit = 0
 var _current_crit_multiplier = 0.0
 

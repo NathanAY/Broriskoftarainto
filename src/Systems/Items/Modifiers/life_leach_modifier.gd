@@ -1,6 +1,9 @@
 extends Node
 class_name LifeLeachModifier
 
+@export var display_name: String = "Life Leach"
+@export var trigger_event: String = "on_hit"
+
 var event_manager: EventManager = null
 var holder: Node = null
 var stats: Stats = null
@@ -9,11 +12,14 @@ var stacks: Array[bool] = []  # each entry = active/inactive
 
 const default_leach := 0.05     # 5% of damage
 
+func get_tooltip_stats() -> String:
+    return "Heals %d%% of dealt damage" % int(round(default_leach * 100.0))
+
 func attachEventManager(em: Node):
     event_manager = em
     holder = em.get_parent()
     stats = holder.get_node_or_null("Stats")
-    event_manager.subscribe("on_hit", Callable(self, "_on_event"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_event"))
 
 func add_stack(active: bool):
     stacks.append(active)

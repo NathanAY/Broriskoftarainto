@@ -6,7 +6,11 @@ class_name ChainModifier
 @export var max_bounces: int = 3
 @export var bounce_range: float = 1000
 @export var projectile_speed: float = 2000
+@export var display_name: String = "Chain"
 @export var trigger_event: String = "on_hit" #"on_attack", "on_hit", "before_take_damage"
+
+func get_tooltip_stats() -> String:
+    return "Chains to %d extra targets" % max_bounces
 
 var event_manager: EventManager = null
 var holder: Node

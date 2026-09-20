@@ -1,6 +1,9 @@
 #ExplosiveShotEffect
 extends Node
 
+@export var display_name: String = "Explosive Shot"
+@export_multiline var tooltip_text: String = "Hits explode, dealing area damage."
+
 var explosionScene = preload("res://src/scenes/Explosion.tscn")
 
 var explosion_radius := 64.0

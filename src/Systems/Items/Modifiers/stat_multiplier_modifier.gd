@@ -5,9 +5,15 @@ var event_manager: EventManager = null
 var holder: Node = null
 var stats: Stats = null
 
+@export var display_name: String = "Stat Multiplier"
+@export var trigger_event: String = "on_item_added"
+
 # Configurable parameters
 @export var target_stat: String = "damage"
 @export var multiplier: float = 2.0
+
+func get_tooltip_stats() -> String:
+    return "Multiplies %s bonuses from items by %sx" % [target_stat, str(multiplier)]
 
 func attachEventManager(em: Node):
     event_manager = em

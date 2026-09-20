@@ -1,6 +1,8 @@
 extends Node
 class_name ProjectileBounceModifier
 
+@export var display_name: String = "Projectile Bounce"
+@export_multiline var tooltip_text: String = "Projectiles bounce to 3 extra targets."
 @export var max_bounces: int = 3
 @export var bounce_range: float = 1000.0
 

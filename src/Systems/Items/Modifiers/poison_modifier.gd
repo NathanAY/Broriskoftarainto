@@ -8,17 +8,24 @@ var event_manager: Node = null
 var holder: Node = null
 var stats: Node = null
 
+@export var display_name: String = "Poison"
+@export var trigger_event: String = "on_hit"
+
 @export var poison_chance: float = 0.9993
 @export var duration: float = 3.0
 @export var tick_interval: float = 1.0
 @export var max_stacks: int = 500
+
+## Poison damage per tick equals 100% of the triggering hit's base damage.
+func get_tooltip_stats() -> String:
+    return "Poison deals 100%% of hit damage per tick for %ss" % str(duration)
 
 func attachEventManager(em: Node):
     event_manager = em
     holder = em.get_parent()
     stats = holder.get_node_or_null("Stats")
     # subscribe to on_hit (so poison is applied only on successful hits)
-    em.subscribe("on_hit", Callable(self, "_on_on_hit"))
+    em.subscribe(trigger_event, Callable(self, "_on_on_hit"))
 
 func _on_on_hit(event: Dictionary) -> void:
     # event expected to be a Dictionary: {"projectile":..., "body":..., "damage_context":...}

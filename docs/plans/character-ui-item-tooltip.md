@@ -1,5 +1,8 @@
 # Character UI Item Tooltip Plan
 
+> Status: IMPLEMENTED (done). Do NOT implement this file.
+> Open follow-up work lives in `docs/plans/item-tooltip-clarity.md` — implement that file when asked about tooltip clarity.
+
 ## Goal
 
 Add a tooltip / hover card to `src/ui/CharacterUI.tscn` that appears when the mouse is over an entry in the Items or Weapons list. For now the card shows only simple key-value text:

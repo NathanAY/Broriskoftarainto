@@ -1,7 +1,11 @@
 extends Node
 class_name KnockbackModifier
 
+@export var display_name: String = "Knockback"
 @export var knockback_strength: float = 300.0
+# Display trigger: knockback itself is applied on hit (on_attack only
+# pre-attaches the behavior to projectiles).
+@export var trigger_event: String = "on_hit"
 var knockback_velocity: Vector2 = Vector2.ZERO
 var knockback_timer: float = 0.0
 var knockback_duration: float = 0.2
@@ -10,13 +14,16 @@ var holder: Node
 var event_manager: EventManager
 var stacks: Array[bool] = []
 
+func get_tooltip_stats() -> String:
+    return "Knocks back enemies with %s force" % str(knockback_strength)
+
 func attachEventManager(em: EventManager):
     event_manager = em
     holder = em.get_parent()
     # keep listening to on_attack for projectile-case (attach behavior to projectile)
     event_manager.subscribe("on_attack", Callable(self, "_on_attack"))
     # ALSO listen for actual hit events to apply knockback for melee & projectiles
-    event_manager.subscribe("on_hit", Callable(self, "_on_hit"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_hit"))
 
 func add_stack(active: bool):
     stacks.append(active)

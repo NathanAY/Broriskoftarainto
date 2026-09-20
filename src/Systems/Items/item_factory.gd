@@ -85,7 +85,7 @@ func _generate_stat_item(index: int = -1) -> Item:
 
     return ItemBuilder.make_stat_item(
         _generate_item_name(chosen_stat),
-        "Increases %s for %s\nDecreasese %s for %s" % [chosen_stat, value, negative_chosen_stat, negative_value],
+        "Enhances %s at a cost." % [chosen_stat],
         {chosen_stat: value, negative_chosen_stat: negative_value}
     )
 
@@ -108,7 +108,7 @@ func _generate_effect_item(index: int = -1) -> Item:
     if "trigger_event" in props:
         var trig = temp_instance.get("trigger_event")
         if trig != null:
-            description += " (Triggers on %s)" % str(trig).replace("_", " ")
+            description += " (Triggers on %s)" % ItemTooltip.humanize_trigger(str(trig))
     temp_instance.queue_free()
 
     #add negative effect
@@ -117,14 +117,15 @@ func _generate_effect_item(index: int = -1) -> Item:
     var negative_base_value = stats.stats[negative_chosen_stat]
     var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
     negative_value.set("flat", -negative_value.get("flat") * 2)
-    description += "\nDecreasese %s for %s" % [negative_chosen_stat, negative_value]
 
-    return ItemBuilder.make_effect_item(
+    var item := ItemBuilder.make_effect_item(
         item_name,
         description,
         configured_scene,
         {negative_chosen_stat: negative_value}
     )
+    _store_effect_display(item, configured_scene)
+    return item
 
 func _generate_buff_item(index: int = -1) -> Item:
     var stat_names = stats.stats.keys()
@@ -144,11 +145,14 @@ func _generate_buff_item(index: int = -1) -> Item:
     var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
     negative_value.set("flat", -negative_value.get("flat"))
 
+    # Buff triggers can be randomly generated (possible_trigger_event), so the
+    # packed instance's actual trigger is always read back at generation time.
+    var configured_buff_scene: PackedScene = _configure_dynamic_modifier(chosen_scene)
+    var buff_trigger := _read_scene_trigger(configured_buff_scene)
     var item_name = _generate_buff_name(chosen_scene.resource_path, chosen_stat)
-    var description := "Grants a temporary buff: increases %s when triggered." % [chosen_stat]
-    description += "\nDecreasese %s for %s" % [negative_chosen_stat, negative_value]
+    var description := "Grants a temporary buff: increases %s (Triggers on %s)." % [chosen_stat, ItemTooltip.humanize_trigger(buff_trigger)]
 
-    var item := ItemBuilder.make_buff_item(item_name, description, chosen_stat, modifier_value, chosen_scene)
+    var item := ItemBuilder.make_buff_item(item_name, description, chosen_stat, modifier_value, configured_buff_scene)
     item.modifiers[negative_chosen_stat] = negative_value
     return item
 
@@ -162,22 +166,74 @@ func _generate_debuff_item(_index: int = -1) -> Item:
     var value: float = modifier_value.get("flat")
     modifier_value.set("flat", -value)
 
+    # Same as buffs: always check the generated instance's actual trigger.
+    var configured_debuff_scene: PackedScene = _configure_dynamic_modifier(chosen_scene)
+    var debuff_trigger := _read_scene_trigger(configured_debuff_scene)
     var item_name = _generate_buff_name(chosen_scene.resource_path, chosen_stat)
-    var description := "Grants a debuff: decreases %s when triggered." % [chosen_stat]
+    var description := "Grants a debuff: decreases %s (Triggers on %s)." % [chosen_stat, ItemTooltip.humanize_trigger(debuff_trigger)]
 
     var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
     var negative_base_value = stats.stats[negative_chosen_stat]
     var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
     negative_value.set("flat", -negative_value.get("flat") * 2)
-    description += "\nDecreasese %s for %s" % [negative_chosen_stat, negative_value]
 
-    var item := ItemBuilder.make_debuff_item(item_name, description, chosen_stat, modifier_value, chosen_scene)
+    var item := ItemBuilder.make_debuff_item(item_name, description, chosen_stat, modifier_value, configured_debuff_scene)
     item.modifiers[negative_chosen_stat] = negative_value
     return item
 
 # -------------------
 # Name Helpers
 # -------------------
+# Q8-C steady state: resolve modifier display text at build time so the
+# tooltip never has to instantiate per hover. Stored as item metadata.
+func _store_effect_display(item: Item, scene: PackedScene) -> void:
+    if item == null or scene == null:
+        return
+    var instance: Node = scene.instantiate()
+    if instance == null:
+        return
+    var props := {}
+    for p in instance.get_property_list():
+        props[p.name] = true
+    var display_name := ""
+    var tooltip_text := ""
+    var tooltip_stats := ""
+    var trigger := ""
+    if props.has("display_name"):
+        display_name = str(instance.get("display_name"))
+    if props.has("tooltip_text"):
+        tooltip_text = str(instance.get("tooltip_text"))
+    if instance.has_method("get_tooltip_stats"):
+        tooltip_stats = str(instance.call("get_tooltip_stats"))
+    if props.has("trigger_event"):
+        var trig = instance.get("trigger_event")
+        if trig != null:
+            trigger = str(trig)
+    instance.free()
+    if display_name.is_empty():
+        display_name = ItemTooltip.humanize_effect_name(str(scene.resource_path.get_file().get_basename()))
+    item.set_meta("effect_display_name", display_name)
+    item.set_meta("effect_tooltip_text", tooltip_text)
+    item.set_meta("effect_tooltip_stats", tooltip_stats)
+    item.set_meta("effect_trigger", trigger)
+
+# Read the actual trigger_event off a (possibly dynamically configured) scene.
+func _read_scene_trigger(scene: PackedScene) -> String:
+    if scene == null:
+        return ""
+    var instance: Node = scene.instantiate()
+    if instance == null:
+        return ""
+    var trigger := ""
+    for p in instance.get_property_list():
+        if p.name == "trigger_event":
+            var trig = instance.get("trigger_event")
+            if trig != null:
+                trigger = str(trig)
+            break
+    instance.free()
+    return trigger
+
 func _generate_item_name(stat: String) -> String:
     match stat:
         "health": return "Potion of Vitality"

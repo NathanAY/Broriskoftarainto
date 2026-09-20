@@ -7,7 +7,11 @@ class_name HomingOnHitModifier
 @export var homing_range: int = 600
 @export var projectile_speed: int = 250
 @export var life_time: int = 5
+@export var display_name: String = "Homing Rocket"
 @export var trigger_event: String = "before_take_damage" #"on_attack", "on_hit", "before_take_damage"
+
+func get_tooltip_stats() -> String:
+    return "Launches a homing rocket dealing 100% of hit damage"
 
 
 var modifier_meta = "spawned_by_HomingOnHitModifier"

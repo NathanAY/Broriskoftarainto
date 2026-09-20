@@ -5,8 +5,12 @@ class_name ReflectProjectileModifier
 @export var target_selector: TargetSelector
 @export var reflect_range: float = 250
 @export var projectile_speed: float = 2000
+@export var display_name: String = "Reflect Projectiles"
 @export var volley_projectile_count: int = 2
 @export var trigger_event: String = "before_take_damage"
+
+func get_tooltip_stats() -> String:
+    return "Fires %d projectiles back at attackers" % volley_projectile_count
 
 var modifier_meta := "spawned_by_RetaliationVolleyModifier"
 var event_manager: EventManager

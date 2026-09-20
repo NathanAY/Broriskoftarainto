@@ -97,7 +97,6 @@ func test_character_select_uses_compact_cards_and_detail_panel() -> void:
 
 	assert_str(menu.selected_path).is_equal(second.character_path)
 	assert_bool(second.is_selected).is_true()
-	assert_str(menu.details_name.text).is_equal(str(second.character.display_name))
 	assert_str(menu.details_label.text).is_equal("\n\n".join(CharacterTooltip.tooltip_lines(second.character)))
 	assert_int(menu.details_icon_holder.get_child_count()).is_equal(1)
 

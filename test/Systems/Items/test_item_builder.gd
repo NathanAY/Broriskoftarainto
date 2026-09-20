@@ -34,6 +34,7 @@ func test_make_buff_item() -> void:
     var buff: Buff = item.effect_scene[0].instantiate()
     assert_object(buff).is_not_null()
     assert_that(buff.modifiers).is_equal({"attack_speed": {"flat": 2.5}})
+    buff.free()
     collect_orphan_node_details()
 
 func test_make_debuff_item() -> void:
@@ -46,6 +47,7 @@ func test_make_debuff_item() -> void:
     var debuff: DebuffSource = item.effect_scene[0].instantiate()
     assert_object(debuff).is_not_null()
     assert_that(debuff.modifiers).is_equal({"armor": {"flat": -10}})
+    debuff.free()
     collect_orphan_node_details()
 
 func test_pack_instance_preserves_config() -> void:
@@ -58,6 +60,8 @@ func test_pack_instance_preserves_config() -> void:
     var inst: StatMultiplierModifier = packed.instantiate()
     assert_that(inst.target_stat).is_equal("damage")
     assert_that(inst.multiplier).is_equal(2.5)
+    modifier.free()
+    inst.free()
     collect_orphan_node_details()
 
 func test_load_scenes_from_dir_returns_packed_scenes() -> void:

@@ -9,6 +9,7 @@ func apply_to(holder: Node) -> void:
     super.apply_to(holder) # parent setup (timer etc.)
     var new_sprite = Sprite2D.new()
     sprite_node = new_sprite
+    holder.add_child(new_sprite)
     
     var area = holder.get_node_or_null("Hitbox")
     if area and area is Area2D:

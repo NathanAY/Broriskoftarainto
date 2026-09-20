@@ -109,7 +109,7 @@ func _generate_effect_item(index: int = -1) -> Item:
         var trig = temp_instance.get("trigger_event")
         if trig != null:
             description += " (Triggers on %s)" % ItemTooltip.humanize_trigger(str(trig))
-    temp_instance.queue_free()
+    temp_instance.free()
 
     #add negative effect
     var stat_names = stats.stats.keys()
@@ -270,11 +270,14 @@ func _configure_dynamic_modifier(scene: PackedScene) -> PackedScene:
             else:
                 print("Skipping override:", key, " — property not found on", scene.resource_path)
     else:
+        instance.free()
         return scene
     # Future: easily extend this logic to support other dynamic fields
     # e.g., if instance.has_variable("damage_bonus"), randomize range
     # Repack it as new scene
-    return ItemBuilder.pack_instance(instance)
+    var repacked: PackedScene = ItemBuilder.pack_instance(instance)
+    instance.free()
+    return repacked
 
 func _generate_stat_modifiers(_chosen_stat, base_value) -> Dictionary:
     var modifier_value = {}

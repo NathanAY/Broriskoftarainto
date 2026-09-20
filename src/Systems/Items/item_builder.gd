@@ -26,6 +26,7 @@ static func make_buff_item(name: String, description: String, stat_name: String,
     buff_instance.modifiers = {stat_name: modifier_value}
     buff_instance.name = name
     item.effect_scene = [pack_instance(buff_instance)]
+    buff_instance.free()
     return item
 
 static func make_debuff_item(name: String, description: String, stat_name: String, modifier_value: Dictionary, debuff_scene: PackedScene) -> Item:
@@ -38,6 +39,7 @@ static func make_debuff_item(name: String, description: String, stat_name: Strin
     debuff_instance.modifiers = {stat_name: modifier_value}
     debuff_instance.name = name
     item.effect_scene = [pack_instance(debuff_instance)]
+    debuff_instance.free()
     return item
 
 static func pack_instance(instance: Node) -> PackedScene:

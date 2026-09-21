@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bq8dw7w4526dw"
-path="res://.godot/imported/luck.png-2d31b0eb29c8cddcf30a1a6a7e286581.ctex"
+uid="uid://c7g0rhfq1upya"
+path="res://.godot/imported/projectile_speed_multiplier.png-fa58821e681423fe84a8280a2a31c154.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://src/Assets/stats/luck.png"
-dest_files=["res://.godot/imported/luck.png-2d31b0eb29c8cddcf30a1a6a7e286581.ctex"]
+source_file="res://src/Assets/stats/projectile_speed_multiplier.png"
+dest_files=["res://.godot/imported/projectile_speed_multiplier.png-fa58821e681423fe84a8280a2a31c154.ctex"]
 
 [params]
 

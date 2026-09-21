@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bt2p3tey3qkoo"
-path="res://.godot/imported/percent_damage.png-70e524d12a78349e355bf944efbe32c1.ctex"
+uid="uid://b03pasqgklmq3"
+path="res://.godot/imported/money.png-29f5ad267ece94ce9e4d1f9a3957d4af.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://src/Assets/stats/percent_damage.png"
-dest_files=["res://.godot/imported/percent_damage.png-70e524d12a78349e355bf944efbe32c1.ctex"]
+source_file="res://src/Assets/stats/money.png"
+dest_files=["res://.godot/imported/money.png-29f5ad267ece94ce9e4d1f9a3957d4af.ctex"]
 
 [params]
 

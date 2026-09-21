@@ -65,7 +65,7 @@ func test_group_spawn_stays_inside_arena() -> void:
 	var enemies: Node = ctx["enemies"]
 	assert_bool(enemies.get_child_count() > 0).is_true()
 	for enemy in enemies.get_children():
-		_assert_inside_arena(ctx["arena"], (enemy as Node2D).global_position)
+		assert_bool(ctx["arena"].is_inside((enemy as Node2D).global_position)).is_true()
 
 
 func test_boss_spawn_clamped_inside_arena() -> void:
@@ -89,3 +89,62 @@ func test_spawn_unclamped_without_arena() -> void:
 	var character_pos: Vector2 = (ctx["character"] as Node2D).global_position
 	# Unclamped ring position: exactly 500 from the character (no arena to pull it in).
 	assert_float((enemy_pos - character_pos).length()).is_equal_approx(500.0, 1.0)
+
+
+func _assert_pairwise_separation(enemies: Node, min_separation: float) -> void:
+	var children: Array = enemies.get_children()
+	for i in range(children.size()):
+		for j in range(i + 1, children.size()):
+			var a: Vector2 = (children[i] as Node2D).global_position
+			var b: Vector2 = (children[j] as Node2D).global_position
+			assert_float(a.distance_to(b)).is_greater_equal(min_separation - 0.001)
+
+
+func test_group_spawn_enemies_are_separated() -> void:
+	var ctx: Dictionary = _build_tree(false, "res://src/Systems/EnemySpawner.tscn", Vector2.ZERO)
+	var spawner: EnemySpawner = ctx["spawner"]
+	spawner.group_spawn_interval = 0.01
+	spawner.group_size = 3
+	spawner.group_spawn_radius = 120.0
+	spawner.min_spawn_separation = 90.0
+	seed(1234)
+	await spawner.spawn_enemy_group()
+	var enemies: Node = ctx["enemies"]
+	assert_int(enemies.get_child_count()).is_equal(3)
+	_assert_pairwise_separation(enemies, spawner.min_spawn_separation)
+
+
+func test_pick_spawn_position_avoids_existing_enemy() -> void:
+	var ctx: Dictionary = _build_tree(false, "res://src/Systems/EnemySpawner.tscn")
+	var spawner: EnemySpawner = ctx["spawner"]
+	var enemies: Node = ctx["enemies"]
+	var existing := Node2D.new()
+	existing.global_position = Vector2.ZERO
+	enemies.add_child(existing)
+	spawner.min_spawn_separation = 90.0
+	var calls: Array = [0]
+	var pos: Vector2 = spawner._pick_spawn_position(func() -> Vector2:
+		calls[0] += 1
+		if calls[0] == 1:
+			return Vector2.ZERO
+		return Vector2(500, 0)
+	, [])
+	# First candidate (overlapping the existing enemy) must be skipped...
+	assert_int(calls[0]).is_greater(1)
+	# ...and the retried candidate must be returned, not the overlapping one.
+	assert_float(pos.distance_to(Vector2(500, 0))).is_zero()
+
+
+func test_pick_spawn_position_respects_reserved_points() -> void:
+	var ctx: Dictionary = _build_tree(false, "res://src/Systems/EnemySpawner.tscn")
+	var spawner: EnemySpawner = ctx["spawner"]
+	spawner.min_spawn_separation = 90.0
+	var calls: Array = [0]
+	var pos: Vector2 = spawner._pick_spawn_position(func() -> Vector2:
+		calls[0] += 1
+		if calls[0] == 1:
+			return Vector2.ZERO
+		return Vector2(2000, 0)
+	, [Vector2.ZERO])
+	# The reserved point (group center) must not be violated by the result.
+	assert_float(pos.distance_to(Vector2.ZERO)).is_greater_equal(89.0)

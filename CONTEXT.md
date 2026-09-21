@@ -47,6 +47,26 @@ What a dying actor grants: money, item drops, altars, death marks. Implemented t
 the misnamed `spawner_modifier.gd`.
 _Avoid_: spawner modifier
 
+## Run structure
+
+**Wave**:
+One Stage-1 enemy period: timed spawning then kill-all mop-up.
+_Avoid_: stage (when you mean this period), round
+
+**Stage**:
+The Wave → Boss → Shop triple orchestrated by `StageManager`.
+_Avoid_: wave, loop
+
+**Loop**:
+One full difficulty round, incremented on shop-exit (`StageManager.current_loop`).
+Higher loops raise `target_enemy_count` and scale enemy/boss stats.
+_Avoid_: stage, wave
+
+**Spawn pacing**:
+How fast `EnemySpawner` refills the arena: base interval, empty-arena refill
+delay, min/max wait clamp, and max alive cap.
+_Avoid_: spawn rate (when you mean the full pacing policy)
+
 ## Infrastructure
 
 **event contract**: the checker seam (`src/Scripts/event_contract.gd`) that validates every

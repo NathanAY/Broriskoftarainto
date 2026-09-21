@@ -13,6 +13,12 @@ Data flow
 - Processing: `EnemySpawner` spawns enemies around the character and attaches death-reward handlers and stage scaling; `BossSpawner` spawns a single boss instance and scales by loop.
 - Outputs: instantiated enemy/boss nodes added to runtime `Nodes/Enemies` container.
 
+Spawn pacing (see glossary: Wave, Stage, Loop, Spawn pacing)
+- Base `spawn_interval = 1s`; each Wave entry calls `start_wave()` so the first tick lands ~1s (no stale stopped/long timer).
+- Dynamic rate: speeds up when below `target_enemy_count`, slows down when above (protects weak builds + perf). Ticks clamped to `[0.4s, 4.0s]`.
+- Empty arena: refill delay `max(0.3, 1.0 - 0.15*(Loop-1))` + `_process` watchdog shortens any long pending wait.
+- Alive cap `max_alive_enemies = 100`: ticks above cap are skipped (wait = max).
+
 Dependencies
 - `StageManager` to control `spawn_active` flags; `Enemy` scenes expect `Stats`, `WeaponHolder`, `ItemHolder` children.
 

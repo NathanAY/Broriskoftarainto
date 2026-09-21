@@ -117,11 +117,15 @@ func go_to_stage(stage: int) -> void:
 
     match stage:
         1:
-            # Start spawning enemy waves for this loop
+            # Start a Wave (enemy period) for this loop via the spawner seam so
+            # the cadence restarts at ~1s instead of inheriting a stale timer.
             stage_active = true
-            enemy_spawner.spawn_active = true
             # Boss should not spawn or be active during wave
             boss_spawner.spawn_active = false
+            if enemy_spawner.has_method("start_wave"):
+                enemy_spawner.start_wave()
+            else:
+                enemy_spawner.spawn_active = true
             # NOTE:
             # We purposely DON'T call enemy_spawner._on_next_stage() here,
             # because start_new_loop() already calls that when beginning a new loop.

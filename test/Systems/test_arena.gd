@@ -201,7 +201,9 @@ func test_enemy_body_collides_with_walls() -> void:
 	var enemy: CharacterBody2D = auto_free(load("res://src/Systems/Enemy.tscn").instantiate())
 	add_child(enemy)
 	assert_int(enemy.collision_layer).is_equal(2)
-	assert_bool((enemy.collision_mask & 2) != 0).is_true()
+	# Enemies only collide with walls; crowding uses soft separation so packed
+	# groups no longer hard-push/slide each other sideways.
+	assert_bool((enemy.collision_mask & 2) == 0).is_true()
 	assert_bool((enemy.collision_mask & Arena.WALL_LAYER_BIT) != 0).is_true()
 	var hitbox: Area2D = enemy.get_node("Hitbox")
 	assert_bool((hitbox.collision_mask & Arena.WALL_LAYER_BIT) == 0).is_true()

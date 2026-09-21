@@ -26,5 +26,3 @@ func process_movement(creature_self: CharacterBody2D, _delta: float) -> void:
 
     creature_self.anim_player.play("move")
     creature_self.sprite.flip_h = direction.x < 0
-
-    creature_self.move_and_slide()

@@ -19,5 +19,3 @@ func process_movement(creature_self: CharacterBody2D, delta: float) -> void:
     else:
         creature_self.velocity = Vector2.ZERO
         creature_self.anim_player.play("idle")
-
-    creature_self.move_and_slide()

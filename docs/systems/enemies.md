@@ -11,7 +11,8 @@ Key scripts / scenes
 
 Data flow
 - Inputs: spawn position and modifiers from spawners; target set by spawner or StageManager.
-- Processing: `behaviour.process_movement(self, delta)` handles movement (also flips the `sprite` via `creature_self.sprite.flip_h`); weapons in `WeaponHolder` fire based on their logic.
+- Processing: `behaviour.process_movement(self, delta)` computes the desired velocity (also flips the `sprite` via `creature_self.sprite.flip_h`); `Enemy._physics_process` then adds a soft separation force (crowd spacing) and calls `move_and_slide()`. Weapons in `WeaponHolder` fire based on their logic.
+- Crowding: enemies do NOT hard-collide with each other (`collision_mask` includes only walls). Instead `_separation_force()` repels overlapping neighbours softly, so large groups spread naturally instead of being shoved side to side by physics.
 - Outputs: on death, subscribe to event manager `on_death` handlers; remove collision and play death animation.
 
 Dependencies

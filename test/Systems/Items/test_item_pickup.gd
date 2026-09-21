@@ -1,4 +1,4 @@
-class_name ItemPickupGdUnit4Test
+class_name ItemPickupTest
 extends GdUnitTestSuite
 
 func test_pickup_menu_shows_buff_details() -> void:

@@ -14,6 +14,8 @@ signal next_stage_pressed
 
 const SHOP_ITEM_CARD_SCENE: PackedScene = preload("res://src/Scenes/menu/ShopItemCard.tscn")
 
+const WEAPON_CHANCE: float = 0.1
+
 var staged_items: Array = []
 var locked_items: Array = []   # items that persist between shops
 var character: Character = null
@@ -128,13 +130,13 @@ func _add_item_entry(item: Item):
     )
 
 # ------------------- PHASE 2 (shop) -------------------
-func _add_shop_item_entry(item: Item, existing_id: String = ""):
+func _add_shop_item_entry(offer: Resource, existing_id: String = ""):
     var card: ShopItemCard = SHOP_ITEM_CARD_SCENE.instantiate()
     var entry_id = existing_id if existing_id != "" else _generate_entry_id()
-    card.set_meta("item", item)
+    card.set_meta("item", offer)
     card.set_meta("id", entry_id)
     items_container.add_child(card)
-    card.set_item_display(item)
+    card.set_item_display(offer)
 
     # Buy button
     card.primary_button.text = "Buy"
@@ -142,9 +144,14 @@ func _add_shop_item_entry(item: Item, existing_id: String = ""):
         var money = character.stats.stats.get("money", 0)
         if money >= 1:
             character.stats.set_base_stat("money", money - 1)
-            var holder: ItemHolder = character.get_node_or_null("ItemHolder")
-            if holder:
-                holder.add_item(item)
+            if offer is BaseWeapon:
+                var weapon_holder: WeaponHolder = character.get_node_or_null("WeaponHolder")
+                if weapon_holder:
+                    weapon_holder.add_weapon(offer as BaseWeapon)
+            else:
+                var holder: ItemHolder = character.get_node_or_null("ItemHolder")
+                if holder:
+                    holder.add_item(offer as Item)
             card.queue_free()
             # remove this exact entry from locked list if it was there
             locked_items = locked_items.filter(func(li): return li.id != entry_id)
@@ -161,7 +168,7 @@ func _add_shop_item_entry(item: Item, existing_id: String = ""):
             locked_items = locked_items.filter(func(li): return li.id != entry_id)
             card.secondary_button.text = "Lock"
         else:
-            locked_items.append({"id": entry_id, "item": item})
+            locked_items.append({"id": entry_id, "item": offer})
             card.secondary_button.text = "Unlock"
     )
 
@@ -244,18 +251,28 @@ func _start_shop_phase():
 
     # fill up to 4 active items
     while _active_item_count() < 4:
-        var new_item: Item = item_factory.get_item_from_pool_or_generate()
-        if not new_item:
+        var new_offer: Resource = _generate_shop_offer()
+        if not new_offer:
             break
-        _add_shop_item_entry(new_item)
+        _add_shop_item_entry(new_offer)
 
 # ensure shop stays at 4 items after buys/locks
 func _refill_shop_items():
     while _active_item_count() < 4:
-        var new_item: Item = item_factory.get_item_from_pool_or_generate()
-        if not new_item:
+        var new_offer: Resource = _generate_shop_offer()
+        if not new_offer:
             break
-        _add_shop_item_entry(new_item)
+        _add_shop_item_entry(new_offer)
+
+# 10% weapon chance, otherwise a generated item.
+func _generate_shop_offer() -> Resource:
+    if not item_factory:
+        return null
+    if item_factory.rng.randf() < WEAPON_CHANCE:
+        var weapon: BaseWeapon = item_factory.get_random_weapon()
+        if weapon:
+            return weapon
+    return item_factory.get_item_from_pool_or_generate()
 
 # ----- REROLL -----
 var _shop_entry_id_counter: int = 0

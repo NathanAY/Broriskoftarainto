@@ -1,4 +1,4 @@
-class_name WanderArenaGdUnit4Test
+class_name WanderArenaTest
 extends GdUnitTestSuite
 
 

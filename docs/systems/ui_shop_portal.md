@@ -6,7 +6,7 @@ Purpose
 Key scripts / scenes
 - `Systems/ShopPortal.tscn` (portal scene referenced from `StageManager`)
 - `Scenes/menu/starter_menu.gd` — starter selection UI that writes to `GlobalGameState`.
-- `Scenes/menu/ShopMenu.tscn` + `Scenes/menu/shop_menu.gd` — shop UI; `ItemsList` is an `HBoxContainer` so offers are laid out in a horizontal row.
+- `Scenes/menu/ShopMenu.tscn` + `Scenes/menu/shop_menu.gd` — shop UI; `ItemsList` is an `HBoxContainer` so offers are laid out in a horizontal row. Each generated offer has a 10% chance to be a weapon (`WEAPON_CHANCE`); buying a weapon equips it via `WeaponHolder.add_weapon`.
 - `Scenes/menu/ShopItemCard.tscn` + `Scenes/menu/shop_item_card.gd` (`ShopItemCard`) — prepared card scene used for every entry in `ItemsList`, both pickup phase (`Take`/`Sell`) and shop phase (`Buy`/`Lock`). Layout: `IconHolder` on top, scrollable `InfoScroll` (`ScrollContainer`, horizontal scroll disabled) with `InfoLabel` below it showing `"\n\n".join(ItemTooltip.tooltip_lines(item))`, and two side-by-side buttons at the bottom. `ShopMenu` instantiates the card, calls `set_item_display(item)`, then wires the buttons; buy/lock/take/sell logic stays in `shop_menu.gd`.
 
 Data flow

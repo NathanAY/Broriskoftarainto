@@ -1,5 +1,5 @@
 # GdUnit generated TestSuite
-class_name PauseMenuGdUnit4Test
+class_name PauseMenuTest
 extends GdUnitTestSuite
 
 const PAUSE_MENU_SCENE_PATH := "res://src/Scenes/menu/PauseMenu.tscn"

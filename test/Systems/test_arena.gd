@@ -1,4 +1,4 @@
-class_name ArenaGdUnit4Test
+class_name ArenaTest
 extends GdUnitTestSuite
 
 

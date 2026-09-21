@@ -1,5 +1,5 @@
 # GdUnit generated TestSuite
-class_name MainMenuGdUnit4Test
+class_name MainMenuTest
 extends GdUnitTestSuite
 
 const MAIN_SCENE_PATH := "res://src/Scenes/menu/Main.tscn"

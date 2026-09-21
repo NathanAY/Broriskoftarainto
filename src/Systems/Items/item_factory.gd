@@ -6,6 +6,9 @@ var rng := RandomNumberGenerator.new()
 # empty at begining, fills by generated items.
 var drop_pool: Array[Item] = []
 
+const WEAPONS_DIR: String = "res://src/Resources/weapons"
+var weapon_resources: Array[BaseWeapon] = []
+
 @onready var stats: Stats = $Stats
 
 # preload or lazy-load effect/buff scenes
@@ -36,6 +39,28 @@ func get_item_from_pool_or_generate() -> Item:
         var new_item = generate_random_item()
         drop_pool.append(new_item)
         return new_item
+
+func get_random_weapon() -> BaseWeapon:
+    if weapon_resources.is_empty():
+        _load_weapons()
+    if weapon_resources.is_empty():
+        return null
+    return weapon_resources.pick_random()
+
+func _load_weapons() -> void:
+    var dir = DirAccess.open(WEAPONS_DIR)
+    if not dir:
+        push_warning("ItemFactory: could not open " + WEAPONS_DIR)
+        return
+    dir.list_dir_begin()
+    var file_name = dir.get_next()
+    while file_name != "":
+        if not dir.current_is_dir() and file_name.ends_with(".tres"):
+            var res: Resource = load(WEAPONS_DIR + "/" + file_name)
+            if res is BaseWeapon:
+                weapon_resources.append(res)
+        file_name = dir.get_next()
+    dir.list_dir_end()
 
 func get_item_by_type(type: String, index: int = -1) -> Item:
     match type:

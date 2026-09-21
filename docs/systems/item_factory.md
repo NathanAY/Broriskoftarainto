@@ -9,7 +9,7 @@ Key scripts / scenes
 Data flow
 - Inputs: reads available stats from `Stats` instance, loads PackedScenes from `res://src/Systems/Items/Modifiers` and buff/debuff scenes.
 - Processing: random roll decides between stat/effect/buff/debuff generators; creates `Item` resources with modifiers and optionally pre-configured PackedScenes.
-- Outputs: returns an `Item` instance (or `null` if no sources available); maintains `drop_pool` cache.
+- Outputs: returns an `Item` instance (or `null` if no sources available); maintains `drop_pool` cache. `get_random_weapon()` lazily loads `BaseWeapon` resources from `res://src/Resources/weapons` and returns a random one (used by the shop).
 
 Dependencies
 - `Stats` node reference (onready `$Stats`), PackedScenes under `Systems/Items/Modifiers` and `Systems/Items/Buffs`.

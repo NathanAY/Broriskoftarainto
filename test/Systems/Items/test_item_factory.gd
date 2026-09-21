@@ -1,5 +1,5 @@
 # GdUnit generated TestSuite
-class_name ItemFactoryGdUnit4Test
+class_name ItemFactoryTest
 extends GdUnitTestSuite
 
 # Test suite for ItemFactory

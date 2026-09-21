@@ -25,12 +25,12 @@ class_name ItemBuilder — all static funcs, no Node/autoload/scene needed:
 - test_buff_in_combat.gd:26 → ItemBuilder.make_buff_item("attack_speed", {"flat": 2.5}, load(buff.tscn)) — behavior changes: the buff will now actually receive the requested modifier (previously it silently used the scene's hardcoded default). Expect existing assertions to need adjustment; will verify per AGENTS.md loop.
 - test_items_gut.gd → make_stat_item for stat items, make_effect_item + pack_instance for the doubler.
 - test_item_factory_gut.gd:30 → make_stat_item.
-- test_item_sacrifice_altar_gdunit4.gd — leave as plain Item.new() (it's a bare holder test, not a shape).
+- test_item_sacrifice_altar.gd — leave as plain Item.new() (it's a bare holder test, not a shape).
 
 ## 5. New test (per AGENTS.md: test → run → fix → rerun)
-test/Systems/Items/test_item_builder_gdunit4.gd: each make_* returns an Item with correct name/modifiers/effect_scene; buff/debuff items carry the right meta and their packed scene instantiates with the injected modifier; pack_instance returns an instantiable scene with the config preserved.
+test/Systems/Items/test_item_builder.gd: each make_* returns an Item with correct name/modifiers/effect_scene; buff/debuff items carry the right meta and their packed scene instantiates with the injected modifier; pack_instance returns an instantiable scene with the config preserved.
 
-Run with .\run_tests_gdunit_custom.bat test_item_builder_gdunit4.gd, then full .\run_tests_gdunit.bat.
+Run with .\run_tests_gdunit_custom.bat test_item_builder.gd, then full .\run_tests_gdunit.bat.
 
 ## 6. Docs
 Update docs/systems/items.md to document ItemBuilder as the single item-construction entry point.

@@ -1,4 +1,4 @@
-class_name SpawnPacingGdUnit4Test
+class_name SpawnPacingTest
 extends GdUnitTestSuite
 
 

@@ -1,5 +1,5 @@
 # GdUnit generated TestSuite
-class_name ItemBuilderGdUnit4Test
+class_name ItemBuilderTest
 extends GdUnitTestSuite
 
 const BUFF_SCENE := "res://src/Systems/Items/Buffs/buff.tscn"

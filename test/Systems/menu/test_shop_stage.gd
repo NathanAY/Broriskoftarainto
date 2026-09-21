@@ -1,5 +1,5 @@
 # GdUnit generated TestSuite
-class_name ShopStageGdUnit4Test
+class_name ShopStageTest
 extends GdUnitTestSuite
 
 

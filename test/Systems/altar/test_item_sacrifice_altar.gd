@@ -1,4 +1,4 @@
-class_name ItemSacrificeAltarGdUnit4Test
+class_name ItemSacrificeAltarTest
 extends GdUnitTestSuite
 
 func test_add_item_keeps_item_references() -> void:

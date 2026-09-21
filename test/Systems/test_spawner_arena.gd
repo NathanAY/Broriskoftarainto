@@ -1,4 +1,4 @@
-class_name SpawnerArenaGdUnit4Test
+class_name SpawnerArenaTest
 extends GdUnitTestSuite
 
 

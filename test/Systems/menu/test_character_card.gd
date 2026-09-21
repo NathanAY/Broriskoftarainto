@@ -1,5 +1,5 @@
 # GdUnit TestSuite for the compact CharacterCard and the CharacterSelect detail panel.
-class_name CharacterCardGdUnit4Test
+class_name CharacterCardTest
 extends GdUnitTestSuite
 
 const CARD_SCENE := "res://src/Scenes/menu/CharacterCard.tscn"

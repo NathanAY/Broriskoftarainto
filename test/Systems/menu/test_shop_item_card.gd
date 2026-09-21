@@ -1,5 +1,5 @@
 # GdUnit TestSuite for the prepared ShopItemCard scene.
-class_name ShopItemCardGdUnit4Test
+class_name ShopItemCardTest
 extends GdUnitTestSuite
 
 const SHOP_SCENE := "res://src/Scenes/menu/ShopMenu.tscn"

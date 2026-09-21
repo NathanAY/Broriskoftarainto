@@ -15,7 +15,7 @@ set "LOG_FILE=.gdunit.log"
 if not "%~1"=="" set "TEST_TARGET=res://test/%~1"
 
 echo ========================================
-echo GdUnit4 Test Runner
+echo Test Runner
 echo Target: %TEST_TARGET%
 echo Timeout: %TIMEOUT_SECONDS%s
 echo Log: %LOG_FILE%

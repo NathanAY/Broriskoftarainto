@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://brgr2yeaajlxi"]
+
+[ext_resource type="Script" uid="uid://0oe18i87lq8e" path="res://src/Scenes/effects/hit_flash_manager.gd" id="1_flash"]
+
+[node name="HitFlashManager" type="Node2D" unique_id=614046527]
+script = ExtResource("1_flash")

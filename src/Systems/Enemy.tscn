@@ -13,6 +13,7 @@
 [ext_resource type="AnimationLibrary" uid="uid://cwclbp73qaped" path="res://src/animations/enemy_animations.res" id="11_r1xls"]
 [ext_resource type="PackedScene" uid="uid://c0miaq2nbp3m6" path="res://src/Systems/movement/bahaviour/ChaseMovementBehaviour.tscn" id="12_pdagp"]
 [ext_resource type="PackedScene" uid="uid://cmvgx8sqctngm" path="res://src/Scenes/effects/TextureBurstManager.tscn" id="13_burst"]
+[ext_resource type="PackedScene" uid="uid://brgr2yeaajlxi" path="res://src/Scenes/effects/HitFlashManager.tscn" id="14_flash"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_kpr8r"]
 radius = 41.0
@@ -55,6 +56,8 @@ event_manager = NodePath("../EventManager")
 [node name="ParticleEffectManager" parent="." unique_id=1019445881 instance=ExtResource("9_yw6dd")]
 
 [node name="TextureBurstManager" parent="." unique_id=847736535 instance=ExtResource("13_burst")]
+
+[node name="HitFlashManager" parent="." unique_id=847736536 instance=ExtResource("14_flash")]
 
 [node name="AnimationPlayer" parent="." unique_id=1752898773 instance=ExtResource("10_58ao5")]
 libraries/ = ExtResource("11_r1xls")

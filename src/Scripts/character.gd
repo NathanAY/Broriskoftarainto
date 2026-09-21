@@ -6,7 +6,6 @@ class_name Character
 @onready var item_holder: ItemHolder = $ItemHolder
 @onready var stats: Stats = $Stats
 @onready var weapon_holder: WeaponHolder = $WeaponHolder
-@onready var sprite: Sprite2D = $Node2D/Sprite2D
 @onready var anim_player: AnimationPlayer = $AnimationPlayer
 
 var current_target = null
@@ -71,19 +70,12 @@ func _ready():
     
     $Hitbox.collision_layer = 3
     $Hitbox.collision_mask = 7
-    event_manager.subscribe("on_death", Callable(self, "_die"))   
-    event_manager.subscribe("before_take_damage", Callable(self, "_flash"))
+    event_manager.subscribe("on_death", Callable(self, "_die"))
 
 func _on_area_2d_area_entered(area: Area2D) -> void:
     if area.get_parent().is_in_group("enemies"):
         area.get_parent().queue_free()
         print("Enemy destroyed!")  
-
-func _flash(_event):
-    var tween = create_tween()
-    tween.tween_property(sprite, "modulate", Color(1, 4, 1), 0.1)
-    tween.tween_property(sprite, "modulate", Color(4, 1, 1, 0), 0.1).from(Color(1, 1, 4))
-    tween.tween_property(sprite, "modulate", Color(1, 1, 1, 1), 0.0)
 
 func _die(_event: Dictionary):
     emit_signal("character_died")

@@ -140,4 +140,4 @@ The tooltip logic was extracted from `character_ui.gd` into a reusable component
 - `test_tooltip_ui_bind_to_row` — standalone `TooltipUi` bound to a generated row; hover shows, exit hides.
 - `test_shop_menu_character_info_tooltips` — instantiates `ShopMenu.tscn` off a typed `Character` stub (item + weapon added), calls `_update_character_info()`, verifies one row per container and hover/exit behavior via `shop.tooltip`.
 
-Result: 5/5 pass, 0 orphans, 0 errors in the GDUnit4 run.
+Result: 155/1555 pass, 0 orphans, 0 errors in the GDUnit4 run.

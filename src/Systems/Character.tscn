@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://bfv23hn20a0ia" path="res://src/ui/numberspawn/HealNumberSpawner.tscn" id="12_fdd6p"]
 [ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://src/ui/HealthBar.tscn" id="13_mogpt"]
 [ext_resource type="PackedScene" uid="uid://jsw2vxmrn6yc" path="res://src/Scenes/particles/ParticleEffectManager.tscn" id="14_yw36p"]
+[ext_resource type="PackedScene" uid="uid://brgr2yeaajlxi" path="res://src/Scenes/effects/HitFlashManager.tscn" id="15_flash"]
 [ext_resource type="AnimationLibrary" uid="uid://cv7ddqsudqysx" path="res://src/animations/player_animations.res" id="17_rd1uo"]
 [ext_resource type="AnimationLibrary" uid="uid://cwclbp73qaped" path="res://src/animations/enemy_animations.res" id="18_tqakc"]
 
@@ -27,6 +28,8 @@ radius = 30.0
 
 [node name="Character" type="CharacterBody2D" unique_id=1395820321]
 script = ExtResource("1_cw27m")
+
+[node name="HitFlashManager" parent="." unique_id=311505824 instance=ExtResource("15_flash")]
 
 [node name="Node2D" type="Node2D" parent="." unique_id=764863756]
 

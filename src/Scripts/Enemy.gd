@@ -48,7 +48,6 @@ func _ready():
     $Hitbox.collision_mask = 7
     
     event_manager.subscribe("on_death", Callable(self, "_die"))
-    event_manager.subscribe("before_take_damage", Callable(self, "_flash"))
 
 func set_target_position(new_target: Node):
     target = new_target  
@@ -57,12 +56,6 @@ func _physics_process(delta):
     if !_alive:
         return
     behaviour.process_movement(self, delta)
-
-func _flash(_event):
-    var tween = create_tween()
-    tween.tween_property(sprite, "modulate", Color(1, 4, 1), 0.1)
-    tween.tween_property(sprite, "modulate", Color(4, 1, 1, 0), 0.1).from(Color(1, 1, 4))
-    tween.tween_property(sprite, "modulate", Color(1, 1, 1, 1), 0.0)
 
 func _die(_event: Dictionary):
     _alive = false

@@ -7,10 +7,11 @@ Key scripts / scenes
 - `Scripts/Enemy.gd` (`Enemy` class)
 - `Systems/Enemy.tscn` and `Systems/EnemyBoss.tscn` (boss variant)
 - Movement behaviours under `Scenes/` or `Systems/` (referenced as `MovementBehaviour`).
+- Visual managers live as children (see `Scenes/effects/`): `HitFlashManager` (damage flash via `before_take_damage`), `TextureBurstManager` (death burst via `on_death`), `Scenes/particles/ParticleEffectManager` (hit particles via `after_take_damage`).
 
 Data flow
 - Inputs: spawn position and modifiers from spawners; target set by spawner or StageManager.
-- Processing: `behaviour.process_movement(self, delta)` handles movement; weapons in `WeaponHolder` fire based on their logic.
+- Processing: `behaviour.process_movement(self, delta)` handles movement (also flips the `sprite` via `creature_self.sprite.flip_h`); weapons in `WeaponHolder` fire based on their logic.
 - Outputs: on death, subscribe to event manager `on_death` handlers; remove collision and play death animation.
 
 Dependencies

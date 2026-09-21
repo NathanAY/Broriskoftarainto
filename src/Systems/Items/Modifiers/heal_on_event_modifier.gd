@@ -26,6 +26,9 @@ var stacks: Array[bool] = []  # each entry = active/inactive
 func get_tooltip_stats() -> String:
     return "Heals %s HP" % str(default_heal)
 
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
+
 ## Generation-time hook (called by ItemFactory): pick a random trigger from
 ## possible_trigger_event and apply its overrides to this instance.
 ## Context: {"rng": RandomNumberGenerator, "stats": Dictionary}.
@@ -51,20 +54,17 @@ func attachEventManager(em: Node):
 
 func add_stack(active: bool):
     stacks.append(active)
-    prints("add_stack", stacks)
 
 func remove_stack(index: int):
     if index >= 0 and index < stacks.size():
         stacks.remove_at(index)
-    prints("remove_stack", stacks)
 
 func set_stack_active(index: int, active: bool):
     if index >= 0 and index < stacks.size():
         stacks[index] = active
-    prints("set_stack_active", stacks)
 
 func _on_event(_event: Dictionary):
     var health: Health = holder.get_node_or_null("Health")
     if not health:
         return
-    health.heal(default_heal * stacks.count(true))
+    health.heal(default_heal * _active_stacks())

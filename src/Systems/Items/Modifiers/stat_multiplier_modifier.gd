@@ -4,6 +4,7 @@ class_name StatMultiplierModifier
 var event_manager: EventManager = null
 var holder: Node = null
 var stats: Stats = null
+var stacks: Array[bool] = []  # each entry = active/inactive
 
 @export var display_name: String = "Stat Multiplier"
 @export var trigger_event: String = "on_item_added"
@@ -13,7 +14,21 @@ var stats: Stats = null
 @export var multiplier: float = 2.0
 
 func get_tooltip_stats() -> String:
-    return "Multiplies %s bonuses from items by %sx" % [target_stat, str(multiplier)]
+    return "Multiplies %s bonuses from items by %sx per stack" % [target_stat, str(multiplier)]
+
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
+
+func add_stack(active: bool):
+    stacks.append(active)
+
+func remove_stack(index: int):
+    if index >= 0 and index < stacks.size():
+        stacks.remove_at(index)
+
+func set_stack_active(index: int, active: bool):
+    if index >= 0 and index < stacks.size():
+        stacks[index] = active
 
 func attachEventManager(em: Node):
     event_manager = em
@@ -34,6 +49,6 @@ func _on_item_added(event):
         if mod_data is Dictionary and mod_data.has("flat"):
             var original_flat = mod_data["flat"]
             
-            # Apply multiplier
-            mod_data["flat"] = original_flat * multiplier
+            # Apply multiplier (scales with stacks)
+            mod_data["flat"] = original_flat * multiplier * _active_stacks()
             print("StatMultiplierModifier: Multiplied %s item from %s to %s" % [target_stat, original_flat, mod_data["flat"]])

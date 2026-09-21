@@ -4,29 +4,31 @@ class_name SpreadModifier
 @export var projectile_scene = preload("res://src/Systems/weapon/Projectile.tscn")
 
 @export var display_name: String = "Spread"
-@export_multiline var tooltip_text: String = "Spawn 2 extra projectiles"
 @export var trigger_event: String = "on_attack"
 
 var event_manager: EventManager
 var stacks: Array[bool] = []  # each entry = active/inactive
 
-func attachEventManager(em: EventManager):
-    event_manager = em
-    em.subscribe("on_attack", Callable(self, "_on_attack"))
+func get_tooltip_stats() -> String:
+    return "Spawns 2 extra projectiles per stack"
+
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
 
 func add_stack(active: bool):
     stacks.append(active)
-    prints("add_stack", stacks)
 
 func remove_stack(index: int):
     if index >= 0 and index < stacks.size():
         stacks.remove_at(index)
-    prints("remove_stack", stacks)
 
 func set_stack_active(index: int, active: bool):
     if index >= 0 and index < stacks.size():
         stacks[index] = active
-    prints("set_stack_active", stacks)
+
+func attachEventManager(em: EventManager):
+    event_manager = em
+    em.subscribe("on_attack", Callable(self, "_on_attack"))
 
 func _on_attack(data: Dictionary):
     if !data.has("projectile"):
@@ -39,7 +41,7 @@ func _on_attack(data: Dictionary):
         return
 
     var base_direction = projectile.direction
-    var active_count = stacks.count(true)  # ✅ only active stacks
+    var active_count = _active_stacks()  # only active stacks
 
     for i in range(active_count):
         var angle = 10

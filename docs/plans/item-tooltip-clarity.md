@@ -1,7 +1,7 @@
 # Item Tooltip Clarity Plan
 
 > Status: IMPLEMENTED — see `src/ui/item_tooltip.gd`, `src/Systems/Items/item_factory.gd`,
-> pilot `display_name`/`tooltip_text` on `projectile_bounce_modifier.gd` + `ExplosiveShotEffect.gd`,
+> pilot `display_name`/`tooltip_text` on `projectile_bounce_modifier.gd` + `explosive_shot_modifier.gd`,
 > and `test/ui/test_character_ui_tooltip.gd`.
 
 ## Goal
@@ -39,7 +39,7 @@ read code → read testing docs → write test → run → fix → rerun.
 - Q9 Line format: A — explicit `buff:` / `tradeoff:` (or `effect:` / `tradeoff:`) prefixes;
   description carries flavor + trigger only, never raw dicts.
 - Q10 Migration scope: A — pilot on `projectile_bounce_modifier.gd` (+ 1–2 more,
-  e.g. `ExplosiveShotEffect.gd`); remaining ~18 use humanized fallback.
+  e.g. `explosive_shot_modifier.gd`); remaining ~18 use humanized fallback.
 - Q11 Plan file: this file — `docs/plans/item-tooltip-clarity.md`.
 
 ## Current behavior (evidence)
@@ -54,7 +54,7 @@ read code → read testing docs → write test → run → fix → rerun.
 - `item_factory.gd:88` — `"Increases %s for %s\nDecreasese %s for %s"` (typo + raw dicts).
 - `item_factory.gd:100-120` — `"Grants special effect: %s[ (Triggers on %s)]\nDecreasese %s for %s"`.
 - `item_factory.gd:148-149,166-172` — buff/debuff descriptions mix flavor + tradeoff dicts.
-- `projectile_bounce_modifier.gd:1-9`, `ExplosiveShotEffect.gd` — no display fields.
+- `projectile_bounce_modifier.gd:1-9`, `explosive_shot_modifier.gd` — no display fields.
 - Payload hiding: `Buff.modifiers` (`src/Systems/Items/Buffs/buff.gd:7-10`) and
   `DebuffSource.modifiers` (`src/Systems/Items/Buffs/debuff_source.gd:7`) live inside the
   packed instance, never rendered; tooltip only renders `Item.modifiers` (tradeoff).
@@ -142,7 +142,7 @@ tradeoff: armor flat: -1.0
 
 ### 2. Modifier contract (Q5-B, Q10-A pilot)
 
-Add to `projectile_bounce_modifier.gd` (+ `ExplosiveShotEffect.gd` as second pilot):
+Add to `projectile_bounce_modifier.gd` (+ `explosive_shot_modifier.gd` as second pilot):
 
 ```gdscript
 @export var display_name: String = "Projectile Bounce"

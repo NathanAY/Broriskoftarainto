@@ -1,28 +1,47 @@
 extends Node
-class_name Shield
+class_name EnergyShieldModifier
 
 @export var display_name: String = "Energy Shield"
 @export var trigger_event: String = "before_take_damage"
+@export var shield_per_stack: float = 5.0
 
 var max_shield: float = 0.0
 @export var recharge_rate: float = 10.0         # per second
 @export var recharge_delay: float = 1.5         # seconds after last damage
 
 func get_tooltip_stats() -> String:
-    return "Shield absorbs damage, recharges %s per second after %ss" % [str(recharge_rate), str(recharge_delay)]
+    return "Shield absorbs damage, recharges %s per second after %ss (+%s max shield per stack)" % [str(recharge_rate), str(recharge_delay), str(shield_per_stack)]
+
 var current_shield: float = 0.0
 var _time_since_damage: float = 0.0
 
 var stats: Stats = null
 var event_manager: EventManager = null
+var stacks: Array[bool] = []  # each entry = active/inactive
+
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
+
+func add_stack(active: bool):
+    stacks.append(active)
+    _update_max_shield(null)
+
+func remove_stack(index: int):
+    if index >= 0 and index < stacks.size():
+        stacks.remove_at(index)
+    _update_max_shield(null)
+
+func set_stack_active(index: int, active: bool):
+    if index >= 0 and index < stacks.size():
+        stacks[index] = active
+    _update_max_shield(null)
 
 func attachEventManager(em: Node):
     event_manager = em
     stats = em.get_parent().get_node_or_null("Stats")
     if not stats:
-        push_warning("Energy shiel: Stats not found on holder %s" % em.get_parent())
+        push_warning("EnergyShieldModifier: Stats not found on holder %s" % em.get_parent())
         return
-    #current_shield = max_shield
     _update_max_shield([])
     if event_manager:
         event_manager.subscribe(trigger_event, Callable(self, "_on_before_take_damage"))
@@ -51,7 +70,7 @@ func _on_before_take_damage(event):
 
 func _update_max_shield(_event):
     if stats:
-        max_shield = stats.get_stat("energy_shield")
+        max_shield = stats.get_stat("energy_shield") + (shield_per_stack * (_active_stacks() - 1))
         current_shield = min(current_shield, max_shield)
         _emit_shield_changed(0)
 

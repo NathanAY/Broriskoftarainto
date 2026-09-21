@@ -201,23 +201,23 @@ func _effect_line_for_scene(path: String) -> String:
 
 
 func test_armor_tooltip() -> void:
-    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/ArmorMode.tscn")).is_equal(
-        "effect: Armor — Armor reduces incoming damage. (Triggers on before take damage)")
+    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/ArmorModifier.tscn")).is_equal(
+        "effect: Armor — Armor reduces incoming damage. +5 armor per stack (Triggers on before take damage)")
 
 
 func test_bomb_tooltip() -> void:
-    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/bombOnHitModifier.tscn")).is_equal(
+    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/BombOnHitModifier.tscn")).is_equal(
         "effect: Bomb — Attached bombs explode for 30% of hit damage after 3.0s (Triggers on hit)")
 
 
 func test_chain_tooltip() -> void:
-    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/ChainMod.tscn")).is_equal(
-        "effect: Chain — Chains to 3 extra targets (Triggers on hit)")
+    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/ChainModifier.tscn")).is_equal(
+        "effect: Chain — Chains to 3 extra targets per stack (Triggers on hit)")
 
 
 func test_crit_tooltip() -> void:
-    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/Crit.tscn")).is_equal(
-        "effect: Crit — Critical hits deal extra damage based on your critical chance and multiplier. (Triggers on before deal damage)")
+    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/CritModifier.tscn")).is_equal(
+        "effect: Crit — Critical hits deal extra damage based on your critical chance and multiplier. +0.15 crit multiplier per stack (Triggers on before deal damage)")
 
 
 func test_emergency_heal_tooltip() -> void:
@@ -226,8 +226,8 @@ func test_emergency_heal_tooltip() -> void:
 
 
 func test_energy_shield_tooltip() -> void:
-    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/EnergyShield.tscn")).is_equal(
-        "effect: Energy Shield — Shield absorbs damage, recharges 10.0 per second after 1.5s (Triggers on before take damage)")
+    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/EnergyShieldModifier.tscn")).is_equal(
+        "effect: Energy Shield — Shield absorbs damage, recharges 10.0 per second after 1.5s (+5.0 max shield per stack) (Triggers on before take damage)")
 
 
 func test_homing_tooltip() -> void:
@@ -237,12 +237,12 @@ func test_homing_tooltip() -> void:
 
 func test_homing_rocket_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/HomingRocketModifier.tscn")).is_equal(
-        "effect: Homing Rocket — Launches a homing rocket dealing 100% of hit damage (Triggers on before take damage)")
+        "effect: Homing Rocket — Launches a homing rocket dealing 100% of hit damage (+1 per stack) (Triggers on before take damage)")
 
 
 func test_homing_rocket_from_target_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/HomingRocketFromTargetModifier.tscn")).is_equal(
-        "effect: Homing Rocket From Target — Launches a homing rocket dealing 100% of hit damage (Triggers on hit)")
+        "effect: Homing Rocket From Target — Launches a homing rocket dealing 100% of hit damage (+1 per stack) (Triggers on hit)")
 
 
 func test_knockback_tooltip() -> void:
@@ -270,7 +270,7 @@ func test_stat_on_kill_tooltip_follows_configured_stat() -> void:
 
 
 func test_high_health_bonus_tooltip() -> void:
-    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/PlusDamageToHealthyTargetMode.tscn")).is_equal(
+    assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/PlusDamageToHealthyTargetModifier.tscn")).is_equal(
         "effect: High Health Bonus — Deals 30% extra damage to targets above 90% HP (Triggers on before deal damage)")
 
 
@@ -281,7 +281,7 @@ func test_reflect_tooltip() -> void:
 
 func test_spread_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/SpreadModifier.tscn")).is_equal(
-        "effect: Spread — Spawn 2 extra projectiles (Triggers on attack)")
+        "effect: Spread — Spawns 2 extra projectiles per stack (Triggers on attack)")
 
 
 func test_stat_multiplier_tooltip() -> void:
@@ -290,7 +290,7 @@ func test_stat_multiplier_tooltip() -> void:
     var packed: PackedScene = ItemBuilder.pack_instance(modifier)
     var item: Item = ItemBuilder.make_effect_item("Test Item", "flavor", packed, {})
     var lines: PackedStringArray = ItemTooltip.tooltip_lines(item)
-    assert_that(lines).contains("effect: Stat Multiplier — Multiplies damage bonuses from items by 2.0x (Triggers on item added)")
+    assert_that(lines).contains("effect: Stat Multiplier — Multiplies damage bonuses from items by 2.0x per stack (Triggers on item added)")
     modifier.free()
 
 

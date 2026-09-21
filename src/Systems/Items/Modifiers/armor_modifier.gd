@@ -4,10 +4,29 @@ class_name ArmorModifier
 @export var display_name: String = "Armor"
 @export_multiline var tooltip_text: String = "Armor reduces incoming damage."
 @export var trigger_event: String = "before_take_damage"
+@export var armor_per_stack: float = 5.0
 
 var event_manager: EventManager = null
 var holder: Node = null
 var stats: Stats = null
+var stacks: Array[bool] = []  # each entry = active/inactive
+
+func get_tooltip_stats() -> String:
+    return "+%d armor per stack" % int(armor_per_stack)
+
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
+
+func add_stack(active: bool):
+    stacks.append(active)
+
+func remove_stack(index: int):
+    if index >= 0 and index < stacks.size():
+        stacks.remove_at(index)
+
+func set_stack_active(index: int, active: bool):
+    if index >= 0 and index < stacks.size():
+        stacks[index] = active
 
 func attachEventManager(em: Node):
     event_manager = em
@@ -24,7 +43,7 @@ func _on_before_take_damage(event):
     if not ctx or not stats:
         return
 
-    var armor: float = stats.get_stat("armor")
+    var armor: float = stats.get_stat("armor") + armor_per_stack * (_active_stacks() - 1)
     var multiplier: float = 1.0
 
     if armor >= 0:

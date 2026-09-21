@@ -10,15 +10,30 @@ class_name ChainModifier
 @export var trigger_event: String = "on_hit" #"on_attack", "on_hit", "before_take_damage"
 
 func get_tooltip_stats() -> String:
-    return "Chains to %d extra targets" % max_bounces
+    return "Chains to %d extra targets per stack" % max_bounces
 
 var event_manager: EventManager = null
 var holder: Node
 var stats: Stats
 var ignore_groups: Array = []
 var modifier_meta = "spawned_by_ChainModifier"
+var stacks: Array[bool] = []
 
 var _current_projectile_speed_multiplier: float = 1
+
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
+
+func add_stack(active: bool):
+    stacks.append(active)
+
+func remove_stack(index: int):
+    if index >= 0 and index < stacks.size():
+        stacks.remove_at(index)
+
+func set_stack_active(index: int, active: bool):
+    if index >= 0 and index < stacks.size():
+        stacks[index] = active
 
 func attachEventManager(em: EventManager):
     event_manager = em
@@ -93,7 +108,7 @@ func _spawn_chain_projectile(damage: int, spawn_position: Vector2, next_target: 
 
     var bounce = preload("res://src/Systems/weapon/projectile_bounce_behavior.gd").new()
     bounce.holder = holder
-    bounce.max_bounces = max_bounces
+    bounce.max_bounces = max_bounces * _active_stacks()
     bounce.bounce_range = bounce_range
     bounce.target_selector = target_selector
 

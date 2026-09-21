@@ -16,6 +16,9 @@ func get_tooltip_stats() -> String:
 	var amount_text := str(int(round(add_amount))) if is_equal_approx(add_amount, round(add_amount)) else str(add_amount)
 	return "Gain %s %s per stack" % [amount_text, target_stat]
 
+func _active_stacks() -> int:
+	return max(1, stacks.count(true))
+
 ## Generation-time hook (called by ItemFactory): roll a random stat from the
 ## Stats table so generated items cover different options (health on kill,
 ## movement_speed on kill, ...) and scale the amount to the stat's base value.
@@ -57,22 +60,19 @@ func attachEventManager(em: Node):
 
 func add_stack(active: bool):
 	stacks.append(active)
-	prints("add_stack", stacks)
 
 func remove_stack(index: int):
 	if index >= 0 and index < stacks.size():
 		stacks.remove_at(index)
-	prints("remove_stack", stacks)
 
 func set_stack_active(index: int, active: bool):
 	if index >= 0 and index < stacks.size():
 		stacks[index] = active
-	prints("set_stack_active", stacks)
 
 func _on_event(_event: Dictionary):
 	if not stats:
 		return
 	if not stats.stats.has(target_stat):
 		return
-	var total = add_amount * stacks.count(true)
+	var total = add_amount * _active_stacks()
 	stats.set_base_stat(target_stat, float(stats.stats.get(target_stat)) + total)

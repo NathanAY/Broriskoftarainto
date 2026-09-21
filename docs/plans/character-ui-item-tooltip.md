@@ -44,7 +44,7 @@ Scope decision (confirmed with user): the tooltip applies to **both** the Items 
 | name    | `item.name` |
 | description | `item.description` |
 | modifiers | flattened: for each `stat` → for each modifier type (`flat`/`percent`/...) → `"<stat> <type>: <value>"` e.g. `damage flat: 5`, `area_size_multiplier percent: 30%` |
-| effects | basename of each `effect_scene` resource path (e.g. `ExplosiveShotEffect`) |
+| effects | basename of each `effect_scene` resource path (e.g. `ExplosiveShotModifier`) |
 
 Percent values are multiplied by 100 for display (`0.3` → `30%`).
 

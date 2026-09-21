@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bf70h3krsevqe"]
+
+[ext_resource type="Script" uid="uid://bb8hn5dk0ao1j" path="res://src/Systems/Items/Modifiers/crit_modifier.gd" id="1_hkvbm"]
+
+[node name="CritModifier" type="Node" unique_id=1473625870]
+script = ExtResource("1_hkvbm")

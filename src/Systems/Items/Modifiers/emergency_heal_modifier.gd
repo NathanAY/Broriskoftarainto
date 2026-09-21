@@ -16,6 +16,20 @@ const COOLDOWN_TIME := 60.0        # seconds
 func get_tooltip_stats() -> String:
     return "Heals 75%% max HP below %d%% HP, %ss cooldown" % [int(round(HEALTH_THRESHOLD * 100.0)), str(COOLDOWN_TIME)]
 
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
+
+func add_stack(active: bool):
+    stacks.append(active)
+
+func remove_stack(index: int):
+    if index >= 0 and index < stacks.size():
+        stacks.remove_at(index)
+
+func set_stack_active(index: int, active: bool):
+    if index >= 0 and index < stacks.size():
+        stacks[index] = active
+
 func attachEventManager(em: Node):
     event_manager = em
     holder = em.get_parent()
@@ -26,20 +40,6 @@ func attachEventManager(em: Node):
         return
 
     event_manager.subscribe(trigger_event, Callable(self, "_on_after_take_damage"))
-
-func add_stack(active: bool):
-    stacks.append(active)
-    prints("add_stack", stacks)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-    prints("remove_stack", stacks)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
-    prints("set_stack_active", stacks)
 
 func _on_after_take_damage(event: Dictionary):
     if on_cooldown:
@@ -55,11 +55,9 @@ func _on_after_take_damage(event: Dictionary):
 
     var ratio := float(health.current_health) / float(health.max_health)
     if ratio <= HEALTH_THRESHOLD:
-        # ✅ Trigger instant heal
         _trigger_emergency_heal(health)
 
 func _trigger_emergency_heal(health: Health):
-    prints("Emergency Heal triggered for", holder.name)
     if holder and holder.has_node("Health"):
         var h: Health = holder.get_node("Health")
         h.heal(health.max_health * 0.75)
@@ -67,17 +65,13 @@ func _trigger_emergency_heal(health: Health):
 
 func _start_cooldown():
     on_cooldown = true
-    prints("Emergency Heal cooldown started")
 
     var t = Timer.new()
-    var timeMultiplier = 10.0 / (9 + stacks.count(true))
-    t.wait_time = COOLDOWN_TIME * timeMultiplier
+    t.wait_time = COOLDOWN_TIME / _active_stacks() # fewer seconds per stack = faster
     t.one_shot = true
     t.connect("timeout", Callable(self, "_on_cooldown_end"))
-    prints("Emergency Heal cooldown started", t.wait_time)
     add_child(t)
     t.start()
 
 func _on_cooldown_end():
     on_cooldown = false
-    prints("Emergency Heal is ready again!")

@@ -2,7 +2,6 @@ extends Node
 class_name ProjectileBounceModifier
 
 @export var display_name: String = "Projectile Bounce"
-@export_multiline var tooltip_text: String = "Projectiles bounce to 3 extra targets."
 @export var max_bounces: int = 3
 @export var bounce_range: float = 1000.0
 
@@ -10,10 +9,11 @@ var holder: Node
 var event_manager: EventManager
 var stacks: Array[bool] = []
 
-func attachEventManager(em: EventManager):
-    event_manager = em
-    holder = em.get_parent()
-    em.subscribe("on_attack", Callable(self, "_on_attack"))
+func get_tooltip_stats() -> String:
+    return "Projectiles bounce to %d extra targets per stack" % max_bounces
+
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
 
 func add_stack(active: bool):
     stacks.append(active)
@@ -26,12 +26,17 @@ func set_stack_active(index: int, active: bool):
     if index >= 0 and index < stacks.size():
         stacks[index] = active
 
+func attachEventManager(em: EventManager):
+    event_manager = em
+    holder = em.get_parent()
+    em.subscribe("on_attack", Callable(self, "_on_attack"))
+
 func _on_attack(data: Dictionary):
     if !data.has("projectile"):
         return
     var projectile: Projectile = data["projectile"]
 
-    var active_count = stacks.count(true)
+    var active_count = _active_stacks()
     for i in range(active_count):
         var bounce = preload("res://src/Systems/weapon/projectile_bounce_behavior.gd").new()
         bounce.holder = holder

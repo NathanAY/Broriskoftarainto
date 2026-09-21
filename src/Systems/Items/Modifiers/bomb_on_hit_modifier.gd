@@ -1,5 +1,5 @@
 extends Node
-class_name BombModifier
+class_name BombOnHitModifier
 
 var explosion_scene := preload("res://src/Scenes/Explosion.tscn")
 var bomb_scene := preload("res://src/Scenes/Bomb.tscn") # optional, for visuals
@@ -10,6 +10,7 @@ var detonation_delay := 3.0
 
 @export var display_name: String = "Bomb"
 @export var trigger_event: String = "on_hit"
+@export var bonus_per_stack: float = 0.2 # +20% explosion damage per stack
 
 var _tag = "bomb_modifier"
 var event_manager: EventManager = null
@@ -18,24 +19,24 @@ var stacks: Array[bool] = []  # each entry = active/inactive
 func get_tooltip_stats() -> String:
     return "Attached bombs explode for %d%% of hit damage after %ss" % [int(round(explosion_damage * 100.0)), str(detonation_delay)]
 
-func attachEventManager(em: Node):
-    event_manager = em
-    event_manager.subscribe(trigger_event, Callable(self, "_on_hit"))
-    event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
 
 func add_stack(active: bool):
     stacks.append(active)
-    prints("add_stack", stacks)
 
 func remove_stack(index: int):
     if index >= 0 and index < stacks.size():
         stacks.remove_at(index)
-    prints("remove_stack", stacks)
 
 func set_stack_active(index: int, active: bool):
     if index >= 0 and index < stacks.size():
         stacks[index] = active
-    prints("set_stack_active", stacks)
+
+func attachEventManager(em: Node):
+    event_manager = em
+    event_manager.subscribe(trigger_event, Callable(self, "_on_hit"))
+    event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func _on_hit(event: Dictionary):
     var ctx: DamageContext = event.get("damage_context")
@@ -73,7 +74,7 @@ func _detonate(target: Node, damage: int, bomb_visual: Node, timer: Timer):
     if not is_instance_valid(target):
         return
 
-    var stacks_multiplier = 5.0 / (4 + stacks.count(true))# +20% per stack
+    var stacks_multiplier = 1.0 + (bonus_per_stack * (_active_stacks() - 1))# +20% per stack
     # spawn explosion at target position
     var explosion: Explosion = explosion_scene.instantiate()
     explosion.attachEventManager(event_manager)

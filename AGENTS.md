@@ -34,6 +34,7 @@
 - docs/systems/event_manager.md
 - docs/systems/item_factory.md
 - docs/systems/items.md
+- docs/systems/modifiers.md
 - docs/systems/player.md
 - docs/systems/spawners.md
 - docs/systems/stage_manager.md

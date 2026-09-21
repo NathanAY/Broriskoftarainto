@@ -18,7 +18,7 @@ func test_bouncing_modifier() -> void:
 
     var character: Character = test_scene.get_node("Character")
     
-    var item: Item = _create_item("ChainMod.tscn", 1)
+    var item: Item = _create_item("ChainModifier.tscn", 1)
     character.item_holder.add_item(item)
     # character.weapon_holder.add_weapon(load("res://src/Resources/weapons/Pistol.tres"))
         

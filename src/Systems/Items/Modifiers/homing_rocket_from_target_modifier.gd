@@ -1,5 +1,5 @@
 extends Node
-class_name HomingFromTargetModifier
+class_name HomingRocketFromTargetModifier
 
 @export var projectile_scene: PackedScene
 @export var target_selector: TargetSelector
@@ -11,10 +11,9 @@ class_name HomingFromTargetModifier
 @export var trigger_event: String = "on_hit" #"on_attack", "on_hit", "before_take_damage"
 
 func get_tooltip_stats() -> String:
-    return "Launches a homing rocket dealing 100% of hit damage"
+    return "Launches a homing rocket dealing 100% of hit damage (+1 per stack)"
 
-
-var modifier_meta = "spawned_by_HomingfromTargetModifier"
+var modifier_meta = "spawned_by_HomingRocketFromTargetModifier"
 var event_manager: EventManager
 var holder: Node
 var stats: Stats
@@ -22,13 +21,8 @@ var ignore_groups: Array = []
 var stacks: Array[bool] = []
 var _current_projectile_speed_multiplier: float = 1
 
-func attachEventManager(em: EventManager):
-    event_manager = em
-    holder = em.get_parent()
-    stats = holder.get_node("Stats")
-    ignore_groups = holder.get_groups().filter(func(g): return g != "damageable")
-    em.subscribe(trigger_event, Callable(self, "_on_triger"))
-    em.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
 
 func add_stack(active: bool):
     stacks.append(active)
@@ -40,6 +34,14 @@ func remove_stack(index: int):
 func set_stack_active(index: int, active: bool):
     if index >= 0 and index < stacks.size():
         stacks[index] = active
+
+func attachEventManager(em: EventManager):
+    event_manager = em
+    holder = em.get_parent()
+    stats = holder.get_node("Stats")
+    ignore_groups = holder.get_groups().filter(func(g): return g != "damageable")
+    em.subscribe(trigger_event, Callable(self, "_on_triger"))
+    em.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func _on_triger(event: Dictionary) -> void:
     # Skip if this projectile was already spawned by this modifier
@@ -64,12 +66,9 @@ func _on_triger(event: Dictionary) -> void:
     if damage == 0:
         damage = stats.get_stat("damage")
 
-    var active_count = stacks.count(true)
-    if active_count == 0:
-        return
-
     var next_target: Node = _find_next_target(target)
-    call_deferred("_spawn_homing_projectile", target, damage, next_target)
+    for i in range(_active_stacks()):
+        call_deferred("_spawn_homing_projectile", target, damage, next_target)
 
 func _find_next_target(exclude: Node) -> Node:
     if not target_selector:
@@ -99,7 +98,7 @@ func _spawn_homing_projectile(source: Node, damage: int, next_target: Node2D) ->
     new_projectile.set_meta(modifier_meta, true)
     new_projectile.set_meta("ignore_enemy", source)
 
-    # ✅ Add homing behavior
+    # Add homing behavior
     var homing = preload("res://src/Systems/weapon/homing_behavior.gd").new()
     homing.holder = holder
     homing.homing_strength = homing_strength

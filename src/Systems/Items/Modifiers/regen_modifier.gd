@@ -1,5 +1,5 @@
-# RegenModifier.gd
 extends Node
+class_name RegenModifier
 
 @export var display_name: String = "Regen"
 @export var heal_amount: float = 4.0   # heal per tick
@@ -10,17 +10,30 @@ extends Node
 ## values are always shown, never stale static text.
 func get_tooltip_stats() -> String:
     return "Regenerates %s HP + %d%% max HP every %ss" % [str(heal_amount), int(round(heal_amount_percent * 100.0)), str(interval)]
+
 var event_manager: EventManager
-var stacks: int = 0
 var holder: Node = null
+var stacks: Array[bool] = []  # each entry = active/inactive
 
 var _regen_timer: Timer
+
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
+
+func add_stack(active: bool):
+    stacks.append(active)
+
+func remove_stack(index: int):
+    if index >= 0 and index < stacks.size():
+        stacks.remove_at(index)
+
+func set_stack_active(index: int, active: bool):
+    if index >= 0 and index < stacks.size():
+        stacks[index] = active
 
 func attachEventManager(em: EventManager):
     event_manager = em
     holder = em.get_parent()
-    em.subscribe("on_item_added", Callable(self, "_on_item_added"))
-    em.subscribe("on_item_removed", Callable(self, "_on_item_removed"))
 
     # setup regen timer
     _regen_timer = Timer.new()
@@ -30,22 +43,9 @@ func attachEventManager(em: EventManager):
     _regen_timer.timeout.connect(_on_regen_tick)
     add_child(_regen_timer)
 
-func _on_item_added(event):
-    if event.get("item").resource_path.ends_with("RegenPassive.tres"):
-        stacks += 1
-    elif event.get("item").name.contains("RegenModifier"):
-        stacks += 1
-
-func _on_item_removed(event):
-    if event.get("item").resource_path.ends_with("RegenPassive.tres"):
-        stacks = max(0, stacks - 1)
-    elif event.get("item").name.contains("RegenModifier.tres"):
-        stacks = max(0, stacks - 1)
-        
-
 func _on_regen_tick():
-    if stacks <= 0:
+    if stacks.is_empty():
         return
     if holder and holder.has_node("Health"):
         var h: Health = holder.get_node("Health")
-        h.heal((heal_amount + (h.max_health * heal_amount_percent)) * stacks)
+        h.heal((heal_amount + (h.max_health * heal_amount_percent)) * _active_stacks())

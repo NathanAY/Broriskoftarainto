@@ -134,7 +134,7 @@ func test_heal_on_event_randomize_owns_trigger_roll() -> void:
 func test_factory_passes_through_scenes_without_hook() -> void:
 	var factory: ItemFactory = load("res://src/Systems/Items/ItemFactory.tscn").instantiate()
 	add_child(factory)
-	# ChainMod has no randomize_for_generation: returned untouched.
-	var plain_scene: PackedScene = load("res://src/Systems/Items/Modifiers/ChainMod.tscn")
+	# ChainModifier has no randomize_for_generation: returned untouched.
+	var plain_scene: PackedScene = load("res://src/Systems/Items/Modifiers/ChainModifier.tscn")
 	assert_that(factory._configure_dynamic_modifier(plain_scene)).is_same(plain_scene)
 	collect_orphan_node_details()

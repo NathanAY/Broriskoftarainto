@@ -12,7 +12,7 @@ class_name ReflectProjectileModifier
 func get_tooltip_stats() -> String:
     return "Fires %d projectiles back at attackers" % volley_projectile_count
 
-var modifier_meta := "spawned_by_RetaliationVolleyModifier"
+var modifier_meta := "spawned_by_ReflectProjectileModifier"
 var event_manager: EventManager
 var holder: Node
 var stats: Stats
@@ -21,13 +21,8 @@ var stacks: Array[bool] = []
 var _current_projectile_speed_multiplier: float = 1.0
 var _current_damage_multiplier: float = 1.0
 
-func attachEventManager(em: EventManager):
-    event_manager = em
-    holder = em.get_parent()
-    stats = holder.get_node_or_null("Stats")
-    ignore_groups = holder.get_groups().filter(func(g): return g != "damageable")
-    event_manager.subscribe(trigger_event, Callable(self, "_on_trigger"))
-    event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
 
 func add_stack(active: bool):
     stacks.append(active)
@@ -40,17 +35,24 @@ func set_stack_active(index: int, active: bool):
     if index >= 0 and index < stacks.size():
         stacks[index] = active
 
-func _on_trigger(_event: Dictionary) -> void:
-    var current_stacks: int = stacks.count(true)
-    var stacks_multiplier = 5.0 / (4 + current_stacks)# +20% per stack
+func attachEventManager(em: EventManager):
+    event_manager = em
+    holder = em.get_parent()
+    stats = holder.get_node_or_null("Stats")
+    ignore_groups = holder.get_groups().filter(func(g): return g != "damageable")
+    event_manager.subscribe(trigger_event, Callable(self, "_on_trigger"))
+    event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
-    var targets = target_selector.find_targets(holder, reflect_range * stacks_multiplier, holder)
+func _on_trigger(_event: Dictionary) -> void:
+    var active_stacks: int = _active_stacks()# +1 projectile per stack, bigger range
+
+    var targets = target_selector.find_targets(holder, reflect_range * active_stacks, holder)
     if targets.is_empty():
         return
     var damage: float = stats.get_stat("base_damage") * _current_damage_multiplier
     var speed: int = int(projectile_speed * _current_projectile_speed_multiplier)
     # spawn volley toward each target
-    for i in range(min(volley_projectile_count + current_stacks, targets.size())):
+    for i in range(min(volley_projectile_count + (active_stacks - 1), targets.size())):
         var target = targets.get(i)
         call_deferred("_spawn_projectile", target, damage, speed)
 

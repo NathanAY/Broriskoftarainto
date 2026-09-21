@@ -1,5 +1,5 @@
 extends Node
-class_name SpinningOrbsOnKillModifier
+class_name SpinningOrbsModifier
 
 @export var orb_scene: PackedScene = preload("res://src/Scenes/OrbitingOrb.tscn")
 
@@ -15,11 +15,14 @@ var stats: Stats = null
 var ignore_groups: Array[StringName] = []
 var stacks: Array[bool] = []
 @export var display_name: String = "Spinning Orbs"
-var modifier_meta := "spawned_by_SpinningOrb"
+var modifier_meta := "spawned_by_SpinningOrbsModifier"
 # Export so the value survives PackedScene.pack() if ever dynamically configured.
 @export var trigger_event := "on_hit"# "on_hit" "on_kill"
 var _current_base_damage: float
 var _current_damage_multiplier: float
+
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
 
 func attachEventManager(em: Node):
     event_manager = em
@@ -51,9 +54,9 @@ func _on_triger(event: Dictionary):
     call_deferred("_spawn_orbs")
 
 func _spawn_orbs():
-    # spawn new orbs
+    # spawn new orbs (+1 orb per additional stack)
     var damage = _current_base_damage * DAMAGE * _current_damage_multiplier
-    var orb_count = ORB_COUNT + stacks.count(true)
+    var orb_count = ORB_COUNT + (_active_stacks() - 1)
     var active_orbs: Array[Node] = []
     for i in range(orb_count):
         var orb: SpinningOrb = orb_scene.instantiate()

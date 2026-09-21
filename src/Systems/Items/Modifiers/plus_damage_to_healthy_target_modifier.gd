@@ -1,5 +1,5 @@
 extends Node
-class_name MoreDamageToHealtyModifier
+class_name PlusDamageToHealthyTargetModifier
 
 var event_manager: EventManager = null
 var holder: Node = null
@@ -15,31 +15,31 @@ const HEALTH_THRESHOLD := 0.9        # target must be > 90 %
 func get_tooltip_stats() -> String:
     return "Deals %d%% extra damage to targets above %d%% HP" % [int(round(BONUS_MULTIPLIER * 100.0)), int(round(HEALTH_THRESHOLD * 100.0))]
 
+func _active_stacks() -> int:
+    return max(1, stacks.count(true))
+
+func add_stack(active: bool):
+    stacks.append(active)
+
+func remove_stack(index: int):
+    if index >= 0 and index < stacks.size():
+        stacks.remove_at(index)
+
+func set_stack_active(index: int, active: bool):
+    if index >= 0 and index < stacks.size():
+        stacks[index] = active
+
 func attachEventManager(em: Node):
     event_manager = em
     holder = em.get_parent()
     stats = holder.get_node_or_null("Stats")
 
     if not event_manager:
-        push_warning("HighHealthBonusDamage: missing EventManager!")
+        push_warning("PlusDamageToHealthyTargetModifier: missing EventManager!")
         return
 
     event_manager.subscribe(trigger_event, Callable(self, "_on_before_deal_damage"))
     event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
-
-func add_stack(active: bool):
-    stacks.append(active)
-    prints("add_stack", stacks)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-    prints("remove_stack", stacks)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
-    prints("set_stack_active", stacks)
 
 func _on_before_deal_damage(event: Dictionary):
     var ctx: DamageContext = event.get("damage_context")
@@ -59,7 +59,7 @@ func _on_before_deal_damage(event: Dictionary):
 
     var ratio := float(current) / float(max_hp)
     if ratio > HEALTH_THRESHOLD:
-        var active_count: int = stacks.count(true)  # ✅ only active stacks
+        var active_count: int = _active_stacks()  # only active stacks
         ctx.final_amount *= 1 + (BONUS_MULTIPLIER * active_count)
         ctx.tags.append("high_health_bonus")  # for debugging/logging
 

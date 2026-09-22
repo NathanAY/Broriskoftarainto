@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://dftkmuwn10pgp"
+path="res://.godot/imported/Adonai - Phase Break.mp3-b59f767916d6377146f454a0f75e62d0.mp3str"
+
+[deps]
+
+source_file="res://src/Assets/music/Adonai - Phase Break.mp3"
+dest_files=["res://.godot/imported/Adonai - Phase Break.mp3-b59f767916d6377146f454a0f75e62d0.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

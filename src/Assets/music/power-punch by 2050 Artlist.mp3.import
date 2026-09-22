@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://oy32v2h8tqnq"
+path="res://.godot/imported/power-punch by 2050 Artlist.mp3-c991efe8fa98bb9a5f172386bfb55a60.mp3str"
+
+[deps]
+
+source_file="res://src/Assets/music/power-punch by 2050 Artlist.mp3"
+dest_files=["res://.godot/imported/power-punch by 2050 Artlist.mp3-c991efe8fa98bb9a5f172386bfb55a60.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

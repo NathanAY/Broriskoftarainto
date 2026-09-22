@@ -6,6 +6,7 @@ REM timeout guard; afterwards only a short tail / failure index goes to console.
 REM NOTE: the Godot exit code is parsed from the log's "Exit code: N" line, NOT from
 REM the process handle - Start-Process ExitCode is unreliable here (reads back empty
 REM on this machine's PowerShell 5.1), so the run step only distinguishes OK vs 124.
+REM To see other arguments \addons\gdUnit4\src\core\runners\GdUnitTestCIRunner.gd  
 
 set "GODOT_BIN=F:\programs\Godot_v4.6.1-stable_win64\Godot_v4.6.1-stable_win64.exe"
 set "TEST_TARGET=res://test"

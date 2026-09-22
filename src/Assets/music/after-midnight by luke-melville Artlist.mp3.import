@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://b7i727xk1osgy"
+path="res://.godot/imported/after-midnight by luke-melville Artlist.mp3-6fe0b57792c6987732178b23118380f0.mp3str"
+
+[deps]
+
+source_file="res://src/Assets/music/after-midnight by luke-melville Artlist.mp3"
+dest_files=["res://.godot/imported/after-midnight by luke-melville Artlist.mp3-6fe0b57792c6987732178b23118380f0.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

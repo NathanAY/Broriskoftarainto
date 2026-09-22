@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://6xxuxwra7uyc"
+path="res://.godot/imported/extreme-chaos by 2050 Artlist.mp3-2d57d6bef521a090f738a30286b1b525.mp3str"
+
+[deps]
+
+source_file="res://src/Assets/music/extreme-chaos by 2050 Artlist.mp3"
+dest_files=["res://.godot/imported/extreme-chaos by 2050 Artlist.mp3-2d57d6bef521a090f738a30286b1b525.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

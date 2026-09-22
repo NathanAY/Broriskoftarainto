@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://clrl0x7y70qmb"
+path="res://.godot/imported/Adonai - Wubs of the Deep.mp3-5afbaff4f58c990d45677c8096bf2d24.mp3str"
+
+[deps]
+
+source_file="res://src/Assets/music/Adonai - Wubs of the Deep.mp3"
+dest_files=["res://.godot/imported/Adonai - Wubs of the Deep.mp3-5afbaff4f58c990d45677c8096bf2d24.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://cukktursoltae"
+path="res://.godot/imported/Adonai - Covert Sub.mp3-fcbdb13c1d22af6fca46a4117808b572.mp3str"
+
+[deps]
+
+source_file="res://src/Assets/music/Adonai - Covert Sub.mp3"
+dest_files=["res://.godot/imported/Adonai - Covert Sub.mp3-fcbdb13c1d22af6fca46a4117808b572.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

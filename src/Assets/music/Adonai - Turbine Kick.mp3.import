@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://drr18obfpodvb"
+path="res://.godot/imported/Adonai - Turbine Kick.mp3-c8d6f4db3a647f0e1d38ed3f89637986.mp3str"
+
+[deps]
+
+source_file="res://src/Assets/music/Adonai - Turbine Kick.mp3"
+dest_files=["res://.godot/imported/Adonai - Turbine Kick.mp3-c8d6f4db3a647f0e1d38ed3f89637986.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

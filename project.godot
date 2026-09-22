@@ -28,6 +28,7 @@ buses/default_bus_layout="res://src/default_bus_layout.tres"
 
 SoundManager="*res://src/Scripts/autoload/sound_manager.gd"
 GlobalGameState="*res://src/Scripts/autoload/global_game_state.gd"
+MusicManager="*res://src/Scripts/autoload/music_manager.gd"
 
 [display]
 

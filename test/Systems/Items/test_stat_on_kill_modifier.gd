@@ -39,12 +39,12 @@ func test_on_kill_event_is_accepted_by_contract() -> void:
 func test_stat_on_kill_increases_health_by_default() -> void:
     var holder := _build_holder()
     var stats: Stats = holder.get_node("Stats")
-    var before: float = stats.stats.get("health")
+    var health_before: float = stats.stats.get("health")
     var modifier := _attach_modifier(holder, BASE_SCENE)
     assert_str(str(modifier.get("trigger_event"))).is_equal("on_kill")
     assert_str(str(modifier.get("target_stat"))).is_equal("health")
     holder.get_node("EventManager").emit_event("on_kill", {"damage_context": {}})
-    assert_float(float(stats.stats.get("health"))).is_equal(before + float(modifier.get("add_amount")))
+    assert_float(float(stats.stats.get("health"))).is_equal(health_before + float(modifier.get("add_amount")))
     holder.free()
 
 
@@ -61,19 +61,19 @@ func test_stat_on_kill_configured_stat_damage() -> void:
     holder.add_child(modifier)
     modifier.attachEventManager(holder.get_node("EventManager"))
     modifier.add_stack(true)
-    var before: float = float(stats.stats.get("damage"))
+    var damage_before: float = float(stats.stats.get("damage"))
     holder.get_node("EventManager").emit_event("on_kill", {"damage_context": {}})
-    assert_float(float(stats.stats.get("damage"))).is_equal(before + 2.0)
+    assert_float(float(stats.stats.get("damage"))).is_equal(damage_before + 2.0)
     holder.free()
 
 
 func test_stat_on_kill_does_not_trigger_on_hit() -> void:
     var holder := _build_holder()
     var stats: Stats = holder.get_node("Stats")
-    var before: float = float(stats.stats.get("health"))
+    var health_before: float = float(stats.stats.get("health"))
     _attach_modifier(holder, BASE_SCENE)
     holder.get_node("EventManager").emit_event("on_hit", {"damage_context": {}})
-    assert_float(float(stats.stats.get("health"))).is_equal(before)
+    assert_float(float(stats.stats.get("health"))).is_equal(health_before)
     holder.free()
 
 

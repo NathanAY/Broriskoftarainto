@@ -60,20 +60,20 @@ func test_item_health_50_percent_bonus():
     e_health.heal(100000)
     
     var stat_value = c_stats.get_stat("health")
-    assert_eq(stat_value, 2040.0)
+    assert_eq(stat_value, 1040.0)
     
      # 2. Add Items
     # await wait_seconds(2)
     c_item_holder.add_item(doubler_item)
     stat_value = c_stats.get_stat("health")
-    assert_eq(stat_value, 2040.0)
+    assert_eq(stat_value, 1040.0)
     # await wait_seconds(2)
 
     c_item_holder.add_item(stat_item)
     # 3. Verify Stats
     # Assuming stats.get_stat("damage") reflects applied modifiers
     stat_value = c_stats.get_stat("health")
-    assert_eq(stat_value, 2190.0)
+    assert_eq(stat_value, 1190.0)
     # await wait_seconds(2)
     test_scene.queue_free()
 

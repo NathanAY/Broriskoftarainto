@@ -15,6 +15,12 @@ melee_scene = ExtResource("1_gd444")
 name = "Fist"
 description = "Fist"
 base_damage = 10.0
+modifiers = {
+"knockback": {
+"strength": 250.0,
+"duration": 0.2
+}
+}
 range = 300.0
 target_selector = ExtResource("3_wkow1")
 sprite = ExtResource("2_wkow1")

@@ -22,6 +22,9 @@ var event_manager: Node
 var timer: Timer     # each weapon has its own firing timer
 var sprite_node: Sprite2D  # visual instance of this weapon
 
+# Bound built-in modifier nodes created from this weapon's `modifiers` dict.
+var _bound_effect_nodes: Array[Node] = []
+
 #groups to ignore (friendly fire)
 var ignore_groups: Array = []
 
@@ -42,7 +45,11 @@ func apply_to(holder: Node) -> void:
     if event_manager:
         event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
+    WeaponBuiltinEffects.attach_for_weapon(self, holder, event_manager)
+
 func remove_from(_holder: Node) -> void:
+    WeaponBuiltinEffects.detach(self)
+
     if timer and is_instance_valid(timer):
         timer.stop()
         timer.queue_free()

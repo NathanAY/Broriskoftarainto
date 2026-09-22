@@ -46,6 +46,11 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
    - `randomize_for_generation(context: Dictionary) -> bool` — called by `ItemFactory` at generation time; rolls a random trigger/stat/value. Returns `true` when it mutated the instance so the factory repacks it. Implemented by `HealOnEventModifier` and `StatOnKillModifier`.
    - `get_generation_suffix() -> String` — postfix for the item name so randomized variants differ (`StatOnKillModifier`).
 
+5. Weapon binding (implemented in `BaseModifier`)
+   - `var bound_weapon: Object = null` — when non-null, handler events must carry this exact weapon to fire. Used by weapon built-in effects (`Systems/weapon/weapon_builtin_effects.gd`): Fist/Knife/Pistol declare their own `knockback`/`poison` via `BaseWeapon.modifiers`, and the helper instantiates these modifier scripts as real nodes bound to one weapon instance.
+   - `_is_bound_event(data: Dictionary) -> bool` — returns `true` when `bound_weapon` is null (item-pickup path, holder-wide, unchanged) or `data.get("weapon") == bound_weapon`. Call `if not _is_bound_event(data): return` as the first line of every subscribed handler.
+   - `_subscribe(event_name, listener)` — subscribes and records the pair; `_unsubscribe_all()` unregisters every recorded pair and clears the list. Because `EventManager` crashes on freed listeners (`LocalEventManager.gd:29`), detach MUST unsubscribe before freeing — `WeaponBuiltinEffects.detach` relies on this.
+
 Lifecycle / data flow
 - `ItemHolder.add_item(item)` (`Systems/Items/item_holder.gd`):
   1. Looks up an existing child by `scene_file_path == effect_scene[0].resource_path` (dedup).

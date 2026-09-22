@@ -68,10 +68,16 @@ name: Pistol
 damage: 5.0
 range: 400.0
 attack speed: 0.8
+pierce: 1
+knockback: 120.0
 ```
 
 - Rule: never emit `description` for `is BaseWeapon`, even if non-empty (Q6-A: field stays,
   tooltip ignores).
+- Rule: weapons that declare built-in effects in `BaseWeapon.modifiers` append one
+  human-readable line per effect (`WeaponBuiltinEffects.builtin_tooltip_lines`), e.g.
+  `pierce: 1`, `knockback: 120.0`, `poison: 50% chance, 3.0s`. Weapons without built-ins
+  stay at the four base lines.
 
 ### Stat items (`effect_scene` empty, no buff/debuff meta)
 

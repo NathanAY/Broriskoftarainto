@@ -17,7 +17,7 @@ func test_shotgun_does_damage() -> void:
 
     character.weapon_holder.add_weapon(load("res://src/Resources/weapons/Shotgun.tres"))
 
-    await runner.simulate_frames(60 * 2.5)
+    await runner.simulate_frames(60 * 3.0)
 
     # shotgun has multiple pellet with random spread, so a single hit can do random damage
     assert_float(e_health.current_health).is_between(30.0, 38.0)

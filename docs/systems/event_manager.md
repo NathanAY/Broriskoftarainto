@@ -33,6 +33,12 @@ Event schema (required keys; extra keys are tolerated)
 - Buffs / debuffs: `on_buff_added` / `on_buff_removed` -> `buff`, `holder`, `id`; `on_debuff_added` / `on_debuff_removed` -> `debuff`, `holder`, `target`
 - Misc: `on_crit` -> `damage_context`; `on_shield_changed` -> `self`, `amount`, `current_shield`, `max_shield`
 
+Weapon attribution on hit events
+- `on_hit`, `on_kill` and `after_deal_damage` now consistently carry the firing weapon as an extra `"weapon"` key:
+  - melee (`melee_weapon_node.gd`) and contact/area weapons (`contact_weapon.gd`, `area_weapon.gd`) pass their weapon resource directly;
+  - projectiles (`projectile.gd`) report `"weapon": source_weapon`, a back-link to the firing `BaseWeapon` set by `ProjectileWeapon.shoot_projectile`.
+- This lets weapon-bound modifiers (see `bound_weapon` in `docs/systems/modifiers.md`) filter events to exactly the hits their own weapon caused. Secondary hits that never had a weapon (e.g. `explosion.gd`, `orbiting_orb.gd`) simply carry no `weapon`, so weapon-bound modifiers correctly ignore them.
+
 Adding a new event
 - Register a schema entry in `EventContracts.SCHEMAS` (file `Scripts/event_contract.gd`), then emit/subscribe; the bus will not accept the event until the schema exists.
 

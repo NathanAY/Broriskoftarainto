@@ -9,6 +9,8 @@ var life_time = 3
 @export var damage: float = 0
 
 var event_manager: EventManager = null
+# The weapon resource that fired this projectile (null for pickups/spawned by modifiers).
+var source_weapon: Object = null
 # groups to ignore (friendly fire)
 var ignore_groups: Array = []
 # Optional target (only used by homing behaviors)
@@ -96,8 +98,8 @@ func do_damage(body):
     bodyHealth.take_damage(ctx)
     bodyHealth.event_manager.emit_event("after_take_damage", {"damage_context": ctx})
     if event_manager:
-        event_manager.emit_event("after_deal_damage", {"projectile": self, "body": body, "damage_context": ctx})
+        event_manager.emit_event("after_deal_damage", {"projectile": self, "body": body, "damage_context": ctx, "weapon": source_weapon})
     if event_manager:
-        event_manager.emit_event("on_hit", {"projectile": self, "body": body, "damage_context": ctx})
+        event_manager.emit_event("on_hit", {"projectile": self, "body": body, "damage_context": ctx, "weapon": source_weapon})
     if event_manager and bodyHealth.current_health <= 0:
-        event_manager.emit_event("on_kill", {"projectile": self, "body": body, "damage_context": ctx})
+        event_manager.emit_event("on_kill", {"projectile": self, "body": body, "damage_context": ctx, "weapon": source_weapon})

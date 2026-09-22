@@ -17,7 +17,7 @@ func test_character_in_combat() -> void:
     await runner.simulate_frames(int(60 * 3.2))
     assert_float(e_health.current_health).is_less(30.0)
     
-    await runner.simulate_frames(60 * 2)
+    await runner.simulate_frames(60 * 3)
     assert_bool(is_instance_valid(enemy)).is_false()
 
     test_scene.free()

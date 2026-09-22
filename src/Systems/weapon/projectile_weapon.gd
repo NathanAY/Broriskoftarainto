@@ -31,6 +31,9 @@ func shoot_projectile(target: Node) -> Projectile:
         "bounce": stats.get_stat("projectile_bounce") if stats.get_stat("projectile_bounce") else 0.0,
         "chain": stats.get_stat("projectile_chain") if stats.get_stat("projectile_chain") else 0.0
     }
+    var spawn_mods := WeaponBuiltinEffects.get_spawn_time_modifiers(self)
+    for key in spawn_mods:
+        projectile_props[key] = projectile_props.get(key, 0.0) + spawn_mods[key]
     p.set_properties(projectile_props)
     
     p.base_speed = p.base_speed * _current_projectile_speed_multiplier
@@ -42,7 +45,8 @@ func shoot_projectile(target: Node) -> Projectile:
         var dir = (target.global_position - holder_sprite_node.global_position).normalized()
         p.set_direction(dir)
         p.set_target(target)
-    
+
+    p.source_weapon = self
     holder.get_tree().current_scene.add_child(p)
     event_manager.emit_event("on_attack", {"projectile": p, "weapon": self})
     return p

@@ -16,6 +16,33 @@ var holder: Node = null
 var stats: Stats = null
 var stacks: Array[bool] = []  # each entry = active/inactive
 
+## When non-null, handler events must carry this exact weapon to fire.
+## Weapon built-in modifiers bind to their owning weapon instance; item-pickup
+## modifiers leave it null (holder-wide, unchanged behavior).
+var bound_weapon: Object = null
+
+# Tracked subscriptions so detach can unregister before freeing (the bus crashes
+# on freed listeners). Each entry: [event_name, callable].
+var _subscriptions: Array = []
+
+func _subscribe(event_name: String, listener: Callable) -> void:
+	_subscriptions.append([event_name, listener])
+	if event_manager:
+		event_manager.subscribe(event_name, listener)
+
+func _unsubscribe_all() -> void:
+	for sub in _subscriptions:
+		if is_instance_valid(event_manager):
+			event_manager.unsubscribe(sub[0], sub[1])
+	_subscriptions.clear()
+
+## True when this modifier may react to an event payload. Unbound modifiers
+## react to everything; bound ones only to events from their weapon.
+func _is_bound_event(data: Dictionary) -> bool:
+	if bound_weapon == null:
+		return true
+	return data.get("weapon") == bound_weapon
+
 func _active_stacks() -> int:
 	return max(1, stacks.count(true))
 

@@ -37,7 +37,10 @@ func test_weapon_tooltip_lines() -> void:
     assert_that(lines).contains("damage: 5.0")
     assert_that(lines).contains("range: 400.0")
     assert_that(lines).contains("attack speed: 0.8")
-    assert_int(lines.size()).is_equal(4)
+    # built-in modifiers declared on the pistol show as extra lines
+    assert_that(lines).contains("pierce: 1")
+    assert_that(lines).contains("knockback: 120.0")
+    assert_int(lines.size()).is_equal(6)
 
 
 func test_item_tooltip_lines() -> void:

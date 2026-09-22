@@ -13,24 +13,29 @@ func get_tooltip_stats() -> String:
 func attachEventManager(em: EventManager):
     _cache_holder(em)
     # keep listening to on_attack for projectile-case (attach behavior to projectile)
-    event_manager.subscribe("on_attack", Callable(self, "_on_attack"))
+    _subscribe("on_attack", Callable(self, "_on_attack"))
     # ALSO listen for actual hit events to apply knockback for melee & projectiles
-    event_manager.subscribe(trigger_event, Callable(self, "_on_hit"))
+    _subscribe(trigger_event, Callable(self, "_on_hit"))
 
 # Keep previous logic but only handle projectile attaching here
 func _on_attack(data: Dictionary):
+    if not _is_bound_event(data):
+        return
     var active_count = _active_stacks()
 
     if data.has("projectile"):
         var projectile: Projectile = data["projectile"]
         # attach projectile behavior node (projectiles are nodes in the scene when fired)
         var behavior = preload("res://src/Systems/weapon/knockback_behavior.gd").new()
+        behavior.name = "KnockbackBehavior"
         behavior.knockback_strength = knockback_strength * active_count
         behavior.knockback_duration = knockback_duration
         projectile.add_child(behavior)
 
 # This handles both melee and projectile hits
 func _on_hit(data: Dictionary) -> void:
+    if not _is_bound_event(data):
+        return
     var active_count = _active_stacks()
 
     var body: Node = data.get("body", null)
@@ -42,6 +47,10 @@ func _on_hit(data: Dictionary) -> void:
     if data.has("projectile"):
         var proj = data["projectile"]
         if proj and is_instance_valid(proj):
+            # the KnockbackBehavior attached at on_attack already handles
+            # projectile hits; avoid double knockback
+            if proj.get_node_or_null("KnockbackBehavior") != null:
+                return
             # push away from projectile
             dir = (body.global_position - proj.global_position).normalized()
 

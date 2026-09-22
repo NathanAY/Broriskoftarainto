@@ -8,7 +8,14 @@
 script = ExtResource("1_363sm")
 name = "Knife"
 description = "Knife"
-range = 40.0
+modifiers = {
+"poison": {
+"chance": 0.5,
+"duration": 3.0,
+"max_stacks": 3,
+"tick_interval": 1.0
+}
+}
 target_selector = ExtResource("2_jyyv4")
 sprite = ExtResource("2_pke07")
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"

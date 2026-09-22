@@ -19,9 +19,11 @@ func get_tooltip_stats() -> String:
 func attachEventManager(em: Node):
     _cache_holder(em)
     # subscribe to on_hit (so poison is applied only on successful hits)
-    em.subscribe(trigger_event, Callable(self, "_on_hit"))
+    _subscribe(trigger_event, Callable(self, "_on_hit"))
 
 func _on_hit(event: Dictionary) -> void:
+    if not _is_bound_event(event):
+        return
     # event expected to be a Dictionary: {"projectile":..., "body":..., "damage_context":...}
     var body = event.get("body", null)
     if not body:

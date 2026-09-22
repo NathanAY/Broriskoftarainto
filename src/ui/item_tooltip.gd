@@ -4,7 +4,8 @@ class_name ItemTooltip
 ## Static builder of tooltip key-value lines for Item, BaseWeapon and
 ## CharacterData resources. CharacterData delegates to CharacterTooltip.
 ## Clarity rules (docs/plans/item-tooltip-clarity.md):
-## - Weapons: name/damage/range/attack speed only, never description.
+## - Weapons: name/damage/range/attack speed, plus one line per built-in effect
+##   declared in BaseWeapon.modifiers (pierce/knockback/poison).
 ## - Stat items: name + modifier lines only, ignore description.
 ## - Effect items: name + single `effect:` line (modifier-owned text) + `tradeoff:` lines.
 ## - Buff/debuff: name + clean flavor? + `buff:`/`debuff:` payload + `tradeoff:` lines.
@@ -46,7 +47,7 @@ static func tooltip_lines(resource: Resource) -> PackedStringArray:
         lines.append("damage: " + str(resource.base_damage))
         lines.append("range: " + str(resource.weapon_range))
         lines.append("attack speed: " + str(resource.base_attack_speed))
-        for line in modifier_lines(resource.modifiers):
+        for line in WeaponBuiltinEffects.builtin_tooltip_lines(resource):
             lines.append(line)
         return lines
     elif resource is Item:

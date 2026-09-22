@@ -266,11 +266,11 @@ func do_damage(body):
     bodyHealth.take_damage(ctx)
     bodyHealth.event_manager.emit_event("after_take_damage", {"damage_context": ctx})
     if event_manager:
-        event_manager.emit_event("after_deal_damage", {"melee": self, "body": body, "damage_context": ctx})
+        event_manager.emit_event("after_deal_damage", {"melee": self, "body": body, "damage_context": ctx, "weapon": weapon_data})
     if event_manager:
-        event_manager.emit_event("on_hit", {"melee": self, "body": body, "damage_context": ctx})
+        event_manager.emit_event("on_hit", {"melee": self, "body": body, "damage_context": ctx, "weapon": weapon_data})
     if event_manager and bodyHealth.current_health <= 0:
-        event_manager.emit_event("on_kill", {"melee": self, "body": body, "damage_context": ctx})
+        event_manager.emit_event("on_kill", {"melee": self, "body": body, "damage_context": ctx, "weapon": weapon_data})
 
 func _adjust_hitbox_stretch(speed: float) -> void:
     hitbox.scale.x = _original_scale_x * speed

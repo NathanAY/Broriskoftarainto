@@ -1,5 +1,4 @@
-extends Node
-class_name RegenModifier
+extends BaseModifier
 
 @export var display_name: String = "Regen"
 @export var heal_amount: float = 4.0   # heal per tick
@@ -11,29 +10,10 @@ class_name RegenModifier
 func get_tooltip_stats() -> String:
     return "Regenerates %s HP + %d%% max HP every %ss" % [str(heal_amount), int(round(heal_amount_percent * 100.0)), str(interval)]
 
-var event_manager: EventManager
-var holder: Node = null
-var stacks: Array[bool] = []  # each entry = active/inactive
-
 var _regen_timer: Timer
 
-func _active_stacks() -> int:
-    return max(1, stacks.count(true))
-
-func add_stack(active: bool):
-    stacks.append(active)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
-
 func attachEventManager(em: EventManager):
-    event_manager = em
-    holder = em.get_parent()
+    _cache_holder(em)
 
     # setup regen timer
     _regen_timer = Timer.new()
@@ -46,6 +26,6 @@ func attachEventManager(em: EventManager):
 func _on_regen_tick():
     if stacks.is_empty():
         return
-    if holder and holder.has_node("Health"):
-        var h: Health = holder.get_node("Health")
+    var h: Health = get_health()
+    if h:
         h.heal((heal_amount + (h.max_health * heal_amount_percent)) * _active_stacks())

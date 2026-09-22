@@ -4,14 +4,15 @@ Purpose
 - Modifiers ARE the "effects" half of an `Item`. While `Item.modifiers` carries plain stat values applied to `Stats`, modifiers are Node-based scripts that implement gameplay behavior (spawn extra projectiles, heal, debuff, shields, on-hit reactions, ...). They attach to an actor's `ItemHolder`, subscribe to `EventManager` events, and react to gameplay.
 
 Location and files
+- Base class: `Systems/Items/Modifiers/base_modifier.gd` (`class_name BaseModifier`) — owns the stack state, `EventManager`/holder/Stats caching, and `get_health()`.
 - Scripts: `Systems/Items/Modifiers/*_modifier.gd` (e.g. `life_leach_modifier.gd`).
 - Scenes: `Systems/Items/Modifiers/*Modifier.tscn` (one per script that ships as an item effect).
 - Item data: `Resources/items/*.tres` reference a modifier scene via `effect_scene`.
 
 Naming conventions (enforced by the 2026 naming pass)
 - Script file is `snake_case_modifier.gd`.
-- Scene file basename equals the script's `class_name`, PascalCase `SomethingModifier.tscn`.
-- `class_name` always ends in `Modifier`. Every modifier declares `class_name` (even when little else reuses it).
+- Scene file basename equals the script's class, PascalCase `SomethingModifier.tscn`.
+- Modifiers that differ only slightly reuse a shared script via inheritance (e.g. `homing_rocket_from_target_modifier.gd` extends `homing_rocket_modifier.gd`), keeping one scene per variant.
 - Items that want to randomize their generated stats also implement generation hooks (see "Generation hooks" below).
 
 Why a modifier exists vs a stat modifier
@@ -19,17 +20,18 @@ Why a modifier exists vs a stat modifier
 - Anything reactive (needs events, timers, scene spawning, health) is a modifier.
 
 The modifier contract
-Every modifier implements the same scaffolding so the `ItemHolder` and tooltip can treat them uniformly:
+Every modifier `extends BaseModifier`, which provides the shared scaffolding so the `ItemHolder` and tooltip can treat them uniformly:
 
-1. Stack state
+1. Stack state (implemented in `BaseModifier`)
    - `var stacks: Array[bool] = []` — one entry per instance (stack) of the effect; `true` = active.
    - `add_stack(active: bool)` — called by `ItemHolder.add_item()` after instantiation + `attachEventManager`.
    - `remove_stack(index: int)` — removes one entry.
    - `set_stack_active(index: int, active: bool)` — toggles a stack on/off. `ItemHolder` wires this to condition managers: an item with `effect_scene_condition` gets an `on_condition_change` subscription that flips the matching index.
    - `_active_stacks() -> int` — `max(1, stacks.count(true))`. The floor of 1 means a single (or even all-inactive) copy still runs at base power; all scaling is expressed as `(active - 1)`.
 
-2. Attachment
-   - `attachEventManager(em)` — cache `holder = em.get_parent()`, `stats = holder.get_node_or_null("Stats")`, then `em.subscribe(event_name, Callable(self, "_handler"))`.
+2. Attachment (implemented in `BaseModifier`)
+   - `_cache_holder(em)` — caches `event_manager`, `holder = em.get_parent()`, `stats = holder.get_node_or_null("Stats")` (with a `push_warning` when the holder has no `Stats` node); `get_health()` returns `holder.get_node_or_null("Health")`.
+   - Each modifier overrides `attachEventManager` to subscribe to its main behavior event via the `trigger_event` export, plus `on_stat_changes` when it caches derived stats.
    - Per-event handlers stay idempotent and cheap: bail out early when the event lacks what they need.
    - Spawned objects are tagged to avoid recursive triggers (see "Anti-recursion" below).
 
@@ -61,8 +63,8 @@ Scaling models (how per-stack growth is implemented)
 - All rely on `_active_stacks()` and express the strategy in the same style; tooltip text mirrors the math ("per stack", "(+1 per stack)", "+50% per stack").
 
 Anti-recursion
-- Spawned projectiles/orbs are tagged with metadata (e.g. `spawned_by_ChainModifier`, `spawned_by_HomingRocketModifier`, `spawned_by_ReflectProjectileModifier`, `spawned_by_SpinningOrbsModifier`, bomb `_tag = "bomb_modifier"`).
-- Handlers early-return when the event carries an object already carrying that meta, so a chain fired by a chain never chains again.
+- Spawned projectiles/orbs are tagged with metadata (e.g. `spawned_by_ChainModifier`, `spawned_by_HomingRocketModifier`, `spawned_by_HomingRocketFromTargetModifier`, `spawned_by_ReflectProjectileModifier`, `spawned_by_SpinningOrbsModifier`, bomb `_tag = "bomb_modifier"`).
+- Handlers early-return when the event carries an object already carrying that meta, so a chain fired by a chain never chains again. `SpinningOrbsModifier` also checks the `damage_context.tags` of any event that carries one (not its own `trigger_event` name) before spawning.
 
 Events used
 - Consumed: `on_attack`, `on_hit`, `before_take_damage`, `after_take_damage`, `before_deal_damage`, `on_kill`, `on_item_added`, `on_condition_change`, `on_stat_changes`.
@@ -81,7 +83,7 @@ Catalog
 | HealOnEventModifier | `heal_on_event_modifier.gd` | randomized (`on_attack`/`on_hit`/`on_crit`/`after take damage`/... ) | Heals fixed HP per event; heal amount × active stacks. |
 | HomingModifier | `homing_modifier.gd` | `on_attack` | Adds homing steering module to projectiles; one module per stack. |
 | HomingRocketModifier | `homing_rocket_modifier.gd` | `before_take_damage` | Launches a homing rocket dealing 100% of hit damage; +1 rocket per stack. |
-| HomingRocketFromTargetModifier | `homing_rocket_from_target_modifier.gd` | `on_hit` | Launches a homing rocket from the target/victim; +1 rocket per stack. |
+| HomingRocketFromTargetModifier | `homing_rocket_from_target_modifier.gd` (extends the homing rocket script) | `on_hit` | Same rocket, but resolves the target from the hit (`target`/`source`), searches the next enemy within `homing_range`, and spawns the rocket from the target. +1 rocket per stack. |
 | KnockbackModifier | `knockback_modifier.gd` | `on_hit` (also listens `on_attack`) | Knocks enemies back; strength × stacks. |
 | LifeLeachModifier | `life_leach_modifier.gd` | `on_hit` | Heals 5% of dealt damage; +20% leech power per stack. |
 | PlusDamageToHealthyTargetModifier | `plus_damage_to_healthy_target_modifier.gd` | `before_deal_damage` | +30% damage vs targets above 90% HP; × active stacks. |
@@ -95,9 +97,9 @@ Catalog
 | StatOnKillModifier | `stat_on_kill_modifier.gd` | `on_kill` | Gains a randomized stat per stack (`health`, `movement_speed`, ...). |
 
 Guidelines for adding a new modifier
-1. `extends Node` (+ `class_name XxxModifier`), 4-space indentation, in `Systems/Items/Modifiers/`.
-2. Copy the standard scaffolding: `stacks`, `add_stack`, `remove_stack`, `set_stack_active`, `_active_stacks()`.
-3. Implement `attachEventManager`; cache `holder`/`stats`; subscribe only to the events you need; bail early when data is missing.
+1. `extends BaseModifier` (`Systems/Items/Modifiers/base_modifier.gd`), matching the file's indentation style (4-space), in `Systems/Items/Modifiers/`. For a variant of an existing behavior, extend that script instead and set differing defaults in `_init()`.
+2. Stack state, `attachEventManager` caching, `_active_stacks()`, and `get_health()` come free from `BaseModifier`.
+3. Implement `attachEventManager`; subscribe your behavior to the `trigger_event` export, and to `on_stat_changes` only when you cache derived stats; bail early when data is missing.
 4. Add the display contract (`display_name`, optional `tooltip_text`, `trigger_event`, and `get_tooltip_stats()` reading live values). If you add it, an item `.tres` in `Resources/items/` and a matching `XxxModifier.tscn` are needed to ship it.
 5. Scale per stack using `_active_stacks()`; keep the formula mirrored in the tooltip string.
 6. Tag anything you spawn to prevent recursion.
@@ -108,4 +110,4 @@ Known limitations / TODOs
 - `_active_stacks()` floors at 1, so a fully condition-deactivated modifier still runs at base power.
 - Not every stat-based tilt belongs here; pure numeric bonuses should be `Item.modifiers` instead.
 - `StatMultiplierModifier` mutates the incoming `Item.modifiers` dictionary in place at `on_item_added` (no rollback on remove).
-- Some handlers read `get_node("Stats")` (hard lookup) vs `get_node_or_null` inconsistently; a holder missing `Stats` can error.
+- `BaseModifier` misses the `Stats` node with a `push_warning` (not hard-crash); child lookups like `holder.get_node("Sprite")` in homing target selection still assume the node exists.

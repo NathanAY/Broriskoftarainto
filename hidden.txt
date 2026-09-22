@@ -1,13 +1,4 @@
 THIS FILE SHOULD BE IGNORED BY AI AGENTS, IT'S ONLY FOR PERSONAL NOTES
-===
-Remove 2 point from architecture-review.
-===
-There is a test that creates an Item that applies a buff.
-It has one WARNING: Detected 1 orphan nodes.  <Node> Id:150961391423
-The Debugger, ObjectDb profiler shows that the orphan node is a node of type Buff with that has script buff.gd
-
-You can run this test by next command ".\run_tests_gdunit_custom.bat Systems/Items/test_stat_creation_buff.gd"
-
 =======
 Naming convention
 FOLDERS             snake_case
@@ -43,39 +34,3 @@ func test_attack_speed_affects_attack_interval():
 func test_spread_shot_hits_multiple_enemies():
 func test_chain_projectile_selects_next_target():
 =======
-Please implement a ground for my game.
-I want that it will be simple, this dont need to be very complex now.
-For example just a medium/big size arena for comban in rectangle shape.
-
-I have a src/Game.tscn scene that has game logic but there is no terrain/ground in my game.
-Please create in in new scene, for example in src/GameWithGround.scene .
-
-You can take the assests and logic from one or two other projects that I have in those folders:
-
-1) F:\programs\Godot projects\Brotato3.6
-This contain a simple minimalistic ground, that can be different size and colors.
-Made on old godot version 3.6
-
-2) F:\programs\Godot projects\Wild West
-This contain one static level in wild west style with desert/sand ground.
-Made on same godot version 4.6.
-But this game has some 3D assets and level object that I don't need to be used.
-=====
-
-Please implement a ground for my game.
-I want that it will be simple, this dont need to be very complex now.
-For example just a medium/big size arena for comban in rectangle shape.
-
-I have a src/Game.tscn scene that has game logic but there is no terrain/ground in my game.
-Please create in in new scene, for example in src/GameWithGround.scene .
-
-You can take the assests and logic from other project that I have in folder:
-F:\programs\Godot projects\Brotato3.6
-This contain a simple minimalistic ground, that can be different size and colors.
-Made on old godot version 3.6
-
-   
-====
-In the Brotato folder there is a ground is made from tiles.
-"F:\programs\Godot projects\Brotato3.6\resources\tiles\tiles_1.png"
-

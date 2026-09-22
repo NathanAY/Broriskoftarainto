@@ -1,13 +1,7 @@
-extends Node
-class_name PoisonModifier
+extends BaseModifier
 
 # Preload the PoisonEffect script (change path if you saved it elsewhere)
 const _PoisonEffect = preload("res://src/Systems/Items/Buffs/poison_effect.gd")
-
-var event_manager: Node = null
-var holder: Node = null
-var stats: Node = null
-var stacks: Array[bool] = []  # each entry = active/inactive
 
 @export var display_name: String = "Poison"
 @export var trigger_event: String = "on_hit"
@@ -22,28 +16,12 @@ var stacks: Array[bool] = []  # each entry = active/inactive
 func get_tooltip_stats() -> String:
     return "Poison deals 100%% of hit damage per tick for %ss" % str(duration)
 
-func _active_stacks() -> int:
-    return max(1, stacks.count(true))
-
-func add_stack(active: bool):
-    stacks.append(active)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
-
 func attachEventManager(em: Node):
-    event_manager = em
-    holder = em.get_parent()
-    stats = holder.get_node_or_null("Stats")
+    _cache_holder(em)
     # subscribe to on_hit (so poison is applied only on successful hits)
-    em.subscribe(trigger_event, Callable(self, "_on_on_hit"))
+    em.subscribe(trigger_event, Callable(self, "_on_hit"))
 
-func _on_on_hit(event: Dictionary) -> void:
+func _on_hit(event: Dictionary) -> void:
     # event expected to be a Dictionary: {"projectile":..., "body":..., "damage_context":...}
     var body = event.get("body", null)
     if not body:

@@ -1,5 +1,4 @@
-extends Node
-class_name EnergyShieldModifier
+extends BaseModifier
 
 @export var display_name: String = "Energy Shield"
 @export var trigger_event: String = "before_take_damage"
@@ -15,37 +14,16 @@ func get_tooltip_stats() -> String:
 var current_shield: float = 0.0
 var _time_since_damage: float = 0.0
 
-var stats: Stats = null
-var event_manager: EventManager = null
-var stacks: Array[bool] = []  # each entry = active/inactive
-
-func _active_stacks() -> int:
-    return max(1, stacks.count(true))
-
-func add_stack(active: bool):
-    stacks.append(active)
-    _update_max_shield(null)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-    _update_max_shield(null)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
+func _on_stacks_changed() -> void:
     _update_max_shield(null)
 
 func attachEventManager(em: Node):
-    event_manager = em
-    stats = em.get_parent().get_node_or_null("Stats")
+    _cache_holder(em)
     if not stats:
-        push_warning("EnergyShieldModifier: Stats not found on holder %s" % em.get_parent())
         return
     _update_max_shield([])
-    if event_manager:
-        event_manager.subscribe(trigger_event, Callable(self, "_on_before_take_damage"))
-        event_manager.subscribe("on_stat_changes", Callable(self, "_update_max_shield"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_before_take_damage"))
+    event_manager.subscribe("on_stat_changes", Callable(self, "_update_max_shield"))
 
 func _process(delta: float) -> void:
     if current_shield < max_shield:

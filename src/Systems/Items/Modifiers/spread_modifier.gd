@@ -1,34 +1,16 @@
-extends Node
-class_name SpreadModifier
+extends BaseModifier
 
 @export var projectile_scene = preload("res://src/Systems/weapon/Projectile.tscn")
 
 @export var display_name: String = "Spread"
 @export var trigger_event: String = "on_attack"
 
-var event_manager: EventManager
-var stacks: Array[bool] = []  # each entry = active/inactive
-
 func get_tooltip_stats() -> String:
     return "Spawns 2 extra projectiles per stack"
 
-func _active_stacks() -> int:
-    return max(1, stacks.count(true))
-
-func add_stack(active: bool):
-    stacks.append(active)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
-
 func attachEventManager(em: EventManager):
-    event_manager = em
-    em.subscribe("on_attack", Callable(self, "_on_attack"))
+    _cache_holder(em)
+    em.subscribe(trigger_event, Callable(self, "_on_attack"))
 
 func _on_attack(data: Dictionary):
     if !data.has("projectile"):
@@ -57,7 +39,6 @@ func _spawn_extra(source: Projectile, direction: Vector2, damage: float):
     p.ignore_groups = source.ignore_groups.duplicate()
     p.attachEventManager(event_manager)
     p.global_position = source.global_position
-    if p.has_method("set_direction"):
-        p.set_direction(direction)
-        p.set_target(source.target)
+    p.set_direction(direction)
+    p.set_target(source.target)
     get_tree().current_scene.add_child(p)

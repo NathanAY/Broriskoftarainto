@@ -276,7 +276,7 @@ func test_high_health_bonus_tooltip() -> void:
 
 func test_reflect_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/Modifiers/ReflectProjectilesModifier.tscn")).is_equal(
-        "effect: Reflect Projectiles — Fires 2 projectiles back at attackers (Triggers on before take damage)")
+        "effect: Reflect Projectiles — Fires 2 projectiles back at attackers (+1 per stack) (Triggers on before take damage)")
 
 
 func test_spread_tooltip() -> void:
@@ -286,7 +286,7 @@ func test_spread_tooltip() -> void:
 
 func test_stat_multiplier_tooltip() -> void:
     # No .tscn for this one: pack a script instance like the builder test does.
-    var modifier: StatMultiplierModifier = preload("res://src/Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
+    var modifier = preload("res://src/Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
     var packed: PackedScene = ItemBuilder.pack_instance(modifier)
     var item: Item = ItemBuilder.make_effect_item("Test Item", "flavor", packed, {})
     var lines: PackedStringArray = ItemTooltip.tooltip_lines(item)

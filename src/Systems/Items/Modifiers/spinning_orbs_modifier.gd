@@ -1,5 +1,4 @@
-extends Node
-class_name SpinningOrbsModifier
+extends BaseModifier
 
 @export var orb_scene: PackedScene = preload("res://src/Scenes/OrbitingOrb.tscn")
 
@@ -9,11 +8,7 @@ const ORBIT_RADIUS := 90
 const ORBIT_SPEED := 180  # degrees per second
 const DAMAGE := 0.5 # 50% of base damage
 
-var event_manager: EventManager = null
-var holder: Node = null
-var stats: Stats = null
 var ignore_groups: Array[StringName] = []
-var stacks: Array[bool] = []
 @export var display_name: String = "Spinning Orbs"
 var modifier_meta := "spawned_by_SpinningOrbsModifier"
 # Export so the value survives PackedScene.pack() if ever dynamically configured.
@@ -21,36 +16,20 @@ var modifier_meta := "spawned_by_SpinningOrbsModifier"
 var _current_base_damage: float
 var _current_damage_multiplier: float
 
-func _active_stacks() -> int:
-    return max(1, stacks.count(true))
-
 func attachEventManager(em: Node):
-    event_manager = em
-    holder = em.get_parent()
-    stats = holder.get_node_or_null("Stats")
+    _cache_holder(em)
     ignore_groups = holder.get_groups().filter(func(g): return g != "damageable")
-    event_manager.subscribe(trigger_event, Callable(self, "_on_triger"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_trigger"))
     event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
-
-func add_stack(active: bool):
-    stacks.append(active)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
 
 func get_tooltip_stats() -> String:
     return "Orbs deal %d%% of base damage" % int(round(DAMAGE * 100.0))
 
-func _on_triger(event: Dictionary):
-    if trigger_event == "on_hit":
-        var dc: DamageContext = event.get("damage_context")
-        if dc.tags.has(modifier_meta):
-            return
+func _on_trigger(event: Dictionary):
+    # Skip when the event was emitted by our own orbs (prevents self-retrigger loops)
+    var dc: DamageContext = event.get("damage_context")
+    if dc and dc.tags.has(modifier_meta):
+        return
     call_deferred("_spawn_orbs")
 
 func _spawn_orbs():

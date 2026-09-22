@@ -1,10 +1,4 @@
-extends Node
-class_name CritModifier
-
-var event_manager: EventManager = null
-var holder: Node = null
-var stats: Stats = null
-var stacks: Array[bool] = []  # each entry = active/inactive
+extends BaseModifier
 
 @export var display_name: String = "Crit"
 @export_multiline var tooltip_text: String = "Critical hits deal extra damage based on your critical chance and multiplier."
@@ -17,25 +11,9 @@ var _current_crit_multiplier = 0.0
 func get_tooltip_stats() -> String:
     return "+%.2f crit multiplier per stack" % crit_multiplier_per_stack
 
-func _active_stacks() -> int:
-    return max(1, stacks.count(true))
-
-func add_stack(active: bool):
-    stacks.append(active)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
-
 func attachEventManager(em: Node):
-    event_manager = em
-    holder = em.get_parent()
-    stats = holder.get_node("Stats")
-    em.subscribe("before_deal_damage", Callable(self, "_on_before_deal_damage"))
+    _cache_holder(em)
+    em.subscribe(trigger_event, Callable(self, "_on_before_deal_damage"))
     em.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func _on_before_deal_damage(event):

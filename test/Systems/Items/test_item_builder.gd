@@ -51,13 +51,13 @@ func test_make_debuff_item() -> void:
     collect_orphan_node_details()
 
 func test_pack_instance_preserves_config() -> void:
-    var modifier: StatMultiplierModifier = preload("res://src/Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
+    var modifier = preload("res://src/Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
     modifier.target_stat = "damage"
     modifier.multiplier = 2.5
 
     var packed: PackedScene = ItemBuilder.pack_instance(modifier)
     assert_object(packed).is_not_null()
-    var inst: StatMultiplierModifier = packed.instantiate()
+    var inst = packed.instantiate()
     assert_that(inst.target_stat).is_equal("damage")
     assert_that(inst.multiplier).is_equal(2.5)
     modifier.free()

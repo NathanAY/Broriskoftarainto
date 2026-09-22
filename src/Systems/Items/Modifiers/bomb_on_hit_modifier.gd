@@ -1,5 +1,4 @@
-extends Node
-class_name BombOnHitModifier
+extends BaseModifier
 
 var explosion_scene := preload("res://src/Scenes/Explosion.tscn")
 var bomb_scene := preload("res://src/Scenes/Bomb.tscn") # optional, for visuals
@@ -13,30 +12,13 @@ var detonation_delay := 3.0
 @export var bonus_per_stack: float = 0.2 # +20% explosion damage per stack
 
 var _tag = "bomb_modifier"
-var event_manager: EventManager = null
-var stacks: Array[bool] = []  # each entry = active/inactive
 
 func get_tooltip_stats() -> String:
     return "Attached bombs explode for %d%% of hit damage after %ss" % [int(round(explosion_damage * 100.0)), str(detonation_delay)]
 
-func _active_stacks() -> int:
-    return max(1, stacks.count(true))
-
-func add_stack(active: bool):
-    stacks.append(active)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
-
 func attachEventManager(em: Node):
-    event_manager = em
+    _cache_holder(em)
     event_manager.subscribe(trigger_event, Callable(self, "_on_hit"))
-    event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func _on_hit(event: Dictionary):
     var ctx: DamageContext = event.get("damage_context")
@@ -83,10 +65,3 @@ func _detonate(target: Node, damage: int, bomb_visual: Node, timer: Timer):
     explosion.radius = explosion_radius
     explosion.damage = damage * explosion_damage * stacks_multiplier
     get_tree().current_scene.add_child(explosion)
-
-func _on_stat_changes(event: Dictionary):
-    var stat_name: String = event.get("stat_name", "")
-    var value: float = event.get("final_value", 0.0)
-    match stat_name:
-        "damage":
-            explosion_damage = value

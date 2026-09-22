@@ -1,5 +1,4 @@
-extends Node
-class_name HomingRocketModifier
+extends BaseModifier
 
 @export var projectile_scene: PackedScene
 @export var target_selector: TargetSelector
@@ -14,61 +13,62 @@ func get_tooltip_stats() -> String:
     return "Launches a homing rocket dealing 100% of hit damage (+1 per stack)"
 
 var modifier_meta = "spawned_by_HomingRocketModifier"
-var event_manager: EventManager
-var holder: Node
-var stats: Stats
 var ignore_groups: Array = []
-var stacks: Array[bool] = []
 var _current_projectile_speed_multiplier: float = 1
 
-func _active_stacks() -> int:
-    return max(1, stacks.count(true))
-
-func add_stack(active: bool):
-    stacks.append(active)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
-
 func attachEventManager(em: EventManager):
-    event_manager = em
-    holder = em.get_parent()
-    stats = holder.get_node("Stats")
+    _cache_holder(em)
     ignore_groups = holder.get_groups().filter(func(g): return g != "damageable")
-    em.subscribe(trigger_event, Callable(self, "_on_triger"))
-    em.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_trigger"))
+    event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
-func _on_triger(event: Dictionary) -> void:
-    # Skip if this projectile was already spawned by this modifier
+func _on_trigger(event: Dictionary) -> void:
+    if _is_own_projectile(event):
+        return
+    var damage: float = _extract_damage(event)
+    var target: Node2D = _extract_target(event)
+    for i in range(_active_stacks()):
+        call_deferred("_spawn_homing_projectile", holder, damage, target)
+
+## Shared with homing_rocket_from_target modifier (subclass).
+func _is_own_projectile(event: Dictionary) -> bool:
     if event.has("projectile"):
         var projectile: Projectile = event["projectile"]
-        if projectile.get_meta(modifier_meta, false):
-            return
+        return projectile.get_meta(modifier_meta, false)
+    return false
 
-    var target = null
-    var damage: float = 0
+## Shared with homing_rocket_from_target modifier (subclass).
+func _extract_damage(event: Dictionary) -> float:
+    var damage: float = 0.0
     if event.has("damage_context"):
         var damage_ctx: DamageContext = event["damage_context"]
         damage = max(damage_ctx.base_amount, damage_ctx.final_amount)
-        if damage_ctx.target != holder: 
-            target = damage_ctx.target
     elif event.has("weapon"):
         var weapon: BaseWeapon = event["weapon"]
         damage = weapon.base_damage
-
     if damage == 0:
         damage = stats.get_stat("damage")
+    return damage
 
-    for i in range(_active_stacks()):
-        if target:
-            call_deferred("_spawn_homing_projectile", holder, damage, target)
-        else:
-            call_deferred("_spawn_homing_projectile", holder, damage, null)
+## Subclass overrides this to also consider damage_context.source.
+func _extract_target(event: Dictionary) -> Node2D:
+    if event.has("damage_context"):
+        var damage_ctx: DamageContext = event["damage_context"]
+        if damage_ctx.target != holder:
+            return damage_ctx.target
+    return null
+
+## Shared with homing_rocket_from_target modifier (subclass): picks the next
+## enemy within homing_range, excluding the given node.
+func _find_next_target(exclude: Node) -> Node:
+    if not target_selector or not holder:
+        return null
+    var sprite_node: Node2D = holder.get_node_or_null("Sprite")
+    if not sprite_node:
+        sprite_node = holder
+    var candidates = target_selector.find_targets(sprite_node, homing_range, holder)
+    candidates = candidates.filter(func(t): return t != exclude)
+    return candidates[0] if candidates.size() > 0 else null
 
 func _spawn_homing_projectile(source: Node, damage: int, next_target: Node2D) -> void:
     var new_projectile: Projectile = projectile_scene.instantiate()
@@ -83,6 +83,7 @@ func _spawn_homing_projectile(source: Node, damage: int, next_target: Node2D) ->
     new_projectile.set_direction(random_dir)
     new_projectile.set_target(next_target)
     new_projectile.set_meta(modifier_meta, true)
+    new_projectile.set_meta("ignore_enemy", source)
 
     # Add homing behavior
     var homing = preload("res://src/Systems/weapon/homing_behavior.gd").new()

@@ -1,5 +1,4 @@
-extends Node
-class_name ReflectProjectileModifier
+extends BaseModifier
 
 @export var projectile_scene: PackedScene
 @export var target_selector: TargetSelector
@@ -10,35 +9,15 @@ class_name ReflectProjectileModifier
 @export var trigger_event: String = "before_take_damage"
 
 func get_tooltip_stats() -> String:
-    return "Fires %d projectiles back at attackers" % volley_projectile_count
+    return "Fires %d projectiles back at attackers (+1 per stack)" % volley_projectile_count
 
 var modifier_meta := "spawned_by_ReflectProjectileModifier"
-var event_manager: EventManager
-var holder: Node
-var stats: Stats
 var ignore_groups: Array = []
-var stacks: Array[bool] = []
 var _current_projectile_speed_multiplier: float = 1.0
 var _current_damage_multiplier: float = 1.0
 
-func _active_stacks() -> int:
-    return max(1, stacks.count(true))
-
-func add_stack(active: bool):
-    stacks.append(active)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
-
 func attachEventManager(em: EventManager):
-    event_manager = em
-    holder = em.get_parent()
-    stats = holder.get_node_or_null("Stats")
+    _cache_holder(em)
     ignore_groups = holder.get_groups().filter(func(g): return g != "damageable")
     event_manager.subscribe(trigger_event, Callable(self, "_on_trigger"))
     event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))

@@ -1,9 +1,6 @@
-extends Node
+extends BaseModifier
 class_name HealOnEventModifier
 
-var event_manager: EventManager = null
-var holder: Node = null
-var stats: Stats = null
 # Format:
 # { "event_name": { "variable_name": value, ... } }
 var possible_trigger_event := {
@@ -17,7 +14,6 @@ var possible_trigger_event := {
 # Exports (not plain vars) so factory-configured values survive
 # PackedScene.pack() when the dynamic trigger is randomized.
 @export var trigger_event: String = "on_crit"
-var stacks: Array[bool] = []  # each entry = active/inactive
 @export var default_heal := 1
 
 ## Dynamic tooltip fragment: the heal amount is configured per trigger
@@ -25,9 +21,6 @@ var stacks: Array[bool] = []  # each entry = active/inactive
 ## off the live instance, never baked into static text.
 func get_tooltip_stats() -> String:
     return "Heals %s HP" % str(default_heal)
-
-func _active_stacks() -> int:
-    return max(1, stacks.count(true))
 
 ## Generation-time hook (called by ItemFactory): pick a random trigger from
 ## possible_trigger_event and apply its overrides to this instance.
@@ -43,28 +36,14 @@ func randomize_for_generation(context: Dictionary) -> bool:
     var overrides: Dictionary = possible_trigger_event[chosen_event]
     for key in overrides.keys():
         set(key, overrides[key])
-    print("HealOnEventModifier randomized: trigger=", chosen_event, " overrides=", overrides)
     return true
 
 func attachEventManager(em: Node):
-    event_manager = em
-    holder = em.get_parent()
-    stats = holder.get_node_or_null("Stats")
+    _cache_holder(em)
     event_manager.subscribe(trigger_event, Callable(self, "_on_event"))
 
-func add_stack(active: bool):
-    stacks.append(active)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
-
 func _on_event(_event: Dictionary):
-    var health: Health = holder.get_node_or_null("Health")
+    var health: Health = get_health()
     if not health:
         return
     health.heal(default_heal * _active_stacks())

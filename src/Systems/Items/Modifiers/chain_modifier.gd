@@ -1,5 +1,4 @@
-extends Node
-class_name ChainModifier
+extends BaseModifier
 
 @export var projectile_scene: PackedScene
 @export var target_selector: TargetSelector
@@ -12,38 +11,18 @@ class_name ChainModifier
 func get_tooltip_stats() -> String:
     return "Chains to %d extra targets per stack" % max_bounces
 
-var event_manager: EventManager = null
-var holder: Node
-var stats: Stats
 var ignore_groups: Array = []
 var modifier_meta = "spawned_by_ChainModifier"
-var stacks: Array[bool] = []
 
 var _current_projectile_speed_multiplier: float = 1
 
-func _active_stacks() -> int:
-    return max(1, stacks.count(true))
-
-func add_stack(active: bool):
-    stacks.append(active)
-
-func remove_stack(index: int):
-    if index >= 0 and index < stacks.size():
-        stacks.remove_at(index)
-
-func set_stack_active(index: int, active: bool):
-    if index >= 0 and index < stacks.size():
-        stacks[index] = active
-
 func attachEventManager(em: EventManager):
-    event_manager = em
-    holder = em.get_parent()
-    stats = holder.get_node("Stats")
+    _cache_holder(em)
     ignore_groups = holder.get_groups().filter(func(g): return g != "damageable")
-    em.subscribe(trigger_event, Callable(self, "_on_triger"))
-    em.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_trigger"))
+    event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
-func _on_triger(event: Dictionary) -> void:
+func _on_trigger(event: Dictionary) -> void:
     # Skip if this projectile was already spawned by this modifier
     if event.has("projectile"):
         var projectile: Projectile = event["projectile"]

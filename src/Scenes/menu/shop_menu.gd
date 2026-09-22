@@ -217,6 +217,8 @@ func _update_stats() -> void:
         value_label.name = "value_" + str(stat_name)
         hbox.add_child(value_label)
 
+        tooltip.bind_to_row_text(hbox, ItemTooltip.stat_hint(stat_name))
+
         stats_container.add_child(hbox)
         value_labels[stat_name] = value_label
 

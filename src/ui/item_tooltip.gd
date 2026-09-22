@@ -11,6 +11,31 @@ class_name ItemTooltip
 
 static var _effect_display_cache: Dictionary = {}
 
+## Plain-text hints explaining what each stat does, shown in the Stats list tooltips.
+## Multi-line strings render as separate lines inside the tooltip card.
+const STAT_HINTS: Dictionary = {
+    "health": "Maximum hit points. You die when it reaches 0.",
+    "energy_shield": "Shield that absorbs incoming damage before health. Recharges over time.",
+    "damage": "Overall damage multiplier applied to all attacks.\nFormula: (base_damage + flat_damage) * damage.",
+    "base_damage": "Base damage of your weapon before any multipliers.",
+    "flat_damage": "Flat damage added to every hit.\nGreat for fast-attacking weapons with low base damage, since it scales with hits per second.",
+    "attack_speed": "Attack speed multiplier. Higher = more attacks per second = more on-hit effects.",
+    "area_radius": "Radius of area attacks and melee swings.",
+    "attack_range": "Maximum distance at which your weapons can hit targets.",
+    "movement_speed": "Movement speed.",
+    "armor": "Reduces incoming damage.\nFormula: final damage x (10 / (10 + armor)).\nExample: 1 armor blocks about 9%% (multiplier 0.91).\nExample: 10 armor blocks 50%% (multiplier 0.50).",
+    "critical_chance": "Chance per hit to land a critical strike (in percent, 0-100).",
+    "critical_multiplier": "Critical strikes multiply your damage by this value (1.5 = 150%%).",
+    "area_size_multiplier": "Multiplier for the size of explosions and area effects.",
+    "projectile_pierce": "Number of enemies a projectile can pass through before disappearing.",
+    "projectile_speed_multiplier": "Multiplier for projectile travel speed.",
+    "money": "Currency used to buy and reroll items in the shop.",
+}
+
+
+static func stat_hint(stat_name: String) -> String:
+    return str(STAT_HINTS.get(stat_name, ""))
+
 
 static func tooltip_lines(resource: Resource) -> PackedStringArray:
     var lines := PackedStringArray()

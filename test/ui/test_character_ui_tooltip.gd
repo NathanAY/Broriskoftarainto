@@ -491,6 +491,83 @@ func test_shop_menu_character_info_tooltips() -> void:
     character.free()
 
 
+func test_stat_hint_flat_damage_mentions_fast_attacking() -> void:
+    var hint: String = ItemTooltip.stat_hint("flat_damage")
+    assert_bool(hint.is_empty()).is_false()
+    assert_that(hint).contains("fast-attacking weapons with low base damage")
+
+
+func test_stat_hint_armor_has_formula_and_examples() -> void:
+    var hint: String = ItemTooltip.stat_hint("armor")
+    assert_bool(hint.is_empty()).is_false()
+    assert_that(hint).contains("(10 / (10 + armor))")
+    assert_that(hint).contains("1 armor blocks about 9%")
+    assert_that(hint).contains("10 armor blocks 50%")
+
+
+func test_tooltip_ui_bind_to_row_text() -> void:
+    var tooltip_ui = load("res://src/ui/TooltipUi.tscn").instantiate()
+    add_child(tooltip_ui)
+
+    var row: Control = HBoxContainer.new()
+    row.add_child(Label.new())
+    add_child(row)
+
+    tooltip_ui.bind_to_row_text(row, "some hint")
+    assert_bool(tooltip_ui.visible).is_false()
+
+    row.emit_signal("mouse_entered")
+    assert_bool(tooltip_ui.visible).is_true()
+    assert_str(tooltip_ui.label.text).contains("some hint")
+
+    row.emit_signal("mouse_exited")
+    assert_bool(tooltip_ui.visible).is_false()
+
+    row.free()
+    tooltip_ui.free()
+
+
+func test_character_ui_stat_rows_have_tooltips() -> void:
+    var character := _build_character()
+    var prev_character: Character = GlobalGameState.current_character
+    GlobalGameState.current_character = character
+
+    var ui = load(CHARACTER_UI_SCENE).instantiate()
+    add_child(ui)
+
+    assert_int(ui.stats_container.get_child_count()).is_greater(0)
+    var row: Control = ui.stats_container.get_child(0)
+    row.emit_signal("mouse_entered")
+    assert_bool(ui.tooltip.visible).is_true()
+    assert_bool(ui.tooltip.label.text.is_empty()).is_false()
+    row.emit_signal("mouse_exited")
+    assert_bool(ui.tooltip.visible).is_false()
+
+    GlobalGameState.current_character = prev_character if is_instance_valid(prev_character) else null
+    ui.free()
+    character.free()
+
+
+func test_shop_menu_stat_rows_have_tooltips() -> void:
+    var character := _build_character()
+
+    var shop = load(SHOP_SCENE).instantiate()
+    add_child(shop)
+    shop.character = character
+    shop._update_stats()
+
+    assert_int(shop.stats_container.get_child_count()).is_greater(0)
+    var row: Control = shop.stats_container.get_child(0)
+    row.emit_signal("mouse_entered")
+    assert_bool(shop.tooltip.visible).is_true()
+    assert_bool(shop.tooltip.label.text.is_empty()).is_false()
+    row.emit_signal("mouse_exited")
+    assert_bool(shop.tooltip.visible).is_false()
+
+    shop.free()
+    character.free()
+
+
 func test_freeing_character_clears_global() -> void:
     # Regression: Character._ready publishes itself to GlobalGameState.current_character.
     # It must retract that reference on free, otherwise the autoload dangles to a freed

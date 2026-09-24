@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Item" format=3 uid="uid://bxcdb5o7lgga8"]
 
-[ext_resource type="PackedScene" uid="uid://bqa56q1a0jyvc" path="res://src/Systems/Items/Modifiers/KnockbackModifier.tscn" id="1_datnv"]
+[ext_resource type="PackedScene" uid="uid://bqa56q1a0jyvc" path="res://src/Systems/Items/modifiers/KnockbackModifier.tscn" id="1_datnv"]
 [ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="2_a2frs"]
 
 [resource]

@@ -17,7 +17,7 @@ var buff_scenes: Array[PackedScene] = []
 var debuff_scene: PackedScene = null
 
 func _ready():
-    effect_scenes = ItemBuilder.load_scenes_from_dir("res://src/Systems/Items/Modifiers")
+    effect_scenes = ItemBuilder.load_scenes_from_dir("res://src/Systems/Items/modifiers")
     buff_scenes.append(load("res://src/Systems/Items/Buffs/buff.tscn"))
     debuff_scene = load("res://src/Systems/Items/Buffs/DebuffSource.tscn")
 

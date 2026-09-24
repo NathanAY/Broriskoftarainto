@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://d0enhfct2hog4"]
 
-[ext_resource type="Script" uid="uid://fyndxi2tocas" path="res://src/Systems/Items/Modifiers/homing_rocket_from_target_modifier.gd" id="1_o8oa7"]
+[ext_resource type="Script" uid="uid://fyndxi2tocas" path="res://src/Systems/Items/modifiers/homing_rocket_from_target_modifier.gd" id="1_o8oa7"]
 [ext_resource type="PackedScene" uid="uid://dama33idg0ecs" path="res://src/Systems/weapon/RocketProjectile.tscn" id="2_hhkmv"]
 [ext_resource type="Resource" uid="uid://hye6t5sxe2yg" path="res://src/Resources/weapons/aim/closest.tres" id="3_hhkmv"]
 

@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Item" format=3 uid="uid://d0bx0gtm7257b"]
 
-[ext_resource type="PackedScene" uid="uid://cx4vy6rd3q5ph" path="res://src/Systems/Items/Modifiers/EmergencyHealModifier.tscn" id="1_mboki"]
+[ext_resource type="PackedScene" uid="uid://cx4vy6rd3q5ph" path="res://src/Systems/Items/modifiers/EmergencyHealModifier.tscn" id="1_mboki"]
 [ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="2_r8oil"]
 
 [resource]

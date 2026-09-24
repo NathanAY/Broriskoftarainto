@@ -1,4 +1,4 @@
-extends "res://src/Systems/Items/Modifiers/homing_rocket_modifier.gd"
+extends "res://src/Systems/Items/modifiers/homing_rocket_modifier.gd"
 
 func _init():
     display_name = "Homing Rocket From Target"

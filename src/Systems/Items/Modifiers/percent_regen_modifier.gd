@@ -1,4 +1,4 @@
-extends "res://src/Systems/Items/Modifiers/regen_modifier.gd"
+extends "res://src/Systems/Items/modifiers/regen_modifier.gd"
 
 @export var heal_amount_percent: float = 0.01  # % of max HP healed per tick
 

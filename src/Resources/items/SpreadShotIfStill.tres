@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Item" format=3 uid="uid://d28aq4yyk8v4l"]
 
-[ext_resource type="PackedScene" uid="uid://bwrwqelyrp4aa" path="res://src/Systems/Items/Modifiers/SpreadModifier.tscn" id="1_2d20f"]
+[ext_resource type="PackedScene" uid="uid://bwrwqelyrp4aa" path="res://src/Systems/Items/modifiers/SpreadModifier.tscn" id="1_2d20f"]
 [ext_resource type="PackedScene" uid="uid://3g46r8pwf6mq" path="res://src/Systems/stats/conditions/StandingStillManager.tscn" id="1_tx0an"]
 [ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="2_tx0an"]
 

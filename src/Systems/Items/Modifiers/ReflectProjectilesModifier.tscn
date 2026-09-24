@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://di5ksgmjj6o0w"]
 
-[ext_resource type="Script" uid="uid://c48xu15o7sop1" path="res://src/Systems/Items/Modifiers/reflect_projectiles_modifier.gd" id="1_gbfjk"]
+[ext_resource type="Script" uid="uid://c48xu15o7sop1" path="res://src/Systems/Items/modifiers/reflect_projectiles_modifier.gd" id="1_gbfjk"]
 [ext_resource type="PackedScene" uid="uid://dvphvkk5rwuc2" path="res://src/Systems/weapon/LightningProjectile.tscn" id="2_mqhb2"]
 [ext_resource type="Script" uid="uid://4jtig3thlogl" path="res://src/Systems/weapon/target/closest_target_selector.gd" id="3_xwphw"]
 

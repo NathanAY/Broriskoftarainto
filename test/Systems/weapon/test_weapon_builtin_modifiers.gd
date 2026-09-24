@@ -8,8 +8,8 @@ const FIST := "res://src/Resources/weapons/Fist.tres"
 const KNIFE := "res://src/Resources/weapons/Knife.tres"
 const PISTOL := "res://src/Resources/weapons/Pistol.tres"
 
-const KNOCKBACK_SCRIPT := "res://src/Systems/Items/Modifiers/knockback_modifier.gd"
-const POISON_SCRIPT := "res://src/Systems/Items/Modifiers/poison_modifier.gd"
+const KNOCKBACK_SCRIPT := "res://src/Systems/Items/modifiers/knockback_modifier.gd"
+const POISON_SCRIPT := "res://src/Systems/Items/modifiers/poison_modifier.gd"
 
 
 func test_bound_poison_only_fires_on_its_weapon() -> void:

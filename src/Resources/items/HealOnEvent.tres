@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Item" format=3 uid="uid://d11fah746ohq0"]
 
-[ext_resource type="PackedScene" uid="uid://ckunysabqicus" path="res://src/Systems/Items/Modifiers/HealOnEventModifier.tscn" id="1_y76dx"]
+[ext_resource type="PackedScene" uid="uid://ckunysabqicus" path="res://src/Systems/Items/modifiers/HealOnEventModifier.tscn" id="1_y76dx"]
 [ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="2_ixhk8"]
 
 [resource]

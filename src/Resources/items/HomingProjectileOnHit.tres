@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Item" format=3 uid="uid://cdftbmoe27p"]
 
-[ext_resource type="PackedScene" uid="uid://cqlbwfn1qp6ba" path="res://src/Systems/Items/Modifiers/HomingRocketModifier.tscn" id="1_ty5p3"]
+[ext_resource type="PackedScene" uid="uid://cqlbwfn1qp6ba" path="res://src/Systems/Items/modifiers/HomingRocketModifier.tscn" id="1_ty5p3"]
 [ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="2_soule"]
 
 [resource]

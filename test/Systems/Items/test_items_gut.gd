@@ -78,7 +78,7 @@ func test_item_health_50_percent_bonus():
     test_scene.queue_free()
 
 func _pack_doubler(target_stat: String, multiplier: float) -> PackedScene:
-    var doubler_mod = preload("res://src/Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
+    var doubler_mod = preload("res://src/Systems/Items/modifiers/stat_multiplier_modifier.gd").new()
     doubler_mod.target_stat = target_stat
     doubler_mod.multiplier = multiplier
     return ItemBuilder.pack_instance(doubler_mod)

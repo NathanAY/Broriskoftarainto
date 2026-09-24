@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://1xdx2hytud6j"]
 
-[ext_resource type="Script" uid="uid://dtljb8t5cnfu5" path="res://src/Systems/Items/Modifiers/homing_modifier.gd" id="1_0b3um"]
+[ext_resource type="Script" uid="uid://dtljb8t5cnfu5" path="res://src/Systems/Items/modifiers/homing_modifier.gd" id="1_0b3um"]
 
 [node name="HomingModifier" type="Node"]
 script = ExtResource("1_0b3um")

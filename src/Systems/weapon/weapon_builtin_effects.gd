@@ -13,8 +13,8 @@ class_name WeaponBuiltinEffects
 
 # key (used in BaseWeapon.modifiers) -> modifier script to instantiate + bind
 const MODIFIER_KEY_TO_SCRIPT := {
-	"knockback": preload("res://src/Systems/Items/Modifiers/knockback_modifier.gd"),
-	"poison": preload("res://src/Systems/Items/Modifiers/poison_modifier.gd"),
+	"knockback": preload("res://src/Systems/Items/modifiers/knockback_modifier.gd"),
+	"poison": preload("res://src/Systems/Items/modifiers/poison_modifier.gd"),
 }
 
 # alias config keys from the .tres dict onto the modifier script's variable names

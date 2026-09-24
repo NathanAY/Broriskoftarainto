@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://src/Systems/Items/Modifiers/stat_on_kill_modifier.gd" id="1_statkill"]
+[ext_resource type="Script" uid="uid://cpqbm7cnx1f0s" path="res://src/Systems/Items/modifiers/stat_on_kill_modifier.gd" id="1_statkill"]
 
 [node name="statOnKill" type="Node"]
 script = ExtResource("1_statkill")

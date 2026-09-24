@@ -2,7 +2,7 @@
 class_name BaseModifierTest
 extends GdUnitTestSuite
 
-const BASE := preload("res://src/Systems/Items/Modifiers/base_modifier.gd")
+const BASE := preload("res://src/Systems/Items/modifiers/base_modifier.gd")
 
 class RecordingModifier extends BaseModifier:
 	var hook_calls: int = 0

@@ -4,7 +4,7 @@ signal closed
 
 const WEAPONS_PATH := "res://src/Resources/weapons"
 const ITEMS_PATH := "res://src/Resources/items"
-const EFFECTS_PATH := "res://src/Systems/Items/Modifiers"
+const EFFECTS_PATH := "res://src/Systems/Items/modifiers"
 const BUFF_PATH := "res://src/Systems/Items/Buffs/buff.tscn"
 const DEBUFF_PATH := "res://src/Systems/Items/Buffs/DebuffSource.tscn"
 

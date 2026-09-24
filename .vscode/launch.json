@@ -4,7 +4,12 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
+                {
+            "name": "Main",
+            "type": "godot",
+            "request": "launch",
+            "scene": "src/Scenes/menu/Main.tscn",
+        },
         {
             "name": "TestScene",
             "type": "godot",

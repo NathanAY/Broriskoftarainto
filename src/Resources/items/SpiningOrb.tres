@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Item" format=3 uid="uid://ylm8bud5g2xo"]
 
-[ext_resource type="PackedScene" uid="uid://byqp45swd5fmh" path="res://src/Systems/Items/Modifiers/SpinningOrbsModifier.tscn" id="1_lof36"]
+[ext_resource type="PackedScene" uid="uid://byqp45swd5fmh" path="res://src/Systems/Items/modifiers/SpinningOrbsModifier.tscn" id="1_lof36"]
 [ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="2_xkn81"]
 
 [resource]

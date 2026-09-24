@@ -4,7 +4,7 @@ extends GdUnitTestSuite
 
 const BUFF_SCENE := "res://src/Systems/Items/Buffs/buff.tscn"
 const DEBUFF_SCENE := "res://src/Systems/Items/Buffs/DebuffSource.tscn"
-const EFFECT_SCENE := "res://src/Systems/Items/Modifiers/ProjectileBounceModifier.tscn"
+const EFFECT_SCENE := "res://src/Systems/Items/modifiers/ProjectileBounceModifier.tscn"
 
 func test_make_stat_item() -> void:
     var item: Item = ItemBuilder.make_stat_item("Sword", "Increases damage", {"damage": {"flat": 5}})
@@ -51,7 +51,7 @@ func test_make_debuff_item() -> void:
     collect_orphan_node_details()
 
 func test_pack_instance_preserves_config() -> void:
-    var modifier = preload("res://src/Systems/Items/Modifiers/stat_multiplier_modifier.gd").new()
+    var modifier = preload("res://src/Systems/Items/modifiers/stat_multiplier_modifier.gd").new()
     modifier.target_stat = "damage"
     modifier.multiplier = 2.5
 
@@ -65,7 +65,7 @@ func test_pack_instance_preserves_config() -> void:
     collect_orphan_node_details()
 
 func test_load_scenes_from_dir_returns_packed_scenes() -> void:
-    var scenes: Array[PackedScene] = ItemBuilder.load_scenes_from_dir("res://src/Systems/Items/Modifiers")
+    var scenes: Array[PackedScene] = ItemBuilder.load_scenes_from_dir("res://src/Systems/Items/modifiers")
     assert_bool(scenes.size() > 0).is_true()
     for scene in scenes:
         assert_object(scene).is_not_null()

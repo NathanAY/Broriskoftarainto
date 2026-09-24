@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Item" format=3 uid="uid://mbsf00nc5suw"]
 
-[ext_resource type="PackedScene" uid="uid://dd1jxognhjwtj" path="res://src/Systems/Items/Modifiers/EnergyShieldModifier.tscn" id="1_0t2tx"]
+[ext_resource type="PackedScene" uid="uid://dd1jxognhjwtj" path="res://src/Systems/Items/modifiers/EnergyShieldModifier.tscn" id="1_0t2tx"]
 [ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="2_xqxg8"]
 
 [resource]

@@ -2,7 +2,7 @@
 class_name StatOnKillModifierTest
 extends GdUnitTestSuite
 
-const BASE_SCENE := "res://src/Systems/Items/Modifiers/StatOnKillModifier.tscn"
+const BASE_SCENE := "res://src/Systems/Items/modifiers/StatOnKillModifier.tscn"
 
 
 func _build_holder() -> Node:
@@ -135,6 +135,6 @@ func test_factory_passes_through_scenes_without_hook() -> void:
     var factory: ItemFactory = load("res://src/Systems/Items/ItemFactory.tscn").instantiate()
     add_child(factory)
     # ChainModifier has no randomize_for_generation: returned untouched.
-    var plain_scene: PackedScene = load("res://src/Systems/Items/Modifiers/ChainModifier.tscn")
+    var plain_scene: PackedScene = load("res://src/Systems/Items/modifiers/ChainModifier.tscn")
     assert_that(factory._configure_dynamic_modifier(plain_scene)).is_same(plain_scene)
     collect_orphan_node_details()

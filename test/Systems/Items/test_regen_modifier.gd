@@ -3,8 +3,8 @@
 class_name RegenModifierTest
 extends GdUnitTestSuite
 
-const FLAT_REGEN := preload("res://src/Systems/Items/Modifiers/flat_regen_modifier.gd")
-const PERCENT_REGEN := preload("res://src/Systems/Items/Modifiers/percent_regen_modifier.gd")
+const FLAT_REGEN := preload("res://src/Systems/Items/modifiers/flat_regen_modifier.gd")
+const PERCENT_REGEN := preload("res://src/Systems/Items/modifiers/percent_regen_modifier.gd")
 
 
 func _build_holder(with_health: bool = true, max_health: float = 100.0) -> Node:

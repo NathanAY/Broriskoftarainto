@@ -1,5 +1,5 @@
 # base_modifier.gd
-## Base class for every effect modifier in Systems/Items/Modifiers/.
+## Base class for every effect modifier in Systems/Items/modifiers/.
 ##
 ## Owns the single source of truth for the stack bookkeeping contract and the
 ## common attachment plumbing so subclasses only carry their own trigger logic.

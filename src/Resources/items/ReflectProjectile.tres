@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Item" format=3 uid="uid://d1yw8i7q4msxn"]
 
-[ext_resource type="PackedScene" uid="uid://di5ksgmjj6o0w" path="res://src/Systems/Items/Modifiers/ReflectProjectilesModifier.tscn" id="1_ga13j"]
+[ext_resource type="PackedScene" uid="uid://di5ksgmjj6o0w" path="res://src/Systems/Items/modifiers/ReflectProjectilesModifier.tscn" id="1_ga13j"]
 [ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="2_sok7j"]
 
 [resource]

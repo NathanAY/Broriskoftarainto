@@ -177,12 +177,20 @@ func test_spinning_orbs_tooltip_shows_trigger_and_damage() -> void:
     assert_that(lines).contains("effect: Spinning Orbs — Orbs deal 50% of base damage (Triggers on hit)")
 
 
-func test_regen_tooltip_shows_amount_without_trigger() -> void:
-    var scene: PackedScene = load("res://src/Systems/Items/Modifiers/RegenModifier.tscn")
-    var item: Item = ItemBuilder.make_effect_item("Regen Modifier", "flavor", scene, {})
+func test_flat_regen_tooltip_shows_amount_without_trigger() -> void:
+    var scene: PackedScene = load("res://src/Systems/Items/Modifiers/FlatRegenModifier.tscn")
+    var item: Item = ItemBuilder.make_effect_item("Flat Regen Modifier", "flavor", scene, {})
     var lines: PackedStringArray = ItemTooltip.tooltip_lines(item)
     # Regen is a passive timer effect: amounts shown, no trigger suffix.
-    assert_that(lines).contains("effect: Regen — Regenerates 4.0 HP + 1% max HP every 0.5s")
+    assert_that(lines).contains("effect: Flat Regen — Regenerates 4.0 HP every 0.5s")
+
+
+func test_percent_regen_tooltip_shows_amount_without_trigger() -> void:
+    var scene: PackedScene = load("res://src/Systems/Items/Modifiers/PercentRegenModifier.tscn")
+    var item: Item = ItemBuilder.make_effect_item("Percent Regen Modifier", "flavor", scene, {})
+    var lines: PackedStringArray = ItemTooltip.tooltip_lines(item)
+    # Regen is a passive timer effect: amounts shown, no trigger suffix.
+    assert_that(lines).contains("effect: Percent Regen — Regenerates 1% max HP every 0.5s")
 
 
 func test_poison_tooltip_shows_trigger_and_amount() -> void:

@@ -95,7 +95,8 @@ Catalog
 | PoisonModifier | `poison_modifier.gd` | `on_hit` | Applies `PoisonEffect` (100% of hit damage per tick); +50% tick damage per stack. |
 | ProjectileBounceModifier | `projectile_bounce_modifier.gd` | `on_attack` | Projectiles bounce to 3 extra targets per stack. |
 | ReflectProjectileModifier | `reflect_projectiles_modifier.gd` | `before_take_damage` | Fires 2 projectiles back at attackers; +1 per stack and larger range. |
-| RegenModifier | `regen_modifier.gd` | passive timer | Regenerates fixed HP + % max HP per tick; × stacks. No trigger event. |
+| FlatRegenModifier | `flat_regen_modifier.gd` (extends `regen_modifier.gd`) | passive timer | Regenerates fixed HP per tick; × stacks. No trigger event. |
+| PercentRegenModifier | `percent_regen_modifier.gd` (extends `regen_modifier.gd`) | passive timer | Regenerates % of max HP per tick; × stacks. No trigger event. |
 | SpinningOrbsModifier | `spinning_orbs_modifier.gd` | `on_hit` | Spawns orbiting orbs (2 base, +1 per stack) dealing 50% of base damage. |
 | SpreadModifier | `spread_modifier.gd` | `on_attack` | Spawns 2 extra projectiles per stack. |
 | StatMultiplierModifier | `stat_multiplier_modifier.gd` | `on_item_added` | Multiplies flat bonuses of a target stat from items by 2.0× per stack. Script-only (no `.tscn`; packed via `ItemBuilder`). |

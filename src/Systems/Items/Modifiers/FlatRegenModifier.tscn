@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://ywpq6fpoxwu1"]
+
+[ext_resource type="Script" uid="uid://dqgv2umlvar3s" path="res://src/Systems/Items/Modifiers/flat_regen_modifier.gd" id="1_3bqev"]
+
+[node name="FlatRegenModifier" type="Node"]
+script = ExtResource("1_3bqev")

@@ -22,11 +22,13 @@ const PIECE_COUNT := 32
 var _shards: Array[Dictionary] = []
 var _age := 0.0
 var _configured := false
+var _speed_multiplier := 1.0
 
 
-func configure(sprite: Sprite2D, direction: Vector2, strength: float) -> void:
+func configure(sprite: Sprite2D, direction: Vector2, strength: float, speed_multiplier := 1.0) -> void:
     if sprite == null or sprite.texture == null:
         return
+    _speed_multiplier = maxf(speed_multiplier, 0.0)
     var root_atlas: Texture2D = sprite.texture
     var frame_origin := Vector2.ZERO
     var frame_size := root_atlas.get_size()
@@ -97,6 +99,7 @@ func configure(sprite: Sprite2D, direction: Vector2, strength: float) -> void:
         var push: float = randf_range(impact_push_min, impact_push_max) * power
         var vel: Vector2 = outward * outward_speed * jitter + dir * push
         vel += Vector2(randf_range(-40.0, 40.0), randf_range(-40.0, 40.0))
+        vel *= _speed_multiplier
         _shards.append({
             "node": piece,
             "vel": vel,
@@ -130,3 +133,7 @@ func _process(delta: float) -> void:
 
 func get_piece_count() -> int:
     return _shards.size()
+
+
+func get_speed_multiplier() -> float:
+    return _speed_multiplier

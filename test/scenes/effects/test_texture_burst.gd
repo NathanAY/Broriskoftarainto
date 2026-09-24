@@ -62,6 +62,28 @@ func test_burst_zero_direction_falls_back() -> void:
 	sprite.queue_free()
 
 
+func test_burst_weak_damage_keeps_base_speed() -> void:
+	var burst = BURST_SCENE.instantiate()
+	add_child(burst)
+	var sprite := _make_sprite()
+	add_child(sprite)
+	burst.configure(sprite, Vector2.RIGHT, 1.0, 1.0)
+	assert_float(burst.get_speed_multiplier()).is_equal(1.0)
+	burst.queue_free()
+	sprite.queue_free()
+
+
+func test_burst_strong_damage_scales_speed() -> void:
+	var burst = BURST_SCENE.instantiate()
+	add_child(burst)
+	var sprite := _make_sprite()
+	add_child(sprite)
+	burst.configure(sprite, Vector2.RIGHT, 1.0, 10.0)
+	assert_float(burst.get_speed_multiplier()).is_equal(10.0)
+	burst.queue_free()
+	sprite.queue_free()
+
+
 func test_manager_spawns_burst_as_sibling_on_death() -> void:
 	var container := Node2D.new()
 	add_child(container)
@@ -93,3 +115,49 @@ func test_manager_spawns_burst_as_sibling_on_death() -> void:
 	assert_object(found_burst).is_not_null()
 	assert_int(found_burst.get_piece_count()).is_equal(32)
 	container.queue_free()
+
+
+func test_manager_weak_damage_keeps_base_burst_speed() -> void:
+	var found_burst = _spawn_death_burst(0.5)
+	assert_object(found_burst).is_not_null()
+	assert_float(found_burst.get_speed_multiplier()).is_equal(1.0)
+
+func test_manager_three_times_max_health_is_ten_times_speed() -> void:
+	var found_burst = _spawn_death_burst(3.0)
+	assert_object(found_burst).is_not_null()
+	assert_float(found_burst.get_speed_multiplier()).is_equal(10.0)
+
+func test_manager_overkill_speed_has_no_cap() -> void:
+	var found_burst = _spawn_death_burst(6.0)
+	assert_object(found_burst).is_not_null()
+	assert_float(found_burst.get_speed_multiplier()).is_equal(23.5)
+
+
+func _spawn_death_burst(percent: float) -> Node:
+	var container := Node2D.new()
+	add_child(container)
+	var holder := Node2D.new()
+	holder.name = "Holder"
+	container.add_child(holder)
+	var event_manager := EventManager.new()
+	event_manager.name = "EventManager"
+	holder.add_child(event_manager)
+	var inner := Node2D.new()
+	inner.name = "Node2D"
+	holder.add_child(inner)
+	var sprite := _make_sprite()
+	sprite.name = "Sprite2D"
+	inner.add_child(sprite)
+	var manager = MANAGER_SCENE.instantiate()
+	holder.add_child(manager)
+	var ctx := DamageContext.new()
+	ctx.source = null
+	ctx.target = holder
+	ctx.target_take_persent_damage = percent
+	event_manager.emit_event("on_death", {"self": holder, "damage_context": ctx})
+	var found_burst = null
+	for child in container.get_children():
+		if child != holder and child.has_method("get_speed_multiplier"):
+			found_burst = child
+	container.queue_free()
+	return found_burst

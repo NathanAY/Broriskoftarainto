@@ -24,6 +24,7 @@ func _emit_burst(event: Dictionary):
         return
     var direction := Vector2.RIGHT
     var strength := 1.0
+    var speed_multiplier := 1.0
     var ctx: DamageContext = event.get("damage_context")
     if ctx != null:
         if ctx.source is Node2D and is_instance_valid(ctx.source) and holder is Node2D:
@@ -34,8 +35,12 @@ func _emit_burst(event: Dictionary):
         var percent: float = float(ctx.target_take_persent_damage)
         if percent > 0.0:
             strength = clampf(0.8 + percent * 1.5, 0.8, 2.2)
+        # Scale shard speed by overkill: 3x the holder's max health => 10x speed,
+        # linear above the 1.0 killing-blow baseline (no cap).
+        if percent > 1.0:
+            speed_multiplier = 1.0 + (percent - 1.0) * 4.5
     var burst = burst_scene.instantiate()
     target_parent.add_child(burst)
     if burst is Node2D and sprite is Node2D:
         (burst as Node2D).global_position = (sprite as Node2D).global_position
-    burst.configure(sprite, direction, strength)
+    burst.configure(sprite, direction, strength, speed_multiplier)

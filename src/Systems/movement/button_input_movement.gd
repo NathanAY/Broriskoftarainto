@@ -12,7 +12,7 @@ func _physics_process(_delta: float) -> void:
 
     var move_speed = 0.0
     if stats:
-        move_speed = stats.get_stat("movement_speed")
+        move_speed = stats.get_movement_speed_px()
 
     var flip = input_dir.x < 0
     flip_sprites_h(character.get_node("Node2D/Sprite2D"), flip)

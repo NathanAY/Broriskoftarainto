@@ -17,12 +17,12 @@ name = "Pistol"
 description = "Pistol"
 base_attack_speed = 0.8
 modifiers = {
+"knockback": {
+"duration": 0.15,
+"strength": 120.0
+},
 "pierce": {
 "amount": 1
-},
-"knockback": {
-"strength": 120.0,
-"duration": 0.15
 }
 }
 target_selector = ExtResource("3_v0y1f")

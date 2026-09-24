@@ -11,6 +11,9 @@ Data flow
 - Processing: `get_stat()` computes final stat by applying all modifiers (flat then percent multipliers) and honoring conditional modifiers via `_check_condition()`.
 - Outputs: emits `on_stat_changes` and `on_condition_change` events via `event_manager` when stats or conditions change.
 
+Units
+- `movement_speed` is stored in meters per second (base default 0.25 m/s = 50 px/s). Use `get_movement_speed_px()` (or multiply by `Stats.PIXELS_PER_METER` = 200) when feeding velocity into physics, which works in pixels.
+
 Dependencies
 - Expects `event_manager` reference (exported or found on parent). Condition managers are added via `add_condition_manager`.
 

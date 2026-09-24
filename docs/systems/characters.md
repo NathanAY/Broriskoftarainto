@@ -20,13 +20,13 @@ This document explains the new character system (data, UI, and integration point
 ## CharacterData format
 - `display_name` (String): shown in UI.
 - `description` (String): short description.
-- `base_stats` (Dictionary): explicit base stat values to set when the character is chosen. These call `Stats.set_base_stat(stat_name, value)` for each key. Examples: `"health"`, `"movement_speed"`, `"damage"`, `"armor"`.
+- `base_stats` (Dictionary): explicit base stat values to set when the character is chosen. These call `Stats.set_base_stat(stat_name, value)` for each key. Examples: `"health"`, `"movement_speed"`, `"damage"`, `"armor"`. `movement_speed` is in meters per second (200 px = 1 m).
 - `modifiers` (Array): list of modifier dictionaries matching the `Stats.add_modifier` format. Example modifier: `{ "damage": {"percent": -0.25}, "condition": {...} }` or `{ "attack_speed": {"percent": 0.2} }`.
 
 Example (pseudo):
 ```
 display_name = "Rogue"
-base_stats = {"health": 35.0, "movement_speed": 70.0, "damage": 0.8}
+base_stats = {"health": 35.0, "movement_speed": 0.35, "damage": 0.8}
 modifiers = [{"attack_speed": {"percent": 0.2}}]
 ```
 

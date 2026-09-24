@@ -13,7 +13,7 @@ func process_movement(creature_self: CharacterBody2D, delta: float) -> void:
 
     if dist > stop_distance:
         var direction = (target_pos - creature_self.global_position).normalized()
-        creature_self.velocity = direction * creature_self.stats.get_stat("movement_speed")
+        creature_self.velocity = direction * creature_self.stats.get_movement_speed_px()
         creature_self.anim_player.play("move")
         creature_self.sprite.flip_h = direction.x < 0
     else:

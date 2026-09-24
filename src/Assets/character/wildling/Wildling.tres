@@ -13,7 +13,7 @@ base_stats = {
 "armor": 10,
 "damage": 0.9,
 "health": 120.0,
-"movement_speed": 35.0
+"movement_speed": 0.175
 }
 modifiers = [{
 "armor": {

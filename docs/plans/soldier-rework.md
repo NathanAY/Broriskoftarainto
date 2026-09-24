@@ -14,7 +14,7 @@ Soldier is currently a byte-for-byte clone of Wildling (`Assets/character/soldie
 - `description`: `"Demolitions specialist: every hit triggers explosions. Devastating area damage, weaker single-target."`
 - `base_stats`:
   - `health: 75.0`
-  - `movement_speed: 42.0`
+  - `movement_speed: 0.21`
   - `damage: 0.8`
   - (drops inert `armor: 10`; health 120 → 75; damage 0.9 → 0.8)
 - `modifiers`:
@@ -28,7 +28,7 @@ Soldier is currently a byte-for-byte clone of Wildling (`Assets/character/soldie
 ## Resulting identity vs. the other characters
 
 - Wildling clone path is gone; Soldier is the only explosive AoE character.
-- Medium-low HP (75), fair speed (42), 0.8 damage multiplier offset by on-hit explosions and bomb drops.
+- Medium-low HP (75), fair speed (0.21 m/s), 0.8 damage multiplier offset by on-hit explosions and bomb drops.
 - `area_size_multiplier +30%` scales every explosion's AoE via `Scripts/explosion.gd`.
 
 ## Verification

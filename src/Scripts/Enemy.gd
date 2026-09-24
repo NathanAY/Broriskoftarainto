@@ -69,7 +69,7 @@ func _physics_process(_delta):
     velocity += _separation_force()
     # Keep combined chase + separation within the enemy's top speed so crowds
     # spread smoothly instead of bursting outward.
-    var max_speed := stats.get_stat("movement_speed")
+    var max_speed := stats.get_movement_speed_px()
     var speed_sq := velocity.length_squared()
     if speed_sq > max_speed * max_speed:
         velocity = velocity.normalized() * max_speed
@@ -83,7 +83,7 @@ func _separation_force() -> Vector2:
     var sep_radius := radius * SEPARATION_FACTOR
     if sep_radius <= 0.0:
         return Vector2.ZERO
-    var move_speed: float = stats.get_stat("movement_speed")
+    var move_speed: float = stats.get_movement_speed_px()
     var force := Vector2.ZERO
     for other in get_tree().get_nodes_in_group("enemies"):
         if other == self or not is_instance_valid(other):

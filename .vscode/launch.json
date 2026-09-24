@@ -10,8 +10,6 @@
             "type": "godot",
             "request": "launch",
             "scene": "test/TestScene.tscn",
-            // "scene": "Scenes/menu/StarterMenu.tscn"
-            // "scene": "main|current|pinned|<path>",
         },
         {
             "name": "TestGame",

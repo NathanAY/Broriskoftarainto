@@ -4,6 +4,10 @@ class_name Stats
 
 @export var event_manager: Node  # assign LocalEventManager in editor or via code
 
+## World unit scale: 200 pixels = 1 meter. Stats measured in meters (like
+## movement_speed, stored as m/s) are converted to pixels with this factor.
+const PIXELS_PER_METER: float = 200.0
+
 # Base stats
 @export var stats := {
     "health": 40.0,
@@ -14,7 +18,7 @@ class_name Stats
     "attack_speed": 1.0,
     "area_radius": 1.0,
     "attack_range": 500.0,
-    "movement_speed": 50,
+    "movement_speed": 0.25,
     "armor": 0,
     "critical_chance": 0,
     "critical_multiplier": 1.5,
@@ -54,6 +58,12 @@ func get_stat(stat_name: String) -> float:
             final_value += mod[stat_name].get("flat", 0.0)
             final_value *= 1.0 + mod[stat_name].get("percent", 0.0)
     return final_value
+
+## movement_speed is stored in meters per second; convert to pixels per second
+## for physics (200 px = 1 m).
+func get_movement_speed_px() -> float:
+    return get_stat("movement_speed") * PIXELS_PER_METER
+
 
 func set_base_stat(stat_name: String, value: float):
     stats[stat_name] = value

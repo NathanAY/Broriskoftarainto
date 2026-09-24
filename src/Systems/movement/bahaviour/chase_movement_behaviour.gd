@@ -21,7 +21,7 @@ func process_movement(creature_self: CharacterBody2D, _delta: float) -> void:
 
     # Otherwise chase target
     var direction = to_target.normalized()
-    var move_speed = creature_self.stats.get_stat("movement_speed")
+    var move_speed = creature_self.stats.get_movement_speed_px()
     creature_self.velocity = direction * move_speed
 
     creature_self.anim_player.play("move")

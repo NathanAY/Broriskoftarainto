@@ -34,7 +34,6 @@ MusicManager="*res://src/Scripts/autoload/music_manager.gd"
 
 window/size/viewport_width=1552
 window/size/viewport_height=861
-window/size/initial_position_type=4
 
 [dotnet]
 

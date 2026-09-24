@@ -5,10 +5,10 @@
 [resource]
 script = ExtResource("1_4eod8")
 name = "Boots of speed"
-description = "Speed +50"
+description = "Speed +1.0 m/s"
 modifiers = {
 "movement_speed": {
-"flat": 200.0
+"flat": 1.0
 }
 }
 effect_scene = Array[PackedScene]([])

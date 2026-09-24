@@ -32,7 +32,7 @@ func test_item_with_3_stats_has_3_image():
         "damage": {"flat": 100.0},
         "armor": {"flat": 100.0},
         "critical_chance": {"flat": 100.0},
-        "movement_speed": {"flat": 100.0}
+        "movement_speed": {"flat": 0.5}
     })
     c_item_holder.add_item(stat_item)
     

@@ -11,7 +11,7 @@ description = "Tough melee starter: more HP, moderate damage."
 base_stats = {
 "damage": 1.0,
 "health": 80.0,
-"movement_speed": 45.0
+"movement_speed": 0.225
 }
 modifiers = [{
 "damage": {

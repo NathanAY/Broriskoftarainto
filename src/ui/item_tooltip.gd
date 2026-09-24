@@ -23,7 +23,7 @@ const STAT_HINTS: Dictionary = {
     "attack_speed": "Attack speed multiplier. Higher = more attacks per second = more on-hit effects.",
     "area_radius": "Radius of area attacks and melee swings.",
     "attack_range": "Maximum distance at which your weapons can hit targets.",
-    "movement_speed": "Movement speed.",
+    "movement_speed": "Movement speed in meters per second (m/s).",
     "armor": "Reduces incoming damage.\nFormula: final damage x (10 / (10 + armor)).\nExample: 1 armor blocks about 9%% (multiplier 0.91).\nExample: 10 armor blocks 50%% (multiplier 0.50).",
     "critical_chance": "Chance per hit to land a critical strike (in percent, 0-100).",
     "critical_multiplier": "Critical strikes multiply your damage by this value (1.5 = 150%%).",

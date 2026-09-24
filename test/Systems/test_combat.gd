@@ -2,6 +2,11 @@
 class_name CombatTest
 extends GdUnitTestSuite
 
+# simulate_frames() advances real process frames and game-time per frame depends
+# on the actual framerate (headless runs uncapped), so a fixed frame budget is not
+# deterministic across windowed/headless runs. Poll for combat conditions instead.
+const ENEMY_MAX_FRAMES: int = 60 * 20
+
 func test_character_in_combat() -> void:
     var runner := scene_runner("res://test/TestScene.tscn")
     var test_scene := runner.scene()
@@ -14,10 +19,15 @@ func test_character_in_combat() -> void:
 
     assert_float(e_health.current_health).is_equal(40.0)
 
-    await runner.simulate_frames(int(60 * 3.2))
+    var frames := 0
+    while e_health.current_health >= 30.0 and frames < ENEMY_MAX_FRAMES:
+        await runner.simulate_frames(5)
+        frames += 5
     assert_float(e_health.current_health).is_less(30.0)
-    
-    await runner.simulate_frames(60 * 3)
+
+    while is_instance_valid(enemy) and frames < ENEMY_MAX_FRAMES:
+        await runner.simulate_frames(5)
+        frames += 5
     assert_bool(is_instance_valid(enemy)).is_false()
 
     test_scene.free()

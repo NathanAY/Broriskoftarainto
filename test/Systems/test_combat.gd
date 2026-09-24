@@ -15,15 +15,18 @@ func test_character_in_combat() -> void:
 
     var _character: Character = test_scene.get_node("Character")
     var enemy = test_scene.get_node("Enemy")
+    var initial_position = enemy.global_position
     var e_health: Health = enemy.get_node("Health")
 
     assert_float(e_health.current_health).is_equal(40.0)
 
     var frames := 0
-    while e_health.current_health >= 30.0 and frames < ENEMY_MAX_FRAMES:
+    while e_health.current_health >= 20.0 and frames < ENEMY_MAX_FRAMES:
         await runner.simulate_frames(5)
         frames += 5
-    assert_float(e_health.current_health).is_less(30.0)
+    assert_float(e_health.current_health).is_less(20.0)
+    # Change position because fist weapon has a knockback
+    enemy.global_position = initial_position
 
     while is_instance_valid(enemy) and frames < ENEMY_MAX_FRAMES:
         await runner.simulate_frames(5)

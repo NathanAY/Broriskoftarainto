@@ -16,5 +16,8 @@ class_name CharacterData
 # Starting items for the character
 @export var starting_items: Array[Item] = []
 
+# Starting weapons equipped on spawn (e.g. Fist for the Brawler)
+@export var starting_weapons: Array[BaseWeapon] = []
+
 @export var small_icon: Texture2D    # assign in .tres
 @export var sprite: Texture2D    # assign in .tres

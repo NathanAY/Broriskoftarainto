@@ -47,6 +47,24 @@ func _ready():
         for item in char_res.starting_items:
             item_holder.add_item(item)
 
+    # Apply starting weapons once the Character (owner) is fully ready: WeaponHolder
+    # resolves its @onready hold_owner in its own _ready, which runs before the
+    # owner's ready. Equipping before the owner is ready fails because children
+    # (timer, sprite) cannot be added to a character still entering the tree, so
+    # same-timing deferred calls race with later weapon changes. Waiting on the
+    # owner's ready signal keeps weapon setup deterministic during scene load.
+    if owner.has_node("WeaponHolder"):
+        var weapon_holder := owner.get_node("WeaponHolder")
+        if owner.is_node_ready():
+            _add_starting_weapons(weapon_holder, char_res.starting_weapons)
+        else:
+            owner.ready.connect(_add_starting_weapons.bind(weapon_holder, char_res.starting_weapons))
+
+
+func _add_starting_weapons(weapon_holder: Node, starting_weapons: Array[BaseWeapon]) -> void:
+    for weapon in starting_weapons:
+        weapon_holder.add_weapon(weapon)
+
 func load_custom_sprites(char_res: Resource, owner_sprite: Sprite2D):
     # 1. Get the directory path from the resource path
     var dir_path = char_res.resource_path.get_base_dir()

@@ -26,4 +26,9 @@ static func tooltip_lines(character: CharacterData) -> PackedStringArray:
 			continue
 		var item_name := str(item.name) if "name" in item else str(item)
 		lines.append("starting item: " + item_name)
+	for weapon in character.starting_weapons:
+		if weapon == null:
+			continue
+		var weapon_name := str(weapon.name) if "name" in weapon else str(weapon)
+		lines.append("starting weapon: " + weapon_name)
 	return lines

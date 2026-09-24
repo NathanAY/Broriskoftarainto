@@ -30,7 +30,7 @@ func _ready():
     for item_path in items:
         $ItemHolder.add_item(load(item_path)) 
  
-    $WeaponHolder.add_weapon(load("res://src/Resources/weapons/Fist.tres"))
+    #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Fist.tres"))
     #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Thorns.tres"))
     #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Pistol.tres"))
     #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Shotgun.tres"))

@@ -12,7 +12,7 @@ This document explains the new character system (data, UI, and integration point
 - `Resources/characters/*.tres` — character definitions (examples: `Warrior.tres`, `Rogue.tres`, `Tank.tres`).
 - `Scenes/menu/CharacterSelect.tscn` + `Scenes/menu/character_select.gd` — character selection UI: top `DetailPanel` (icon + name + scrollable stats for the selected character) above a compact card grid (8 columns, fits 30+ characters). A shared `TooltipUi` node shows the full `ItemTooltip` stats on card hover, so details are visible without selecting.
 - `Scenes/menu/CharacterCard.tscn` + `Scenes/menu/character_card.gd` (`class_name CharacterCard`) — compact grid entry (120x132): icon + name only, whole card clickable (`selected` signal via `gui_input`/`select()`), gold highlight when selected. Full stats live in the top detail panel and the hover tooltip, not on the card.
-- `ui/character_tooltip.gd` (`class_name CharacterTooltip`) — static `tooltip_lines(CharacterData)` builder (name, description, `base <stat>`, flattened modifiers via `ItemTooltip.modifier_lines`, `starting item:` names).
+- `ui/character_tooltip.gd` (`class_name CharacterTooltip`) — static `tooltip_lines(CharacterData)` builder (name, description, `base <stat>`, flattened modifiers via `ItemTooltip.modifier_lines`, `starting item:`/`starting weapon:` names).
 - `Scripts/autoload/global_game_state.gd` — holds `starting_character` (path or Resource).
 - `Systems/characters/CharacterInitializer.gd` — applies character data to the `Stats` node on character spawn.
 - `Systems/Character.tscn` — now contains a `CharacterInitializer` Node (instance) so application is automatic.
@@ -22,6 +22,8 @@ This document explains the new character system (data, UI, and integration point
 - `description` (String): short description.
 - `base_stats` (Dictionary): explicit base stat values to set when the character is chosen. These call `Stats.set_base_stat(stat_name, value)` for each key. Examples: `"health"`, `"movement_speed"`, `"damage"`, `"armor"`. `movement_speed` is in meters per second (200 px = 1 m).
 - `modifiers` (Array): list of modifier dictionaries matching the `Stats.add_modifier` format. Example modifier: `{ "damage": {"percent": -0.25}, "condition": {...} }` or `{ "attack_speed": {"percent": 0.2} }`.
+- `starting_items` (Array[Item]): `Item` resources equipped at spawn via the `ItemHolder`.
+- `starting_weapons` (Array[BaseWeapon]): `BaseWeapon` resources (e.g. `res://src/Resources/weapons/Fist.tres`) equipped at spawn via the `WeaponHolder`.
 
 Example (pseudo):
 ```
@@ -36,6 +38,8 @@ modifiers = [{"attack_speed": {"percent": 0.2}}]
 3. When the game scene creates the player `Character` (instancing `Systems/Character.tscn`), the `CharacterInitializer` node reads `GlobalGameState.starting_character`, loads the resource, and:
    - Calls `Stats.set_base_stat` for each entry in `base_stats` (overwrites base values).
    - Calls `Stats.add_modifier` for each modifier in `modifiers` (adds modifier dicts to the stack).
+   - Calls `ItemHolder.add_item` for each entry in `starting_items`.
+   - Calls `WeaponHolder.add_weapon` (deferred until the ready pass finishes) for each entry in `starting_weapons`.
 
 This keeps character data separate from player logic and allows easy addition of new characters.
 
@@ -45,4 +49,4 @@ This keeps character data separate from player logic and allows easy addition of
 3. No code changes needed — `CharacterSelect` scans the folder and will display the new entry.
 
 ## Extensibility ideas
-- Per-character starting items/weapons are already supported via `starting_items` on the resource (shown as `starting item:` lines on the card); wiring them into `GlobalGameState` on confirm is the remaining step.
+- Optional: merge a character's `starting_weapons`/`starting_items` into `GlobalGameState` on confirm so they still appear in the StarterMenu loadout; currently they are applied directly at spawn by `CharacterInitializer`.

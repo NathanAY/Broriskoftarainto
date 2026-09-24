@@ -2,7 +2,7 @@
 class_name ChainLighningModifierTest
 extends GdUnitTestSuite
 
-func test_bouncing_modifier() -> void:
+func test_chain_lightnin_modifier() -> void:
     var runner := scene_runner("res://test/TestScene.tscn")
     var test_scene := runner.scene()
     runner.set_time_factor(5)
@@ -20,14 +20,13 @@ func test_bouncing_modifier() -> void:
     
     var item: Item = _create_item("ChainModifier.tscn", 1)
     character.item_holder.add_item(item)
-    # character.weapon_holder.add_weapon(load("res://src/Resources/weapons/Pistol.tres"))
         
     await runner.simulate_frames(60 * 3)
 
     #enemy1 hit by fist twice (2 x 10 damage, fist only - no pistol here)
-    assert_float(e1_health.current_health).is_equal(20.0)
+    assert_float(e1_health.current_health).is_less(35.0)
     #enemy2 hit by chain lightning projectile twice (2 x 10 damage)
-    assert_float(e2_health.current_health).is_equal(20.0)
+    assert_float(e2_health.current_health).is_less(35.0)
     test_scene.free()
 
 

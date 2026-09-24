@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://cd0qtrgapleia"]
+
+[ext_resource type="Script" uid="uid://b174fx02jtd8q" path="res://src/Systems/characters/CharacterData.gd" id="1_brawler"]
+[ext_resource type="Script" uid="uid://2vl1rp4agc1u" path="res://src/Systems/weapon/BaseWeapon.gd" id="2_brawler"]
+[ext_resource type="Texture2D" uid="uid://c316d60nhgh1t" path="res://src/Assets/character/brawler/brawler_icon.png" id="2_i8dd6"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="3_7ttqk"]
+[ext_resource type="Resource" uid="uid://dj8an5x7vxx4e" path="res://src/Resources/weapons/Fist.tres" id="3_brawler"]
+
+[resource]
+script = ExtResource("1_brawler")
+display_name = "Brawler"
+description = "Close-quarters fighter: tough, hard-hitting, up close and personal."
+base_stats = {
+"armor": 4,
+"attack_speed": 1.1,
+"damage": 1.15,
+"health": 95.0,
+"movement_speed": 0.28
+}
+modifiers = [{
+"damage": {
+"percent": 0.1
+}
+}]
+starting_weapons = Array[ExtResource("2_brawler")]([ExtResource("3_brawler")])
+small_icon = ExtResource("2_i8dd6")
+metadata/_custom_type_script = "uid://b174fx02jtd8q"

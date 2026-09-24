@@ -19,8 +19,6 @@ func attachEventManager(em: EventManager):
 
 # Keep previous logic but only handle projectile attaching here
 func _on_attack(data: Dictionary):
-    if not _is_bound_event(data):
-        return
     var active_count = _active_stacks()
 
     if data.has("projectile"):
@@ -34,8 +32,6 @@ func _on_attack(data: Dictionary):
 
 # This handles both melee and projectile hits
 func _on_hit(data: Dictionary) -> void:
-    if not _is_bound_event(data):
-        return
     var active_count = _active_stacks()
 
     var body: Node = data.get("body", null)

@@ -48,8 +48,9 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
 
 5. Weapon binding (implemented in `BaseModifier`)
    - `var bound_weapon: Object = null` — when non-null, handler events must carry this exact weapon to fire. Used by weapon built-in effects (`Systems/weapon/weapon_builtin_effects.gd`): Fist/Knife/Pistol declare their own `knockback`/`poison` via `BaseWeapon.modifiers`, and the helper instantiates these modifier scripts as real nodes bound to one weapon instance.
-   - `_is_bound_event(data: Dictionary) -> bool` — returns `true` when `bound_weapon` is null (item-pickup path, holder-wide, unchanged) or `data.get("weapon") == bound_weapon`. Call `if not _is_bound_event(data): return` as the first line of every subscribed handler.
-   - `_subscribe(event_name, listener)` — subscribes and records the pair; `_unsubscribe_all()` unregisters every recorded pair and clears the list. Because `EventManager` crashes on freed listeners (`LocalEventManager.gd:29`), detach MUST unsubscribe before freeing — `WeaponBuiltinEffects.detach` relies on this.
+   - `_is_bound_event(data: Dictionary) -> bool` — returns `true` when `bound_weapon` is null (item-pickup path, holder-wide, unchanged) or `data.get("weapon") == bound_weapon`.
+   - `_subscribe(event_name, listener)` — subscribes and records the pair. When `bound_weapon` is set, the listener is auto-wrapped so it only receives events whose payload carries the bound weapon; guard-less handlers are scoped automatically. Modifiers never write their own `if not _is_bound_event(data): return` — subscribing via `_subscribe` is enough. Events without a `weapon` key (explosion/orb sources) never match a bound modifier.
+   - `_subscribe` also records every pair so `_unsubscribe_all()` can unregister before freeing. Because `EventManager` crashes on freed listeners (`LocalEventManager.gd:29`), detach MUST unsubscribe before freeing — `WeaponBuiltinEffects.detach` relies on this. Modifiers that subscribe via raw `event_manager.subscribe` bypass both the auto-scoping and the tracking; any modifier intended to work as a weapon built-in must use `_subscribe`.
 
 Lifecycle / data flow
 - `ItemHolder.add_item(item)` (`Systems/Items/item_holder.gd`):
@@ -105,7 +106,7 @@ Catalog
 Guidelines for adding a new modifier
 1. `extends BaseModifier` (`Systems/Items/Modifiers/base_modifier.gd`), matching the file's indentation style (4-space), in `Systems/Items/Modifiers/`. For a variant of an existing behavior, extend that script instead and set differing defaults in `_init()`.
 2. Stack state, `attachEventManager` caching, `_active_stacks()`, and `get_health()` come free from `BaseModifier`.
-3. Implement `attachEventManager`; subscribe your behavior to the `trigger_event` export, and to `on_stat_changes` only when you cache derived stats; bail early when data is missing.
+3. Implement `attachEventManager`; subscribe your behavior with `_subscribe(trigger_event, ...)`, and to `on_stat_changes` only when you cache derived stats. Always use `_subscribe` (not raw `event_manager.subscribe`) — it handles weapon scoping when bound and unsubscribes on detach. Bail early when data is missing.
 4. Add the display contract (`display_name`, optional `tooltip_text`, `trigger_event`, and `get_tooltip_stats()` reading live values). If you add it, an item `.tres` in `Resources/items/` and a matching `XxxModifier.tscn` are needed to ship it.
 5. Scale per stack using `_active_stacks()`; keep the formula mirrored in the tooltip string.
 6. Tag anything you spawn to prevent recursion.

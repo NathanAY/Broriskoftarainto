@@ -25,10 +25,25 @@ var bound_weapon: Object = null
 # on freed listeners). Each entry: [event_name, callable].
 var _subscriptions: Array = []
 
+## Subscribe and record the pair. When this modifier is bound to a weapon
+## (`bound_weapon != null`), the listener is auto-wrapped so it only reacts to
+## events from that weapon. That way per-handler `_is_bound_event` guards are
+## unnecessary: any modifier that subscribes via `_subscribe` is correctly scoped
+## the moment a weapon binds it. Unbound modifiers (item-pickup path) get the raw
+## listener with zero behavior change.
 func _subscribe(event_name: String, listener: Callable) -> void:
-	_subscriptions.append([event_name, listener])
+	var effective := listener
+	if bound_weapon != null:
+		effective = Callable(self, "_guard_weapon_event").bind(listener)
+	_subscriptions.append([event_name, effective])
 	if event_manager:
-		event_manager.subscribe(event_name, listener)
+		event_manager.subscribe(event_name, effective)
+
+## Bound-listener wrapper: forwards `data` to the wrapped listener only when the
+## event belongs to the bound weapon (or the modifier is unbound).
+func _guard_weapon_event(data: Dictionary, listener: Callable) -> void:
+	if _is_bound_event(data):
+		listener.call(data)
 
 func _unsubscribe_all() -> void:
 	for sub in _subscriptions:

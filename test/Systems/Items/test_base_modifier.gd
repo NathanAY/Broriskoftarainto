@@ -13,6 +13,19 @@ class RecordingModifier extends BaseModifier:
 		hook_active_after.append(_active_stacks())
 
 
+# Deliberately guard-less: subscribes via _subscribe and counts on_hit events, so
+# tests prove weapon scoping lives in BaseModifier, not in per-handler checks.
+class ScopedProbe extends BaseModifier:
+	var hits: int = 0
+
+	func attachEventManager(em: Node) -> void:
+		_cache_holder(em)
+		_subscribe("on_hit", Callable(self, "_on_hit"))
+
+	func _on_hit(_event: Dictionary) -> void:
+		hits += 1
+
+
 func _build_holder(with_stats: bool = true) -> Node:
 	var holder := Node.new()
 	holder.name = "Holder"
@@ -120,4 +133,70 @@ func test_get_health_returns_null_without_health_node() -> void:
 	var holder := _build_holder()
 	var modifier := _attach(holder)
 	assert_that(modifier.get_health()).is_null()
+	holder.free()
+
+
+func _hit_event(weapon: Object) -> Dictionary:
+	return {"weapon": weapon, "body": null, "damage_context": DamageContext.new()}
+
+
+func test_unbound_subscription_tracks_every_weapon() -> void:
+	var holder := _build_holder()
+	var em: EventManager = holder.get_node("EventManager")
+	var probe := ScopedProbe.new()
+	holder.add_child(probe)
+	probe.attachEventManager(em)
+
+	em.emit_event("on_hit", _hit_event(Object.new()))
+	assert_int(probe.hits).is_equal(1)
+	em.emit_event("on_hit", _hit_event(Object.new()))
+	assert_int(probe.hits).is_equal(2)
+
+	probe.free()
+	holder.free()
+
+
+func test_bound_subscription_scopes_without_any_handler_guard() -> void:
+	var holder := _build_holder()
+	var em: EventManager = holder.get_node("EventManager")
+	var weapon_a := Object.new()
+	var weapon_b := Object.new()
+
+	var probe := ScopedProbe.new()
+	probe.bound_weapon = weapon_a
+	holder.add_child(probe)
+	probe.attachEventManager(em)
+
+	# an event from another weapon must not reach the guard-less handler
+	em.emit_event("on_hit", _hit_event(weapon_b))
+	assert_int(probe.hits).is_equal(0)
+	# an event without any weapon key (e.g. explosion/orb sources) must not either
+	em.emit_event("on_hit", {"damage_context": DamageContext.new()})
+	assert_int(probe.hits).is_equal(0)
+	# an event from the bound weapon fires
+	em.emit_event("on_hit", _hit_event(weapon_a))
+	assert_int(probe.hits).is_equal(1)
+
+	probe.free()
+	holder.free()
+
+
+func test_unsubscribe_all_detaches_bound_wrapped_listener() -> void:
+	var holder := _build_holder()
+	var em: EventManager = holder.get_node("EventManager")
+	var weapon_a := Object.new()
+
+	var probe := ScopedProbe.new()
+	probe.bound_weapon = weapon_a
+	holder.add_child(probe)
+	probe.attachEventManager(em)
+
+	em.emit_event("on_hit", _hit_event(weapon_a))
+	assert_int(probe.hits).is_equal(1)
+
+	probe._unsubscribe_all()
+	em.emit_event("on_hit", _hit_event(weapon_a))
+	assert_int(probe.hits).is_equal(1)
+
+	probe.free()
 	holder.free()

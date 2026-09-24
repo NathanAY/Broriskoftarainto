@@ -22,8 +22,6 @@ func attachEventManager(em: Node):
     _subscribe(trigger_event, Callable(self, "_on_hit"))
 
 func _on_hit(event: Dictionary) -> void:
-    if not _is_bound_event(event):
-        return
     # event expected to be a Dictionary: {"projectile":..., "body":..., "damage_context":...}
     var body = event.get("body", null)
     if not body:

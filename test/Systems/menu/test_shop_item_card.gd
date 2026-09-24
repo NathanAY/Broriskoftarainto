@@ -78,14 +78,14 @@ func test_shop_items_are_horizontal_cards() -> void:
         assert_that(child is ShopItemCard).is_true()
 
     var shop_card: ShopItemCard = shop.items_container.get_child(0)
-    assert_str(shop_card.primary_button.text).is_equal("Buy")
+    assert_str(shop_card.primary_button.text).is_equal("Buy (1)")
     assert_str(shop_card.secondary_button.text).is_equal("Lock")
     assert_str(shop_card.info_label.text).is_equal("\n\n".join(ItemTooltip.tooltip_lines(item)))
     assert_int(shop_card.icon_holder.get_child_count()).is_equal(1)
 
     var pickup_card: ShopItemCard = shop.items_container.get_child(1)
     assert_str(pickup_card.primary_button.text).is_equal("Take")
-    assert_str(pickup_card.secondary_button.text).is_equal("Sell")
+    assert_str(pickup_card.secondary_button.text).is_equal("Sell (+1)")
     assert_str(pickup_card.info_label.text).is_equal("\n\n".join(ItemTooltip.tooltip_lines(item)))
 
     shop.character.free()
@@ -109,6 +109,26 @@ func test_buy_button_uses_card() -> void:
     var holder: ItemHolder = character.get_node("ItemHolder")
     assert_int(holder.items.size()).is_equal(1)
     assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(4.0)
+
+    character.free()
+    shop.free()
+
+
+func test_sell_button_uses_analyzer_price() -> void:
+    var shop = load(SHOP_SCENE).instantiate()
+    add_child(shop)
+    var character := _build_character()
+    shop.character = character
+    character.stats = character.get_node("Stats")
+    character.get_node("Stats").set_base_stat("money", 0)
+
+    var modifier: Item = load("res://src/Resources/items/CritGlass.tres")
+    shop._add_item_entry(modifier)
+    var card: ShopItemCard = shop.items_container.get_child(0)
+    assert_str(card.secondary_button.text).is_equal("Sell (+2)")
+    card.secondary_button.pressed.emit()
+
+    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(2.0)
 
     character.free()
     shop.free()

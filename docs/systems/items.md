@@ -8,6 +8,7 @@ Key scripts / scenes
 - `Systems/Items/item_holder.gd` (class_name `ItemHolder`)
 - `Systems/Items/item_pickup.gd` (pickup behavior)
 - `Systems/Items/item_builder.gd` (class_name `ItemBuilder`)
+- `Systems/Items/item_price_analyzer.gd` (class_name `ItemPriceAnalyzer`) — prices items for the shop
 
 Construction (single entry point)
 - `ItemBuilder` is the canonical, static API for creating items from code. All construction goes through it:
@@ -23,6 +24,15 @@ Data flow
 - Inputs: `Item` resources are added via `ItemHolder.add_item()` (player or enemy).
 - Processing: `Item.apply_to(holder)` adds stat modifiers to `Stats` and instantiates condition managers; holder may attach effect scenes as child nodes and manage stacks.
 - Outputs: Events emitted like `on_item_added`/`on_item_removed`; effects may attach to `EventManager`.
+
+Pricing (items.md, catalog `ItemPriceAnalyzer`)
+- `ItemPriceAnalyzer.get_price(resource)` classifies an offer and returns its shop cost:
+  - stat item (no effect scene, no buff/debuff meta type) = 1
+  - buff or debuff (`meta("type")` = `buff`/`debuff`) = 2
+  - modifier (has an `effect_scene`) = 3
+  - `BaseWeapon` = 5
+- `get_sell_price(resource, ratio = 0.5)` sells a collected pickup at `round(price * ratio)` (min 1). The `ratio` is an optional callable parameter; shop default is 50% of the buy price.
+- The shop (`ShopMenu`) holds a `PriceAnalyzer` node and uses it for both buy and sell buttons.
 
 Dependencies
 - `Stats` (for stat modifiers), `EventManager` (for effect interactions), `ItemFactory` (for generating items at runtime), scene resources under `Systems/Items/Modifiers` (effects) and `Systems/Items/Buffs` (buffs/debuffs).

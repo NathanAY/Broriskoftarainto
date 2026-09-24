@@ -54,10 +54,11 @@ func test_buy_weapon_equips_in_weapon_holder() -> void:
     var weapon: BaseWeapon = load(PISTOL_WEAPON)
     shop._add_shop_item_entry(weapon)
     var card: ShopItemCard = shop.items_container.get_child(0)
+    assert_str(card.primary_button.text).is_equal("Buy (5)")
     card.primary_button.pressed.emit()
 
     assert_int(weapon_holder.weapons.size()).is_equal(1)
-    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(4.0)
+    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(0.0)
 
     weapon_holder.weapons = []
     character.free()

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cagiju3alea6f" path="res://src/Scenes/menu/shop_menu.gd" id="1_rak5t"]
 [ext_resource type="PackedScene" path="res://src/ui/TooltipUi.tscn" id="2_0tooltip"]
+[ext_resource type="Script" uid="uid://ckthxl6pg4fpx" path="res://src/Systems/Items/item_price_analyzer.gd" id="3_v2wgg"]
 
 [node name="ShopMenu" type="CanvasLayer" unique_id=142525685]
 process_mode = 3
@@ -125,3 +126,6 @@ layout_mode = 2
 text = "Go next"
 
 [node name="Tooltip" parent="." unique_id=345678901 instance=ExtResource("2_0tooltip")]
+
+[node name="PriceAnalyzer" type="Node" parent="." unique_id=142525686]
+script = ExtResource("3_v2wgg")

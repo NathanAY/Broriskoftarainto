@@ -9,6 +9,7 @@ class_name ShopMenu
 @onready var collected_items_container: VBoxContainer = $Control/VBoxContainer/BottomContainer/ItemsContainer/ItemsScroll/List
 @onready var weapons_container: GridContainer = $Control/VBoxContainer/BottomContainer/WeaponsContainer/WeaponsScroll/List
 @onready var tooltip: TooltipUi = $Tooltip
+@onready var price_analyzer: ItemPriceAnalyzer = $PriceAnalyzer
 
 signal next_stage_pressed
 
@@ -111,7 +112,7 @@ func _add_item_entry(item: Item):
     items_container.add_child(card)
     card.set_item_display(item)
     card.primary_button.text = "Take"
-    card.secondary_button.text = "Sell"
+    card.secondary_button.text = "Sell (+%d)" % price_analyzer.get_sell_price(item)
     card.primary_button.pressed.connect(func():
         var holder: ItemHolder = character.get_node_or_null("ItemHolder")
         if holder:
@@ -122,7 +123,7 @@ func _add_item_entry(item: Item):
         _check_phase_progression()
     )
     card.secondary_button.pressed.connect(func():
-        character.stats.set_base_stat("money", character.stats.stats.get("money", 0) + 1)
+        character.stats.set_base_stat("money", character.stats.stats.get("money", 0) + price_analyzer.get_sell_price(item))
         card.queue_free()
         _update_money_label()
         _update_stats() # Update stats after selling
@@ -139,11 +140,12 @@ func _add_shop_item_entry(offer: Resource, existing_id: String = ""):
     card.set_item_display(offer)
 
     # Buy button
-    card.primary_button.text = "Buy"
+    var price: int = price_analyzer.get_price(offer)
+    card.primary_button.text = "Buy (%d)" % price
     card.primary_button.pressed.connect(func():
         var money = character.stats.stats.get("money", 0)
-        if money >= 1:
-            character.stats.set_base_stat("money", money - 1)
+        if money >= price:
+            character.stats.set_base_stat("money", money - price)
             if offer is BaseWeapon:
                 var weapon_holder: WeaponHolder = character.get_node_or_null("WeaponHolder")
                 if weapon_holder:

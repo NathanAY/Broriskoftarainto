@@ -10,7 +10,7 @@ const PIXELS_PER_METER: float = 200.0
 
 # Base stats
 @export var stats := {
-    "health": 40.0,
+    "health": 10.0,
     "energy_shield": 0,
     "damage": 1.0,
     "base_damage": 5,
@@ -19,7 +19,6 @@ const PIXELS_PER_METER: float = 200.0
     "area_radius": 1.0,
     "attack_range": 500.0,
     "movement_speed": 0.25,
-    "armor": 0,
     "critical_chance": 0,
     "critical_multiplier": 1.5,
     "area_size_multiplier": 1.0,
@@ -40,6 +39,11 @@ var conditions := {
 # Example:
 # {"damage": {"flat": 5}, "condition": {"is_standing_still": 1}}
 var modifiers: Array = []
+
+# Provided-stat reference counts: stat_name -> number of live modifier instances.
+# Presence of a dynamic stat is tied to these counts; claim on first attach,
+# release on last detach erases the key.
+var _provided_counts: Dictionary = {}
 
 # Condition managers (each can track conditions like standing_still, is_moving)
 var condition_managers: Array = []
@@ -91,6 +95,31 @@ func remove_modifier(mod: Dictionary):
         var final_value = get_stat(stat_name)
         if event_manager:
             event_manager.emit_event("on_stat_changes", {"stat_name" :stat_name, "final_value": final_value})
+
+# ----------------
+# Provided (dynamic) stats
+# ----------------
+## A behavior modifier advertising `provided_stat` claims the stat through here.
+## First claim installs `default_value` as the stat base; later claims (more
+## modifier instances sharing the stat) just bump the reference count.
+func claim_provided_stat(stat_name: String, default_value: float) -> void:
+    if _provided_counts.get(stat_name, 0) == 0:
+        stats[stat_name] = default_value
+        if event_manager:
+            event_manager.emit_event("on_stat_changes", {"stat_name": stat_name, "final_value": default_value})
+    _provided_counts[stat_name] = _provided_counts.get(stat_name, 0) + 1
+
+## Release one modifier instance's claim. At count zero the stat key is erased,
+## so a dynamic stat only exists while at least one owning modifier is attached.
+func release_provided_stat(stat_name: String) -> void:
+    if not _provided_counts.has(stat_name):
+        return
+    _provided_counts[stat_name] -= 1
+    if _provided_counts[stat_name] <= 0:
+        _provided_counts.erase(stat_name)
+        stats.erase(stat_name)
+        if event_manager:
+            event_manager.emit_event("on_stat_changes", {"stat_name": stat_name, "final_value": 0.0})
 
 # -----------------
 # Conditions

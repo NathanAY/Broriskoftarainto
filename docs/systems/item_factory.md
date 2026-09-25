@@ -7,7 +7,7 @@ Key scripts / scenes
 - `Systems/Items/item_factory.gd` (class_name `ItemFactory`)
 
 Data flow
-- Inputs: reads available stats from `Stats` instance, loads PackedScenes from `res://src/Systems/Items/Modifiers` and buff/debuff scenes.
+- Inputs: reads available stats from `Stats` instance plus the union of `provided_stat` names advertised by every Modifier scene (`_candidate_stat_names()`), and loads PackedScenes from `res://src/Systems/Items/Modifiers` and buff/debuff scenes — so generated stat items / debuffs can target dynamic stats like `lifeleach` even before any owning modifier is attached.
 - Processing: random roll decides between stat/effect/buff/debuff generators; creates `Item` resources with modifiers and optionally pre-configured PackedScenes.
 - Outputs: returns an `Item` instance (or `null` if no sources available); maintains `drop_pool` cache. `get_random_weapon()` lazily loads `BaseWeapon` resources from `res://src/Resources/weapons` and returns a random one (used by the shop).
 

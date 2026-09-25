@@ -21,6 +21,25 @@ var stacks: Array[bool] = []  # each entry = active/inactive
 ## modifiers leave it null (holder-wide, unchanged behavior).
 var bound_weapon: Object = null
 
+## Optional stat this modifier owns on the holder's Stats.
+##
+## The stat is dynamic: it exists while at least one modifier instance of this
+## type (`provided_stat_owned = true`) is attached and is erased (reference-
+## counted) when the last one detaches. The modifier only ever READS the stat
+## through `get_provided_stat()`; it never writes it. That way stat items / buffs /
+## debuffs compose with whatever the modifier installs, and can drive the value
+## negative. Empty string = this modifier provides nothing.
+@export var provided_stat: String = ""
+
+## Base value installed on first claim of the owned stat (e.g. lifesteal base 1.0
+## as a multiplier). Ignored for non-owned stats.
+@export var provided_stat_default: float = 0.0
+
+## True = dynamic presence: claim on attach, release (erase) on last detach.
+## False = the stat already exists on the holder (e.g. armor); the modifier is a
+## pure consumer and never claims/releases it.
+@export var provided_stat_owned: bool = true
+
 # Tracked subscriptions so detach can unregister before freeing (the bus crashes
 # on freed listeners). Each entry: [event_name, callable].
 var _subscriptions: Array = []
@@ -69,11 +88,18 @@ func remove_stack(index: int):
 	if index >= 0 and index < stacks.size():
 		stacks.remove_at(index)
 	_on_stacks_changed()
+	if stacks.is_empty():
+		detach()
 
 func set_stack_active(index: int, active: bool):
 	if index >= 0 and index < stacks.size():
 		stacks[index] = active
 	_on_stacks_changed()
+
+## Remove the most recently added stack. Used by `ItemHolder.remove_item`, which
+## does not track which item instance maps to which stack index.
+func remove_latest_stack():
+	remove_stack(stacks.size() - 1)
 
 ## Override to react to stack bookkeeping (e.g. EnergyShield recomputes its cap).
 func _on_stacks_changed() -> void:
@@ -88,6 +114,34 @@ func _cache_holder(em: Node) -> void:
 	if not stats:
 		var holder_name := str(holder.name) if holder else "<none>"
 		push_warning("%s: Stats node not found under holder %s" % [name, holder_name])
+	_claim_provided_stat()
+
+## Live value of `provided_stat` to read in behavior handlers. Falls back to
+## `provided_stat_default` when there is no Stats node yet.
+func get_provided_stat() -> float:
+	if provided_stat.is_empty() or not stats:
+		return provided_stat_default
+	return stats.get_stat(provided_stat)
+
+## Claim the owned stat on the holder's Stats (first claim installs the base).
+## Non-owning modifiers (e.g. armor) skip this — their stat already exists.
+func _claim_provided_stat() -> void:
+	if provided_stat.is_empty() or not stats or not provided_stat_owned:
+		return
+	stats.claim_provided_stat(provided_stat, provided_stat_default)
+
+## Release the owned stat. Erases the key when the last claiming modifier detaches.
+func _release_provided_stat() -> void:
+	if provided_stat.is_empty() or not stats or not provided_stat_owned:
+		return
+	stats.release_provided_stat(provided_stat)
+
+## Full detach: release the owned stat and unsubscribe all recorded subscriptions.
+## Called by `remove_stack` when the last stack is removed; lifecycle owners
+## (ItemHolder) may also call it directly before freeing the node.
+func detach() -> void:
+	_release_provided_stat()
+	_unsubscribe_all()
 
 ## The holder's Health node, or null when it is missing.
 func get_health() -> Health:

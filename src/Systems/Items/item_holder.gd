@@ -68,6 +68,18 @@ func remove_item(item: Resource) -> void:
         item.remove_from(hold_owner)
     elif item.has_method("remove_from"):
         item.remove_from(hold_owner)
+    # Remove one stack of the matching effect node; detach + free on the last stack
+    if item is Item and item.effect_scene:
+        var effect_scene = item.effect_scene[0]
+        for child in get_children():
+            if child.scene_file_path == effect_scene.resource_path:
+                if child.has_method("remove_latest_stack"):
+                    child.remove_latest_stack()
+                if child.stacks.is_empty():
+                    if child.has_method("detach"):
+                        child.detach()
+                    child.queue_free()
+                break
     # Remove from list
     items.erase(item)
     # Notify others

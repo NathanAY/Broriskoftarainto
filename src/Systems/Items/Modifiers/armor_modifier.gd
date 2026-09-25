@@ -8,6 +8,11 @@ extends BaseModifier
 func get_tooltip_stats() -> String:
     return "+%d armor per stack" % int(armor_per_stack)
 
+func _init():
+    provided_stat = "armor"
+    provided_stat_default = 0.0
+    provided_stat_owned = false
+
 func attachEventManager(em: Node):
     _cache_holder(em)
     if not stats:
@@ -20,7 +25,7 @@ func _on_before_take_damage(event):
     if not ctx or not stats:
         return
 
-    var armor: float = stats.get_stat("armor") + armor_per_stack * (_active_stacks() - 1)
+    var armor: float = get_provided_stat() + armor_per_stack * (_active_stacks() - 1)
     var multiplier: float = 1.0
 
     if armor >= 0:

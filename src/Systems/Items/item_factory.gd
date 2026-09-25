@@ -25,6 +25,26 @@ func _ready():
 # -------------------
 # Item Generation API
 # -------------------
+
+## Candidate stat names for generated stat/buff/debuff items: the static base
+## stats plus every `provided_stat` advertised by the modifier scenes. A dynamic
+## stat like `lifesteal` is therefore targetable even when no character owns its
+## modifier yet (the flat modifier activates once the modifier is attached).
+var _candidate_stats: Array = []
+
+func _candidate_stat_names() -> Array:
+    if _candidate_stats.is_empty():
+        _candidate_stats = stats.stats.keys()
+        for scene in effect_scenes:
+            var instance: Node = scene.instantiate()
+            if instance and "provided_stat" in instance:
+                var stat_name: String = instance.get("provided_stat")
+                if not stat_name.is_empty() and not stat_name in _candidate_stats:
+                    _candidate_stats.append(stat_name)
+            if instance:
+                instance.free()
+    return _candidate_stats
+
 func get_item_from_pool_or_generate() -> Item:
     var pool_size = drop_pool.size()
 
@@ -97,14 +117,14 @@ func generate_random_item() -> Item:
     return _generate_debuff_item()
 
 func _generate_stat_item(index: int = -1) -> Item:
-    var stat_names = stats.stats.keys()
+    var stat_names = _candidate_stat_names()
     var index_to_use = index if index != -1 else rng.randi_range(0, stat_names.size() - 1)
     var chosen_stat = stat_names[index_to_use]
-    var base_value = stats.stats[chosen_stat]
+    var base_value = stats.stats.get(chosen_stat, 0.0)
     var value = _generate_stat_modifiers(chosen_stat, base_value)
 
     var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
-    var negative_base_value = stats.stats[negative_chosen_stat]
+    var negative_base_value = stats.stats.get(negative_chosen_stat, 0.0)
     var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
     negative_value.set("flat", -negative_value.get("flat"))
 
@@ -143,9 +163,9 @@ func _generate_effect_item(index: int = -1) -> Item:
     temp_instance.free()
 
     #add negative effect
-    var stat_names = stats.stats.keys()
+    var stat_names = _candidate_stat_names()
     var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
-    var negative_base_value = stats.stats[negative_chosen_stat]
+    var negative_base_value = stats.stats.get(negative_chosen_stat, 0.0)
     var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
     negative_value.set("flat", -negative_value.get("flat") * 2)
 
@@ -159,7 +179,7 @@ func _generate_effect_item(index: int = -1) -> Item:
     return item
 
 func _generate_buff_item(index: int = -1) -> Item:
-    var stat_names = stats.stats.keys()
+    var stat_names = _candidate_stat_names()
 
     var chosen_scene: PackedScene
     if index != -1:
@@ -168,11 +188,11 @@ func _generate_buff_item(index: int = -1) -> Item:
         chosen_scene = buff_scenes.pick_random()
 
     var chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
-    var base_value = stats.stats[chosen_stat]
+    var base_value = stats.stats.get(chosen_stat, 0.0)
     var modifier_value = _generate_stat_modifiers(chosen_stat, base_value)
 
     var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
-    var negative_base_value = stats.stats[negative_chosen_stat]
+    var negative_base_value = stats.stats.get(negative_chosen_stat, 0.0)
     var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
     negative_value.set("flat", -negative_value.get("flat"))
 
@@ -189,11 +209,11 @@ func _generate_buff_item(index: int = -1) -> Item:
     return item
 
 func _generate_debuff_item(_index: int = -1) -> Item:
-    var stat_names = stats.stats.keys()
+    var stat_names = _candidate_stat_names()
     var chosen_scene: PackedScene = debuff_scene
 
     var chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
-    var base_value = stats.stats[chosen_stat]
+    var base_value = stats.stats.get(chosen_stat, 0.0)
     var modifier_value: Dictionary = _generate_stat_modifiers(chosen_stat, base_value)
     var value: float = modifier_value.get("flat")
     modifier_value.set("flat", -value)
@@ -205,7 +225,7 @@ func _generate_debuff_item(_index: int = -1) -> Item:
     var description := "Grants a debuff: decreases %s (Triggers on %s)." % [chosen_stat, ItemTooltip.humanize_trigger(debuff_trigger)]
 
     var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
-    var negative_base_value = stats.stats[negative_chosen_stat]
+    var negative_base_value = stats.stats.get(negative_chosen_stat, 0.0)
     var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
     negative_value.set("flat", -negative_value.get("flat") * 2)
 

@@ -30,6 +30,7 @@ const STAT_HINTS: Dictionary = {
     "area_size_multiplier": "Multiplier for the size of explosions and area effects.",
     "projectile_pierce": "Number of enemies a projectile can pass through before disappearing.",
     "projectile_speed_multiplier": "Multiplier for projectile travel speed.",
+    "lifeleach": "Heals for amount of dealt damage.",
     "money": "Currency used to buy and reroll items in the shop.",
 }
 

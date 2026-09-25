@@ -167,7 +167,7 @@ func test_life_leach_tooltip_shows_trigger_and_percent() -> void:
     var scene: PackedScene = load("res://src/Systems/Items/modifiers/LifeLeachModifier.tscn")
     var item: Item = ItemBuilder.make_effect_item("life leach", "flavor", scene, {})
     var lines: PackedStringArray = ItemTooltip.tooltip_lines(item)
-    assert_that(lines).contains("effect: Life Leach — Heals 5% of dealt damage (Triggers on hit)")
+    assert_that(lines).contains("effect: Life Leach — Heals 5% of dealt damage per item (Triggers on hit)")
 
 
 func test_spinning_orbs_tooltip_shows_trigger_and_damage() -> void:

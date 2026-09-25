@@ -35,6 +35,16 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
    - Per-event handlers stay idempotent and cheap: bail out early when the event lacks what they need.
    - Spawned objects are tagged to avoid recursive triggers (see "Anti-recursion" below).
 
+3. Owning a stat (implemented in `BaseModifier`)
+   - A modifier can OWN a stat on the holder's `Stats` node by setting `provided_stat` (e.g. `LifeLeach` owns `lifesteal`). The stat is **dynamic**: it exists while at least one claiming modifier is attached (reference-counted) and is erased when the last one detaches.
+   - Contract fields: `provided_stat` (name, `""` = none), `provided_stat_default` (base installed on first claim, e.g. `1.0`), `provided_stat_owned` (`true` = claim/release dynamic presence; `false` = the stat already exists, e.g. armor, modifier is a pure consumer).
+   - `_cache_holder(em)` calls `claim_provided_stat` on first attach. `detach()` (called by `remove_stack` on the last stack, or directly before freeing) releases the claim and unsubscribes all recorded subscriptions.
+   - **The modifier never writes the stat.** Behavior handlers read the live value through `get_provided_stat()`. Stat items/buffs/debuffs compose with the installed base via the normal `add_modifier` pipeline and can drive the value negative.
+   - Two semantics:
+     - Multiplier (LifeLeach): stat base is `1.0`; stacks drive the power, the stat scales it — `heal = LIFESTEAL_PER_STACK * _active_stacks() * get_provided_stat()` (1 item = 5%, 2 = 10%; a stat item `flat -2` makes the multiplier `-1.0` → negative leach).
+     - Additive shared (Armor): the stat already exists on the holder; the modifier reads `get_provided_stat()` and adds its per-stack contribution in its handler.
+   - Stack changes (`add_stack`/`remove_stack`/`set_stack_active`) never touch the stat value — stacks combine inside the subclass behavior, not into the owned stat.
+
 3. Display contract (tooltips)
    - `@export var display_name: String` — short noun shown as the effect head.
    - `@export_multiline var tooltip_text: String` — optional one-sentence description (static flavor).
@@ -58,11 +68,12 @@ Lifecycle / data flow
   2. If new: `instantiate()`, `add_child()`, `item.apply_to(holder)` (stat modifiers + condition managers), then `attachEventManager(event_manager)`.
   3. Decides the initial `active` flag from `item.effect_scene_condition` (via `stats.get_condition`); registers an `on_condition_change` subscription bound to the new stack index so the stack turns off/on with the condition.
   4. Calls `add_stack(active)`.
-- `remove_item(item)` removes stat modifiers and re-emits `on_item_removed`, but does NOT call `remove_stack` (see Known limitations).
+- `remove_item(item)` removes stat modifiers, pops one stack of the matching effect node (via `remove_latest_stack`), detaches + frees the node on the last stack, and re-emits `on_item_removed`.
 - Modifiers live as children of the `ItemHolder` node; spawned projectiles/orbs/explosions go to `get_tree().current_scene`.
 
 Scaling models (how per-stack growth is implemented)
-- Multiplicative growth: `value = base * (1.0 + bonus_per_stack * (_active_stacks() - 1))` — life leach, bomb detonation, explosive shot, poison tick base, crit multiplier bonus.
+- Multiplicative growth: `value = base * (1.0 + bonus_per_stack * (_active_stacks() - 1))` — bomb detonation, explosive shot, poison tick base, crit multiplier bonus.
+- Owned-stat multiplier: `value = per_stack * _active_stacks() * stats.get_stat(provided_stat)` — life leach (`0.05` per stack, stat base `1.0`); the stat scales power and can go negative.
 - Flat-per-stack: `value * (1.0 + bonus * _active_stacks())` — plus-damage-to-healthy.
 - Count-per-stack: `for i in range(_active_stacks())` spawn/attach N copies — homing (projectile steering modules), homing rockets, spread (left+right pair per stack = "2 extra projectiles per stack"), projectile bounce attachment count, knockback strength scaling, reflect volley `volley + (active - 1)`, spinning orbs `ORB_COUNT + (active - 1)`, chain bounce count `max_bounces * active`.
 - Linear-with-stacks: `value * _active_stacks()` — regen heal amount, stat-on-kill gain, heal-on-event; emergency heal shortens its cooldown `COOLDOWN / _active_stacks()`.
@@ -79,7 +90,7 @@ Events used
 Catalog
 | Modifier (class) | Script | Trigger event | Effect |
 |---|---|---|---|
-| ArmorModifier | `armor_modifier.gd` | `before_take_damage` | Reduces damage by armor formula `10/(10+armor)`; +5 armor per stack. |
+| ArmorModifier | `armor_modifier.gd` | `before_take_damage` | Reduces damage by armor formula `10/(10+armor)`; +5 armor per stack. Reads the (existing) `armor` stat — pure consumer, not owned. |
 | BombOnHitModifier | `bomb_on_hit_modifier.gd` | `on_hit` | Attaches a bomb to the target, explodes for 30% of hit damage after 3s; +20% explosion damage per stack. |
 | ChainModifier | `chain_modifier.gd` | `on_hit` | Spawns a chain projectile that chains to 3 extra targets per stack. |
 | CritModifier | `crit_modifier.gd` | `before_deal_damage` | On crit applies crit multiplier; +0.15 crit multiplier per stack. |
@@ -91,7 +102,7 @@ Catalog
 | HomingRocketModifier | `homing_rocket_modifier.gd` | `before_take_damage` | Launches a homing rocket dealing 100% of hit damage; +1 rocket per stack. |
 | HomingRocketFromTargetModifier | `homing_rocket_from_target_modifier.gd` (extends the homing rocket script) | `on_hit` | Same rocket, but resolves the target from the hit (`target`/`source`), searches the next enemy within `homing_range`, and spawns the rocket from the target. +1 rocket per stack. |
 | KnockbackModifier | `knockback_modifier.gd` | `on_hit` (also listens `on_attack`) | Knocks enemies back; strength × stacks. |
-| LifeLeachModifier | `life_leach_modifier.gd` | `on_hit` | Heals 5% of dealt damage; +20% leech power per stack. |
+| LifeLeachModifier | `life_leach_modifier.gd` | `on_hit` | Heals 5% of dealt damage per item; the `lifesteal` stat (base `1.0`, multiplier, owned) scales it — stat items can drive it negative. |
 | PlusDamageToHealthyTargetModifier | `plus_damage_to_healthy_target_modifier.gd` | `before_deal_damage` | +30% damage vs targets above 90% HP; × active stacks. |
 | PoisonModifier | `poison_modifier.gd` | `on_hit` | Applies `PoisonEffect` (100% of hit damage per tick); +50% tick damage per stack. |
 | ProjectileBounceModifier | `projectile_bounce_modifier.gd` | `on_attack` | Projectiles bounce to 3 extra targets per stack. |
@@ -113,7 +124,7 @@ Guidelines for adding a new modifier
 7. Follow AGENTS.md: write/extend a test first, run it, fix, rerun. Relevant suites: `test/ui/test_character_ui_tooltip.gd` (tooltip sweep over every modifier scene) and `test/Systems/Items/`.
 
 Known limitations / TODOs
-- `ItemHolder.remove_item()` never calls `remove_stack` — stack state leaks after removal (condition-managed stacks work, removal doesn't).
+- `remove_item` pops the most recently added stack (`remove_latest_stack`); it does not track which item instance maps to which stack index, so condition-scoped stacks' `on_condition_change` subscriptions are not removed with the stack (existing condition wiring stays stale).
 - `_active_stacks()` floors at 1, so a fully condition-deactivated modifier still runs at base power.
 - Not every stat-based tilt belongs here; pure numeric bonuses should be `Item.modifiers` instead.
 - `StatMultiplierModifier` mutates the incoming `Item.modifiers` dictionary in place at `on_item_added` (no rollback on remove).

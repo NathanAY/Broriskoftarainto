@@ -20,8 +20,10 @@ This document explains the new character system (data, UI, and integration point
 ## CharacterData format
 - `display_name` (String): shown in UI.
 - `description` (String): short description.
-- `base_stats` (Dictionary): explicit base stat values to set when the character is chosen. These call `Stats.set_base_stat(stat_name, value)` for each key. Examples: `"health"`, `"movement_speed"`, `"damage"`, `"armor"`. `movement_speed` is in meters per second (200 px = 1 m).
-- `modifiers` (Array): list of modifier dictionaries matching the `Stats.add_modifier` format. Example modifier: `{ "damage": {"percent": -0.25}, "condition": {...} }` or `{ "attack_speed": {"percent": 0.2} }`.
+- `base_stats` (Dictionary): the archetype's own stat block — the values that differ from the default `Stats` (`health`, `movement_speed`, `damage`, `attack_speed`, ...). Each key calls `Stats.set_base_stat(stat_name, value)`. `movement_speed` is in meters per second (200 px = 1 m). **Never** put a stat here that needs a modifier to do anything (e.g. `armor`) — see below.
+- `modifiers` (Array): everything else that makes this character different, as one flat list of two entry kinds applied in order:
+  - **Dictionary** — a value, passed to `Stats.add_modifier` as-is: `{"armor": {"flat": 4}}`, `{"damage": {"percent": 0.2}}`, `{"attack_speed": {"percent": 0.2}, "condition": {...}}`.
+  - **PackedScene** — a behavior: a modifier scene from `Systems/Items/modifiers/*.tscn`, instantiated and wired to the character by `BaseModifier.attach` (e.g. `ArmorModifier.tscn`).
 - `starting_items` (Array[Item]): `Item` resources equipped at spawn via the `ItemHolder`.
 - `starting_weapons` (Array[BaseWeapon]): `BaseWeapon` resources (e.g. `res://src/Resources/weapons/Fist.tres`) equipped at spawn via the `WeaponHolder`.
 
@@ -29,7 +31,7 @@ Example (pseudo):
 ```
 display_name = "Rogue"
 base_stats = {"health": 35.0, "movement_speed": 0.35, "damage": 0.8}
-modifiers = [{"attack_speed": {"percent": 0.2}}]
+modifiers = [{"armor": {"flat": 4}}, <ArmorModifier.tscn>, {"attack_speed": {"percent": 0.2}}]
 ```
 
 ## How selection and application works
@@ -37,15 +39,44 @@ modifiers = [{"attack_speed": {"percent": 0.2}}]
 2. The flow continues to `StarterMenu` to choose weapons/items; those values are also saved in `GlobalGameState`.
 3. When the game scene creates the player `Character` (instancing `Systems/Character.tscn`), the `CharacterInitializer` node reads `GlobalGameState.starting_character`, loads the resource, and:
    - Calls `Stats.set_base_stat` for each entry in `base_stats` (overwrites base values).
-   - Calls `Stats.add_modifier` for each modifier in `modifiers` (adds modifier dicts to the stack).
+   - Walks `modifiers` and dispatches each entry **by type** (`_apply_modifier`): a Dictionary goes to `Stats.add_modifier`, a PackedScene goes to `BaseModifier.attach` (instantiate + `attachEventManager` + one active stack, under the `ItemHolder`).
    - Calls `ItemHolder.add_item` for each entry in `starting_items`.
    - Calls `WeaponHolder.add_weapon` (deferred until the ready pass finishes) for each entry in `starting_weapons`.
 
 This keeps character data separate from player logic and allows easy addition of new characters.
 
+## One way to give a character armor (or any stat-driven behavior)
+A stat on its own is inert: `armor` is just a number, and the
+`10 / (10 + armor)` damage reduction lives in `ArmorModifier`'s
+`before_take_damage` handler. Nothing subscribes to that event unless an
+`ArmorModifier` node is attached, which is why a character needs **both** halves
+of the declaration — and why both live in the same `modifiers` list:
+
+```
+modifiers = [{"armor": {"flat": 14}}, <ArmorModifier.tscn>]   # Wildling
+modifiers = [{"armor": {"flat": 4}},  <ArmorModifier.tscn>]   # Brawler
+```
+
+Rules that keep this the only correct way:
+- A behavior that needs a stat always declares the value as a Dictionary in
+  `modifiers` and the listener as a modifier scene in the same list. Never a
+  bare `armor` key in `base_stats` — that is the archetype stat block only.
+- `CharacterInitializer` names no stat and no modifier. Adding a brand new
+  behavior to a character is a data edit: drop that modifier's scene into
+  `modifiers`. The same is true for items (`ItemHolder` goes through the shared
+  `BaseModifier.instantiate_attached`).
+- A modifier scene entry that is not a `BaseModifier`, or an entry of any other
+  type, logs a warning instead of failing silently.
+- Armor items picked up later bring their own `ArmorModifier` instance; the
+  handler's "strongest armor source wins" guard (`ctx.armor_applied`) keeps a hit
+  reduced exactly once no matter how many armor sources are live.
+
+`CharacterTooltip` renders both halves: stat dicts as `armor flat: 4` and
+modifier scenes as `effect: Armor — ... (Triggers on before take damage)`.
+
 ## Adding a new character
 1. Create a new resource file in `Resources/characters/` using the `CharacterData` script as the resource type (or copy an existing `.tres`).
-2. Set `display_name`, `description`, `base_stats`, and `modifiers` as needed.
+2. Set `display_name`, `description`, and `base_stats` (archetype stats only). Put everything else in `modifiers` — stat dicts and/or modifier scenes.
 3. No code changes needed — `CharacterSelect` scans the folder and will display the new entry.
 
 ## Extensibility ideas

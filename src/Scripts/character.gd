@@ -10,7 +10,6 @@ class_name Character
 
 var current_target = null
 var fire_timer = 0.0
-# var timer = Timer.new()
 
 signal character_died
 
@@ -29,39 +28,6 @@ func _ready():
     var items = GlobalGameState.starting_items
     for item_path in items:
         $ItemHolder.add_item(load(item_path)) 
- 
-    #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Fist.tres"))
-    #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Thorns.tres"))
-    #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Pistol.tres"))
-    #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Shotgun.tres"))
-
-    #$ItemHolder.add_item(load("res://src/Resources/items/AttackSpeedOnHitBuff.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/ProjSpeed.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/HomingProjectileOnHit.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/HomingProjectileFromTarget.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/AttackSpeedItem.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/SpreadShot.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/MoreDamageToHealthy.tres"))sd
-    #$ItemHolder.add_item(load("res://src/Resources/items/BombOnHit.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/ReflectProjectile.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/SpiningOrb.tres"))
-    $ItemHolder.add_item(load("res://src/Resources/items/RegenPassive.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/RegenPassive.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/HealOnEvent.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/LifeLeachModifier.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/EmergencyHeal.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/RegenPassive.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/Knockback.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/AttackSpeedIfStill.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/MinusArmorOnHitDebuff.tres"))
-    $ItemHolder.add_item(load("res://src/Resources/items/BootsOfSpeed.tres"))
-    $ItemHolder.add_item(load("res://src/Resources/items/BootsOfSpeed.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/HomingShot.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/EnergyShieldBlock.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/CritGlass.tres"))
-    #$ItemHolder.add_item(load("res://src/Resources/items/PlusDamageItem.tres"))
-    # $ItemHolder.add_item(load("res://src/Resources/items/HealthMeat.tres"))
-    $ItemHolder.add_item(load("res://src/Resources/items/HealthMeat.tres"))
     
     collision_layer = 1
     # Only collide with arena walls (layer 4) — stays inside the ground.

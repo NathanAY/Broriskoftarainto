@@ -6,7 +6,7 @@ class_name Stats
 
 ## World unit scale: 200 pixels = 1 meter. Stats measured in meters (like
 ## movement_speed, stored as m/s) are converted to pixels with this factor.
-const PIXELS_PER_METER: float = 200.0
+const PIXELS_PER_METER: float = 300.0
 
 # Base stats
 @export var stats := {
@@ -18,7 +18,7 @@ const PIXELS_PER_METER: float = 200.0
     "attack_speed": 1.0,
     "area_radius": 1.0,
     "attack_range": 500.0,
-    "movement_speed": 0.25,
+    "movement_speed": 1,
     "critical_chance": 0,
     "critical_multiplier": 1.5,
     "area_size_multiplier": 1.0,

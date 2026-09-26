@@ -120,58 +120,61 @@ func test_knife_builtin_poison_applied() -> void:
 
 
 func test_fist_builtin_knockback_bound() -> void:
-    var runner := scene_runner("res://test/TestScene.tscn")
+    var runner := scene_runner(WeaponTestSupport.TEST_SCENE)
     var test_scene := runner.scene()
     runner.set_time_factor(5)
     get_tree().current_scene = test_scene
 
     var enemy: Enemy = test_scene.get_node("Enemy")
-    var e_health: Health = enemy.get_node("Health")
+    var e_health := WeaponTestSupport.give_enemy_health(enemy)
     var character: Character = test_scene.get_node("Character")
 
-    for weapon in character.weapon_holder.weapons.duplicate():
-        character.weapon_holder.remove_weapon(weapon)
+    var fist := WeaponTestSupport.equip_only_weapon(character, FIST)
 
-    character.weapon_holder.add_weapon(load(FIST))
-
-    await runner.simulate_frames(60 * 2)
+    await runner.simulate_frames(WeaponTestSupport.FRAMES)
 
     # the built-in knockback modifier node is bound to the fist
-    assert_that(character.weapon_holder.weapons[0]._bound_effect_nodes.size()).is_equal(1)
-    # fist damage still worked as before
-    assert_float(e_health.current_health).is_equal(35.0)
+    assert_that(fist._bound_effect_nodes.size()).is_equal(1)
+    # fist damage still worked, and the target is still standing: binding the
+    # knockback must not have swallowed the weapon's own hits
+    var left := WeaponTestSupport.health_left(e_health)
+    assert_float(left).override_failure_message(
+        "the enemy died and freed its Health node").is_greater(0.0)
+    assert_float(left).override_failure_message(
+        "the fist dealt no damage").is_less(WeaponTestSupport.ENEMY_HEALTH)
 
     test_scene.free()
 
 
 func test_pistol_builtin_pierce_hits_enemy_behind() -> void:
-    var runner := scene_runner("res://test/TestScene.tscn")
+    var runner := scene_runner(WeaponTestSupport.TEST_SCENE)
     var test_scene := runner.scene()
     runner.set_time_factor(5)
     get_tree().current_scene = test_scene
 
     var enemy: Enemy = test_scene.get_node("Enemy")
-    var enemy2 = preload("res://src/Systems/Enemy.tscn").instantiate()
     # second enemy sits on the projectile path, beyond any melee/targeting range
-    enemy2.global_position = enemy.global_position + Vector2(350, 0)
-    test_scene.add_child(enemy2)
+    var enemy2 := WeaponTestSupport.spawn_enemy_behind(test_scene, enemy, Vector2(350, 0))
 
-    var e2_health: Health = enemy2.get_node("Health")
+    var e_health := WeaponTestSupport.give_enemy_health(enemy)
+    var e2_health := WeaponTestSupport.give_enemy_health(enemy2)
     var character: Character = test_scene.get_node("Character")
 
-    for weapon in character.weapon_holder.weapons.duplicate():
-        character.weapon_holder.remove_weapon(weapon)
-
     # built-in pierce (spawn-time) + knockback (hit-event), left fully intact
-    var pistol: BaseWeapon = load(PISTOL).duplicate(true)
-    character.weapon_holder.add_weapon(pistol)
+    var pistol := WeaponTestSupport.equip_only_weapon(character, PISTOL)
 
-    await runner.simulate_frames(60 * 3)
+    await runner.simulate_frames(WeaponTestSupport.FRAMES)
 
     # only the bound knockback node exists for the pistol (pierce is spawn-time)
-    assert_that(character.weapon_holder.weapons[0]._bound_effect_nodes.size()).is_equal(1)
-    # a piercing pistol projectile reached the enemy behind the first one
-    assert_float(e2_health.current_health).is_less(40.0)
+    assert_that(pistol._bound_effect_nodes.size()).is_equal(1)
+    # a piercing pistol projectile reached the enemy behind the first one, which
+    # starts at full health and so must have dropped below it
+    var far_left := WeaponTestSupport.health_left(e2_health)
+    assert_float(far_left).override_failure_message(
+        "the far enemy died and freed its Health node").is_greater(0.0)
+    assert_float(far_left).override_failure_message(
+        "no projectile pierced through to the enemy behind").is_less(
+            WeaponTestSupport.ENEMY_HEALTH)
 
     test_scene.free()
 

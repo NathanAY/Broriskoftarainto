@@ -11,8 +11,7 @@ script = ExtResource("1_p574n")
 display_name = "Multitasker"
 description = "Defaul starter: more HP, moderate damage."
 base_stats = {
-"health": 40.0,
-"movement_speed": 0.225
+"health": 40.0
 }
 starting_weapons = Array[ExtResource("4_8b0i5")]([ExtResource("5_cls4u")])
 small_icon = ExtResource("2_8ciq2")

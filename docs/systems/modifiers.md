@@ -34,6 +34,8 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
    - Each modifier overrides `attachEventManager` to subscribe to its main behavior event via the `trigger_event` export, plus `on_stat_changes` when it caches derived stats.
    - Per-event handlers stay idempotent and cheap: bail out early when the event lacks what they need.
    - Spawned objects are tagged to avoid recursive triggers (see "Anti-recursion" below).
+   - `static instantiate_attached(scene, parent) -> Node` — the one place an effect scene becomes a live node (`instantiate()` + `add_child()`). Wiring is left to the caller because the effect kinds differ: modifiers go through `attachEventManager`, while buffs / poison effects wire themselves in their own `_ready()` from their `ItemHolder` parent.
+   - `static attach(scene, parent, em) -> BaseModifier` — the full contract for a `BaseModifier` scene: `instantiate_attached` + `attachEventManager(em)` + one `add_stack(true)`. Used by hosts that merely declare a modifier scene (a character's `CharacterData.modifiers`); warns and returns `null` when the scene is not a `BaseModifier` or `em` is null, so a misconfigured declaration never silently does nothing.
 
 3. Owning a stat (implemented in `BaseModifier`)
    - A modifier can OWN a stat on the holder's `Stats` node by setting `provided_stat` (e.g. `LifeLeach` owns `lifesteal`). The stat is **dynamic**: it exists while at least one claiming modifier is attached (reference-counted) and is erased when the last one detaches.
@@ -65,7 +67,7 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
 Lifecycle / data flow
 - `ItemHolder.add_item(item)` (`Systems/Items/item_holder.gd`):
   1. Looks up an existing child by `scene_file_path == effect_scene[0].resource_path` (dedup).
-  2. If new: `instantiate()`, `add_child()`, `item.apply_to(holder)` (stat modifiers + condition managers), then `attachEventManager(event_manager)`.
+  2. If new: `BaseModifier.instantiate_attached(effect_scene, self)`, `item.apply_to(holder)` (stat modifiers + condition managers), then `attachEventManager(event_manager)` when the effect implements it.
   3. Decides the initial `active` flag from `item.effect_scene_condition` (via `stats.get_condition`); registers an `on_condition_change` subscription bound to the new stack index so the stack turns off/on with the condition.
   4. Calls `add_stack(active)`.
 - `remove_item(item)` removes stat modifiers, pops one stack of the matching effect node (via `remove_latest_stack`), detaches + frees the node on the last stack, and re-emits `on_item_removed`.
@@ -90,7 +92,7 @@ Events used
 Catalog
 | Modifier (class) | Script | Trigger event | Effect |
 |---|---|---|---|
-| ArmorModifier | `armor_modifier.gd` | `before_take_damage` | Reduces damage by armor formula `10/(10+armor)`; +5 armor per stack. Reads the (existing) `armor` stat — pure consumer, not owned. |
+| ArmorModifier | `armor_modifier.gd` | `before_take_damage` | Reduces damage by armor formula `10/(10+armor)`; +5 armor per stack. Reads the (existing) `armor` stat — pure consumer, not owned. The stat alone is inert: a character must also list this scene in `CharacterData.modifiers` alongside its `armor` value (see `docs/systems/characters.md`). |
 | BombOnHitModifier | `bomb_on_hit_modifier.gd` | `on_hit` | Attaches a bomb to the target, explodes for 30% of hit damage after 3s; +20% explosion damage per stack. |
 | ChainModifier | `chain_modifier.gd` | `on_hit` | Spawns a chain projectile that chains to 3 extra targets per stack. |
 | CritModifier | `crit_modifier.gd` | `before_deal_damage` | On crit applies crit multiplier; +0.15 crit multiplier per stack. |

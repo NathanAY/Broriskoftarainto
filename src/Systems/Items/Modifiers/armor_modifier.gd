@@ -17,15 +17,25 @@ func attachEventManager(em: Node):
     _cache_holder(em)
     if not stats:
         return
-    event_manager.subscribe(trigger_event, Callable(self, "_on_before_take_damage"))
-    event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
+    _subscribe(trigger_event, Callable(self, "_on_before_take_damage"))
+    _subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func _on_before_take_damage(event):
     var ctx: DamageContext = event["damage_context"]
     if not ctx or not stats:
         return
 
+    # Several ArmorModifier instances can be live at once: a character baseline
+    # (attached by CharacterInitializer when base armor > 0) plus one effect
+    # node per held armor item type. Applying each would stack reductions, so
+    # only the strongest armor source wins: if a previous instance already
+    # reduced this hit, undo its multiplier and re-apply with the higher armor
+    # (preserves the item's per-stack bonus over the 0-stack baseline).
     var armor: float = get_provided_stat() + armor_per_stack * (_active_stacks() - 1)
+    if ctx.armor_applied != 0:
+        if int(armor) <= ctx.armor_applied:
+            return
+        ctx.final_amount /= ctx.armor_damage_multiplier
     var multiplier: float = 1.0
 
     if armor >= 0:

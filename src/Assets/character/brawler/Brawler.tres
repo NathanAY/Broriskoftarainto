@@ -5,23 +5,27 @@
 [ext_resource type="Texture2D" uid="uid://c316d60nhgh1t" path="res://src/Assets/character/brawler/brawler_icon.png" id="2_i8dd6"]
 [ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="3_7ttqk"]
 [ext_resource type="Resource" uid="uid://dj8an5x7vxx4e" path="res://src/Resources/weapons/Fist.tres" id="3_brawler"]
+[ext_resource type="PackedScene" uid="uid://cdfucojif8qe6" path="res://src/Systems/Items/modifiers/ArmorModifier.tscn" id="4_brawler"]
 
 [resource]
 script = ExtResource("1_brawler")
 display_name = "Brawler"
 description = "Close-quarters fighter: tough, hard-hitting, up close and personal."
 base_stats = {
-"armor": 4,
 "attack_speed": 1.1,
 "damage": 1.15,
 "health": 95.0,
-"movement_speed": 0.28
+"movement_speed": 0.9
 }
 modifiers = [{
+"armor": {
+"flat": 4
+}
+}, {
 "damage": {
 "percent": 0.1
 }
-}]
+}, ExtResource("4_brawler")]
 starting_weapons = Array[ExtResource("2_brawler")]([ExtResource("3_brawler")])
 small_icon = ExtResource("2_i8dd6")
 metadata/_custom_type_script = "uid://b174fx02jtd8q"

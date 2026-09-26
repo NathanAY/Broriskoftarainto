@@ -148,3 +148,48 @@ func get_health() -> Health:
 	if not holder or not is_instance_valid(holder):
 		return null
 	return holder.get_node_or_null("Health") as Health
+
+
+# -------------------
+# Scene -> live effect
+# -------------------
+## The single place an effect scene becomes a live node under a host. Hosts
+## (character spawn, item pickup, ...) forward the scene they were handed
+## instead of re-implementing instantiate/add_child.
+##
+## Wiring is left to the caller on purpose: the effect kinds wire differently
+## (a BaseModifier through `attachEventManager`, a Buff/poison effect in its own
+## `_ready` from its ItemHolder parent), so this helper only creates.
+static func instantiate_attached(scene: PackedScene, parent: Node) -> Node:
+	if scene == null or parent == null:
+		return null
+	var instance: Node = scene.instantiate()
+	if instance == null:
+		return null
+	parent.add_child(instance)
+	return instance
+
+
+## The complete contract for a BaseModifier scene: instantiate under `parent`,
+## `attachEventManager(em)`, one active stack. This is what a host that declares
+## modifier scenes uses (a character listing them in `CharacterData.modifiers`),
+## so a declaration that is not a modifier scene fails loudly with a warning
+## instead of silently doing nothing.
+##
+## A modifier without an event manager can never react to anything, so a null
+## `em` also warns and returns null rather than handing back a dead node.
+static func attach(scene: PackedScene, parent: Node, em: EventManager) -> BaseModifier:
+	var path := str(scene.resource_path) if scene != null else "<null>"
+	if em == null:
+		push_warning("BaseModifier.attach: no EventManager to wire %s to" % [path])
+		return null
+	var node := instantiate_attached(scene, parent)
+	if not (node is BaseModifier):
+		push_warning("BaseModifier.attach: %s is not a BaseModifier scene" % [path])
+		if is_instance_valid(node):
+			node.free()
+		return null
+	var instance := node as BaseModifier
+	instance.attachEventManager(em)
+	instance.add_stack(true)
+	return instance

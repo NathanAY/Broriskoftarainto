@@ -19,7 +19,17 @@
 
 ## Setup and run test
 - Example how to run GDUnit4 all tests: `.\run_tests_gdunit.bat`
-- Example how to run GDUnit4 specific test: `.\run_tests_gdunit_custom.bat test_stat_creation_stat.gd`
+- Example how to run GDUnit4 specific tests: `.\run_tests_gdunit_custom.bat test_stat_creation_stat.gd`
+
+### `run_tests_gdunit_custom.bat` uses fuzzy test lookup
+The argument is matched case-insensitively against test suite paths under `test/`; `.gd`, folders and slashes/backslashes are optional, so all of these run the same suite:
+- `.\run_tests_gdunit_custom.bat Systems/Items/test_pierce_stat.gd`
+- `.\run_tests_gdunit_custom.bat pierce_stat`
+- `.\run_tests_gdunit_custom.bat Systems\Items` (directory -> all suites inside)
+
+Other behavior:
+- Partial words match several suites at once (e.g. `modifier` -> 7 suites, all run).
+- Only `test_*.gd` files are fuzzy-matched, so shared helper scripts are not run as suites.
 
 # Project documentation.
 - This is top-down brotato style rogulike game project on godot 4.6.

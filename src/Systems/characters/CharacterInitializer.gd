@@ -36,10 +36,9 @@ func _ready():
         if stats_node.has_method("set_base_stat"):
             stats_node.set_base_stat(stat_name, float(v))
 
-    # Apply modifiers (additive modifier dictionaries)
+    # Apply character modifiers (see _apply_modifier for the two entry kinds)
     for mod in char_res.modifiers:
-        if stats_node.has_method("add_modifier"):
-            stats_node.add_modifier(mod)
+        _apply_modifier(owner, stats_node, mod)
 
     # Apply starting items
     if owner.has_node("ItemHolder"):
@@ -64,6 +63,38 @@ func _ready():
 func _add_starting_weapons(weapon_holder: Node, starting_weapons: Array[BaseWeapon]) -> void:
     for weapon in starting_weapons:
         weapon_holder.add_weapon(weapon)
+
+
+## Apply one entry of `CharacterData.modifiers` to the spawned character.
+func _apply_modifier(character: Node, stats_node: Node, mod: Variant) -> void:
+    # One entry in CharacterData.modifiers is one of two things, dispatched by
+    # type so no stat is ever named here:
+    #   Dictionary  -> a value: passed to Stats.add_modifier
+    #                  (e.g. {"armor": {"flat": 4}})
+    #   PackedScene -> a behavior: a modifier scene instantiated and wired to
+    #                  this character (e.g. ArmorModifier.tscn, which is what
+    #                  makes the `armor` value actually reduce damage)
+    # A character that needs a brand new behavior only lists that modifier's
+    # scene; nothing in this file changes.
+    if mod is Dictionary:
+        if stats_node.has_method("add_modifier"):
+            stats_node.add_modifier(mod)
+    elif mod is PackedScene:
+        var em := character.get_node_or_null("EventManager") as EventManager
+        BaseModifier.attach(mod, _modifier_host(character), em)
+    else:
+        push_warning("CharacterInitializer: unsupported modifier entry %s (%s)"
+            % [str(mod), type_string(typeof(mod))])
+
+
+## Where a character's behavior modifiers live. ItemHolder keeps them next to
+## the effect nodes items add; the character itself is the fallback for scenes
+## without an ItemHolder. Only grouping matters: a modifier resolves its holder
+## from the EventManager's parent, not from its own position in the tree.
+func _modifier_host(character: Node) -> Node:
+    var holder: Node = character.get_node_or_null("ItemHolder")
+    return holder if holder != null else character
+
 
 func load_custom_sprites(char_res: Resource, owner_sprite: Sprite2D):
     # 1. Get the directory path from the resource path

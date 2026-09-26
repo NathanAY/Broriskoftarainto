@@ -30,12 +30,13 @@ func add_item(item: Item) -> void:
                 break
         # 🔹 If not found, create new one
         if not effect:
-            effect = effect_scene.instantiate()
-
-            add_child(effect)
-            item.apply_to(hold_owner)
-            if effect.has_method("attachEventManager") and event_manager:
-                effect.attachEventManager(event_manager)                
+            effect = BaseModifier.instantiate_attached(effect_scene, self)
+            if effect:
+                item.apply_to(hold_owner)
+                # Modifiers wire through attachEventManager; buffs / poison
+                # effects wire themselves in their own _ready.
+                if effect.has_method("attachEventManager") and event_manager:
+                    effect.attachEventManager(event_manager)
         # Decide stack state
         var active = true
         var scene_conditions: Array[String] = item.effect_scene_condition

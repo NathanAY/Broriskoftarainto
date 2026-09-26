@@ -28,25 +28,7 @@ func _ready():
     add_to_group("enemies")  # Add enemy to a group
     add_to_group("damageable")
     $WeaponHolder.add_weapon(load("res://src/Resources/weapons/Thorns.tres"))
-    #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Fist.tres"))
-    # $WeaponHolder.add_weapon(load("res://src/Resources/weapons/Pistol.tres"))
-    #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Pistol.tres"))
-    #$WeaponHolder.add_weapon(load("res://src/Resources/weapons/Knife.tres"))
-    item_holder.add_item(load("res://src/Resources/items/BootsOfSpeed.tres"))
-    item_holder.add_item(load("res://src/Resources/items/ProjSlow.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/MoreDamageToHealthy.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/RegenPassive.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/RegenPassive.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/RegenPassive.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/ArmorPlate.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/EnergyShieldBlock.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/MinusArmorOnHitDebuff.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/PoisonHit.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/HomingProjectileOnHit.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/HomingShot.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/Knockback.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/HealthMeat.tres"))
-    #item_holder.add_item(load("res://src/Resources/items/HealthMeat.tres"))
+    # item_holder.add_item(load("res://src/Resources/items/BootsOfSpeed.tres"))
     
     collision_layer = 2
     # Only collide with arena walls (layer 4). Enemies do NOT collide with

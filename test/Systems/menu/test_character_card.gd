@@ -13,7 +13,7 @@ func test_tooltip_lines_cover_name_stats_modifiers_items() -> void:
 	assert_str("\n".join(lines)).contains("name: Soldier")
 	assert_str("\n".join(lines)).contains("Slow and sturdy")
 	assert_str("\n".join(lines)).contains("base health: 120")
-	assert_str("\n".join(lines)).contains("armor flat: 2")
+	assert_str("\n".join(lines)).contains("armor flat: 12")
 	assert_str("\n".join(lines)).contains("starting item:")
 
 

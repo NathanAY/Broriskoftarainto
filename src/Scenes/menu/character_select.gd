@@ -17,6 +17,9 @@ var selected_card: CharacterCard = null
 
 
 func _ready():
+    # Entry point of a new run: make sure the tree is not left paused by a
+    # previous screen (run end screen pauses the tree).
+    get_tree().paused = false
     _load_characters("res://src/Assets/character", chars_container)
     confirm_button.pressed.connect(_on_confirm_pressed)
     cancel_button.pressed.connect(_on_cancel_pressed)

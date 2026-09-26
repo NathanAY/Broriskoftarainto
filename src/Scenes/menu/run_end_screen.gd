@@ -12,6 +12,9 @@ func _ready():
     get_tree().paused = true
 
 func _on_new_run_pressed():
+    # The tree is paused by this screen; menus use PROCESS_MODE_ALWAYS so they
+    # work while paused, but the game scene does not -> unpause before leaving.
+    get_tree().paused = false
     get_tree().change_scene_to_file("res://src/Scenes/menu/CharacterSelect.tscn")
 
 func _on_exit_pressed():

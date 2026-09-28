@@ -9,6 +9,10 @@ class_name ItemHolder
 
 @export var items: Array[Item] = []
 
+# `items` above is the single source of truth. An item is a Resource, so it can
+# never be a child itself; `_create_item_node` therefore builds the one node per
+# item that represents it in the tree, named after the item ("Boots of speed").
+
 func add_item(item: Item) -> void:
     if item == null:
         return
@@ -20,14 +24,12 @@ func add_item(item: Item) -> void:
     if event_manager == null:
         event_manager = hold_owner.get_node_or_null("EventManager")
 
+    _create_item_node(item)
+
     if item is Item and item.effect_scene:
         var effect_scene = item.effect_scene[0]
-        var effect: Node = null
         # 🔹 Look if we already have an effect of this type
-        for child in get_children():
-            if child.scene_file_path == effect_scene.resource_path:
-                effect = child
-                break
+        var effect: Node = _find_effect_node(effect_scene)
         # 🔹 If not found, create new one
         if not effect:
             effect = BaseModifier.instantiate_attached(effect_scene, self)
@@ -58,7 +60,63 @@ func add_item(item: Item) -> void:
     # Notify others
     if event_manager:
         event_manager.emit_event("on_item_added", {"hold_owner": hold_owner, "item": item, "items": items})
- 
+
+# The single node that represents the item in the scene tree. It is a sibling of
+# the item's effect node on purpose: effect nodes are deduplicated per effect
+# type and stacked, so one effect node can serve several items and cannot be
+# owned by any one of them.
+func _create_item_node(item: Item) -> ItemNode:
+    var node := ItemNode.new()
+    node.name = _unique_item_node_name(item.name)
+    node.item = item
+    add_child(node)
+    return node
+
+# Items are shared Resources, so the holder looks its node up by the item it
+# carries instead of keeping a map.
+func _find_item_node(item: Item) -> ItemNode:
+    for child in get_children():
+        if child is ItemNode and (child as ItemNode).item == item:
+            return child as ItemNode
+    return null
+
+# The already-instantiated effect for `effect_scene`, or null.
+#
+# Effect nodes are matched by scene path, and both sides of that comparison can
+# legitimately be empty: `ItemBuilder.pack_instance` builds in-memory
+# PackedScenes with no `resource_path`, and a node instantiated from one has no
+# `scene_file_path` either. That empty == empty match is what lets a second item
+# of the same type find and stack into the first item's effect node, so it has to
+# stay. The per-item ItemNode is script-created and also has an empty
+# `scene_file_path`, so it would hijack that match and swallow the real effect -
+# it must be skipped explicitly.
+func _find_effect_node(effect_scene: PackedScene) -> Node:
+    if effect_scene == null:
+        return null
+    for child in get_children():
+        if child is ItemNode:
+            continue
+        if child.scene_file_path == effect_scene.resource_path:
+            return child
+    return null
+
+# Godot node names cannot contain . : @ / " % and two holders can hold the same
+# item, so a taken name gets a numeric suffix ("Boots of speed", "Boots of
+# speed2", ...).
+func _unique_item_node_name(item_name: String) -> String:
+    var base := ""
+    for c in item_name:
+        if c not in [".", ":", "@", "/", "\\", "\"", "%"]:
+            base += c
+    if base.is_empty():
+        base = "Item"
+    var candidate := base
+    var suffix := 2
+    while has_node(NodePath(candidate)):
+        candidate = "%s%d" % [base, suffix]
+        suffix += 1
+    return candidate
+
 func remove_item(item: Resource) -> void:
     if not item:
         return
@@ -72,15 +130,18 @@ func remove_item(item: Resource) -> void:
     # Remove one stack of the matching effect node; detach + free on the last stack
     if item is Item and item.effect_scene:
         var effect_scene = item.effect_scene[0]
-        for child in get_children():
-            if child.scene_file_path == effect_scene.resource_path:
-                if child.has_method("remove_latest_stack"):
-                    child.remove_latest_stack()
-                if child.stacks.is_empty():
-                    if child.has_method("detach"):
-                        child.detach()
-                    child.queue_free()
-                break
+        var effect: Node = _find_effect_node(effect_scene)
+        if effect:
+            if effect.has_method("remove_latest_stack"):
+                effect.remove_latest_stack()
+            if effect.stacks.is_empty():
+                if effect.has_method("detach"):
+                    effect.detach()
+                effect.queue_free()
+    # Remove the tree node that represents the item
+    var item_node := _find_item_node(item as Item)
+    if item_node:
+        item_node.queue_free()
     # Remove from list
     items.erase(item)
     # Notify others

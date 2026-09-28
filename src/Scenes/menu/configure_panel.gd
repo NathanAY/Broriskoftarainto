@@ -88,7 +88,7 @@ func _populate_available_weapons(container: VBoxContainer, cur_container: VBoxCo
         if not dir.current_is_dir() and file_name.ends_with(".tres"):
             var path = WEAPONS_PATH + "/" + file_name
             var display_name := file_name.get_basename()
-            var btn = Button.new()
+            var btn = UiMenuButton.new()
             btn.text = "Add " + display_name
             btn.pressed.connect(func(p=path): _on_add_weapon(p, container, cur_container))
             container.add_child(btn)
@@ -98,7 +98,7 @@ func _populate_available_weapons(container: VBoxContainer, cur_container: VBoxCo
 func _populate_effect_items(container: VBoxContainer, result_container: VBoxContainer) -> void:
     for scene in ItemBuilder.load_scenes_from_dir(EFFECTS_PATH):
         var display_name := scene.resource_path.get_file().get_basename()
-        var btn = Button.new()
+        var btn = UiMenuButton.new()
         btn.text = "Add " + display_name
         btn.pressed.connect(func(p=scene.resource_path, rc=result_container): _create_effect_item(p, rc))
         container.add_child(btn)
@@ -212,7 +212,7 @@ func _refresh_equipped_list(container: VBoxContainer) -> void:
         var lbl := Label.new()
         lbl.text = weapon_name
         h.add_child(lbl)
-        var rem := Button.new()
+        var rem := UiMenuButton.new()
         rem.text = "Remove"
         rem.pressed.connect(func(wref=w, curc=container): _on_remove_weapon(wref, curc))
         h.add_child(rem)
@@ -244,7 +244,7 @@ func _refresh_equipped_items(container: VBoxContainer) -> void:
         var lbl := Label.new()
         lbl.text = item_name
         h.add_child(lbl)
-        var rem := Button.new()
+        var rem := UiMenuButton.new()
         rem.text = "Remove"
         rem.pressed.connect(func(iref=it, curc=container): _on_remove_item(iref, curc))
         h.add_child(rem)

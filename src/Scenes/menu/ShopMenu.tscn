@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cagiju3alea6f" path="res://src/Scenes/menu/shop_menu.gd" id="1_rak5t"]
 [ext_resource type="PackedScene" path="res://src/ui/TooltipUi.tscn" id="2_0tooltip"]
 [ext_resource type="Script" uid="uid://ckthxl6pg4fpx" path="res://src/Systems/Items/item_price_analyzer.gd" id="3_v2wgg"]
+[ext_resource type="Script" path="res://src/ui/menu_button.gd" id="menu_button"]
 
 [node name="ShopMenu" type="CanvasLayer" unique_id=142525685]
 process_mode = 3
@@ -120,10 +121,12 @@ alignment = 1
 [node name="RerollButton" type="Button" parent="Control/VBoxContainer/BottomContainer/ButtonsContainer" unique_id=405648332]
 layout_mode = 2
 text = "Reroll"
+script = ExtResource("menu_button")
 
 [node name="NextStageButton" type="Button" parent="Control/VBoxContainer/BottomContainer/ButtonsContainer" unique_id=1073517102]
 layout_mode = 2
 text = "Go next"
+script = ExtResource("menu_button")
 
 [node name="Tooltip" parent="." unique_id=345678901 instance=ExtResource("2_0tooltip")]
 

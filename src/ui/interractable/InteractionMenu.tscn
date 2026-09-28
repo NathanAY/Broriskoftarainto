@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://dljplvstuesm1"]
 
+[ext_resource type="Script" path="res://src/ui/menu_button.gd" id="menu_button"]
+
 [node name="InteractionMenu" type="Control" unique_id=485626872]
 layout_mode = 3
 anchors_preset = 15
@@ -15,12 +17,14 @@ offset_top = -66.0
 offset_right = 34.0
 offset_bottom = -35.0
 text = "E"
+script = ExtResource("menu_button")
 
 [node name="Button2" type="Button" parent="." unique_id=659866723]
 layout_mode = 0
 offset_top = -31.0
 offset_right = 35.0
 text = "F"
+script = ExtResource("menu_button")
 
 [node name="Description" type="VBoxContainer" parent="." unique_id=1711067902]
 layout_mode = 0

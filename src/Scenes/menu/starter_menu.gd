@@ -30,7 +30,7 @@ func _load_resource_buttons(base_path: String, container: VBoxContainer, callbac
             var _res: Resource = load(path)
             var display_name := file_name.get_basename() # or res.name if defined
 
-            var btn = Button.new()
+            var btn = UiMenuButton.new()
             btn.text = "Add " + display_name
             btn.pressed.connect(func(): callback.call(path, display_name))
             container.add_child(btn)

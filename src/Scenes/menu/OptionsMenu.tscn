@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://6mpb7db144uh"]
 
 [ext_resource type="Script" uid="uid://bi0lglln23krd" path="res://src/Scenes/menu/options_menu.gd" id="1_jrbyj"]
+[ext_resource type="Script" path="res://src/ui/menu_button.gd" id="menu_button"]
 
 [node name="OptionsMenu" type="CanvasLayer" unique_id=854644811]
 process_mode = 3
@@ -41,6 +42,7 @@ alignment = 1
 [node name="WindowButton" type="Button" parent="Control/VBoxContainer" unique_id=664449591]
 layout_mode = 2
 text = "Window"
+script = ExtResource("menu_button")
 
 [node name="ShowStats" type="CheckButton" parent="Control/VBoxContainer" unique_id=1098469529]
 layout_mode = 2
@@ -58,3 +60,4 @@ layout_mode = 2
 [node name="BackButton" type="Button" parent="Control/VBoxContainer" unique_id=82364102]
 layout_mode = 2
 text = "Back"
+script = ExtResource("menu_button")

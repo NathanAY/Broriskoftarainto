@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b6iqmep0h5pm"]
 
 [ext_resource type="Script" uid="uid://cfnuri6xv0jhu" path="res://src/Scenes/menu/run_end_screen.gd" id="1_mqxu1"]
+[ext_resource type="Script" path="res://src/ui/menu_button.gd" id="menu_button"]
 
 [node name="RunEndScreen" type="CanvasLayer"]
 process_mode = 3
@@ -45,7 +46,9 @@ text = "You Win!"
 [node name="NewRunButton" type="Button" parent="Control/VBoxContainer"]
 layout_mode = 2
 text = "New run"
+script = ExtResource("menu_button")
 
 [node name="ExitButton" type="Button" parent="Control/VBoxContainer"]
 layout_mode = 2
 text = "Exit"
+script = ExtResource("menu_button")

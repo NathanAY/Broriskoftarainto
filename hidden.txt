@@ -34,3 +34,17 @@ func test_attack_speed_affects_attack_interval():
 func test_spread_shot_hits_multiple_enemies():
 func test_chain_projectile_selects_next_target():
 =======
+
+There is a project where I want to copy the button system effect system.
+It has some sound on mouse_enter, on_focus and press event. 
+I want to also have those button effect.
+Project path: F:\programs\Godot projects\Brotato3.6\
+Important files:
+ui/menus/global/my_menu_button.gd
+ui/menus/global/my_menu_button_parent.gd
+res://ui/sounds/button_focus.wav
+res://ui/sounds/button_press.wav
+
+You can copy sounds from that project to current.
+For now only change the Main.tscn buttons. 
+Don't create new tests now, just run one random te check if the proejct compiles

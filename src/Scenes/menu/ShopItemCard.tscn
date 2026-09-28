@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://d3ubcwvh1jj7h"]
 
 [ext_resource type="Script" uid="uid://bqcegfkue41q0" path="res://src/Scenes/menu/shop_item_card.gd" id="1_card"]
+[ext_resource type="Script" path="res://src/ui/menu_button.gd" id="menu_button"]
 
 [node name="ShopItemCard" type="PanelContainer" unique_id=1323448926]
 custom_minimum_size = Vector2(190, 400)
@@ -43,8 +44,10 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Primary"
+script = ExtResource("menu_button")
 
 [node name="SecondaryButton" type="Button" parent="Margin/VBox/Buttons" unique_id=1845586642]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Secondary"
+script = ExtResource("menu_button")

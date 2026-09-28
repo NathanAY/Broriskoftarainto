@@ -31,7 +31,7 @@ func _ready():
     character_button.pressed.connect(_on_character_pressed)
     options_button.pressed.connect(_on_options_pressed)
     # Add Configure button dynamically so the scene file doesn't need editing
-    var cfg_btn = Button.new()
+    var cfg_btn = UiMenuButton.new()
     cfg_btn.text = "Configure"
     cfg_btn.pressed.connect(_on_configure_pressed)
     $Control/VBoxContainer.add_child(cfg_btn)

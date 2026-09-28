@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://u1vqm6gmpjwc" path="res://src/Scenes/menu/pause_menu.gd" id="1_lj4oq"]
 [ext_resource type="PackedScene" uid="uid://1oycydgaehxf" path="res://src/ui/CharacterUI.tscn" id="2_4eb7s"]
 [ext_resource type="PackedScene" uid="uid://6mpb7db144uh" path="res://src/Scenes/menu/OptionsMenu.tscn" id="2_qwhev"]
+[ext_resource type="Script" path="res://src/ui/menu_button.gd" id="menu_button"]
 
 [node name="PauseMenu" type="CanvasLayer" unique_id=2044281697]
 process_mode = 3
@@ -43,30 +44,37 @@ alignment = 1
 [node name="ResumeButton" type="Button" parent="Control/VBoxContainer" unique_id=65616881]
 layout_mode = 2
 text = "Resume"
+script = ExtResource("menu_button")
 
 [node name="RestartButton" type="Button" parent="Control/VBoxContainer" unique_id=733715336]
 layout_mode = 2
 text = "Restart"
+script = ExtResource("menu_button")
 
 [node name="NewRunButton" type="Button" parent="Control/VBoxContainer" unique_id=440514636]
 layout_mode = 2
 text = "New run"
+script = ExtResource("menu_button")
 
 [node name="CharacterButton" type="Button" parent="Control/VBoxContainer" unique_id=925289219]
 layout_mode = 2
 text = "Character"
+script = ExtResource("menu_button")
 
 [node name="OptionsButton" type="Button" parent="Control/VBoxContainer" unique_id=1487591074]
 layout_mode = 2
 text = "Options"
+script = ExtResource("menu_button")
 
 [node name="MainMenuButton" type="Button" parent="Control/VBoxContainer" unique_id=164848417]
 layout_mode = 2
 text = "Main menu"
+script = ExtResource("menu_button")
 
 [node name="ExitButton" type="Button" parent="Control/VBoxContainer" unique_id=164848416]
 layout_mode = 2
 text = "Exit"
+script = ExtResource("menu_button")
 
 [node name="CharacterUi" parent="." unique_id=227911457 instance=ExtResource("2_4eb7s")]
 

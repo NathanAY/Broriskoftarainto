@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cnearl6ardcar"]
 
 [ext_resource type="Script" uid="uid://de8clrwu2mq0w" path="res://src/Scenes/menu/starter_menu.gd" id="1_dmgkn"]
+[ext_resource type="Script" path="res://src/ui/menu_button.gd" id="menu_button"]
 
 [node name="StarterMenu" type="CanvasLayer" unique_id=1837554978]
 process_mode = 3
@@ -102,7 +103,9 @@ size_flags_horizontal = 4
 [node name="Clear" type="Button" parent="Control/VBoxContainer/HBoxContainer" unique_id=1483075535]
 layout_mode = 2
 text = "Clear all"
+script = ExtResource("menu_button")
 
 [node name="Play" type="Button" parent="Control/VBoxContainer/HBoxContainer" unique_id=1361683055]
 layout_mode = 2
 text = "Play"
+script = ExtResource("menu_button")

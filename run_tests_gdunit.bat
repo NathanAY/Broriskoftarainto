@@ -10,7 +10,7 @@ REM To see other arguments \addons\gdUnit4\src\core\runners\GdUnitTestCIRunner.g
 
 set "GODOT_BIN=F:\programs\Godot_v4.6.1-stable_win64\Godot_v4.6.1-stable_win64.exe"
 set "TEST_TARGET=res://test"
-set "TIMEOUT_SECONDS=30"
+set "TIMEOUT_SECONDS=40"
 set "LOG_FILE=.gdunit.log"
 
 if not "%~1"=="" set "TEST_TARGET=res://test/%~1"

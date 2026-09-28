@@ -13,6 +13,13 @@ Data flow
 - Processing: `WeaponHolder` duplicates resources, calls `apply_to` on weapons, creates sprite nodes and timers for firing logic; weapon scripts manage aiming and firing.
 - Outputs: weapons may add stat modifiers, spawn projectiles, emit events via `EventManager`.
 
+Debug visibility (`weapon_holder.gd`, `weapon_visual.gd`)
+- A weapon is a `Resource`, so it can never be a child itself. `WeaponHolder._create_visual` therefore builds the one node per weapon that represents it in the tree: a `WeaponVisual` (a `Sprite2D` subclass) child of the `WeaponHolder`, named after the weapon (`Shotgun`, and `Shotgun2` for a second copy).
+- `weapons` stays the single source of truth. There is no weapon -> node lookup table: `BaseWeapon.sprite_node` points at the weapon's own `WeaponVisual`, and the node points back through its exported `weapon` field, so selecting the node in the inspector shows the weapon. `_reposition_weapons` and weapon scripts (spawn position, aim, melee) all read `sprite_node` directly. `remove_weapon` frees it via `BaseWeapon.remove_from`.
+- `WeaponHolder.tscn`'s root is a `Node2D`, not a `Node`: a `Node2D` under a plain `Node` does not inherit the canvas transform, so the visuals would sit at the world origin instead of orbiting the holder.
+- The visual's `z_index` is 1 because it used to be appended as the last child of the holder; nesting it under the `WeaponHolder` changes the tree order, and the bump keeps the weapon drawn on top of the holder's other visuals.
+- In the editor, run the game and use the Scene dock's **Remote** tree - these nodes only exist at runtime.
+
 Dependencies
 - `WeaponHolder` depends on the owning node (holder) exposing `Stats` and `EventManager` where applicable.
 

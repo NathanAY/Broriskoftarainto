@@ -35,8 +35,7 @@ func try_shoot(targets: Array[Node]) -> void:
         node = holder.get_node(node_name)
 
     # Update spawn position at the weapon sprite
-    var holder_weapon_holder = holder.get_node("WeaponHolder")
-    var holder_sprite_node: Node2D = holder_weapon_holder.weapon_templates.get(self, null)
+    var holder_sprite_node: Node2D = sprite_node
     if holder_sprite_node:
         node.global_position = holder_sprite_node.global_position
     else:

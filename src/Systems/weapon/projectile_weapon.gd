@@ -17,8 +17,7 @@ func shoot_projectile(target: Node) -> Projectile:
     var p: Projectile = projectile_scene.instantiate()
         
     # get weapon’s sprite node
-    var holder_weapon_holder = holder.get_node("WeaponHolder")
-    var holder_sprite_node: Node2D = holder_weapon_holder.weapon_templates.get(self, null)
+    var holder_sprite_node: Node2D = sprite_node
 
     if holder_sprite_node:
         p.global_position = holder_sprite_node.global_position

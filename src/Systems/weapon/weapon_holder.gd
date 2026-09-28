@@ -8,8 +8,12 @@ class_name WeaponHolder
 @export var weapon_orbit_radius: float = 60.0
 @export var angle_offset: float = -PI * 1  # start at top; change if you want different start angle
 
-# keep a map: weapon_instance -> Node2D (the visual sprite node)
-var weapon_templates: Dictionary = {}
+# `weapons` above is the single source of truth: every equipped weapon is one
+# entry, and `BaseWeapon.sprite_node` points at the one WeaponVisual node that
+# represents it in the tree, named after the weapon (e.g. "Shotgun"). A weapon
+# is a Resource, so that node is what makes it visible at all - there is no
+# weapon -> node lookup table.
+
 # runtime state: map weapon_instance -> Timer
 var weapon_timers: Dictionary = {}   # key: weapon_instance (Resource), value: Timer
 
@@ -40,7 +44,8 @@ func remove_weapon(weapon_inst: BaseWeapon) -> void:
         return
     if not (weapon_inst in weapons):
         return
-    # remove modifiers
+    # remove modifiers, timer and the WeaponVisual node (remove_from frees
+    # sprite_node, which is the weapon's only node)
     if weapon_inst.has_method("remove_from"):
         weapon_inst.remove_from(hold_owner)
     # stop & free timer
@@ -50,10 +55,6 @@ func remove_weapon(weapon_inst: BaseWeapon) -> void:
             t.stop()
             t.queue_free()
         weapon_timers.erase(weapon_inst)
-    if weapon_templates.has(weapon_inst):
-        var sprite_node = weapon_templates[weapon_inst]
-        if is_instance_valid(sprite_node): sprite_node.queue_free()
-        weapon_templates.erase(weapon_inst)
     # remove from list
     weapons.erase(weapon_inst)
     # reposition remaining visuals
@@ -68,12 +69,39 @@ func _equip_weapon(weapon_inst: BaseWeapon) -> void:
     else:
         push_warning("WeaponHolder: weapon has no apply_to method")
     if weapon_inst.sprite:
-        var sprite_node := Sprite2D.new()
-        sprite_node.texture = weapon_inst.sprite
-        weapon_inst.sprite_node = sprite_node
-        hold_owner.add_child(sprite_node)
-        weapon_templates[weapon_inst] = sprite_node
+        weapon_inst.sprite_node = _create_visual(weapon_inst)
     _reposition_weapons() 
+
+# The single node that represents the weapon in the scene tree. It sits at the
+# WeaponHolder's origin, so the visual's global position and rotation stay
+# identical to when it was parented to the holder directly.
+func _create_visual(weapon_inst: BaseWeapon) -> WeaponVisual:
+    var visual := WeaponVisual.new()
+    visual.name = _unique_visual_name(weapon_inst.name)
+    visual.texture = weapon_inst.sprite
+    visual.weapon = weapon_inst
+    # The visual used to be appended as the last child of the holder, so it drew
+    # on top of the holder's other visuals (body, legs, hit particles). Nesting
+    # it under the WeaponHolder changes the tree order, so restore that here.
+    visual.z_index = 1
+    add_child(visual)
+    return visual
+
+# Godot node names cannot contain . : @ / " % and two weapons may share a name,
+# so a taken name gets a numeric suffix ("Shotgun", "Shotgun2", ...).
+func _unique_visual_name(weapon_name: String) -> String:
+    var base := ""
+    for c in weapon_name:
+        if c not in [".", ":", "@", "/", "\\", "\"", "%"]:
+            base += c
+    if base.is_empty():
+        base = "Weapon"
+    var candidate := base
+    var suffix := 2
+    while has_node(NodePath(candidate)):
+        candidate = "%s%d" % [base, suffix]
+        suffix += 1
+    return candidate
 
 func _reposition_weapons() -> void:
     var count := weapons.size()
@@ -81,12 +109,11 @@ func _reposition_weapons() -> void:
         return
     for i in range(count):
         var weapon_inst = weapons[i]
-        if weapon_templates.has(weapon_inst):
-            var node: Sprite2D = weapon_templates[weapon_inst]
-            if not is_instance_valid(node):
-                continue
-            node.position = _get_weapon_position(i, count)
-            _update_weapon_orientation(node, i, count)
+        var node: Sprite2D = weapon_inst.sprite_node if weapon_inst else null
+        if not is_instance_valid(node):
+            continue
+        node.position = _get_weapon_position(i, count)
+        _update_weapon_orientation(node, i, count)
 
 
 func _get_weapon_position(index: int, count: int) -> Vector2:

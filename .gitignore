@@ -11,3 +11,5 @@ reports/
 # Single-run test wrapper working file (overwritten every test run)
 .gdunit_timeout.log
 .gdunit.log
+
+.playwright-mcp/

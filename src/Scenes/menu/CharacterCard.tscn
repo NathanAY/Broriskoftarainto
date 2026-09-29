@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://d2m41ljb1ac38" path="res://src/Scenes/menu/character_card.gd" id="1_card"]
 
 [node name="CharacterCard" type="PanelContainer" unique_id=462281984]
-custom_minimum_size = Vector2(120, 132)
+custom_minimum_size = Vector2(108, 124)
 size_flags_horizontal = 3
 script = ExtResource("1_card")
 
@@ -16,16 +16,24 @@ theme_override_constants/margin_bottom = 8
 
 [node name="VBox" type="VBoxContainer" parent="Margin" unique_id=115190933]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 6
 
 [node name="IconHolder" type="CenterContainer" parent="Margin/VBox" unique_id=925806004]
-custom_minimum_size = Vector2(64, 64)
+custom_minimum_size = Vector2(72, 72)
 layout_mode = 2
+size_flags_vertical = 4
 mouse_filter = 2
 
 [node name="NameLabel" type="Label" parent="Margin/VBox" unique_id=379090110]
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.784314, 0.803922, 0.847059, 1)
+theme_override_font_sizes/font_size = 13
 text = "Name"
 horizontal_alignment = 1
+vertical_alignment = 1
 autowrap_mode = 2
+max_lines_visible = 2
+text_overrun_behavior = 3

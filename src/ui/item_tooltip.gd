@@ -77,6 +77,8 @@ static func tooltip_lines(resource: Resource) -> PackedStringArray:
 ## stays the flat-text source for hover tooltips and is left untouched.
 static func card_rows(resource: Resource) -> Array:
     var rows: Array = []
+    if resource is CharacterData:
+        return CharacterTooltip.card_rows(resource as CharacterData)
     if resource is BaseWeapon:
         return weapon_card_rows(resource as BaseWeapon)
     if not (resource is Item):
@@ -127,6 +129,15 @@ static func _append_weapon_row(rows: Array, label: String, value: String) -> voi
     rows.append(row)
 
 
+## Turns a `{stat: {kind: value}}` modifier dictionary into rows. Shared with
+## CharacterTooltip so a character's stat modifiers render exactly like a shop
+## item's. `force_tone` overrides the value-derived tone (used for tradeoffs).
+static func stat_rows(modifiers: Dictionary, force_tone: int = -1) -> Array:
+    var rows: Array = []
+    _append_stat_rows(rows, modifiers, force_tone)
+    return rows
+
+
 static func _append_stat_rows(rows: Array, modifiers: Dictionary, force_tone: int = -1) -> void:
     for stat_name in modifiers:
         var mod = modifiers[stat_name]
@@ -151,6 +162,18 @@ static func _append_stat_rows(rows: Array, modifiers: Dictionary, force_tone: in
                 row.value = _signed(str(value))
                 row.tone = force_tone if force_tone >= 0 else _tone_for_number(_as_number(value))
             rows.append(row)
+
+
+## Renders a raw stat value without a sign. Used for absolute values (a
+## character's `base_stats`) where the colour, not the prefix, says whether
+## the number is high or low. Whole floats drop the ".0" noise.
+static func format_value(value) -> String:
+    var trimmed := str(value).strip_edges()
+    if trimmed.is_valid_float():
+        var number := trimmed.to_float()
+        if number == floorf(number):
+            return str(int(number))
+    return trimmed
 
 
 static func _append_effect_row(rows: Array, item: Item) -> void:

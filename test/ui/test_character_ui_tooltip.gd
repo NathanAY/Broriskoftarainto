@@ -9,6 +9,10 @@ const PLUS_DAMAGE_ITEM := "res://src/Resources/items/PlusDamageItem.tres"
 const BUFF_SCENE := "res://src/Systems/Items/Buffs/buff.tscn"
 const DEBUFF_SCENE := "res://src/Systems/Items/Buffs/DebuffSource.tscn"
 const EFFECT_SCENE := "res://src/Systems/Items/modifiers/ProjectileBounceModifier.tscn"
+const TOOLTIP_SCENE := "res://src/ui/TooltipUi.tscn"
+const DETAIL_SCENE := "res://src/ui/CharacterDetailPanel.tscn"
+const SOLDIER := "res://src/Assets/character/soldier/Soldier.tres"
+const SOLDIER_ICON := "res://src/Assets/character/soldier/soldier_icon.png"
 
 
 func _build_character() -> Character:
@@ -139,6 +143,91 @@ func test_effect_item_with_negative_stat_mirroring_factory() -> void:
         if line.begins_with("effect:") and "Projectile Bounce" in line:
             found_effect = true
     assert_bool(found_effect).is_true()
+
+
+# --- characters in the shared ItemDisplayPanel ------------------------------
+
+func test_character_icon_is_built_and_name_is_human_readable() -> void:
+    var character: CharacterData = load(SOLDIER)
+
+    # CharacterData has no `name` property, so the generic path used to fall
+    # through to str(resource) and print the .tres path in the header.
+    assert_str(ItemDisplayPanel.display_name(character)).is_equal("Soldier")
+    assert_bool(ItemDisplayPanel.display_name(character).contains("res://")).is_false()
+
+    # ...and the generic path built an empty Control, so the icon plate was blank.
+    var icon := ItemDisplayPanel.make_icon(character)
+    assert_that(icon).is_not_null()
+    var found := _find_texture(icon)
+    assert_that(found).is_not_null()
+    assert_that(found.texture).is_equal(character.small_icon)
+    icon.free()
+
+
+func test_character_falls_back_to_sprite_then_placeholder() -> void:
+    var sprite_only := CharacterData.new()
+    sprite_only.sprite = load(SOLDIER_ICON)
+    var from_sprite := ItemDisplayPanel.make_icon(sprite_only)
+    assert_that(_find_texture(from_sprite).texture).is_equal(sprite_only.sprite)
+    from_sprite.free()
+
+    # Nothing assigned at all: still an icon, never an empty plate.
+    var bare := CharacterData.new()
+    var placeholder := ItemDisplayPanel.make_icon(bare)
+    assert_that(_find_texture(placeholder)).is_not_null()
+    placeholder.free()
+
+
+func test_character_tooltip_renders_the_header_and_rows() -> void:
+    var tooltip_ui = load(TOOLTIP_SCENE).instantiate()
+    add_child(tooltip_ui)
+    var character: CharacterData = load(SOLDIER)
+
+    tooltip_ui.show_for(character)
+
+    assert_str(tooltip_ui.name_label.text).is_equal("Soldier")
+    assert_bool(tooltip_ui.type_badge.visible).is_false()
+    assert_int(tooltip_ui.icon_holder.get_child_count()).is_equal(1)
+    # Colored rows, not the raw "base health: 120.0" flat text.
+    assert_bool(tooltip_ui.label.text.contains("Health")).is_true()
+    assert_bool(tooltip_ui.label.text.contains("res://")).is_false()
+    assert_bool(tooltip_ui.label.text.contains("base health:")).is_false()
+
+    tooltip_ui.free()
+
+
+func test_tooltip_and_detail_panel_share_the_same_skeleton() -> void:
+    var tooltip_ui = load(TOOLTIP_SCENE).instantiate()
+    add_child(tooltip_ui)
+    var detail = load(DETAIL_SCENE).instantiate()
+    add_child(detail)
+
+    for node in [tooltip_ui, detail]:
+        for path in ["Margin/VBox/Header/IconPlate/IconHolder", "Margin/VBox/Header/NameBox/NameLabel",
+                "Margin/VBox/InfoScroll/InfoLabel"]:
+            assert_that(node.get_node_or_null(path)).is_not_null()
+
+    # Both hug their content. A zero-height scroll area is why: the panels must
+    # disable scrolling for the container to report the label's real height.
+    assert_int(tooltip_ui.info_scroll.vertical_scroll_mode).is_equal(ScrollContainer.SCROLL_MODE_DISABLED)
+    assert_int(detail.info_scroll.vertical_scroll_mode).is_equal(ScrollContainer.SCROLL_MODE_DISABLED)
+    # autowrap at width 0 breaks every word onto its own line and explodes the
+    # measured height, so the label needs a wrap-width floor.
+    assert_float(detail.info_label.custom_minimum_size.x).is_greater(0.0)
+
+    tooltip_ui.free()
+    detail.free()
+
+
+## First TextureRect found anywhere under `node`, or null.
+func _find_texture(node: Node) -> TextureRect:
+    if node is TextureRect:
+        return node
+    for child in node.get_children():
+        var found := _find_texture(child)
+        if found != null:
+            return found
+    return null
 
 
 func test_heal_on_event_tooltip_shows_trigger_and_amount() -> void:
@@ -669,7 +758,9 @@ func test_tooltip_text_hint_has_no_icon_or_name() -> void:
 
     # A plain hint has no resource, so the icon and name must be cleared.
     tooltip_ui.show_text("just a hint")
-    assert_int(tooltip_ui.icon_holder.get_child_count()).is_equal(1)
+    # Zero, not one: the old icon is detached immediately rather than left in
+    # the tree until the end of the frame.
+    assert_int(tooltip_ui.icon_holder.get_child_count()).is_equal(0)
     assert_str(tooltip_ui.name_label.text).is_empty()
     assert_bool(tooltip_ui.type_badge.visible).is_false()
     assert_str(tooltip_ui.label.text).contains("just a hint")

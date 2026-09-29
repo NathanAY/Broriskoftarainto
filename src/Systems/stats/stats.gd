@@ -8,23 +8,35 @@ class_name Stats
 ## movement_speed, stored as m/s) are converted to pixels with this factor.
 const PIXELS_PER_METER: float = 300.0
 
-# Base stats
-@export var stats := {
+## Canonical base values, shared by every character. `CharacterData.base_stats`
+## overrides a subset of these, so UI that needs to know whether a character's
+## value is above or below the norm (the character select screen) compares
+## against this table rather than hardcoding its own numbers.
+const DEFAULT_STATS := {
     "health": 10.0,
-    "energy_shield": 0,
+    "energy_shield": 0.0,
     "damage": 1.0,
-    "base_damage": 5,
-    "flat_damage": 0,
+    "base_damage": 5.0,
+    "flat_damage": 0.0,
     "attack_speed": 1.0,
     "area_radius": 1.0,
     "attack_range": 500.0,
-    "movement_speed": 1,
-    "critical_chance": 0,
+    "movement_speed": 1.0,
+    "critical_chance": 0.0,
     "critical_multiplier": 1.5,
     "area_size_multiplier": 1.0,
-    "projectile_pierce": 0,
+    "projectile_pierce": 0.0,
     "projectile_speed_multiplier": 1.0,
 }
+
+# Base stats
+@export var stats := DEFAULT_STATS.duplicate()
+
+
+## The value a stat starts at before any modifier. Missing stats have no
+## default, so they report 0.0 and read as neutral.
+static func default_stat(stat_name: String) -> float:
+    return float(DEFAULT_STATS.get(stat_name, 0.0))
 # All conditions are numeric (0/1 or seconds)
 var conditions := {
     "standing_still": 0.0,

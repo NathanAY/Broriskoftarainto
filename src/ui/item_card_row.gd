@@ -16,6 +16,7 @@ enum Kind {
     TRADEOFF, ## "tradeoff: ..." payload, always a loss
     STAT,     ## flat / percent modifier on a stat
     WEAPON,   ## weapon damage / range / attack speed / built-in effect
+    GEAR,     ## starting item / weapon a character begins the run with
 }
 
 enum Tone {
@@ -56,6 +57,9 @@ func to_display() -> String:
             return text
         Kind.NAME:
             return label
+        Kind.GEAR:
+            # Value-first reads wrong for gear: "Passive Regen Starting Item".
+            return "%s: %s" % [label, value]
         _:
             if value.is_empty():
                 return label

@@ -1,0 +1,62 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/ui/character_detail_panel.gd" id="1_detail"]
+[ext_resource type="PackedScene" path="res://src/ui/ItemDisplayPanel.tscn" id="2_base"]
+
+[node name="CharacterDetailPanel" instance=ExtResource("2_base")]
+custom_minimum_size = Vector2(320, 0)
+size_flags_horizontal = 3
+size_flags_vertical = 0
+script = ExtResource("1_detail")
+
+[node name="Margin" parent="." index="0"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" parent="Margin" index="1"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" parent="Margin/VBox" index="0"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="IconPlate" parent="Margin/VBox/Header" index="0"]
+custom_minimum_size = Vector2(104, 104)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="IconHolder" parent="Margin/VBox/Header/IconPlate" index="0"]
+custom_minimum_size = Vector2(88, 88)
+layout_mode = 2
+
+[node name="NameBox" parent="Margin/VBox/Header" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="NameLabel" parent="Margin/VBox/Header/NameBox" index="0"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+
+[node name="TypeBadge" parent="Margin/VBox/Header/NameBox" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Separator" parent="Margin/VBox" index="2"]
+layout_mode = 2
+
+[node name="InfoScroll" parent="Margin/VBox" index="3"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="InfoLabel" parent="Margin/VBox/InfoScroll" index="0"]
+custom_minimum_size = Vector2(900, 0)
+layout_mode = 2
+size_flags_horizontal = 3

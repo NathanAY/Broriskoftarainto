@@ -1,14 +1,12 @@
 extends CanvasLayer
 
 @onready var chars_container: GridContainer = $Control/VBoxContainer/ScrollContainer/CharsList
-@onready var details_icon_holder: CenterContainer = $Control/VBoxContainer/DetailPanel/Margin/HBox/DetailIconHolder
-@onready var details_label: Label = $Control/VBoxContainer/DetailPanel/Margin/HBox/DetailVBox/TopScrollContainer/Details
+@onready var details_panel: CharacterDetailPanel = $Control/VBoxContainer/DetailPanel
 @onready var confirm_button: Button = $Control/VBoxContainer/HBoxContainer/Confirm
 @onready var cancel_button: Button = $Control/VBoxContainer/HBoxContainer/Cancel
 @onready var tooltip: TooltipUi = $Tooltip
 
 const CHARACTER_CARD_SCENE: PackedScene = preload("res://src/Scenes/menu/CharacterCard.tscn")
-const DETAIL_ICON_SIZE := Vector2(96, 96)
 
 var characters: Array = [] # list of (path, resource)
 var selected_path = null
@@ -69,24 +67,11 @@ func _on_character_pressed(path: String, res: CharacterData, card: CharacterCard
         _update_details(res)
 
 
-## Full stats view for the selected character, using the same
-## CharacterTooltip formatting the grid cards used to show inline.
+## Full stats view for the selected character. The panel is the shared
+## `ItemDisplayPanel`, so it renders the same header and coloured stat rows as a
+## shop card; the content comes from `ItemTooltip.card_rows()`.
 func _update_details(res: CharacterData) -> void:
-    for child in details_icon_holder.get_children():
-        child.free()
-    var icon := TextureRect.new()
-    if res.small_icon:
-        icon.texture = res.small_icon
-    elif res.sprite:
-        icon.texture = res.sprite
-    elif ResourceLoader.exists("res://src/Assets/character/potato.png"):
-        icon.texture = load("res://src/Assets/character/potato.png")
-    icon.custom_minimum_size = DETAIL_ICON_SIZE
-    icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-    icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-    icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-    details_icon_holder.add_child(icon)
-    details_label.text = "\n\n".join(CharacterTooltip.tooltip_lines(res))
+    details_panel.set_character_display(res)
 
 
 func _on_confirm_pressed():

@@ -86,14 +86,38 @@ func _on_resource_changed() -> void:
 static func display_name(resource: Resource) -> String:
     if resource == null:
         return ""
+    # CharacterData spells it `display_name`; without this branch the generic
+    # check below fails and the header renders the .tres path.
+    if resource is CharacterData:
+        return str((resource as CharacterData).display_name)
     if "name" in resource:
         return ItemTooltip.humanize_effect_name(str(resource.name))
     return str(resource)
 
 
-## Builds the icon Control for an Item or a BaseWeapon. Falls back to the
-## default weapon sprite / default modifier icon.
+## Placeholder used when a character resource has no art assigned at all, so
+## the icon plate is never empty.
+const CHARACTER_PLACEHOLDER := "res://src/Assets/character/potato.png"
+
+
+## The portrait to show for a character: its own small icon, else its sprite,
+## else the shared placeholder.
+static func character_icon_texture(character: CharacterData) -> Texture2D:
+    if character != null:
+        if character.small_icon:
+            return character.small_icon
+        if character.sprite:
+            return character.sprite
+    if ResourceLoader.exists(CHARACTER_PLACEHOLDER):
+        return load(CHARACTER_PLACEHOLDER)
+    return null
+
+
+## Builds the icon Control for an Item, a BaseWeapon or a CharacterData.
+## Falls back to the default weapon sprite / default modifier icon.
 static func make_icon(resource: Resource) -> Control:
+    if resource is CharacterData:
+        return _make_texture_icon(character_icon_texture(resource as CharacterData))
     if resource is BaseWeapon:
         return _make_weapon_icon(resource as BaseWeapon)
     if resource is Item:
@@ -103,16 +127,22 @@ static func make_icon(resource: Resource) -> Control:
     return container
 
 
-static func _make_weapon_icon(weapon: BaseWeapon) -> Control:
+## A square icon holder holding one texture, centred and aspect-preserved.
+static func _make_texture_icon(texture: Texture2D) -> Control:
     var container := Control.new()
     container.custom_minimum_size = ItemIconGenerator.BASE_SIZE
     var rect := TextureRect.new()
-    rect.texture = weapon.sprite if weapon.sprite else load("res://src/Assets/weapons/_default.png")
+    rect.texture = texture
     rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
     rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
     rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     container.add_child(rect)
     return container
+
+
+static func _make_weapon_icon(weapon: BaseWeapon) -> Control:
+    var texture: Texture2D = weapon.sprite if weapon.sprite else load("res://src/Assets/weapons/_default.png")
+    return _make_texture_icon(texture)
 
 
 ## Renders card rows as BBCode. The name row is skipped because it is already
@@ -161,7 +191,10 @@ static func set_mouse_ignore(node: Node) -> void:
 
 # --- panel styling ----------------------------------------------------------
 
-func _apply_panel_style(border_color: Color) -> void:
+## The shared card look: dark fill, 2px border, rounded corners and a drop
+## shadow. Exposed as a static so panels that are not ItemDisplayPanel
+## subclasses (the compact character grid card) stay in the same visual kit.
+static func make_panel_stylebox(border_color: Color) -> StyleBoxFlat:
     var box := StyleBoxFlat.new()
     box.bg_color = PANEL_BG
     box.set_border_width_all(2)
@@ -169,7 +202,11 @@ func _apply_panel_style(border_color: Color) -> void:
     box.set_corner_radius_all(PANEL_RADIUS)
     box.shadow_color = PANEL_SHADOW
     box.shadow_size = 6
-    add_theme_stylebox_override("panel", box)
+    return box
+
+
+func _apply_panel_style(border_color: Color) -> void:
+    add_theme_stylebox_override("panel", make_panel_stylebox(border_color))
 
 
 # --- icon plumbing ----------------------------------------------------------
@@ -184,5 +221,9 @@ func _add_icon(icon: Control) -> void:
 func _clear_icon() -> void:
     if not is_node_ready():
         return
+    # Freed immediately, not queued: `queue_free()` leaves the old icon in the
+    # tree for the rest of the frame, so switching resources twice in a row
+    # would stack icons in the plate. Nothing connects to an icon, so there is
+    # no callback mid-free to worry about.
     for child in icon_holder.get_children():
-        child.queue_free()
+        child.free()

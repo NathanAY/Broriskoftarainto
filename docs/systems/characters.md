@@ -10,9 +10,12 @@ This document explains the new character system (data, UI, and integration point
 ## Files of interest
 - `Systems/characters/CharacterData.gd` — Resource class for characters.
 - `Resources/characters/*.tres` — character definitions (examples: `Warrior.tres`, `Rogue.tres`, `Tank.tres`).
-- `Scenes/menu/CharacterSelect.tscn` + `Scenes/menu/character_select.gd` — character selection UI: top `DetailPanel` (icon + name + scrollable stats for the selected character) above a compact card grid (8 columns, fits 30+ characters). A shared `TooltipUi` node shows the full `ItemTooltip` stats on card hover, so details are visible without selecting.
-- `Scenes/menu/CharacterCard.tscn` + `Scenes/menu/character_card.gd` (`class_name CharacterCard`) — compact grid entry (120x132): icon + name only, whole card clickable (`selected` signal via `gui_input`/`select()`), gold highlight when selected. Full stats live in the top detail panel and the hover tooltip, not on the card.
-- `ui/character_tooltip.gd` (`class_name CharacterTooltip`) — static `tooltip_lines(CharacterData)` builder (name, description, `base <stat>`, flattened modifiers via `ItemTooltip.modifier_lines`, `starting item:`/`starting weapon:` names).
+- `Scenes/menu/CharacterSelect.tscn` + `Scenes/menu/character_select.gd` — character selection UI: a top `DetailPanel` showing the selected character, above a compact card grid of 10 columns so 15+ characters still fit, with the `ScrollContainer` scrolling for extra rows. A shared `TooltipUi` node shows the same stats on card hover, so details are visible without selecting.
+- `ui/CharacterDetailPanel.tscn` + `ui/character_detail_panel.gd` (`class_name CharacterDetailPanel`) — the top panel. It inherits the shared `ui/ItemDisplayPanel.tscn` scene (the same base as `ShopItemCard` and `TooltipUi`) at a larger scale, so the character screen and the shop cannot drift apart visually. It adds nothing of its own beyond content: `set_character_display(CharacterData)` is an alias for `set_resource()`.
+- `Scenes/menu/CharacterCard.tscn` + `Scenes/menu/character_card.gd` (`class_name CharacterCard`) — compact grid entry (108x124): icon + name only, whole card clickable (`selected` signal via `gui_input`/`select()`). It is not an `ItemDisplayPanel` subclass (it has no body) but borrows that class's palette via `ItemDisplayPanel.make_panel_stylebox()`, so the grid reads as part of the same UI. Selection is a gold border + gold name rather than a `modulate` tint, because tinting the whole card also recolours the character's own art.
+- `ui/character_tooltip.gd` (`class_name CharacterTooltip`) — two builders over the same data:
+  - `tooltip_lines(CharacterData)` — the original flat text (`name:`, `base <stat>:`, `starting item:` ...). Kept byte-identical; it is what any plain-text consumer reads.
+  - `card_rows(CharacterData)` — the structured counterpart returning `ItemCardRow`s (`NAME` / `FLAVOR` / `STAT` / `EFFECT` / `GEAR`) with a tone each, so the detail panel and hover tooltip can colour each line. `_effect_head()` is shared by both builders so their wording cannot drift.
 - `Scripts/autoload/global_game_state.gd` — holds `starting_character` (path or Resource).
 - `Systems/characters/CharacterInitializer.gd` — applies character data to the `Stats` node on character spawn.
 - `Systems/Character.tscn` — now contains a `CharacterInitializer` Node (instance) so application is automatic.
@@ -73,6 +76,25 @@ Rules that keep this the only correct way:
 
 `CharacterTooltip` renders both halves: stat dicts as `armor flat: 4` and
 modifier scenes as `effect: Armor — ... (Triggers on before take damage)`.
+
+Note that `armor: {flat: 4}` and `ArmorModifier.armor_per_stack` are two
+different numbers: the first is this character's baseline armor, the second is
+what each held stack adds on top. Both show up in the panel, which is correct
+but reads as a near-duplicate at a glance.
+
+## How a character's stats are coloured
+`base_stats` are **absolute** values that overwrite the `Stats` defaults, not
+gains — a Ranger's `health: 35.0` replaces the default 10. So the panel shows
+the absolute number and uses colour to say whether it beats the default:
+- `Systems/stats/stats.gd` exposes `const DEFAULT_STATS` plus
+  `static func default_stat(name)`, which is the single source of truth for the
+  baseline. `@export var stats` is initialised from it, so there is one table,
+  not two that can disagree.
+- `CharacterTooltip._tone_vs_default()` compares each value against that default:
+  above → green, below → red, equal → neutral.
+
+Entries in `modifiers` are real deltas, so those keep the explicit `+`/`-` and
+derive their tone from the value itself — same rule the shop cards use.
 
 ## Adding a new character
 1. Create a new resource file in `Resources/characters/` using the `CharacterData` script as the resource type (or copy an existing `.tres`).

@@ -33,8 +33,7 @@ func test_card_displays_weapon() -> void:
     card.set_item_display(weapon)
 
     assert_int(card.icon_holder.get_child_count()).is_equal(1)
-    assert_str(card.info_label.text).is_equal("\n\n".join(ItemTooltip.tooltip_lines(weapon)))
-    assert_str(card.info_label.text).contains(weapon.name)
+    assert_str(card.name_label.text).contains(weapon.name)
 
     card.free()
 

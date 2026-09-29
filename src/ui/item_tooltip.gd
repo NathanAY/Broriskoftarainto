@@ -72,6 +72,178 @@ static func tooltip_lines(resource: Resource) -> PackedStringArray:
     return lines
 
 
+## Structured counterpart of `tooltip_lines()`, used by `ShopItemCard` so
+## each line can be colored and get its own stat icon. `tooltip_lines()`
+## stays the flat-text source for hover tooltips and is left untouched.
+static func card_rows(resource: Resource) -> Array:
+    var rows: Array = []
+    if resource is BaseWeapon:
+        return weapon_card_rows(resource as BaseWeapon)
+    if not (resource is Item):
+        return rows
+
+    var item: Item = resource
+    if is_buff_item(item):
+        _append_buff_debuff_rows(rows, item, ItemCardRow.Kind.BUFF)
+    elif is_debuff_item(item):
+        _append_buff_debuff_rows(rows, item, ItemCardRow.Kind.DEBUFF)
+    elif has_effect_scene(item):
+        _append_name_row(rows, item.name)
+        _append_effect_row(rows, item)
+        _append_tradeoff_rows(rows, item.modifiers)
+    else:
+        _append_name_row(rows, item.name)
+        _append_stat_rows(rows, item.modifiers)
+    return rows
+
+
+static func weapon_card_rows(weapon: BaseWeapon) -> Array:
+    var rows: Array = []
+    if weapon == null:
+        return rows
+    _append_name_row(rows, weapon.name)
+    _append_weapon_row(rows, "Damage", str(weapon.base_damage))
+    _append_weapon_row(rows, "Range", str(weapon.weapon_range))
+    _append_weapon_row(rows, "Attack Speed", str(weapon.base_attack_speed))
+    for line in WeaponBuiltinEffects.builtin_tooltip_lines(weapon):
+        var split := _split_key_value(line)
+        _append_weapon_row(rows, humanize_effect_name(split[0]), split[1])
+    return rows
+
+
+static func _append_name_row(rows: Array, display_name: String) -> void:
+    var row := ItemCardRow.new()
+    row.kind = ItemCardRow.Kind.NAME
+    row.label = humanize_effect_name(str(display_name))
+    rows.append(row)
+
+
+static func _append_weapon_row(rows: Array, label: String, value: String) -> void:
+    var row := ItemCardRow.new()
+    row.kind = ItemCardRow.Kind.WEAPON
+    row.tone = _tone_for_value(value)
+    row.label = label
+    row.value = _signed(value)
+    rows.append(row)
+
+
+static func _append_stat_rows(rows: Array, modifiers: Dictionary, force_tone: int = -1) -> void:
+    for stat_name in modifiers:
+        var mod = modifiers[stat_name]
+        if typeof(mod) != TYPE_DICTIONARY:
+            continue
+        for mod_type in mod:
+            var value = mod[mod_type]
+            var row := ItemCardRow.new()
+            row.kind = ItemCardRow.Kind.STAT
+            row.stat_name = str(stat_name)
+            row.icon = Stats.get_stat_icon(str(stat_name))
+            # "percent" already shows up in the rendered value as a % sign, and
+            # "flat" is the default flavour, so only unusual kinds are named.
+            row.label = humanize_effect_name(str(stat_name))
+            if mod_type != "flat":
+                row.label += " %s" % str(mod_type)
+            if mod_type == "percent":
+                var shown := "%d%%" % round(float(value) * 100.0)
+                row.value = _signed(shown)
+                row.tone = force_tone if force_tone >= 0 else _tone_for_number(float(value))
+            else:
+                row.value = _signed(str(value))
+                row.tone = force_tone if force_tone >= 0 else _tone_for_number(_as_number(value))
+            rows.append(row)
+
+
+static func _append_effect_row(rows: Array, item: Item) -> void:
+    if not has_effect_scene(item):
+        return
+    var display: Dictionary = resolve_effect_display_for_item(item, item.effect_scene[0])
+    var effect_name := humanize_effect_name(str(display.get("name", "")))
+    if effect_name.is_empty():
+        return
+    var body_parts := PackedStringArray()
+    var text := str(display.get("text", ""))
+    if not text.is_empty():
+        body_parts.append(text)
+    var stats := str(display.get("stats", ""))
+    if not stats.is_empty():
+        body_parts.append(stats)
+    var row := ItemCardRow.new()
+    row.kind = ItemCardRow.Kind.EFFECT
+    row.text = " — ".join([effect_name] + Array(body_parts))
+    var trigger := str(display.get("trigger", ""))
+    if not trigger.is_empty():
+        row.text += " (on %s)" % humanize_trigger(trigger)
+    rows.append(row)
+
+
+static func _append_tradeoff_rows(rows: Array, modifiers: Dictionary) -> void:
+    _append_stat_rows(rows, modifiers, ItemCardRow.Tone.NEGATIVE)
+
+
+static func _append_buff_debuff_rows(rows: Array, item: Item, kind: int) -> void:
+    _append_name_row(rows, item.name)
+    var flavor := str(item.description)
+    if not flavor.is_empty() and is_clean_flavor(flavor):
+        var row := ItemCardRow.new()
+        row.kind = ItemCardRow.Kind.FLAVOR
+        row.text = _flavor_with_trigger(flavor, item)
+        rows.append(row)
+    var tone := ItemCardRow.Tone.POSITIVE if kind == ItemCardRow.Kind.BUFF else ItemCardRow.Tone.NEGATIVE
+    var payload := peek_packed_modifiers(item.effect_scene[0] if has_effect_scene(item) else null)
+    _append_stat_rows(rows, payload, tone)
+    _append_tradeoff_rows(rows, item.modifiers)
+
+
+## Splits "pierce: 1" into ["pierce", "1"]. Falls back to ["text", ""].
+static func _split_key_value(line: String) -> Array:
+    var idx := line.find(":")
+    if idx < 0:
+        return [line, ""]
+    return [line.substr(0, idx).strip_edges(), line.substr(idx + 1).strip_edges()]
+
+
+## Adds an explicit "+" to non-negative numbers so gains and losses read
+## the same way as the stat icons beside them.
+static func _signed(value: String) -> String:
+    var trimmed := value.strip_edges()
+    if trimmed.is_empty() or trimmed.begins_with("+") or trimmed.begins_with("-"):
+        return trimmed
+    # Whole floats render as "5.0" in GDScript; the trailing ".0" is noise on
+    # a stat line, so drop it. Values that are not whole keep full precision.
+    if trimmed.is_valid_float():
+        var number := trimmed.to_float()
+        if number == floorf(number):
+            trimmed = str(int(number))
+    return "+" + trimmed
+
+
+## Modifier payloads can hold ints, floats or pre-formatted strings.
+## Returns NAN for anything non-numeric so it falls back to NEUTRAL.
+static func _as_number(value) -> float:
+    if value is int or value is float:
+        return float(value)
+    return String(str(value)).to_float()
+
+
+## Tone comes from the numeric value, not the rendered string: a positive
+## float renders as "5.0" which never carries an explicit "+".
+static func _tone_for_number(number: float) -> int:
+    if number < 0.0:
+        return ItemCardRow.Tone.NEGATIVE
+    if number > 0.0:
+        return ItemCardRow.Tone.POSITIVE
+    return ItemCardRow.Tone.NEUTRAL
+
+
+static func _tone_for_value(value: String) -> int:
+    var trimmed := value.strip_edges()
+    if trimmed.begins_with("-"):
+        return ItemCardRow.Tone.NEGATIVE
+    if trimmed.begins_with("+"):
+        return ItemCardRow.Tone.POSITIVE
+    return ItemCardRow.Tone.NEUTRAL
+
+
 static func modifier_lines(modifiers: Dictionary) -> PackedStringArray:
     var lines := PackedStringArray()
     for stat_name in modifiers:

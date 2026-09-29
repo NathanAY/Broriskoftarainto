@@ -35,17 +35,16 @@ func test_card_has_icon_above_tooltip_text() -> void:
     # Rectangle card with icon holder, scrollable text and side-by-side buttons.
     assert_that(card).is_not_null()
     assert_bool(card.custom_minimum_size.x >= 150.0).is_true()
-    assert_that(card.get_node("Margin/VBox/IconHolder")).is_not_null()
+    assert_that(card.get_node("Margin/VBox/Header/IconPlate/IconHolder")).is_not_null()
     assert_that(card.get_node("Margin/VBox/InfoScroll")).is_not_null()
     assert_that(card.get_node("Margin/VBox/InfoScroll/InfoLabel")).is_not_null()
 
     var vbox: VBoxContainer = card.get_node("Margin/VBox")
-    assert_int(vbox.get_node("IconHolder").get_index()).is_less(vbox.get_node("InfoScroll").get_index())
+    assert_int(vbox.get_node("Header").get_index()).is_less(vbox.get_node("InfoScroll").get_index())
     assert_int(vbox.get_node("InfoScroll").get_index()).is_less(vbox.get_node("Buttons").get_index())
 
-    # Text matches ItemTooltip formatting.
-    var expected: String = "\n\n".join(ItemTooltip.tooltip_lines(item))
-    assert_str(card.info_label.text).is_equal(expected)
+    # Body text is built from the structured card_rows() builder.
+    assert_str(card.info_label.text).is_equal(card._build_bbcode(ItemTooltip.card_rows(item)))
 
     # Icon is placed at the top of the card.
     assert_int(card.icon_holder.get_child_count()).is_equal(1)
@@ -80,13 +79,14 @@ func test_shop_items_are_horizontal_cards() -> void:
     var shop_card: ShopItemCard = shop.items_container.get_child(0)
     assert_str(shop_card.primary_button.text).is_equal("Buy (1)")
     assert_str(shop_card.secondary_button.text).is_equal("Lock")
-    assert_str(shop_card.info_label.text).is_equal("\n\n".join(ItemTooltip.tooltip_lines(item)))
+    assert_str(shop_card.name_label.text).is_equal(item.name)
+    assert_int(shop_card.price).is_equal(1)
     assert_int(shop_card.icon_holder.get_child_count()).is_equal(1)
 
     var pickup_card: ShopItemCard = shop.items_container.get_child(1)
     assert_str(pickup_card.primary_button.text).is_equal("Take")
     assert_str(pickup_card.secondary_button.text).is_equal("Sell (+1)")
-    assert_str(pickup_card.info_label.text).is_equal("\n\n".join(ItemTooltip.tooltip_lines(item)))
+    assert_str(pickup_card.name_label.text).is_equal(item.name)
 
     shop.character.free()
     shop.free()
@@ -149,7 +149,193 @@ func test_card_text_is_scrollable() -> void:
     assert_int(scroll.size_flags_vertical & Control.SIZE_EXPAND_FILL).is_equal(Control.SIZE_EXPAND_FILL)
 
     # Header and buttons stay outside the scrollable area.
-    assert_that(card.icon_holder.get_parent().get_parent()).is_same(card.get_node("Margin"))
     assert_that(card.primary_button.get_parent().get_parent()).is_same(card.get_node("Margin/VBox"))
 
     card.free()
+
+
+# --- new card structure -----------------------------------------------------
+
+func test_card_shows_item_name_in_header() -> void:
+    var card: ShopItemCard = load(CARD_SCENE).instantiate()
+    add_child(card)
+    var item: Item = load(PLUS_DAMAGE_ITEM)
+    card.set_item_display(item)
+
+    assert_str(card.name_label.text).is_equal("Damage Amulet")
+    # The name is not repeated in the body.
+    assert_bool(card.info_label.text.contains("Damage Amulet")).is_false()
+
+    card.free()
+
+
+func test_card_marks_only_weapon_cards() -> void:
+    var card: ShopItemCard = load(CARD_SCENE).instantiate()
+    add_child(card)
+
+    card.set_item_display(load(PLUS_DAMAGE_ITEM))
+    assert_bool(card.is_weapon).is_false()
+    assert_bool(card.type_badge.visible).is_false()
+
+    card.set_item_display(load("res://src/Resources/weapons/Pistol.tres"))
+    assert_bool(card.is_weapon).is_true()
+    assert_bool(card.type_badge.visible).is_true()
+
+    card.free()
+
+
+func test_card_rows_map_positive_and_negative_tones() -> void:
+    var positive: Array = ItemTooltip.card_rows(load(PLUS_DAMAGE_ITEM))
+    assert_int(positive.size()).is_equal(2)  # name + one flat stat
+    var stat_row: ItemCardRow = positive[1]
+    assert_int(stat_row.kind).is_equal(ItemCardRow.Kind.STAT)
+    assert_int(stat_row.tone).is_equal(ItemCardRow.Tone.POSITIVE)
+    assert_str(stat_row.value).is_equal("+5")
+    assert_str(stat_row.label).is_equal("Damage")
+    assert_that(stat_row.icon).is_not_null()
+
+    # A negative modifier reads as a loss.
+    var negative: Array = ItemTooltip.card_rows(load("res://src/Resources/items/ProjSlow.tres"))
+    var negative_row: ItemCardRow = negative[1]
+    assert_int(negative_row.tone).is_equal(ItemCardRow.Tone.NEGATIVE)
+    assert_str(negative_row.value).is_equal("-0.5")
+
+    # Buff payload rows are always a gain, even when the effect is a slow.
+    var buff: Array = ItemTooltip.card_rows(load("res://src/Resources/items/HealOnEvent.tres"))
+    assert_int(buff.size()).is_greater(1)
+
+
+func test_card_body_colors_by_tone() -> void:
+    var card: ShopItemCard = load(CARD_SCENE).instantiate()
+    add_child(card)
+    card.set_item_display(load(PLUS_DAMAGE_ITEM))
+
+    # The positive stat renders with the green tone color, not the neutral one.
+    assert_str(card.info_label.text).contains(ShopItemCard.COLOR_POSITIVE.to_html(false))
+    assert_str(card.info_label.text).contains("+5 Damage")
+
+    card.free()
+
+
+func test_card_price_plate_reflects_price() -> void:
+    var card: ShopItemCard = load(CARD_SCENE).instantiate()
+    add_child(card)
+
+    card.set_price(4)
+    assert_str(card.price_label.text).is_equal("4 coins")
+
+    card.free()
+
+
+func test_card_disables_buy_when_unaffordable() -> void:
+    var card: ShopItemCard = load(CARD_SCENE).instantiate()
+    add_child(card)
+
+    card.set_affordable(false)
+    assert_bool(card.primary_button.disabled).is_true()
+
+    card.set_affordable(true)
+    assert_bool(card.primary_button.disabled).is_false()
+
+    card.free()
+
+
+func test_card_locked_state_is_reflected() -> void:
+    var shop = load(SHOP_SCENE).instantiate()
+    add_child(shop)
+    shop.character = _build_character()
+    shop._shop_entry_id_counter = 0
+
+    var item: Item = load(PLUS_DAMAGE_ITEM)
+    shop._add_shop_item_entry(item)
+    var card: ShopItemCard = shop.items_container.get_child(0)
+
+    assert_str(card.secondary_button.text).is_equal("Lock")
+    card.secondary_button.pressed.emit()
+    assert_str(card.secondary_button.text).is_equal("Unlock")
+    assert_int(shop.locked_items.size()).is_equal(1)
+
+    card.secondary_button.pressed.emit()
+    assert_str(card.secondary_button.text).is_equal("Lock")
+    assert_int(shop.locked_items.size()).is_equal(0)
+
+    shop.character.free()
+    shop.free()
+
+
+func test_shop_disables_buy_when_money_is_short() -> void:
+    var shop = load(SHOP_SCENE).instantiate()
+    add_child(shop)
+    var character := _build_character()
+    shop.character = character
+    character.stats = character.get_node("Stats")
+    character.get_node("Stats").set_base_stat("money", 0)
+
+    # Weapons cost 5, so with 0 money the card must be unbuyable.
+    shop._add_shop_item_entry(load("res://src/Resources/weapons/Pistol.tres"))
+    var card: ShopItemCard = shop.items_container.get_child(0)
+    assert_int(card.price).is_equal(5)
+    assert_bool(card.primary_button.disabled).is_true()
+
+    # A disabled card must not spend money when pressed anyway.
+    card.primary_button.pressed.emit()
+    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(0.0)
+
+    # With 6 money a 1-cost stat item is affordable and the purchase succeeds.
+    character.get_node("Stats").set_base_stat("money", 6)
+    shop._add_shop_item_entry(load(PLUS_DAMAGE_ITEM))
+    var cheap: ShopItemCard = shop.items_container.get_child(1)
+    assert_int(cheap.price).is_equal(1)
+    assert_bool(cheap.primary_button.disabled).is_false()
+    cheap.primary_button.pressed.emit()
+    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(5.0)
+
+    # With 5 money the 5-cost weapon is affordable again.
+    shop._refresh_affordability()
+    assert_bool(card.primary_button.disabled).is_false()
+
+    character.free()
+    shop.free()
+
+
+func test_selling_pickup_refreshes_other_cards_affordability() -> void:
+    var shop = load(SHOP_SCENE).instantiate()
+    add_child(shop)
+    var character := _build_character()
+    shop.character = character
+    character.stats = character.get_node("Stats")
+    character.get_node("Stats").set_base_stat("money", 0)
+
+    # A 5-cost weapon the player cannot afford yet.
+    shop._add_shop_item_entry(load("res://src/Resources/weapons/Pistol.tres"))
+    var weapon_card: ShopItemCard = shop.items_container.get_child(0)
+    assert_bool(weapon_card.primary_button.disabled).is_true()
+
+    # Selling a pickup worth 2 still leaves the 5-cost weapon unaffordable.
+    shop._add_item_entry(load("res://src/Resources/items/CritGlass.tres"))
+    var first_pickup: ShopItemCard = shop.items_container.get_child(1)
+    first_pickup.secondary_button.pressed.emit()
+    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(2.0)
+    assert_bool(weapon_card.primary_button.disabled).is_true()
+
+    # Sold cards free on a tween, so look the new pickup up by identity rather
+    # than by index.
+    shop._add_item_entry(load("res://src/Resources/items/CritGlass.tres"))
+    for child in shop.items_container.get_children():
+        if child != first_pickup and child is ShopItemCard and not child.has_meta("id"):
+            (child as ShopItemCard).secondary_button.pressed.emit()
+            break
+    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(4.0)
+    assert_bool(weapon_card.primary_button.disabled).is_true()
+
+    # One more sale crosses the 5 coin threshold and re-enables the weapon.
+    shop._add_item_entry(load("res://src/Resources/items/CritGlass.tres"))
+    for child in shop.items_container.get_children():
+        if child is ShopItemCard and not child.has_meta("id") and not child.is_queued_for_deletion():
+            (child as ShopItemCard).secondary_button.pressed.emit()
+            break
+    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(6.0)
+    assert_bool(weapon_card.primary_button.disabled).is_false()
+
+    character.free()
+    shop.free()

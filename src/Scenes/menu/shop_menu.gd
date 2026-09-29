@@ -39,6 +39,7 @@ func show_menu():
     _update_money_label()
     _update_stats() # Update stats when opening the shop
     _update_character_info() # Update items and weapons
+    _refresh_affordability()
 
 func _update_character_info() -> void:
     if not character: return
@@ -112,21 +113,25 @@ func _add_item_entry(item: Item):
     items_container.add_child(card)
     card.set_item_display(item)
     card.primary_button.text = "Take"
-    card.secondary_button.text = "Sell (+%d)" % price_analyzer.get_sell_price(item)
+    var sell_price: int = price_analyzer.get_sell_price(item)
+    card.secondary_button.text = "Sell (+%d)" % sell_price
+    card.set_price(sell_price)
+    card.set_affordable(true)  # pickups are free to take
     card.primary_button.pressed.connect(func():
         var holder: ItemHolder = character.get_node_or_null("ItemHolder")
         if holder:
             holder.add_item(item)
-        card.queue_free()
+        card.fade_out_and_free()
         _update_stats() # Update stats after taking item
         _update_character_info()
         _check_phase_progression()
     )
     card.secondary_button.pressed.connect(func():
         character.stats.set_base_stat("money", character.stats.stats.get("money", 0) + price_analyzer.get_sell_price(item))
-        card.queue_free()
+        card.fade_out_and_free()
         _update_money_label()
         _update_stats() # Update stats after selling
+        _refresh_affordability()
         _check_phase_progression()
     )
 
@@ -142,8 +147,10 @@ func _add_shop_item_entry(offer: Resource, existing_id: String = ""):
     # Buy button
     var price: int = price_analyzer.get_price(offer)
     card.primary_button.text = "Buy (%d)" % price
+    card.set_price(price)
+    card.set_affordable(_current_money() >= price)
     card.primary_button.pressed.connect(func():
-        var money = character.stats.stats.get("money", 0)
+        var money = _current_money()
         if money >= price:
             character.stats.set_base_stat("money", money - price)
             if offer is BaseWeapon:
@@ -154,25 +161,50 @@ func _add_shop_item_entry(offer: Resource, existing_id: String = ""):
                 var holder: ItemHolder = character.get_node_or_null("ItemHolder")
                 if holder:
                     holder.add_item(offer as Item)
-            card.queue_free()
+            card.fade_out_and_free()
             # remove this exact entry from locked list if it was there
             locked_items = locked_items.filter(func(li): return li.id != entry_id)
             _update_money_label()
             _update_stats() # Update stats after buying
             _update_character_info()
+            _refresh_affordability()
+            _refill_shop_items()
     )
 
     # Lock/Unlock button
     var is_locked = locked_items.any(func(li): return li.id == entry_id)
     card.secondary_button.text = "Unlock" if is_locked else "Lock"
+    card.set_locked(is_locked)
     card.secondary_button.pressed.connect(func():
         if locked_items.any(func(li): return li.id == entry_id):
             locked_items = locked_items.filter(func(li): return li.id != entry_id)
             card.secondary_button.text = "Lock"
+            card.set_locked(false)
         else:
             locked_items.append({"id": entry_id, "item": offer})
             card.secondary_button.text = "Unlock"
+            card.set_locked(true)
     )
+
+
+## Re-applies the affordable state to every card in the row. Called after any
+## transaction that changes the player's money.
+func _refresh_affordability() -> void:
+    var money := _current_money()
+    for child in items_container.get_children():
+        # Pickup-phase cards have no entry id and are always free to take.
+        if not child.has_meta("id"):
+            continue
+        var card := child as ShopItemCard
+        if card:
+            card.set_money(money)
+            card.set_affordable(money >= card.price)
+
+
+func _current_money() -> float:
+    if character == null or not character.has_node("Stats"):
+        return 0.0
+    return float(character.get_node("Stats").stats.get("money", 0))
 
 
 # ------------------- Shared -------------------

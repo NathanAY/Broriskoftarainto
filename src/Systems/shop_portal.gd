@@ -16,20 +16,23 @@ func _populate_menu(menu: Control):
 func default_action():
     var shop: ShopMenu = get_tree().current_scene.get_node_or_null("UI/ShopMenu")
     if shop:
-        var character = get_tree().current_scene.get_node_or_null("Character")
-        shop.character = character
-        _clean_game_area()
+        shop.character = get_tree().current_scene.get_node_or_null("Character")
+        # Show the menu FIRST: show_menu() resets the menu to phase 1, so the
+        # pickup harvest (which can complete phase 1 immediately) must run after.
         shop.show_menu()
+        _clean_game_area(shop)
     queue_free()  # remove portal after entering shop
 
-func _clean_game_area():
+func _clean_game_area(shop: ShopMenu):
     # cleanup stage-specific nodes (death marks, altars etc.)
     var death_marks_parent = get_tree().current_scene.get_node_or_null("Nodes/death_marks")
-    for child in death_marks_parent.get_children():
-        child.queue_free()
+    if death_marks_parent:
+        for child in death_marks_parent.get_children():
+            child.queue_free()
     var altars = get_tree().current_scene.get_node_or_null("Nodes/altars")
-    for child in altars.get_children():
-        child.queue_free()
+    if altars:
+        for child in altars.get_children():
+            child.queue_free()
     # collect pickups
     var pickups = get_tree().current_scene.get_node_or_null("Nodes/pickups")
     if pickups:
@@ -38,9 +41,8 @@ func _clean_game_area():
             items.append(child.item)
             child.queue_free()
 
-        var menu: ShopMenu = get_tree().current_scene.get_node_or_null("UI/ShopMenu")
-        if menu:
-            menu.load_items(items)
+        if shop:
+            shop.load_items(items)
 
 func cancel_action():
     # Player just leaves without going to shop

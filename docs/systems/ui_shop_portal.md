@@ -16,6 +16,19 @@ Key scripts / scenes
 - Tooltip sizing gotcha: a `ScrollContainer` reports a zero minimum size on a scrolling axis, which collapses a self-sizing tooltip's body. The tooltip therefore calls `hug_body_content()` (disables both scroll modes so the container reports the label's real height) and gives `InfoLabel` a definite `custom_minimum_size.x`. Without that width, `autowrap` breaks every word onto its own line and the measured height explodes. The shop card keeps its scrollable body because it has a fixed height.
 
 Data flow
+- The shop menu runs in **two phases**, tracked by `ShopMenu.phase`:
+  - **Phase 1 (pickups).** `ShopPortal.default_action()` harvests `Nodes/pickups` and calls `ShopMenu.load_items(items)`. Every pickup becomes a `Take` / `Sell (+n)` card in `ItemsList`.
+  - **Phase 2 (shop).** `_check_phase_progression()` fires when no pickup card is left; `_start_shop_phase()` sets `phase = 2`, reveals `RerollButton`, and fills `ItemsList` with 4 generated offers (`Buy (n)` / `Lock`).
+- **The row has a fixed number of slots, centered in its area.** `SHOP_SLOT_COUNT` (4) slots are always shown and `ItemsList` has `alignment = 1` (`ALIGNMENT_CENTER`), so the row sits in the middle of `ShopArea` instead of against the left border. `_sync_empty_slots()` pads the row with inert dim placeholders (`EMPTY_SLOT_META`, `EMPTY_SLOT_SIZE` matching `ShopItemCard`'s `custom_minimum_size`) after every change; the placeholder is a bare blank panel with no label. `ShopItemCard` uses `SIZE_SHRINK_BEGIN` rather than `EXPAND_FILL` so a short row does not stretch the remaining cards. Keep `EMPTY_SLOT_SIZE` in sync with the card scene.
+- **Buying never backfills.** Buying an offer leaves its slot empty for the rest of the stage; offers are only generated when the shop starts (`_start_shop_phase()`) or when the player rerolls (`_refill_shop_items()`, called from `_on_reroll_pressed()`). Reroll costs 1 money and keeps locked entries.
+- **A resolved card leaves a gap that the row re-packs differently per phase** (`_resolve_card()`):
+  - **Phase 1 (pickups) compacts left.** The remaining pickups slide into the gap and the blanks are trailing, so the player never has to scroll right to reach the rest of the pile. This falls out of `_sync_empty_slots()`, which only ever appends.
+  - **Phase 2 (shop) keeps slot positions.** `_resolve_card()` records `card.get_index()` and inserts the placeholder at that exact index via `_insert_empty_slot_at()`, so buying offer #2 blanks slot #2 and offers 3 and 4 do not jump around.
+  - `_sync_empty_slots()` is therefore purely additive and idempotent -- it only tops the row up when short, never moving or removing existing slots. Callers that reset the whole row (`load_items()`, `_start_shop_phase()`, `_on_reroll_pressed()`) free every child first.
+  - Either way the card is first reparented out of `ItemsList` onto the `ShopMenu` `CanvasLayer` (keeping its on-screen rect) before `fade_out_and_free()`, so the row never briefly holds an extra child and nothing shifts during the fade.
+- Two ordering rules the flow depends on, both easy to break:
+  1. **`ShopPortal.default_action()` must call `shop.show_menu()` _before_ `_clean_game_area()`.** `show_menu()` resets the menu to phase 1 and hides the reroll button, so harvesting first lets `load_items()` finish phase 1 only for `show_menu()` to rewind it. `_clean_game_area()` dereferences `Nodes/death_marks` and `Nodes/altars`, so it takes the `ShopMenu` as an argument rather than re-resolving the node.
+  2. **`fade_out_and_free()` is asynchronous** (0.15s tween before `queue_free()`), so a taken/sold/bought card can still be a live child when `_check_phase_progression()` runs. `ShopItemCard.is_resolving()` marks it, and `ShopMenu._active_item_count()` skips resolving cards, queued-for-deletion children and empty slots. Counting raw children leaves the shop permanently stuck in phase 1 with no offers and no reroll button.
 - Inputs: `StageManager` spawns portal and possibly connects shop menu signals.
 - Processing: UI selection in starter menu writes `GlobalGameState.starting_weapons` and `starting_items` and starts the game scene; shop menu connects back to `StageManager` via signal to continue.
 - Outputs: triggers `StageManager.start_new_loop()` when player accepts the shop choices.
@@ -26,3 +39,4 @@ Dependencies
 Known limitations / TODOs
 - `starter_menu.gd` reads resources using DirAccess and assumes `.tres` layout; may fail if resources move.
 - `GlobalGameState` implementation not found in repository (assumed autoload singleton).
+- Reroll cost is a hard-coded `1` in `_on_reroll_pressed()`, unlike `WEAPON_CHANCE` which is a constant; locked entries are capped at `SHOP_SLOT_COUNT` when displayed, so extra locks persist but are not shown.

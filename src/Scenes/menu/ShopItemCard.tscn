@@ -55,7 +55,7 @@ corner_radius_bottom_left = 6
 
 [node name="ShopItemCard" type="PanelContainer" unique_id=1729325445]
 custom_minimum_size = Vector2(220, 340)
-size_flags_horizontal = 3
+size_flags_horizontal = 0
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 script = ExtResource("1_card")

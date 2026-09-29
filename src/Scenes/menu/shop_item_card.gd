@@ -25,6 +25,7 @@ var money: float = 0.0
 var _locked: bool = false
 var _affordable: bool = true
 var _hovered: bool = false
+var _resolving: bool = false
 
 
 func _ready() -> void:
@@ -76,10 +77,18 @@ func set_affordable(affordable: bool) -> void:
 ## Fades the card out and frees it. Used when an offer is bought, taken or
 ## sold so the row does not snap shut.
 func fade_out_and_free() -> void:
+    _resolving = true
     mouse_filter = Control.MOUSE_FILTER_IGNORE
     var tween := create_tween()
     tween.tween_property(self, "modulate:a", 0.0, FADE_OUT_TIME)
     tween.tween_callback(queue_free)
+
+
+## True once this card has been taken/sold/bought. The node is still alive
+## during the fade-out tween, so callers that count "live" offers must not
+## count a card that is already being resolved.
+func is_resolving() -> bool:
+    return _resolving
 
 
 func _refresh_price_hint() -> void:

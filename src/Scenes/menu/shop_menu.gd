@@ -17,6 +17,16 @@ const SHOP_ITEM_CARD_SCENE: PackedScene = preload("res://src/Scenes/menu/ShopIte
 
 const WEAPON_CHANCE: float = 0.1
 
+## Number of slots in the shop row. The row always occupies this many slots:
+## an empty placeholder is shown for every slot without an offer, so cards
+## never resize when an offer is bought.
+const SHOP_SLOT_COUNT: int = 4
+
+## Placeholder geometry. Must match `ShopItemCard`'s `custom_minimum_size`
+## so an empty slot is exactly the width of a filled one.
+const EMPTY_SLOT_SIZE: Vector2 = Vector2(220, 340)
+const EMPTY_SLOT_META: String = "empty_slot"
+
 var staged_items: Array = []
 var locked_items: Array = []   # items that persist between shops
 var character: Character = null
@@ -26,6 +36,7 @@ var value_labels: Dictionary = {}  # stat_name -> Label
 
 func _ready():
     visible = false
+    next_stage_button.visible = false
     reroll_button.visible = false
     next_stage_button.pressed.connect(_on_next_stage_pressed)
     reroll_button.pressed.connect(_on_reroll_pressed)
@@ -34,6 +45,7 @@ func show_menu():
     character = GlobalGameState.current_character
     get_tree().paused = true
     visible = true
+    next_stage_button.visible = false
     reroll_button.visible = false
     phase = 1
     _update_money_label()
@@ -104,7 +116,85 @@ func load_items(items: Array):
         _add_item_entry(item)
     _update_money_label()
     _update_stats() # Update stats when loading items
-    _check_phase_progression()
+    # Pad the row only if we are staying in phase 1: `_start_shop_phase()`
+    # already lays out its own row, and padding first would queue placeholders
+    # that are immediately thrown away.
+    if not _check_phase_progression():
+        _sync_empty_slots()
+
+# ------------------- SHOP ROW SLOTS -------------------
+
+## Builds a dim, inert placeholder that occupies one shop slot. Intentionally
+## empty -- a card-sized blank panel, no text.
+func _make_empty_slot() -> PanelContainer:
+    var slot := PanelContainer.new()
+    slot.custom_minimum_size = EMPTY_SLOT_SIZE
+    slot.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+    slot.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+    slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    slot.set_meta(EMPTY_SLOT_META, true)
+
+    var style := StyleBoxFlat.new()
+    style.bg_color = Color(0.09, 0.098, 0.125, 0.55)
+    style.border_color = Color(0.19, 0.207, 0.254, 1)
+    style.set_border_width_all(2)
+    style.set_corner_radius_all(8)
+    slot.add_theme_stylebox_override("panel", style)
+    return slot
+
+
+func _is_empty_slot(node: Node) -> bool:
+    return node.has_meta(EMPTY_SLOT_META)
+
+
+func _empty_slot_count() -> int:
+    var cnt := 0
+    for child in items_container.get_children():
+        if not child.is_queued_for_deletion() and _is_empty_slot(child):
+            cnt += 1
+    return cnt
+
+
+## Inserts a placeholder at a specific slot position. Used when an offer is
+## bought so the blank slot takes the place of the card that left, instead of
+## everything to its right shifting left.
+func _insert_empty_slot_at(index: int) -> void:
+    var slot := _make_empty_slot()
+    items_container.add_child(slot)
+    items_container.move_child(slot, clampi(index, 0, items_container.get_child_count()))
+
+
+## Pads the row out to SHOP_SLOT_COUNT. Purely additive and idempotent: it
+## never moves or removes an existing slot, so positions set by
+## `_insert_empty_slot_at()` survive. Callers that reset the whole row free
+## every child first.
+func _sync_empty_slots() -> void:
+    var missing: int = SHOP_SLOT_COUNT - _active_item_count() - _empty_slot_count()
+    for i in range(maxi(missing, 0)):
+        _insert_empty_slot_at(items_container.get_child_count())
+
+
+## Fades a card out without it occupying a slot: the card is moved out of the
+## layout (keeping its on-screen rect) so the row never briefly holds an extra
+## child and the cards to its right do not shift during the fade.
+##
+## The row then re-packs itself, differently per phase:
+## - Phase 1 (pickups) compacts left, so the remaining pickups slide into the
+##   gap instead of leaving a hole the player has to scroll past.
+## - Phase 2 (shop) keeps slot positions, so the blank marks the offer that was
+##   bought and the offers to its right do not jump around.
+func _resolve_card(card: ShopItemCard) -> void:
+    var index: int = card.get_index()
+    var rect: Rect2 = card.get_global_rect()
+    card.reparent(self)
+    card.global_position = rect.position
+    card.size = rect.size
+    card.fade_out_and_free()
+    if phase == 2:
+        _insert_empty_slot_at(index)
+    else:
+        _sync_empty_slots()
+
 
 # ------------------- PHASE 1 (collected pickups) -------------------
 func _add_item_entry(item: Item):
@@ -121,14 +211,14 @@ func _add_item_entry(item: Item):
         var holder: ItemHolder = character.get_node_or_null("ItemHolder")
         if holder:
             holder.add_item(item)
-        card.fade_out_and_free()
+        _resolve_card(card)
         _update_stats() # Update stats after taking item
         _update_character_info()
         _check_phase_progression()
     )
     card.secondary_button.pressed.connect(func():
         character.stats.set_base_stat("money", character.stats.stats.get("money", 0) + price_analyzer.get_sell_price(item))
-        card.fade_out_and_free()
+        _resolve_card(card)
         _update_money_label()
         _update_stats() # Update stats after selling
         _refresh_affordability()
@@ -161,14 +251,13 @@ func _add_shop_item_entry(offer: Resource, existing_id: String = ""):
                 var holder: ItemHolder = character.get_node_or_null("ItemHolder")
                 if holder:
                     holder.add_item(offer as Item)
-            card.fade_out_and_free()
+            _resolve_card(card)
             # remove this exact entry from locked list if it was there
             locked_items = locked_items.filter(func(li): return li.id != entry_id)
             _update_money_label()
             _update_stats() # Update stats after buying
             _update_character_info()
             _refresh_affordability()
-            _refill_shop_items()
     )
 
     # Lock/Unlock button
@@ -256,21 +345,35 @@ func _update_stats() -> void:
         stats_container.add_child(hbox)
         value_labels[stat_name] = value_label
 
-func _check_phase_progression():
+## Advances to the shop phase when the pickup row is empty.
+## Returns true if the shop phase was started.
+func _check_phase_progression() -> bool:
     # use active count (exclude queued-for-deletion nodes)
     if _active_item_count() == 0 and phase == 1:
         _start_shop_phase()
+        return true
+    return false
 
-# helper: count active (not queued) children
+# helper: count offers that occupy a slot (excludes placeholders and cards
+# that are on their way out).
 func _active_item_count() -> int:
     var cnt := 0
     for child in items_container.get_children():
-        if not child.is_queued_for_deletion():
-            cnt += 1
+        if child.is_queued_for_deletion():
+            continue
+        if _is_empty_slot(child):
+            continue
+        # A card taken/sold/bought is still alive while its fade-out tween
+        # runs, so it must not keep the shop stuck in phase 1.
+        var card := child as ShopItemCard
+        if card and card.is_resolving():
+            continue
+        cnt += 1
     return cnt
 
 func _start_shop_phase():
     phase = 2
+    next_stage_button.visible = true
     reroll_button.visible = true
     # clear visuals (deferred)
     for child in items_container.get_children():
@@ -278,27 +381,27 @@ func _start_shop_phase():
 
     if not item_factory:
         push_warning("ShopMenu: No item_factory assigned!")
+        _sync_empty_slots()
         return
 
-    # show locked items first (cap to 4 to avoid overflow)
-    var locked_to_show = min(locked_items.size(), 4)
+    # show locked items first (cap to the row width to avoid overflow)
+    var locked_to_show = min(locked_items.size(), SHOP_SLOT_COUNT)
     for i in range(locked_to_show):
         _add_shop_item_entry(locked_items[i].get("item"), locked_items[i].get("id", ""))
 
-    # fill up to 4 active items
-    while _active_item_count() < 4:
-        var new_offer: Resource = _generate_shop_offer()
-        if not new_offer:
-            break
-        _add_shop_item_entry(new_offer)
+    # fill the remaining slots
+    _refill_shop_items()
 
-# ensure shop stays at 4 items after buys/locks
+
+## Tops the row back up to SHOP_SLOT_COUNT offers. Only used when the shop
+## starts or the player rerolls -- buying leaves the slot empty on purpose.
 func _refill_shop_items():
-    while _active_item_count() < 4:
+    while _active_item_count() < SHOP_SLOT_COUNT:
         var new_offer: Resource = _generate_shop_offer()
         if not new_offer:
             break
         _add_shop_item_entry(new_offer)
+    _sync_empty_slots()
 
 # 10% weapon chance, otherwise a generated item.
 func _generate_shop_offer() -> Resource:

@@ -435,7 +435,9 @@ func test_hover_shows_and_hides_tooltip() -> void:
     var row: Control = ui.items_container.get_child(0)
     row.emit_signal("mouse_entered")
     assert_bool(ui.tooltip.visible).is_true()
-    assert_str(ui.tooltip.label.text).contains("Damage Amulet")
+    # The name lives in the tooltip header; the body carries the stat rows.
+    assert_str(ui.tooltip.name_label.text).contains("Damage Amulet")
+    assert_str(ui.tooltip.label.text).contains("+5 Damage")
 
     row.emit_signal("mouse_exited")
     assert_bool(ui.tooltip.visible).is_false()
@@ -459,7 +461,8 @@ func test_tooltip_ui_bind_to_row() -> void:
 
     row.emit_signal("mouse_entered")
     assert_bool(tooltip_ui.visible).is_true()
-    assert_str(tooltip_ui.label.text).contains("name: Damage Amulet")
+    assert_str(tooltip_ui.name_label.text).contains("Damage Amulet")
+    assert_str(tooltip_ui.label.text).contains("+5 Damage")
 
     row.emit_signal("mouse_exited")
     assert_bool(tooltip_ui.visible).is_false()
@@ -485,7 +488,8 @@ func test_shop_menu_character_info_tooltips() -> void:
     var item_row: Control = shop.collected_items_container.get_child(0)
     item_row.emit_signal("mouse_entered")
     assert_bool(shop.tooltip.visible).is_true()
-    assert_str(shop.tooltip.label.text).contains("name: Damage Amulet")
+    assert_str(shop.tooltip.name_label.text).contains("Damage Amulet")
+    assert_str(shop.tooltip.label.text).contains("+5 Damage")
     item_row.emit_signal("mouse_exited")
     assert_bool(shop.tooltip.visible).is_false()
 
@@ -494,7 +498,8 @@ func test_shop_menu_character_info_tooltips() -> void:
     var weapon_row: Control = shop.weapons_container.get_child(0)
     weapon_row.emit_signal("mouse_entered")
     assert_bool(shop.tooltip.visible).is_true()
-    assert_str(shop.tooltip.label.text).contains("name: Pistol")
+    assert_str(shop.tooltip.name_label.text).contains("Pistol")
+    assert_str(shop.tooltip.label.text).contains("+400 Range")
     weapon_row.emit_signal("mouse_exited")
     assert_bool(shop.tooltip.visible).is_false()
 
@@ -536,6 +541,178 @@ func test_tooltip_ui_bind_to_row_text() -> void:
 
     row.free()
     tooltip_ui.free()
+
+
+func test_tooltip_body_hugs_its_content() -> void:
+    # A ScrollContainer reports zero minimum height on a scrolling axis, which
+    # would collapse a self-sizing tooltip. Disabling scroll and giving the
+    # label a definite wrap width is what keeps the body visible.
+    var tooltip_ui = load("res://src/ui/TooltipUi.tscn").instantiate()
+    add_child(tooltip_ui)
+    tooltip_ui.show_for(load(PLUS_DAMAGE_ITEM))
+
+    assert_int(tooltip_ui.info_scroll.vertical_scroll_mode).is_equal(ScrollContainer.SCROLL_MODE_DISABLED)
+    assert_int(tooltip_ui.info_scroll.horizontal_scroll_mode).is_equal(ScrollContainer.SCROLL_MODE_DISABLED)
+    # A zero width would make autowrap break every word onto its own line,
+    # inflating the measured height.
+    assert_float(tooltip_ui.info_label.custom_minimum_size.x).is_greater(0.0)
+    # The scroll area and the panel must both report a real height, otherwise
+    # the body collapses to nothing and nothing is drawn.
+    assert_float(tooltip_ui.info_scroll.get_minimum_size().y).is_greater(0.0)
+    assert_float(tooltip_ui.get_combined_minimum_size().y).is_greater(0.0)
+
+    tooltip_ui.free()
+
+
+func test_tooltip_hides_header_chrome_for_text_hints() -> void:
+    var tooltip_ui = load("res://src/ui/TooltipUi.tscn").instantiate()
+    add_child(tooltip_ui)
+
+    tooltip_ui.show_for(load(PLUS_DAMAGE_ITEM))
+    assert_bool(tooltip_ui.icon_plate.visible).is_true()
+    assert_bool(tooltip_ui.separator.visible).is_true()
+
+    tooltip_ui.show_text("just a hint")
+    assert_bool(tooltip_ui.icon_plate.visible).is_false()
+    assert_bool(tooltip_ui.separator.visible).is_false()
+    assert_str(tooltip_ui.name_label.text).is_empty()
+
+    # Going back to a resource restores the header.
+    tooltip_ui.show_for(load(PLUS_DAMAGE_ITEM))
+    assert_bool(tooltip_ui.icon_plate.visible).is_true()
+    assert_bool(tooltip_ui.separator.visible).is_true()
+
+    tooltip_ui.free()
+
+
+# --- shared ItemDisplayPanel ------------------------------------------------
+
+func test_tooltip_and_card_share_the_same_base() -> void:
+    # Both are the same widget at two scales, so the shared rendering lives in
+    # one place instead of being copy-pasted.
+    var tooltip_ui = load("res://src/ui/TooltipUi.tscn").instantiate()
+    add_child(tooltip_ui)
+    var card = load("res://src/Scenes/menu/ShopItemCard.tscn").instantiate()
+    add_child(card)
+
+    assert_that(tooltip_ui is ItemDisplayPanel).is_true()
+    assert_that(card is ItemDisplayPanel).is_true()
+    assert_that(card is TooltipUi).is_false()
+
+    # Same node skeleton, so the header/body slots resolve identically.
+    for panel in [tooltip_ui, card]:
+        assert_that(panel.get_node("Margin/VBox/Header/IconPlate/IconHolder")).is_not_null()
+        assert_that(panel.get_node("Margin/VBox/InfoScroll/InfoLabel")).is_not_null()
+        assert_that(panel.name_label).is_same(panel.get_node("Margin/VBox/Header/NameBox/NameLabel"))
+
+    tooltip_ui.free()
+    card.free()
+
+
+func test_tooltip_is_smaller_than_card() -> void:
+    var tooltip_ui = load("res://src/ui/TooltipUi.tscn").instantiate()
+    add_child(tooltip_ui)
+    var card = load("res://src/Scenes/menu/ShopItemCard.tscn").instantiate()
+    add_child(card)
+
+    assert_bool(tooltip_ui.custom_minimum_size.x < card.custom_minimum_size.x).is_true()
+    var tip_icon: Vector2 = tooltip_ui.get_node("Margin/VBox/Header/IconPlate").custom_minimum_size
+    var card_icon: Vector2 = card.get_node("Margin/VBox/Header/IconPlate").custom_minimum_size
+    assert_bool(tip_icon.x < card_icon.x).is_true()
+
+    # Body text is set at a smaller font size too.
+    assert_int(tooltip_ui.info_label.get_theme_font_size("normal_font_size")).is_less(
+        card.info_label.get_theme_font_size("normal_font_size"))
+
+    tooltip_ui.free()
+    card.free()
+
+
+func test_tooltip_renders_item_with_header_and_toned_body() -> void:
+    var tooltip_ui = load("res://src/ui/TooltipUi.tscn").instantiate()
+    add_child(tooltip_ui)
+
+    var item: Item = load("res://src/Resources/items/ProjSlow.tres")
+    tooltip_ui.show_for(item)
+
+    # Name in the header, raw id humanized; stat rows in the body.
+    assert_str(tooltip_ui.name_label.text).is_equal("Proj Slow")
+    assert_bool(tooltip_ui.is_weapon).is_false()
+    assert_str(tooltip_ui.label.text).contains("-0.5 Projectile Speed Multiplier")
+    assert_str(tooltip_ui.label.text).contains(ItemDisplayPanel.COLOR_NEGATIVE.to_html(false))
+    # Negative stat, so no name line repeated in the body.
+    assert_bool(tooltip_ui.label.text.contains("Proj Slow")).is_false()
+
+    tooltip_ui.free()
+
+
+func test_tooltip_marks_weapons_with_badge() -> void:
+    var tooltip_ui = load("res://src/ui/TooltipUi.tscn").instantiate()
+    add_child(tooltip_ui)
+
+    var weapon: BaseWeapon = load(PISTOL_WEAPON)
+    tooltip_ui.show_for(weapon)
+
+    assert_bool(tooltip_ui.is_weapon).is_true()
+    assert_bool(tooltip_ui.type_badge.visible).is_true()
+    assert_str(tooltip_ui.name_label.text).is_equal("Pistol")
+
+    tooltip_ui.free()
+
+
+func test_tooltip_text_hint_has_no_icon_or_name() -> void:
+    var tooltip_ui = load("res://src/ui/TooltipUi.tscn").instantiate()
+    add_child(tooltip_ui)
+    tooltip_ui.show_for(load(PLUS_DAMAGE_ITEM))
+    var icons_after_resource: int = tooltip_ui.icon_holder.get_child_count()
+    assert_int(icons_after_resource).is_equal(1)
+
+    # A plain hint has no resource, so the icon and name must be cleared.
+    tooltip_ui.show_text("just a hint")
+    assert_int(tooltip_ui.icon_holder.get_child_count()).is_equal(1)
+    assert_str(tooltip_ui.name_label.text).is_empty()
+    assert_bool(tooltip_ui.type_badge.visible).is_false()
+    assert_str(tooltip_ui.label.text).contains("just a hint")
+
+    tooltip_ui.free()
+
+
+func test_item_display_panel_build_bbcode_skips_name_and_colors_tones() -> void:
+    var item: Item = load(PLUS_DAMAGE_ITEM)
+    var rows: Array = ItemTooltip.card_rows(item)
+    var bbcode := ItemDisplayPanel.build_bbcode(rows, item)
+
+    # The name row is dropped because it lives in the header.
+    assert_bool(bbcode.contains("Damage Amulet")).is_false()
+    assert_str(bbcode).contains("+5 Damage")
+    assert_str(bbcode).contains(ItemDisplayPanel.COLOR_POSITIVE.to_html(false))
+
+
+func test_item_display_panel_falls_back_to_plain_lines() -> void:
+    # CharacterData has no card_rows(), so the body must still render.
+    var character: CharacterData = CharacterData.new()
+    character.display_name = "Brawler"
+    var bbcode := ItemDisplayPanel.build_bbcode(ItemTooltip.card_rows(character), character)
+    assert_str(bbcode).contains("name: Brawler")
+
+
+func test_item_display_panel_make_icon_handles_item_and_weapon() -> void:
+    var item_icon := ItemDisplayPanel.make_icon(load(PLUS_DAMAGE_ITEM))
+    assert_that(item_icon).is_not_null()
+
+    # A weapon with no sprite must fall back to the default, not crash.
+    var bare := BaseWeapon.new()
+    bare.name = "Bare"
+    var weapon_icon := ItemDisplayPanel.make_icon(bare)
+    assert_that(weapon_icon).is_not_null()
+
+    # Unknown resource kinds return an empty holder rather than null.
+    var other_icon := ItemDisplayPanel.make_icon(CharacterData.new())
+    assert_that(other_icon).is_not_null()
+
+    item_icon.free()
+    weapon_icon.free()
+    other_icon.free()
 
 
 func test_character_ui_stat_rows_have_tooltips() -> void:

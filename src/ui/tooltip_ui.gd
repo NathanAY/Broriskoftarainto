@@ -1,14 +1,27 @@
-extends PanelContainer
+extends ItemDisplayPanel
 class_name TooltipUi
 
-## Reusable hover tooltip card. Fill its text from a Resource via ItemTooltip.tooltip_lines()
-## or directly via show_text(); wire it to any Control row with bind_to_row() /
-## bind_to_row_text(). Follows the mouse while a row is hovered.
+## Reusable hover tooltip. Renders a Resource in the shared `ItemDisplayPanel`
+## look (icon + name + tone-colored stat rows) at a smaller scale than
+## `ShopItemCard`, and follows the mouse while a bound row is hovered.
+##
+## Wire it to any Control with bind_to_row() / bind_to_row_text().
+
+## Offset from the cursor, and the gap kept when flipping to stay on screen.
+const MOUSE_OFFSET := Vector2(16, 16)
+const SCREEN_MARGIN := 16
 
 var _hovered_resource: Resource = null
 var _hovered_text: String = ""
 
-@onready var label: Label = $Label
+## Kept for callers/tests that read the tooltip body through `.label`.
+@onready var label: RichTextLabel = info_label
+
+
+func _ready() -> void:
+    super()
+    # A tooltip sizes itself to its text, so the body must not be a scroll area.
+    hug_body_content()
 
 
 func show_for(resource: Resource) -> void:
@@ -16,16 +29,25 @@ func show_for(resource: Resource) -> void:
         return
     _hovered_resource = resource
     _hovered_text = ""
-    label.text = "\n".join(ItemTooltip.tooltip_lines(resource))
+    set_resource(resource)
     _show()
 
 
+## Plain text hint (e.g. a stat description). No resource, no header rows:
+## the text is shown as muted prose in the body.
 func show_text(text: String) -> void:
     if text.is_empty():
         return
     _hovered_resource = null
     _hovered_text = text
-    label.text = text
+    # A plain hint has no icon and no name, so collapse the header entirely
+    # rather than leaving an empty plate behind.
+    _clear_icon()
+    icon_plate.visible = false
+    separator.visible = false
+    name_label.text = ""
+    type_badge.visible = false
+    label.text = "[i][color=#%s]%s[/color][/i]" % [COLOR_MUTED.to_html(false), text]
     _show()
 
 
@@ -55,16 +77,9 @@ func bind_to_row_text(row: Control, text: String) -> void:
 func _bind_hover(row: Control, show_callback: Callable) -> void:
     row.mouse_filter = Control.MOUSE_FILTER_STOP
     for child in row.get_children():
-        _set_mouse_ignore(child)
+        set_mouse_ignore(child)
     row.mouse_entered.connect(show_callback)
     row.mouse_exited.connect(hide_tooltip)
-
-
-func _set_mouse_ignore(node: Node) -> void:
-    if node is Control:
-        node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-    for child in node.get_children():
-        _set_mouse_ignore(child)
 
 
 func _process(_delta: float) -> void:
@@ -78,11 +93,12 @@ func _process(_delta: float) -> void:
 func _position() -> void:
     var viewport_size: Vector2 = get_viewport_rect().size
     var tooltip_size: Vector2 = size
-    var pos: Vector2 = get_global_mouse_position() + Vector2(16, 16)
+    var mouse := get_global_mouse_position()
+    var pos: Vector2 = mouse + MOUSE_OFFSET
     if pos.x + tooltip_size.x > viewport_size.x:
-        pos.x = get_global_mouse_position().x - tooltip_size.x - 16
+        pos.x = mouse.x - tooltip_size.x - SCREEN_MARGIN
     if pos.y + tooltip_size.y > viewport_size.y:
-        pos.y = get_global_mouse_position().y - tooltip_size.y - 16
+        pos.y = mouse.y - tooltip_size.y - SCREEN_MARGIN
     pos.x = maxf(pos.x, 0.0)
     pos.y = maxf(pos.y, 0.0)
     global_position = pos

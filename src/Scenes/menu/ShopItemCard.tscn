@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d3ubcwvh1jj7h"]
 
-[ext_resource type="Script" path="res://src/Scenes/menu/shop_item_card.gd" id="1_card"]
-[ext_resource type="Script" path="res://src/ui/menu_button.gd" id="menu_button"]
+[ext_resource type="Script" uid="uid://bqcegfkue41q0" path="res://src/Scenes/menu/shop_item_card.gd" id="1_card"]
+[ext_resource type="Script" uid="uid://c6bybvbcilgad" path="res://src/ui/menu_button.gd" id="menu_button"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
 content_margin_left = 0.0
@@ -22,6 +22,10 @@ shadow_color = Color(0, 0, 0, 0.298039)
 shadow_size = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_icon_plate"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
 bg_color = Color(0.203922, 0.223529, 0.270588, 1)
 border_width_left = 1
 border_width_top = 1
@@ -32,12 +36,12 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-content_margin_left = 6.0
-content_margin_top = 6.0
-content_margin_right = 6.0
-content_margin_bottom = 6.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_price_plate"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
 bg_color = Color(0.109804, 0.117647, 0.145098, 1)
 border_width_left = 1
 border_width_top = 1
@@ -48,59 +52,55 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-content_margin_left = 8.0
-content_margin_top = 4.0
-content_margin_right = 8.0
-content_margin_bottom = 4.0
 
-[node name="ShopItemCard" type="PanelContainer"]
+[node name="ShopItemCard" type="PanelContainer" unique_id=1729325445]
 custom_minimum_size = Vector2(220, 340)
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 script = ExtResource("1_card")
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="." unique_id=241049739]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 10
 
-[node name="VBox" type="VBoxContainer" parent="Margin"]
+[node name="VBox" type="VBoxContainer" parent="Margin" unique_id=1648050543]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Header" type="HBoxContainer" parent="Margin/VBox"]
+[node name="Header" type="HBoxContainer" parent="Margin/VBox" unique_id=246817039]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="IconPlate" type="PanelContainer" parent="Margin/VBox/Header"]
+[node name="IconPlate" type="PanelContainer" parent="Margin/VBox/Header" unique_id=2014975934]
 custom_minimum_size = Vector2(76, 76)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_icon_plate")
 
-[node name="IconHolder" type="CenterContainer" parent="Margin/VBox/Header/IconPlate"]
+[node name="IconHolder" type="CenterContainer" parent="Margin/VBox/Header/IconPlate" unique_id=503171313]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 
-[node name="NameBox" type="VBoxContainer" parent="Margin/VBox/Header"]
+[node name="NameBox" type="VBoxContainer" parent="Margin/VBox/Header" unique_id=1699361460]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 2
 
-[node name="NameLabel" type="Label" parent="Margin/VBox/Header/NameBox"]
+[node name="NameLabel" type="Label" parent="Margin/VBox/Header/NameBox" unique_id=972961500]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.941176, 0.945098, 0.976471, 1)
 theme_override_font_sizes/font_size = 16
 text = "Item"
 autowrap_mode = 2
-max_lines_visible = 2
 text_overrun_behavior = 3
+max_lines_visible = 2
 
-[node name="TypeBadge" type="Label" parent="Margin/VBox/Header/NameBox"]
+[node name="TypeBadge" type="Label" parent="Margin/VBox/Header/NameBox" unique_id=2009231320]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
@@ -109,16 +109,16 @@ theme_override_font_sizes/font_size = 12
 text = "Weapon"
 uppercase = true
 
-[node name="Separator" type="HSeparator" parent="Margin/VBox"]
+[node name="Separator" type="HSeparator" parent="Margin/VBox" unique_id=1575248652]
 layout_mode = 2
 
-[node name="InfoScroll" type="ScrollContainer" parent="Margin/VBox"]
+[node name="InfoScroll" type="ScrollContainer" parent="Margin/VBox" unique_id=512020753]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="InfoLabel" type="RichTextLabel" parent="Margin/VBox/InfoScroll"]
+[node name="InfoLabel" type="RichTextLabel" parent="Margin/VBox/InfoScroll" unique_id=2005561344]
 custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -127,12 +127,12 @@ fit_content = true
 scroll_active = false
 autowrap_mode = 2
 
-[node name="PricePlate" type="PanelContainer" parent="Margin/VBox"]
+[node name="PricePlate" type="PanelContainer" parent="Margin/VBox" unique_id=325332586]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_price_plate")
 
-[node name="PriceLabel" type="Label" parent="Margin/VBox/PricePlate"]
+[node name="PriceLabel" type="Label" parent="Margin/VBox/PricePlate" unique_id=1154992283]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.827451, 0.352941, 1)
 theme_override_constants/outline_size = 0
@@ -141,18 +141,18 @@ text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Buttons" type="HBoxContainer" parent="Margin/VBox"]
+[node name="Buttons" type="HBoxContainer" parent="Margin/VBox" unique_id=879414982]
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="PrimaryButton" type="Button" parent="Margin/VBox/Buttons"]
+[node name="PrimaryButton" type="Button" parent="Margin/VBox/Buttons" unique_id=1220155672]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Primary"
 script = ExtResource("menu_button")
 
-[node name="SecondaryButton" type="Button" parent="Margin/VBox/Buttons"]
+[node name="SecondaryButton" type="Button" parent="Margin/VBox/Buttons" unique_id=1359336748]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Secondary"

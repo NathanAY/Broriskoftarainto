@@ -44,7 +44,7 @@ func test_card_has_icon_above_tooltip_text() -> void:
     assert_int(vbox.get_node("InfoScroll").get_index()).is_less(vbox.get_node("Buttons").get_index())
 
     # Body text is built from the structured card_rows() builder.
-    assert_str(card.info_label.text).is_equal(card._build_bbcode(ItemTooltip.card_rows(item)))
+    assert_str(card.info_label.text).is_equal(ItemDisplayPanel.build_bbcode(ItemTooltip.card_rows(item), item))
 
     # Icon is placed at the top of the card.
     assert_int(card.icon_holder.get_child_count()).is_equal(1)

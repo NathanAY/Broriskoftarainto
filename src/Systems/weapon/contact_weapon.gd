@@ -76,9 +76,8 @@ func do_damage(body: Node) -> void:
         event_manager.emit_event("before_deal_damage", {"damage_context": ctx})
 
     var bodyHealth: Health = body.get_node("Health")
-    bodyHealth.event_manager.emit_event("before_take_damage", {"damage_context": ctx})
-    bodyHealth.take_damage(ctx)
-    bodyHealth.event_manager.emit_event("after_take_damage", {"damage_context": ctx})
+    if not bodyHealth.apply_damage(ctx):
+        return  # already dead: the contact does not land, so no hit/kill events either
 
     if event_manager:
         event_manager.emit_event("after_deal_damage", {"weapon": self, "body": body, "damage_context": ctx})

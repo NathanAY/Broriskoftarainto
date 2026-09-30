@@ -33,6 +33,15 @@ Event schema (required keys; extra keys are tolerated)
 - Buffs / debuffs: `on_buff_added` / `on_buff_removed` -> `buff`, `holder`, `id`; `on_debuff_added` / `on_debuff_removed` -> `debuff`, `holder`, `target`
 - Misc: `on_crit` -> `damage_context`; `on_shield_changed` -> `self`, `amount`, `current_shield`, `max_shield`
 
+Damage pipeline ownership
+- The six damage-pipeline events split across two buses, and the split matters when writing a new damage source:
+  - **Attacker side**, emitted by the weapon/effect on its own (the holder's) bus: `before_deal_damage` -> [armor, crit, high-HP modifiers] -> ... -> `after_deal_damage`, `on_hit`, `on_kill`.
+  - **Defender side**, emitted by `Health.apply_damage()` on the *target's* bus: `before_take_damage` -> subtract -> `on_death` (if lethal) -> `after_take_damage`. The order is fixed, and `target_take_persent_damage` is set before `on_death` so listeners can scale by it.
+- `Health.apply_damage(damage_context) -> bool` (`Systems/damage/health.gd`) is the ONLY way to damage anything. Do not emit `before_take_damage` / `after_take_damage` yourself and do not call `take_damage` (removed); hand the context over and let `Health` run the phase. That is what makes the dead check unbypassable.
+- It latches `Health.is_dead` on death, so every hit after the killing blow is rejected: no `HitFlashManager` flash, no `ParticleEffectManager` particles, no `TextureBurstManager` burst, no `on_death`, no `on_health_changed`. This matters because a dying entity stays in the tree for its whole death animation (an `Enemy` is freed from the `death` animation's `animation_finished`, ~0.7s later).
+- `false` means the hit did not land. Skip `after_deal_damage` / `on_hit` / `on_kill` in that case, otherwise kill rewards (e.g. `StatOnKillModifier`) and the attacker's hit modifiers fire once per corpse. Note the `on_kill` guards in the weapons read `current_health <= 0`, which is only reachable on the killing blow for the same reason.
+- Do not guard damage by reading the owner's private state (`Enemy._alive`) or its groups: a dying enemy has already left `damageable`, but rays and already-registered overlaps can still resolve it, so `Health` is the backstop.
+
 Weapon attribution on hit events
 - `on_hit`, `on_kill` and `after_deal_damage` now consistently carry the firing weapon as an extra `"weapon"` key:
   - melee (`melee_weapon_node.gd`) and contact/area weapons (`contact_weapon.gd`, `area_weapon.gd`) pass their weapon resource directly;

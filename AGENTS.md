@@ -31,17 +31,18 @@ Other behavior:
 - Partial words match several suites at once (e.g. `modifier` -> 7 suites, all run).
 - Only `test_*.gd` files are fuzzy-matched, so shared helper scripts are not run as suites.
 
-### GUT
-- All GUT tests: `.\run_tests_gut.bat`. One file: run `gut_cmdln.gd` with `-gtest=res://path/to/test.gd -gexit`.
-
 ## Visual checks (rendering a scene to a PNG)
 Tests assert structure, not looks. After changing a UI, render it:
 ```
 .run_scene_shot.bat res://path/to/Scene.tscn [res://out.png]
 ```
-- Writes `res://scene_shot.png` by default, prints the path, and quits. Do NOT launch Godot by hand to do this: the MCP `run_project` / `get_runtime_screenshot` path returns blank frames and leaves orphan processes that lock the temp files.
+- Writes `res://scene_shot.png` by default, prints the path, and quits. Measured at ~1.5s end to end, because run, capture and quit all happen inside that one call.
+- **Prefer this over MCP for a plain render.** Every tool call is a separate round trip that costs model time before the request is even sent, so `run_project` + `get_runtime_screenshot` + `stop_project` is 3 calls and several times slower for the same PNG.
 - The window flashes up briefly — a headless viewport has no framebuffer to read back.
 - The target scene must render standalone (no gameplay set up behind it). `res://test/tools/character_ui_preview.tscn` and `res://test/tools/shop_ui_preview.tscn` exist for the character menu and the shop, which both need a character in `GlobalGameState.current_character`.
+
+### MCP screenshots (live game, when you need to interact first)
+`get_editor_screenshot` (2D/3D viewport), `run_project` and `get_runtime_screenshot` Use them when the check needs a running game rather than a one-shot render: firing `simulate_input_action`, inspecting nodes mid-run, or screenshotting after several actions. `stop_project` exits cleanly, leaving only the editor process.
 
 # Project documentation.
 - This is top-down brotato style rogulike game project on godot 4.6.

@@ -71,9 +71,8 @@ func _deal_contact_damage():
         event_manager.emit_event("before_deal_damage", {"damage_context": ctx})
 
         # apply to target
-        health.event_manager.emit_event("before_take_damage", {"damage_context": ctx})
-        health.take_damage(ctx)
-        health.event_manager.emit_event("after_take_damage", {"damage_context": ctx})
+        if not health.apply_damage(ctx):
+            continue  # already dead: the orb passes through, no hit/kill events
 
         event_manager.emit_event("after_deal_damage", {"damage_context": ctx})
         event_manager.emit_event("on_hit", {"damage_context": ctx, "body": body})

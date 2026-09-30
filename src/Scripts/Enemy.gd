@@ -94,7 +94,15 @@ func _body_radius() -> float:
     return 0.0
 
 func _die(_event: Dictionary):
+    if not _alive:
+        return
     _alive = false
+    # The corpse stays in the tree for the whole death animation. Staying in the
+    # target groups kept it acquirable (every TargetSelector walks "damageable",
+    # and lowest_hp actively preferred it), so drop it out of the world the
+    # moment it dies and let Health reject anything that still reaches it.
+    remove_from_group("enemies")
+    remove_from_group("damageable")
     call_deferred("_disable_colision")
     anim_player.play("death")
     anim_player.animation_finished.connect(
@@ -106,3 +114,8 @@ func _die(_event: Dictionary):
 
 func _disable_colision():
     collisition_shape.disabled = true
+    # The hitbox is an Area2D, so it survives the body shape going away: the melee
+    # sweep raycasts against areas and would otherwise keep resolving the corpse.
+    var hitbox_shape := get_node_or_null("Hitbox/CollisionShape2D") as CollisionShape2D
+    if hitbox_shape:
+        hitbox_shape.disabled = true

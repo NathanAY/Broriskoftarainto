@@ -76,7 +76,7 @@ func test_multiplier_composes_with_stat_modifiers() -> void:
     stats.add_modifier({"lifeleach": {"flat": 0.5}})
     var dmg := DamageContext.new()
     dmg.final_amount = 10.0
-    health.take_damage(dmg)
+    health.apply_damage(dmg)
     var health_before: float = health.current_health
     var hit := DamageContext.new()
     hit.final_amount = 20.0
@@ -95,7 +95,7 @@ func test_negative_stat_loses_health() -> void:
     stats.add_modifier({"lifeleach": {"flat": -2.0}})
     var dmg := DamageContext.new()
     dmg.final_amount = 10.0
-    health.take_damage(dmg)
+    health.apply_damage(dmg)
     var health_before: float = health.current_health
     var hit := DamageContext.new()
     hit.final_amount = 100.0
@@ -112,7 +112,7 @@ func test_on_hit_heals_from_provided_stat() -> void:
     _attach_modifier(holder, LIFE_LEACH_SCENE)
     var dmg := DamageContext.new()
     dmg.final_amount = 10.0
-    health.take_damage(dmg)
+    health.apply_damage(dmg)
     var health_before: float = health.current_health
     var hit := DamageContext.new()
     hit.final_amount = 100.0

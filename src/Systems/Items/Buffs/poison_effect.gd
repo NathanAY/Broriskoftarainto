@@ -15,7 +15,7 @@ var _tick_timer: Timer = null
 var _lifetime_timer: Timer = null
 
 func start_effect(target: Node, damage: float, dur: float, interval: float, max_s: int, src: Node) -> void:
-    # target is the Health node (the node that has take_damage())
+    # target is the Health node (the node that has apply_damage())
     target_health = target
     damage_per_tick = damage
     duration = dur
@@ -69,15 +69,11 @@ func _on_tick() -> void:
         sorce_em = source.get_node_or_null("EventManager")
         if sorce_em:
             sorce_em.emit_event("before_deal_damage", {"damage_context": ctx})
-    # Run through defender phase (so armor/resists can apply)
-    var target_em: EventManager = target_health.event_manager
-
-    if target_em:
-        target_em.emit_event("before_take_damage", {"damage_context": ctx})
-    # Apply damage
-    target_health.take_damage(ctx)
-    if target_em:
-        target_em.emit_event("after_take_damage", {"damage_context": ctx})
+    # Run through defender phase (so armor/resists can apply). Health owns the
+    # whole phase and drops the tick if the target died in the meantime, so a
+    # corpse cannot be re-killed once per second for the death animation.
+    if not target_health.apply_damage(ctx):
+        return
 
     if source and source.get_node_or_null("EventManager"):
         sorce_em.emit_event("after_deal_damage", {"damage_context": ctx})

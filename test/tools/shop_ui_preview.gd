@@ -41,9 +41,31 @@ static func _offer_items() -> Array[Item]:
 	out.append(load("res://src/Resources/items/Knockback.tres"))
 	out.append(load("res://src/Resources/items/PoisonHit.tres"))
 
+	# A buff and a debuff side by side. Both payloads land somewhere other than
+	# the player (self vs the enemy), so both are a gain on the card and both
+	# print as green - the debuff's stat value is still negative, which is what
+	# says it drags the enemy down. Descriptions are copied verbatim from what
+	# `ItemFactory` generates, so the shot shows the real wording.
+	var buff := ItemBuilder.make_buff_item(
+		"Buff Projectile Speed",
+		"Grants a temporary buff: increases projectile_speed_multiplier (Triggers on hit).",
+		"projectile_speed_multiplier", {"flat": 0.09},
+		load("res://src/Systems/Items/Buffs/buff.tscn"))
+	var debuff := ItemBuilder.make_debuff_item(
+		"Debuff Critical",
+		"Grants a debuff: decreases critical_multiplier (Triggers on after deal damage).",
+		"critical_multiplier", {"flat": -0.12},
+		load("res://src/Systems/Items/Buffs/DebuffSource.tscn"))
+	# A negated stat on the debuff, so the shot also shows a curse still red
+	# directly under a green payload.
+	debuff.modifiers = {"armor": {"flat": -2.0}}
+	out.append(buff)
+	out.append(debuff)
+	out.append(buff)
+
 	# `get_item_from_pool_or_generate()` picks with replacement, so the pool is
-	# weighted to make both shapes show up in a 4-card row: the two-effect card is
-	# listed twice, the rest once each.
+	# weighted to make both shapes show up in a 4-card row: the two-effect card and
+	# the buff are listed twice, the rest once each.
 	out.append(two_effects)
 
 	cache.free()

@@ -85,10 +85,8 @@ static func card_rows(resource: Resource) -> Array:
         return rows
 
     var item: Item = resource
-    if is_buff_item(item):
-        _append_buff_debuff_rows(rows, item, ItemCardRow.Kind.BUFF)
-    elif is_debuff_item(item):
-        _append_buff_debuff_rows(rows, item, ItemCardRow.Kind.DEBUFF)
+    if is_buff_item(item) or is_debuff_item(item):
+        _append_buff_debuff_rows(rows, item)
     else:
         _append_name_row(rows, item.name)
         _append_effect_rows(rows, item)
@@ -247,23 +245,43 @@ static func _append_tradeoff_rows(rows: Array, modifiers: Dictionary) -> void:
     _append_stat_rows(rows, modifiers, ItemCardRow.Tone.NEGATIVE)
 
 
-static func _append_buff_debuff_rows(rows: Array, item: Item, kind: int) -> void:
+## A buff or debuff payload row is a gain **for the player** in both cases: a
+## buff lifts the holder, a debuff drags the enemy down, and the card is priced
+## and read from the player's side. The sign on the number still says which way
+## the stat moved - a debuff shows `-0.12 Critical Multiplier` - but painting it
+## red made the card read as a penalty the player was paying for, which is the
+## opposite of what the item does. The item's *own* curse is a real loss and
+## keeps its red through `_append_tradeoff_rows` / `_append_effect_rows`.
+static func _append_buff_debuff_rows(rows: Array, item: Item) -> void:
     _append_name_row(rows, item.name)
     var flavor := str(item.description)
     if not flavor.is_empty() and is_clean_flavor(flavor):
         var row := ItemCardRow.new()
         row.kind = ItemCardRow.Kind.FLAVOR
-        row.text = _flavor_with_trigger(flavor, item)
+        row.text = _leads_into_next_row(_flavor_with_trigger(flavor, item))
         rows.append(row)
-    var tone := ItemCardRow.Tone.POSITIVE if kind == ItemCardRow.Kind.BUFF else ItemCardRow.Tone.NEGATIVE
     var payload := peek_packed_modifiers(item.effect_scene[0] if has_effect_scene(item) else null)
-    _append_stat_rows(rows, payload, tone)
+    _append_stat_rows(rows, payload, ItemCardRow.Tone.POSITIVE)
     # Index 0 is the buff/debuff payload itself and is already rendered as the
     # toned stat rows above. Any scene after it is a harmful modifier the factory
     # added as this item's curse, so it has to be shown or the item reads as a
     # free upgrade.
     _append_effect_rows(rows, item, 1)
     _append_tradeoff_rows(rows, item.modifiers)
+
+
+## The grey sentence introduces the stat line under it, so a trailing full stop
+## would close the sentence before the number that completes it. Swapping it for
+## a colon ties the two into one readable block.
+static func _leads_into_next_row(flavor: String) -> String:
+    var trimmed := flavor.strip_edges()
+    if trimmed.is_empty():
+        return flavor
+    if trimmed.ends_with("."):
+        return trimmed.substr(0, trimmed.length() - 1) + ":"
+    if trimmed.ends_with(":"):
+        return trimmed
+    return trimmed + ":"
 
 
 ## Splits "pierce: 1" into ["pierce", "1"]. Falls back to ["text", ""].

@@ -285,6 +285,57 @@ func test_card_body_colors_by_tone() -> void:
     card.free()
 
 
+func test_debuff_card_shows_its_payload_as_a_gain() -> void:
+    # A debuff lands on the enemy, so on the card it is something the player
+    # wants: green like a buff, even though the stat value itself is negative.
+    var item: Item = ItemBuilder.make_debuff_item(
+        "Debuff Crit",
+        "Grants a debuff: decreases critical_multiplier.",
+        "critical_multiplier",
+        {"flat": -0.12},
+        load("res://src/Systems/Items/Buffs/DebuffSource.tscn")
+    )
+    var card: ShopItemCard = load(CARD_SCENE).instantiate()
+    add_child(card)
+    card.set_item_display(item)
+
+    var body: String = card.info_label.text
+    assert_str(body).contains("[color=#%s]-0.12 Critical Multiplier[/color]" % ItemDisplayPanel.COLOR_POSITIVE.to_html(false))
+    assert_str(body).contains(ItemDisplayPanel.COLOR_POSITIVE.to_html(false))
+
+    card.free()
+
+
+func test_buff_and_debuff_flavor_ends_with_a_colon_not_a_period() -> void:
+    # The grey sentence introduces the stat line under it, so a full stop would
+    # close the sentence before the number that completes it. A trailing ':' ties
+    # the two together. The buff reads the same way as the debuff.
+    var debuff: Item = ItemBuilder.make_debuff_item(
+        "Debuff Crit",
+        "Grants a debuff: decreases critical_multiplier.",
+        "critical_multiplier",
+        {"flat": -0.12},
+        load("res://src/Systems/Items/Buffs/DebuffSource.tscn")
+    )
+    var buff: Item = ItemBuilder.make_buff_item(
+        "Buff Crit",
+        "Grants a temporary buff: increases critical_multiplier.",
+        "critical_multiplier",
+        {"flat": 0.09},
+        load("res://src/Systems/Items/Buffs/buff.tscn")
+    )
+
+    for item in [debuff, buff]:
+        var rows: Array = ItemTooltip.card_rows(item)
+        var flavor: ItemCardRow = rows[1]
+        assert_int(flavor.kind).override_failure_message(
+            "'%s' has no flavor row" % item.name).is_equal(ItemCardRow.Kind.FLAVOR)
+        assert_str(flavor.text).override_failure_message(
+            "'%s' does not hand its stat line over" % item.name).ends_with(":")
+        assert_bool(flavor.text.ends_with(".")).override_failure_message(
+            "'%s' still ends on a full stop" % item.name).is_false()
+
+
 func test_card_price_plate_reflects_price() -> void:
     var card: ShopItemCard = load(CARD_SCENE).instantiate()
     add_child(card)

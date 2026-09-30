@@ -271,36 +271,50 @@ func test_a_buff_item_with_a_drain_keeps_its_payload_green() -> void:
 
 func test_buff_and_debuff_still_route_through_their_payload_rows() -> void:
 	# Buff/debuff items carry a packed payload scene, not a BaseModifier, so they
-	# keep their own route: the payload renders as forced-POSITIVE (buff) or
-	# forced-NEGATIVE (debuff) STAT rows. `ItemCardRow.Kind.BUFF` / `.DEBUFF` are
-	# only ever used as the tone selector inside `_append_buff_debuff_rows` - no
-	# row is ever tagged with them - so the tone is what has to be asserted.
+	# keep their own route: the payload renders as forced-POSITIVE STAT rows for
+	# BOTH types. A debuff lands on the enemy, so from the player's side it is a
+	# gain - painting it red read the item as a loss the player was paying for,
+	# which is the opposite of what it does. `ItemCardRow.Kind.BUFF` / `.DEBUFF`
+	# are only ever used as the route selector inside
+	# `_append_buff_debuff_rows` - no row is ever tagged with them - so the tone
+	# is what has to be asserted.
 	var factory := _factory()
 	for type in ["buff", "debuff"]:
 		var checked := 0
 		for item in _batch(factory, type):
-			var want := ItemCardRow.Tone.POSITIVE if type == "buff" else ItemCardRow.Tone.NEGATIVE
+			if not ItemTooltip.has_effect_scene(item):
+				continue
+			var payload := ItemTooltip.peek_packed_modifiers(item.effect_scene[0])
 			var matched := 0
 			for row in ItemTooltip.card_rows(item):
 				var typed: ItemCardRow = row
-				if typed.kind == ItemCardRow.Kind.STAT and typed.tone == want:
-					matched += 1
+				if typed.kind != ItemCardRow.Kind.STAT or not payload.has(typed.stat_name):
+					continue
+				assert_int(typed.tone).override_failure_message(
+					"'%s' (%s) paints its %s payload as a loss" % [item.name, type, typed.stat_name]
+				).is_equal(ItemCardRow.Tone.POSITIVE)
+				matched += 1
 			assert_int(matched).override_failure_message(
-				"'%s' (%s) has no payload row in the %s tone" % [item.name, type, type]).is_greater(0)
+				"'%s' (%s) has no payload row" % [item.name, type]).is_greater(0)
 			checked += 1
 		assert_int(checked).is_greater(0)
 	collect_orphan_node_details()
 
 
-func test_a_debuff_item_stays_all_negative() -> void:
-	# The mirror guard: a debuff's payload AND its curse are both losses, so a
-	# refactor that started deriving payload tone from the value could not make
-	# one of them read as a gain.
+func test_a_debuff_keeps_its_own_curse_red() -> void:
+	# The mirror guard: a debuff's payload is a gain, but the downside the
+	# factory attached to the item is a real loss and must still read red -
+	# otherwise the card would sell a free upgrade.
 	var factory := _factory()
+	var checked := 0
 	for item in _batch(factory, "debuff"):
 		for row in ItemTooltip.card_rows(item):
 			var typed: ItemCardRow = row
-			if typed.kind == ItemCardRow.Kind.STAT:
-				assert_int(typed.tone).override_failure_message(
-					"'%s' has a positive stat row" % item.name).is_equal(ItemCardRow.Tone.NEGATIVE)
+			if typed.kind != ItemCardRow.Kind.STAT or not item.modifiers.has(typed.stat_name):
+				continue
+			assert_int(typed.tone).override_failure_message(
+				"'%s' paints its %s curse as a gain" % [item.name, typed.stat_name]
+			).is_equal(ItemCardRow.Tone.NEGATIVE)
+			checked += 1
+	assert_int(checked).override_failure_message("no debuff ever rolled a stat curse").is_greater(0)
 	collect_orphan_node_details()

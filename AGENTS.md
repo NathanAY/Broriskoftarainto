@@ -52,7 +52,14 @@ Tests assert structure, not looks. After changing a UI, render it:
 - docs/ai_overview.md
 - docs/architecture.md
 
+## Balance rules
+- `docs/systems/balance.md` says how much power a weapon, item or modifier is allowed to give. **Read it before designing a new weapon, item, modifier or character** — it has per-stat budget tables, the weapon tier table, and copy-paste checklists for weapons and modifiers.
+- Hard rule: **one item may add at most +15%** to a character's offense or survivability. Bigger than that is a weapon, not an item.
+- That file is prescriptive and the game does not currently obey it. Its **section 8 is an audit of existing violations, not a to-do list** — do not start "fixing" them unless the task asks for it.
+
 ## Major systems (event manager, player, enemies, stats, weapons, items, itemFactory, modifiers, etc.) docs in folder docs/systems/*
+- docs/systems/balance.md
+- docs/systems/characters.md
 - docs/systems/enemies.md
 - docs/systems/event_manager.md
 - docs/systems/item_factory.md

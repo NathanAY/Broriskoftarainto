@@ -38,11 +38,22 @@ Effects (brief):
 Architecture docs in next file
 - Scene structure, design patterns, script responsibilities docs/architecture.md
 
+Art direction and asset generation
+- Image style, icon constraints, prompt templates `docs/visual_style.md`
+
+Balance rules
+- `docs/systems/balance.md` is the design reference for how much power a weapon, item, modifier or character may give: per-stat item budgets, the weapon tier table, and a worked example per new weapon. Read it before designing one.
+- Hard rule: one item may add at most **+15%** to a character's offense or survivability. Anything bigger is a weapon.
+- The file is prescriptive and the game does not obey it yet. Its **section 8 is an audit of current violations, not a to-do list** — do not "fix" it unprompted.
+
 Major systems (event manager, player, enemies, stats, weapons, items, itemFactory, modifiers, etc.) docs in folder docs/systems/*
+- balance.md
+- characters.md
 - enemies.md
 - event_manager.md
 - item_factory.md
 - items.md
+- modifiers.md
 - player.md
 - spawners.md
 - stage_manager.md

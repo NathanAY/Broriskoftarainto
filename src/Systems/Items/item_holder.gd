@@ -27,39 +27,57 @@ func add_item(item: Item) -> void:
     _create_item_node(item)
 
     if item is Item and item.effect_scene:
-        var effect_scene = item.effect_scene[0]
-        # 🔹 Look if we already have an effect of this type
-        var effect: Node = _find_effect_node(effect_scene)
-        # 🔹 If not found, create new one
-        if not effect:
-            effect = BaseModifier.instantiate_attached(effect_scene, self)
-            if effect:
-                item.apply_to(hold_owner)
+        # An item may carry several effects: every scene in `effect_scene` gets
+        # its own (deduplicated) effect node and one stack per copy. The item's
+        # stat modifiers are applied once per copy, before the first new effect
+        # node is wired, so a modifier that owns a stat sees them.
+        var modifiers_applied := false
+        for i in item.effect_scene.size():
+            var effect_scene: PackedScene = item.effect_scene[i]
+            if effect_scene == null:
+                continue
+            # 🔹 Look if we already have an effect of this type
+            var effect: Node = _find_effect_node(effect_scene)
+            # 🔹 If not found, create new one
+            if not effect:
+                effect = BaseModifier.instantiate_attached(effect_scene, self)
+                if not effect:
+                    continue
+                if not modifiers_applied:
+                    item.apply_to(hold_owner)
+                    modifiers_applied = true
                 # Modifiers wire through attachEventManager; buffs / poison
                 # effects wire themselves in their own _ready.
                 if effect.has_method("attachEventManager") and event_manager:
                     effect.attachEventManager(event_manager)
-        # Decide stack state
-        var active = true
-        var scene_conditions: Array[String] = item.effect_scene_condition
-        if scene_conditions.size() > 0:
-            var condition: String = scene_conditions[0]
-            if condition != "" and stats:
-                active = stats.get_condition(condition) > 0
-                var idx = effect.stacks.size() # about to add
-                event_manager.subscribe("on_condition_change", func(ev):
-                    if effect.has_method("set_stack_active") and ev["condition_name"] == condition:
-                        effect.set_stack_active(idx, stats.get_condition(condition) > 0)
-                )
-
-        if effect.has_method("add_stack"):
-            effect.add_stack(active)
+            # Effect i is gated by condition i (an empty entry means always on)
+            var condition := ""
+            var scene_conditions: Array[String] = item.effect_scene_condition
+            if i < scene_conditions.size():
+                condition = scene_conditions[i]
+            _add_stack(effect, condition)
     else:
         item.apply_to(hold_owner)        
 
     # Notify others
     if event_manager:
         event_manager.emit_event("on_item_added", {"hold_owner": hold_owner, "item": item, "items": items})
+
+# Give `effect` one stack for the item copy that was just added. The stack starts
+# inactive when `condition` does not hold and is kept in sync with it through
+# `on_condition_change`; an empty condition means the stack is always active.
+func _add_stack(effect: Node, condition: String) -> void:
+    if not effect.has_method("add_stack"):
+        return
+    var active := true
+    if condition != "" and stats and event_manager:
+        active = stats.get_condition(condition) > 0
+        var idx: int = effect.stacks.size() # about to add
+        event_manager.subscribe("on_condition_change", func(ev):
+            if effect.has_method("set_stack_active") and ev["condition_name"] == condition:
+                effect.set_stack_active(idx, stats.get_condition(condition) > 0)
+        )
+    effect.add_stack(active)
 
 # The single node that represents the item in the scene tree. It is a sibling of
 # the item's effect node on purpose: effect nodes are deduplicated per effect
@@ -127,17 +145,19 @@ func remove_item(item: Resource) -> void:
         item.remove_from(hold_owner)
     elif item.has_method("remove_from"):
         item.remove_from(hold_owner)
-    # Remove one stack of the matching effect node; detach + free on the last stack
+    # Remove one stack of every matching effect node; detach + free on the last stack
     if item is Item and item.effect_scene:
-        var effect_scene = item.effect_scene[0]
-        var effect: Node = _find_effect_node(effect_scene)
-        if effect:
-            if effect.has_method("remove_latest_stack"):
-                effect.remove_latest_stack()
-            if effect.stacks.is_empty():
-                if effect.has_method("detach"):
-                    effect.detach()
-                effect.queue_free()
+        for effect_scene in item.effect_scene:
+            if effect_scene == null:
+                continue
+            var effect: Node = _find_effect_node(effect_scene)
+            if effect:
+                if effect.has_method("remove_latest_stack"):
+                    effect.remove_latest_stack()
+                if effect.stacks.is_empty():
+                    if effect.has_method("detach"):
+                        effect.detach()
+                    effect.queue_free()
     # Remove the tree node that represents the item
     var item_node := _find_item_node(item as Item)
     if item_node:

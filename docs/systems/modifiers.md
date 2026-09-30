@@ -65,12 +65,13 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
    - `_subscribe` also records every pair so `_unsubscribe_all()` can unregister before freeing. Because `EventManager` crashes on freed listeners (`LocalEventManager.gd:29`), detach MUST unsubscribe before freeing — `WeaponBuiltinEffects.detach` relies on this. Modifiers that subscribe via raw `event_manager.subscribe` bypass both the auto-scoping and the tracking; any modifier intended to work as a weapon built-in must use `_subscribe`.
 
 Lifecycle / data flow
-- `ItemHolder.add_item(item)` (`Systems/Items/item_holder.gd`):
-  1. Looks up an existing child by `scene_file_path == effect_scene[0].resource_path` (dedup).
-  2. If new: `BaseModifier.instantiate_attached(effect_scene, self)`, `item.apply_to(holder)` (stat modifiers + condition managers), then `attachEventManager(event_manager)` when the effect implements it.
-  3. Decides the initial `active` flag from `item.effect_scene_condition` (via `stats.get_condition`); registers an `on_condition_change` subscription bound to the new stack index so the stack turns off/on with the condition.
-  4. Calls `add_stack(active)`.
-- `remove_item(item)` removes stat modifiers, pops one stack of the matching effect node (via `remove_latest_stack`), detaches + frees the node on the last stack, and re-emits `on_item_removed`.
+- `Item.effect_scene` is an `Array[PackedScene]`: one item can carry several effects, so `ItemHolder` walks the whole array. `effect_scene_condition` is the parallel array - entry `i` gates effect `i` (empty/absent = always active).
+- `ItemHolder.add_item(item)` (`Systems/Items/item_holder.gd`), once per entry of `item.effect_scene`:
+  1. Looks up an existing child by `scene_file_path == effect_scene[i].resource_path` (dedup).
+  2. If new: `BaseModifier.instantiate_attached(effect_scene[i], self)`, then `item.apply_to(holder)` (stat modifiers + condition managers) and `attachEventManager(event_manager)` when the effect implements it. `apply_to` runs once per added copy, before the first new effect node is wired, so a modifier that owns a stat sees the item's own bonuses (and never twice for a multi-effect item).
+  3. Decides the initial `active` flag from `item.effect_scene_condition[i]` (via `stats.get_condition`); registers an `on_condition_change` subscription bound to the new stack index so the stack turns off/on with the condition.
+  4. Calls `add_stack(active)` on that effect node.
+- `remove_item(item)` removes stat modifiers, then for every entry of `item.effect_scene` pops one stack of the matching effect node (via `remove_latest_stack`), detaches + frees the node on the last stack, and re-emits `on_item_removed`.
 - Modifiers live as children of the `ItemHolder` node; spawned projectiles/orbs/explosions go to `get_tree().current_scene`.
 
 Scaling models (how per-stack growth is implemented)

@@ -22,7 +22,7 @@ Construction (single entry point)
 
 Data flow
 - Inputs: `Item` resources are added via `ItemHolder.add_item()` (player or enemy).
-- Processing: `Item.apply_to(holder)` adds stat modifiers to `Stats` and instantiates condition managers; holder may attach effect scenes as child nodes and manage stacks.
+- Processing: `Item.apply_to(holder)` adds stat modifiers to `Stats` and instantiates condition managers; the holder then attaches every scene in `Item.effect_scene` as its own child node (deduplicated per scene, stacked per copy) and manages the stacks. `Item.effect_scene_condition[i]` gates effect `i` - an empty or missing entry means always active.
 - Outputs: Events emitted like `on_item_added`/`on_item_removed`; effects may attach to `EventManager`.
 
 Pricing (items.md, catalog `ItemPriceAnalyzer`)
@@ -40,3 +40,4 @@ Dependencies
 Known limitations / TODOs
 - Removing condition managers when item is removed is TODO in `Item.remove_from()`.
 - Item stacking/unique identification relies on scene instances and `effect_scene` resource paths; may need explicit IDs for complex interactions.
+- `ItemTooltip._append_effect_row` renders only `effect_scene[0]`, so a multi-effect item shows one effect line in the shop/character tooltip even though the holder attaches all of them (`ItemIconGenerator` already composes every scene).

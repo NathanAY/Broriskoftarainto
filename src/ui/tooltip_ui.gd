@@ -11,6 +11,9 @@ class_name TooltipUi
 const MOUSE_OFFSET := Vector2(16, 16)
 const SCREEN_MARGIN := 16
 
+## Icon size that fills `TooltipUi.tscn`'s IconHolder without growing the plate.
+const HINT_ICON_SIZE := Vector2(36, 36)
+
 var _hovered_resource: Resource = null
 var _hovered_text: String = ""
 
@@ -34,19 +37,21 @@ func show_for(resource: Resource) -> void:
 
 
 ## Plain text hint (e.g. a stat description). No resource, no header rows:
-## the text is shown as muted prose in the body.
-func show_text(text: String) -> void:
+## the text is shown as muted prose in the body. `icon` (e.g. the stat's own
+## icon) fills the header plate; without one the plate is collapsed so no empty
+## strip is left above the text.
+func show_text(text: String, icon: Texture2D = null) -> void:
     if text.is_empty():
         return
     _hovered_resource = null
     _hovered_text = text
-    # A plain hint has no icon and no name, so collapse the header entirely
-    # rather than leaving an empty plate behind.
     _clear_icon()
-    icon_plate.visible = false
     separator.visible = false
     name_label.text = ""
     type_badge.visible = false
+    icon_plate.visible = icon != null
+    if icon != null:
+        _add_icon(make_texture_icon(icon, HINT_ICON_SIZE))
     label.text = "[i][color=#%s]%s[/color][/i]" % [COLOR_MUTED.to_html(false), text]
     _show()
 
@@ -70,8 +75,9 @@ func bind_to_row(row: Control, resource: Resource) -> void:
 
 
 ## Like bind_to_row(), but shows a plain text hint (e.g. a stat description).
-func bind_to_row_text(row: Control, text: String) -> void:
-    _bind_hover(row, func(): show_text(text))
+## `icon` is optional and fills the header plate when given.
+func bind_to_row_text(row: Control, text: String, icon: Texture2D = null) -> void:
+    _bind_hover(row, func(): show_text(text, icon))
 
 
 func _bind_hover(row: Control, show_callback: Callable) -> void:

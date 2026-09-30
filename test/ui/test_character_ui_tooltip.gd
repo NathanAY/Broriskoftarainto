@@ -661,6 +661,8 @@ func test_tooltip_hides_header_chrome_for_text_hints() -> void:
     assert_bool(tooltip_ui.icon_plate.visible).is_true()
     assert_bool(tooltip_ui.separator.visible).is_true()
 
+    # No icon given: the plate is collapsed instead of leaving an empty strip
+    # above the text.
     tooltip_ui.show_text("just a hint")
     assert_bool(tooltip_ui.icon_plate.visible).is_false()
     assert_bool(tooltip_ui.separator.visible).is_false()
@@ -749,23 +751,61 @@ func test_tooltip_marks_weapons_with_badge() -> void:
     tooltip_ui.free()
 
 
-func test_tooltip_text_hint_has_no_icon_or_name() -> void:
+func test_tooltip_icon_is_replaced_not_stacked() -> void:
     var tooltip_ui = load("res://src/ui/TooltipUi.tscn").instantiate()
     add_child(tooltip_ui)
     tooltip_ui.show_for(load(PLUS_DAMAGE_ITEM))
-    var icons_after_resource: int = tooltip_ui.icon_holder.get_child_count()
-    assert_int(icons_after_resource).is_equal(1)
+    assert_int(tooltip_ui.icon_holder.get_child_count()).is_equal(1)
 
-    # A plain hint has no resource, so the icon and name must be cleared.
-    tooltip_ui.show_text("just a hint")
     # Zero, not one: the old icon is detached immediately rather than left in
     # the tree until the end of the frame.
+    tooltip_ui.show_text("just a hint")
     assert_int(tooltip_ui.icon_holder.get_child_count()).is_equal(0)
     assert_str(tooltip_ui.name_label.text).is_empty()
     assert_bool(tooltip_ui.type_badge.visible).is_false()
     assert_str(tooltip_ui.label.text).contains("just a hint")
 
+    # A second hint must not stack a second icon on the first.
+    tooltip_ui.show_text("another hint", Stats.get_stat_icon("damage"))
+    assert_int(tooltip_ui.icon_holder.get_child_count()).is_equal(1)
+
     tooltip_ui.free()
+
+
+func test_tooltip_text_hint_shows_stat_icon() -> void:
+    var tooltip_ui = load("res://src/ui/TooltipUi.tscn").instantiate()
+    add_child(tooltip_ui)
+
+    # A stat hint passes its own icon, so the plate is filled instead of leaving
+    # an empty strip above the text.
+    var icon: Texture2D = Stats.get_stat_icon("health")
+    assert_object(icon).is_not_null()
+    tooltip_ui.show_text(ItemTooltip.stat_hint("health"), icon)
+
+    assert_bool(tooltip_ui.icon_plate.visible).is_true()
+    assert_int(tooltip_ui.icon_holder.get_child_count()).is_equal(1)
+    var icon_rect: TextureRect = _find_texture_rect(tooltip_ui.icon_holder)
+    assert_object(icon_rect).is_not_null()
+    assert_object(icon_rect.texture).is_same(icon)
+    # Sized to the tooltip plate, not the card's 48px item icon.
+    assert_vector(icon_rect.get_parent().custom_minimum_size).is_equal(TooltipUi.HINT_ICON_SIZE)
+    # Still a plain hint: no name, no badge, prose body.
+    assert_str(tooltip_ui.name_label.text).is_empty()
+    assert_bool(tooltip_ui.type_badge.visible).is_false()
+    assert_bool(tooltip_ui.separator.visible).is_false()
+    assert_str(tooltip_ui.label.text).contains(ItemTooltip.stat_hint("health"))
+
+    tooltip_ui.free()
+
+
+func _find_texture_rect(node: Node) -> TextureRect:
+    if node is TextureRect:
+        return node
+    for child in node.get_children():
+        var found: TextureRect = _find_texture_rect(child)
+        if found != null:
+            return found
+    return null
 
 
 func test_item_display_panel_build_bbcode_skips_name_and_colors_tones() -> void:
@@ -816,9 +856,19 @@ func test_character_ui_stat_rows_have_tooltips() -> void:
 
     assert_int(ui.stats_container.get_child_count()).is_greater(0)
     var row: Control = ui.stats_container.get_child(0)
+    # The row and the tooltip show the same stat icon, so hovering never leaves
+    # an empty strip above the hint.
+    var stat_name: String = str((row.get_child(1) as Label).name).replace("value_", "")
+    var expected: Texture2D = Stats.get_stat_icon(stat_name)
+    assert_object((row.get_child(0) as TextureRect).texture).is_same(expected)
+
     row.emit_signal("mouse_entered")
     assert_bool(ui.tooltip.visible).is_true()
     assert_bool(ui.tooltip.label.text.is_empty()).is_false()
+    assert_bool(ui.tooltip.icon_plate.visible).is_true()
+    var icon_rect: TextureRect = _find_texture_rect(ui.tooltip.icon_holder)
+    assert_object(icon_rect).is_not_null()
+    assert_object(icon_rect.texture).is_same(expected)
     row.emit_signal("mouse_exited")
     assert_bool(ui.tooltip.visible).is_false()
 
@@ -837,9 +887,15 @@ func test_shop_menu_stat_rows_have_tooltips() -> void:
 
     assert_int(shop.stats_container.get_child_count()).is_greater(0)
     var row: Control = shop.stats_container.get_child(0)
+    var stat_name: String = str((row.get_child(1) as Label).name).replace("value_", "")
+    var expected: Texture2D = Stats.get_stat_icon(stat_name)
     row.emit_signal("mouse_entered")
     assert_bool(shop.tooltip.visible).is_true()
     assert_bool(shop.tooltip.label.text.is_empty()).is_false()
+    assert_bool(shop.tooltip.icon_plate.visible).is_true()
+    var icon_rect: TextureRect = _find_texture_rect(shop.tooltip.icon_holder)
+    assert_object(icon_rect).is_not_null()
+    assert_object(icon_rect.texture).is_same(expected)
     row.emit_signal("mouse_exited")
     assert_bool(shop.tooltip.visible).is_false()
 

@@ -117,7 +117,7 @@ static func character_icon_texture(character: CharacterData) -> Texture2D:
 ## Falls back to the default weapon sprite / default modifier icon.
 static func make_icon(resource: Resource) -> Control:
     if resource is CharacterData:
-        return _make_texture_icon(character_icon_texture(resource as CharacterData))
+        return make_texture_icon(character_icon_texture(resource as CharacterData))
     if resource is BaseWeapon:
         return _make_weapon_icon(resource as BaseWeapon)
     if resource is Item:
@@ -128,9 +128,11 @@ static func make_icon(resource: Resource) -> Control:
 
 
 ## A square icon holder holding one texture, centred and aspect-preserved.
-static func _make_texture_icon(texture: Texture2D) -> Control:
+## `size` must match the plate it is dropped into, otherwise the holder's
+## minimum size grows the plate past its intended scale.
+static func make_texture_icon(texture: Texture2D, size: Vector2 = ItemIconGenerator.BASE_SIZE) -> Control:
     var container := Control.new()
-    container.custom_minimum_size = ItemIconGenerator.BASE_SIZE
+    container.custom_minimum_size = size
     var rect := TextureRect.new()
     rect.texture = texture
     rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -142,7 +144,7 @@ static func _make_texture_icon(texture: Texture2D) -> Control:
 
 static func _make_weapon_icon(weapon: BaseWeapon) -> Control:
     var texture: Texture2D = weapon.sprite if weapon.sprite else load("res://src/Assets/weapons/_default.png")
-    return _make_texture_icon(texture)
+    return make_texture_icon(texture)
 
 
 ## Renders card rows as BBCode. The name row is skipped because it is already

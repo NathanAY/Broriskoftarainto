@@ -509,6 +509,112 @@ func test_stale_when_triggered_flavor_is_rewritten() -> void:
         assert_bool("when triggered" in line).is_false()
 
 
+func test_character_ui_items_are_laid_out_as_a_grid_table() -> void:
+    var character := _build_character()
+    var prev_character: Character = GlobalGameState.current_character
+    GlobalGameState.current_character = character
+
+    var ui = load(CHARACTER_UI_SCENE).instantiate()
+    var item_holder: ItemHolder = character.get_node("ItemHolder")
+    var items: Array[Item] = [
+        load("res://src/Resources/items/ArmorPlate.tres"),
+        load("res://src/Resources/items/AttackSpeedItem.tres"),
+        load("res://src/Resources/items/BootsOfSpeed.tres"),
+        load("res://src/Resources/items/CritGlass.tres"),
+        load("res://src/Resources/items/Knockback.tres"),
+        load("res://src/Resources/items/PlusDamageItem.tres"),
+        load("res://src/Resources/items/PoisonHit.tres"),
+    ]
+    for item in items:
+        item_holder.add_item(item)
+    add_child(ui)
+    await get_tree().process_frame
+    await get_tree().process_frame
+
+    # Same widget as the weapons area: a GridContainer, so cells fill a row and
+    # wrap onto the next one instead of being stacked in a single column.
+    assert_that(ui.items_container is GridContainer).is_true()
+    assert_int(ui.items_container.columns).is_equal(ui.weapons_container.columns)
+    assert_int(ui.items_container.get_child_count()).is_equal(items.size())
+
+    # Every cell is the character-select tile at this screen's denser scale, so
+    # a long name truncates here instead of stretching the column.
+    for index in items.size():
+        var cell: Control = ui.items_container.get_child(index)
+        assert_that(cell is IconCard).is_true()
+        assert_vector(cell.custom_minimum_size).is_equal(IconCard.CARD_SIZE * IconCard.COMPACT_SCALE)
+        assert_str((cell as IconCard).name_label.text).is_equal(
+            ItemDisplayPanel.display_name(items[index]))
+        assert_int((cell as IconCard).icon_holder.get_child_count()).is_equal(1)
+
+    # 7 cells in 5 columns: the first five share a row, the rest start the next.
+    var first_row_y: float = (ui.items_container.get_child(0) as Control).position.y
+    assert_float((ui.items_container.get_child(4) as Control).position.y).is_equal(first_row_y)
+    assert_bool((ui.items_container.get_child(5) as Control).position.y > first_row_y).is_true()
+
+    # Fixed-size tiles: a row is as wide as its tiles, not stretched by the
+    # widest name in it.
+    var widest: float = 0.0
+    for index in 5:
+        widest = maxf(widest, (ui.items_container.get_child(index) as Control).size.x)
+    assert_float(widest).is_equal(IconCard.CARD_SIZE.x * IconCard.COMPACT_SCALE)
+
+    GlobalGameState.current_character = prev_character if is_instance_valid(prev_character) else null
+    ui.free()
+    character.free()
+
+
+func test_character_ui_weapons_use_the_same_card_as_the_items() -> void:
+    var character := _build_character()
+    var prev_character: Character = GlobalGameState.current_character
+    GlobalGameState.current_character = character
+
+    var ui = load(CHARACTER_UI_SCENE).instantiate()
+    var weapon_holder: WeaponHolder = character.get_node("WeaponHolder")
+    var weapons: Array[BaseWeapon] = [
+        load("res://src/Resources/weapons/Fist.tres"),
+        load("res://src/Resources/weapons/Pistol.tres"),
+        load("res://src/Resources/weapons/Shotgun.tres"),
+        load("res://src/Resources/weapons/Knife.tres"),
+        load("res://src/Resources/weapons/Fist.tres"),
+        load("res://src/Resources/weapons/Thorns.tres"),
+    ]
+    for weapon in weapons:
+        weapon_holder.weapons.append(weapon)
+    add_child(ui)
+    await get_tree().process_frame
+    await get_tree().process_frame
+
+    assert_int(ui.weapons_container.get_child_count()).is_equal(weapons.size())
+
+    # Same tile as the Items grid and the character select grid, at this
+    # screen's denser scale.
+    for index in weapons.size():
+        var card: Control = ui.weapons_container.get_child(index)
+        assert_that(card is IconCard).is_true()
+        assert_vector(card.custom_minimum_size).is_equal(IconCard.CARD_SIZE * IconCard.COMPACT_SCALE)
+        assert_str((card as IconCard).name_label.text).is_equal(
+            ItemDisplayPanel.display_name(weapons[index]))
+        assert_int((card as IconCard).icon_holder.get_child_count()).is_equal(1)
+
+    # 6 tiles in 5 columns wrap onto a second row.
+    var first_row_y: float = (ui.weapons_container.get_child(0) as Control).position.y
+    assert_float((ui.weapons_container.get_child(4) as Control).position.y).is_equal(first_row_y)
+    assert_bool((ui.weapons_container.get_child(5) as Control).position.y > first_row_y).is_true()
+
+    # Hovering a weapon tile shows its detail in the shared tooltip.
+    var card: Control = ui.weapons_container.get_child(1)
+    card.emit_signal("mouse_entered")
+    assert_bool(ui.tooltip.visible).is_true()
+    assert_str(ui.tooltip.name_label.text).contains("Pistol")
+    card.emit_signal("mouse_exited")
+    assert_bool(ui.tooltip.visible).is_false()
+
+    GlobalGameState.current_character = prev_character if is_instance_valid(prev_character) else null
+    ui.free()
+    character.free()
+
+
 func test_hover_shows_and_hides_tooltip() -> void:
     var character := _build_character()
     var prev_character: Character = GlobalGameState.current_character

@@ -17,10 +17,11 @@ Scope decision (confirmed with user): the tooltip applies to **both** the Items 
 
 ## Relevant code
 
-- `src/ui/CharacterUI.tscn` — scene; root `CharacterUi` (Control) with `ItemsList` (VBoxContainer) and `WeaponsList` (GridContainer) populated at runtime.
-- `src/ui/character_ui.gd` — builds rows dynamically:
-  - `_update_items()` / `_on_item_added()` create one `HBoxContainer` per item (icon + label).
-  - `_update_weapons()` creates one `VBoxContainer` per weapon (icon + name).
+- `src/ui/CharacterUI.tscn` — scene; root `CharacterUi` (Control) with `ItemsList` (GridContainer) and `WeaponsList` (GridContainer) populated at runtime.
+- `src/ui/character_ui.gd` — builds cells dynamically:
+  - `_update_items()` / `_on_item_added()` create one `IconCard` per item.
+  - `_update_weapons()` creates one `IconCard` per weapon.
+  - Both go through `_fill_cards()` / `_add_card()`, so items and weapons are the same tile (the character select grid's `IconCard`, at `IconCard.COMPACT_SCALE`) and each grid wraps into a new row once `columns` cells are filled. The shop's Collected Items / Weapons lists fill the same tile the same way (`Scenes/menu/shop_menu.gd::_fill_gear_cards()`).
 - `src/Systems/Items/Item.gd` — fields: `name`, `description`, `modifiers` (Dictionary, e.g. `{"damage": {"flat": 5.0}}`), `effect_scene` (Array[PackedScene]).
 - `src/Systems/weapon/BaseWeapon.gd` — fields: `name`, `description`, `base_attack_speed`, `base_damage`, `weapon_range`, `modifiers`.
 

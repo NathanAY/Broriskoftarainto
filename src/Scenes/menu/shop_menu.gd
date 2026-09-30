@@ -6,14 +6,18 @@ class_name ShopMenu
 @onready var money_label: Label = $Control/VBoxContainer/TopHBoxContainer/Money
 @onready var items_container: HBoxContainer = $Control/VBoxContainer/MidContainer/ShopArea/ItemsList
 @onready var stats_container: VBoxContainer = $Control/VBoxContainer/MidContainer/StatsPanel/StatsScroll/StatsList
-@onready var collected_items_container: VBoxContainer = $Control/VBoxContainer/BottomContainer/ItemsContainer/ItemsScroll/List
-@onready var weapons_container: GridContainer = $Control/VBoxContainer/BottomContainer/WeaponsContainer/WeaponsScroll/List
+@onready var collected_items_container: GridContainer = $Control/VBoxContainer/BottomContainer/ItemsContainer/ItemsScroll/ItemsMargin/List
+@onready var weapons_container: GridContainer = $Control/VBoxContainer/BottomContainer/WeaponsContainer/WeaponsScroll/WeaponsMargin/List
 @onready var tooltip: TooltipUi = $Tooltip
 @onready var price_analyzer: ItemPriceAnalyzer = $PriceAnalyzer
 
 signal next_stage_pressed
 
 const SHOP_ITEM_CARD_SCENE: PackedScene = preload("res://src/Scenes/menu/ShopItemCard.tscn")
+
+## The Collected Items / Weapons lists are the same tile the character menu's
+## grids use, at the same compact scale: one gear card, one visual language.
+const ICON_CARD_SCENE: PackedScene = preload("res://src/ui/IconCard.tscn")
 
 const WEAPON_CHANCE: float = 0.1
 
@@ -56,48 +60,28 @@ func show_menu():
 func _update_character_info() -> void:
     if not character: return
 
-    # Update Items
     var item_holder: ItemHolder = character.get_node_or_null("ItemHolder")
     if item_holder:
-        for child in collected_items_container.get_children():
-            child.queue_free()
-        for item in item_holder.items:
-            var hbox = HBoxContainer.new()
-            var l = Label.new()
-            l.text = item.name
-            l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-            hbox.add_child(l)
-            tooltip.bind_to_row(hbox, item)
-            collected_items_container.add_child(hbox)
+        _fill_gear_cards(collected_items_container, item_holder.items)
 
-    # Update Weapons
     var weapon_holder = character.get_node_or_null("WeaponHolder")
     if weapon_holder:
-        for child in weapons_container.get_children():
-            child.queue_free()
-        for weapon in weapon_holder.weapons:
-            var vbox = VBoxContainer.new()
-            # Add Icon
-            var icon_rect = TextureRect.new()
-            icon_rect.custom_minimum_size = Vector2(48, 48)
-            icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-            icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+        _fill_gear_cards(weapons_container, weapon_holder.weapons)
 
-            if weapon.get("sprite"):
-                icon_rect.texture = weapon.sprite
-            else:
-                icon_rect.texture = load("res://src/Assets/weapons/_default.png")
-            vbox.add_child(icon_rect)
 
-            # Add Name
-            var name_label = Label.new()
-            name_label.text = weapon.name
-            name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-            vbox.add_child(name_label)
-
-            tooltip.bind_to_row(vbox, weapon)
-
-            weapons_container.add_child(vbox)
+## One `IconCard` per resource, each wired to the shared tooltip. The character
+## menu fills its two grids the same way, so a tile cannot look different in the
+## shop from the one the player just saw in the pause menu.
+func _fill_gear_cards(container: GridContainer, resources: Array) -> void:
+    for child in container.get_children():
+        child.queue_free()
+    for resource in resources:
+        var card: IconCard = ICON_CARD_SCENE.instantiate()
+        # Scaled before the tree so the first layout is already the compact one.
+        card.apply_scale(IconCard.COMPACT_SCALE)
+        container.add_child(card)
+        card.set_display(resource)
+        tooltip.bind_to_row(card, resource)
 
 func hide_menu():
     get_tree().paused = false

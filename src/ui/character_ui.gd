@@ -1,11 +1,15 @@
 # CharacterUI.gd
 extends Control
 
-@onready var items_container: VBoxContainer = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/ItemsScroll/ItemsList
+@onready var items_container: GridContainer = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/ItemsScroll/ItemsMargin/ItemsList
 @onready var stats_container: VBoxContainer = $VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsHBox/StatsScroll/StatsList
-@onready var weapons_container: GridContainer = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/WeaponsScroll/WeaponsList
+@onready var weapons_container: GridContainer = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/WeaponsScroll/WeaponsMargin/WeaponsList
 @onready var back_button: Button = $VBoxContainer/Footer/Close
 @onready var tooltip: TooltipUi = $Tooltip
+
+## Items and weapons are the same tile the character select grid uses, at the
+## compact scale every gear grid shares.
+const ICON_CARD_SCENE: PackedScene = preload("res://src/ui/IconCard.tscn")
 
 var character: Character
 var stats_node: Stats = null
@@ -112,35 +116,8 @@ func _on_stat_changed_event(event) -> void:
 # --- weapon UI ---------------------------------------------------------------
 
 func _update_weapons() -> void:
-    _clear_container(weapons_container)
-    if not weapon_holder or not weapon_holder.weapons:
-        return
+    _fill_cards(weapons_container, weapon_holder.weapons if weapon_holder else [])
 
-    for weapon in weapon_holder.weapons:
-        var vbox = VBoxContainer.new()
-
-        # Add Icon
-        var icon_rect = TextureRect.new()
-        icon_rect.custom_minimum_size = Vector2(48, 48)
-        icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-        icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-
-        if weapon.get("sprite"):
-            icon_rect.texture = weapon.sprite
-        else:
-            icon_rect.texture = load("res://src/Assets/weapons/_default.png")
-
-        vbox.add_child(icon_rect)
-
-        # Add Name
-        var name_label = Label.new()
-        name_label.text = weapon.name
-        name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-        vbox.add_child(name_label)
-
-        tooltip.bind_to_row(vbox, weapon)
-
-        weapons_container.add_child(vbox)
 # Called when weapons emits its signal (weapon_changed(weapon_name, new_value))
 func _on_weapon_changed(event) -> void:
     print("Character_ui, _on_weapon_changed", event)
@@ -150,32 +127,29 @@ func _on_weapon_changed(event) -> void:
 # --- items UI ---------------------------------------------------------------
 
 func _update_items() -> void:
-    _clear_container(items_container)
-    if not item_holder:
-        return
+    _fill_cards(items_container, item_holder.items if item_holder else [])
 
-    if not item_holder.items:
-        return
+# --- shared grid tiles ------------------------------------------------------
 
-    for item in item_holder.items:
-        items_container.add_child(_build_item_row(item))
+## One `IconCard` per resource in `container`, each wired to the shared tooltip.
+## Items and weapons are the same tile, so both grids share this rather than
+## growing a second hand-built cell.
+func _fill_cards(container: Container, resources: Array) -> void:
+    _clear_container(container)
+    for resource in resources:
+        _add_card(container, resource)
 
-func _build_item_row(item: Resource) -> HBoxContainer:
-    var hbox = HBoxContainer.new()
 
-    # Add Icon
-    var icon_node = ItemIconGenerator.generate_icon(item)
-    hbox.add_child(icon_node)
-
-    # Add Label
-    var l = Label.new()
-    l.text = _item_display_name(item)
-    l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-    hbox.add_child(l)
-
-    tooltip.bind_to_row(hbox, item)
-
-    return hbox
+func _add_card(container: Container, resource: Resource) -> IconCard:
+    var card: IconCard = ICON_CARD_SCENE.instantiate()
+    # Scaled before the tree so the very first layout is already the compact one.
+    card.apply_scale(IconCard.COMPACT_SCALE)
+    container.add_child(card)
+    card.set_display(resource)
+    # Bound to the card rather than to a bare icon: the opaque tile is what makes
+    # the whole cell hoverable, and its art is made click-through by set_icon.
+    tooltip.bind_to_row(card, resource)
+    return card
 
 func _on_item_added(event: Dictionary) -> void:
     var entity = event.get("hold_owner")
@@ -183,24 +157,14 @@ func _on_item_added(event: Dictionary) -> void:
     # entity is the owner of the item; only update UI if it's the current character
     if entity != character:
         return
-    var hbox = _build_item_row(item)
-    items_container.add_child(hbox)
-    #_update_items()
+    _add_card(items_container, item)
 
 func _on_item_removed(event: Dictionary) -> void:
     var entity = event.get("hold_owner")
     var _item = event.get("item")
     if entity != character:
-        return  
+        return
     _update_items()
-
-func _item_display_name(item: Resource) -> String:
-    # Prefer Item.name, fallback to resource_name or to_class string
-    if typeof(item) == TYPE_OBJECT and item is Item:
-        return str(item.name)
-    if "resource_name" in item:
-        return str(item.resource_name)
-    return str(item)
 
 func _on_back_pressed():
     visible = false

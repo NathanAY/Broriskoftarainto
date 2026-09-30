@@ -36,7 +36,7 @@ func test_item_with_3_stats_has_3_image():
     })
     c_item_holder.add_item(stat_item)
     
-    var _items_list: VBoxContainer = test_scene.get_node("UI/PauseMenu/CharacterUi/VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/ItemsScroll/ItemsList")
+    var _items_list: GridContainer = test_scene.get_node("UI/PauseMenu/CharacterUi/VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/ItemsScroll/ItemsMargin/ItemsList")
     var critical_chance = c_stats.get_stat("critical_chance")
     await wait_seconds(0.5)
     assert_eq(critical_chance, 100.0)

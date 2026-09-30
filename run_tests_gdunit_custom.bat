@@ -8,7 +8,8 @@ REM   .\run_tests_gdunit_custom.bat test_pierce_stat.gd
 REM   .\run_tests_gdunit_custom.bat test_pierce_stat
 REM   .\run_tests_gdunit_custom.bat pierce_stat
 REM An optional 2nd argument overrides the run timeout in seconds
-REM (default: 10s for a single suite, 180s for several suites / all of them).
+REM (default: TIMEOUT_BASE for the first suite + TIMEOUT_PER_EXTRA for every
+REM  additional suite, so a hung suite is killed after a bounded wait).
 REM Resolution rules (case-insensitive, forward/backslash agnostic, .gd optional):
 REM   1. no argument            -> every suite under res://test
 REM   2. existing path          -> that file or directory (res://test/<arg>)
@@ -24,9 +25,9 @@ REM To see other arguments \addons\gdUnit4\src\core\runners\GdUnitTestCIRunner.g
 set "GODOT_BIN=F:\programs\Godot_v4.6.1-stable_win64\Godot_v4.6.1-stable_win64.exe"
 set "TEST_ROOT=res://test"
 set "TEST_ROOT_FS=test"
-set "TIMEOUT_SINGLE=10"
-set "TIMEOUT_MULTI=180"
-set "TIMEOUT_SECONDS=%TIMEOUT_SINGLE%"
+set "TIMEOUT_BASE=10"
+set "TIMEOUT_PER_EXTRA=3"
+set "TIMEOUT_SECONDS=%TIMEOUT_BASE%"
 set "LOG_FILE=.gdunit.log"
 set "ARGS_FILE=.gdunit_args.txt"
 
@@ -72,13 +73,15 @@ goto timeout_pick
 set "TEST_TARGET=%TEST_ROOT% ^(all suites^)"
 set "GODOT_TEST_ARGS=-a ""%TEST_ROOT%"""
 set "TARGET_COUNT=0"
+for /f %%N in ('dir /b /s "%TEST_ROOT_FS%\test_*.gd" 2^>nul ^| find /c /v ""') do set "TARGET_COUNT=%%N"
 
 :timeout_pick
 REM an optional 2nd argument overrides the timeout in seconds
 if not "%~2"=="" set "TIMEOUT_SECONDS=%~2"
 if not "%~2"=="" goto ready
-if "%TARGET_COUNT%"=="1" set "TIMEOUT_SECONDS=%TIMEOUT_SINGLE%"
-if not "%TARGET_COUNT%"=="1" set "TIMEOUT_SECONDS=%TIMEOUT_MULTI%"
+REM first suite gets TIMEOUT_BASE, every further suite adds TIMEOUT_PER_EXTRA
+set /a TIMEOUT_SECONDS=%TIMEOUT_BASE% + ( %TARGET_COUNT% - 1 ) * %TIMEOUT_PER_EXTRA%
+if %TIMEOUT_SECONDS% LSS 1 set "TIMEOUT_SECONDS=1"
 goto ready
 
 :no_match
@@ -92,14 +95,19 @@ exit /b 2
 echo ========================================
 echo Test Runner
 echo Target: %TEST_TARGET%
-echo Timeout: %TIMEOUT_SECONDS%s
+echo Suites: %TARGET_COUNT%
+echo Timeout: %TIMEOUT_SECONDS%s ^(10 base + 3 per extra suite^)
 echo Log: %LOG_FILE%
 echo ========================================
 
 echo Running tests, logging to file...
 
+REM stdin is redirected from nul on purpose: a script error makes Godot drop into
+REM its "debug>" REPL, and with a live console it waits for input forever while
+REM spamming the log. With stdin closed the break aborts immediately and the run
+REM reaches the normal failure path (or the timeout guard below).
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$cmd = '""%GODOT_BIN%"" --path . -s -d res://addons/gdUnit4/bin/GdUnitCmdTool.gd !GODOT_TEST_ARGS! > ""%LOG_FILE%"" 2>&1';" ^
+  "$cmd = '""%GODOT_BIN%"" --path . -s -d res://addons/gdUnit4/bin/GdUnitCmdTool.gd !GODOT_TEST_ARGS! < nul > ""%LOG_FILE%"" 2>&1';" ^
   "$p = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', $cmd -NoNewWindow -PassThru;" ^
   "if (-not $p.WaitForExit(%TIMEOUT_SECONDS% * 1000)) {" ^
   "    Write-Host ''; Write-Host 'TEST TIMEOUT - process exceeded %TIMEOUT_SECONDS% seconds!' -ForegroundColor Red;" ^

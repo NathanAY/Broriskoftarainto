@@ -1,39 +1,8 @@
-[gd_scene format=3 uid="uid://vyf6m3sarx1i"]
+[gd_scene load_steps=3 format=3 uid="uid://vyf6m3sarx1i"]
 
-[ext_resource type="Script" uid="uid://d2m41ljb1ac38" path="res://src/Scenes/menu/character_card.gd" id="1_card"]
+[ext_resource type="PackedScene" path="res://src/ui/IconCard.tscn" id="1_base"]
+[ext_resource type="Script" uid="uid://d2m41ljb1ac38" path="res://src/Scenes/menu/character_card.gd" id="2_card"]
 
-[node name="CharacterCard" type="PanelContainer" unique_id=462281984]
-custom_minimum_size = Vector2(108, 124)
+[node name="CharacterCard" instance=ExtResource("1_base")]
 size_flags_horizontal = 3
-script = ExtResource("1_card")
-
-[node name="Margin" type="MarginContainer" parent="." unique_id=94200715]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
-
-[node name="VBox" type="VBoxContainer" parent="Margin" unique_id=115190933]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="IconHolder" type="CenterContainer" parent="Margin/VBox" unique_id=925806004]
-custom_minimum_size = Vector2(72, 72)
-layout_mode = 2
-size_flags_vertical = 4
-mouse_filter = 2
-
-[node name="NameLabel" type="Label" parent="Margin/VBox" unique_id=379090110]
-custom_minimum_size = Vector2(10, 10)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-theme_override_colors/font_color = Color(0.784314, 0.803922, 0.847059, 1)
-theme_override_font_sizes/font_size = 13
-text = "Name"
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 2
-max_lines_visible = 2
-text_overrun_behavior = 3
+script = ExtResource("2_card")

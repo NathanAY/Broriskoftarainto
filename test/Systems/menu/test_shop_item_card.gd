@@ -92,6 +92,74 @@ func test_shop_items_are_horizontal_cards() -> void:
     shop.free()
 
 
+func test_collected_items_and_weapons_use_the_character_menu_card() -> void:
+    var shop = load(SHOP_SCENE).instantiate()
+    add_child(shop)
+    var character := _build_character()
+    shop.character = character
+
+    var items: Array[Item] = [
+        load("res://src/Resources/items/ArmorPlate.tres"),
+        load("res://src/Resources/items/CritGlass.tres"),
+        load("res://src/Resources/items/Knockback.tres"),
+        load("res://src/Resources/items/PlusDamageItem.tres"),
+        load("res://src/Resources/items/PoisonHit.tres"),
+        load("res://src/Resources/items/ProjSpeed.tres"),
+    ]
+    for item in items:
+        character.get_node("ItemHolder").add_item(item)
+    var weapons: Array[BaseWeapon] = [
+        load("res://src/Resources/weapons/Fist.tres"),
+        load("res://src/Resources/weapons/Pistol.tres"),
+        load("res://src/Resources/weapons/Shotgun.tres"),
+        load("res://src/Resources/weapons/Knife.tres"),
+        load("res://src/Resources/weapons/Thorns.tres"),
+    ]
+    character.get_node("WeaponHolder").weapons.append_array(weapons)
+
+    shop._update_character_info()
+    # The menu hides its whole layer in `_ready()`, and a hidden layer is never
+    # laid out, so the grid would never assign the tiles a position.
+    shop.visible = true
+    # Two frames: one to add the tiles, one for the grid to lay them out.
+    await get_tree().process_frame
+    await get_tree().process_frame
+
+    # Both lists are grids of the shared tile, at the same compact scale the
+    # character menu uses - so gear looks identical in the shop and in the
+    # pause menu instead of being a one-off widget here.
+    var expected_size: Vector2 = IconCard.CARD_SIZE * IconCard.COMPACT_SCALE
+    for pair in [[shop.collected_items_container, items], [shop.weapons_container, weapons]]:
+        var grid: GridContainer = pair[0]
+        var resources: Array = pair[1]
+        assert_that(grid is GridContainer).is_true()
+        assert_int(grid.columns).is_equal(5)
+        assert_int(grid.get_child_count()).is_equal(resources.size())
+        for index in resources.size():
+            var card: Control = grid.get_child(index)
+            assert_that(card is IconCard).is_true()
+            assert_vector(card.custom_minimum_size).is_equal(expected_size)
+            assert_str((card as IconCard).name_label.text).is_equal(
+                ItemDisplayPanel.display_name(resources[index]))
+            assert_int((card as IconCard).icon_holder.get_child_count()).is_equal(1)
+
+    # 6 tiles in 5 columns wrap onto a second row, exactly like the character menu.
+    var first_row_y: float = (shop.collected_items_container.get_child(0) as Control).position.y
+    assert_float((shop.collected_items_container.get_child(4) as Control).position.y).is_equal(first_row_y)
+    assert_bool((shop.collected_items_container.get_child(5) as Control).position.y > first_row_y).is_true()
+
+    # Hovering a collected item still drives the shared tooltip.
+    var card: Control = shop.collected_items_container.get_child(0)
+    card.emit_signal("mouse_entered")
+    assert_bool(shop.tooltip.visible).is_true()
+    assert_str(shop.tooltip.name_label.text).contains("Armour Plate")
+    card.emit_signal("mouse_exited")
+    assert_bool(shop.tooltip.visible).is_false()
+
+    character.free()
+    shop.free()
+
+
 func test_buy_button_uses_card() -> void:
     var shop = load(SHOP_SCENE).instantiate()
     add_child(shop)

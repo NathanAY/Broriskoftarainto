@@ -31,6 +31,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -53,7 +57,7 @@ text = "Shop"
 [node name="MidContainer" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=607262157]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 2.88
+size_flags_stretch_ratio = 2.4
 
 [node name="ShopArea" type="ScrollContainer" parent="Control/VBoxContainer/MidContainer" unique_id=1856353605]
 layout_mode = 2
@@ -95,8 +99,18 @@ text = "Collected Items"
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="List" type="VBoxContainer" parent="Control/VBoxContainer/BottomContainer/ItemsContainer/ItemsScroll" unique_id=748696048]
+[node name="ItemsMargin" type="MarginContainer" parent="Control/VBoxContainer/BottomContainer/ItemsContainer/ItemsScroll"]
 layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="List" type="GridContainer" parent="Control/VBoxContainer/BottomContainer/ItemsContainer/ItemsScroll/ItemsMargin" unique_id=748696048]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 5
 
 [node name="WeaponsContainer" type="VBoxContainer" parent="Control/VBoxContainer/BottomContainer" unique_id=2093272286]
 layout_mode = 2
@@ -111,8 +125,17 @@ text = "Weapons"
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="List" type="GridContainer" parent="Control/VBoxContainer/BottomContainer/WeaponsContainer/WeaponsScroll" unique_id=1691484941]
+[node name="WeaponsMargin" type="MarginContainer" parent="Control/VBoxContainer/BottomContainer/WeaponsContainer/WeaponsScroll"]
 layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="List" type="GridContainer" parent="Control/VBoxContainer/BottomContainer/WeaponsContainer/WeaponsScroll/WeaponsMargin" unique_id=1691484941]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
 columns = 5
 
 [node name="ButtonsContainer" type="VBoxContainer" parent="Control/VBoxContainer/BottomContainer" unique_id=2083102255]

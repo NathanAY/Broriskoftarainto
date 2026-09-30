@@ -3,29 +3,45 @@ setlocal
 
 REM Single-run GdUnit4 wrapper: one Godot execution is logged to LOG_FILE under a
 REM timeout guard; afterwards only a short tail / failure index goes to console.
+REM Timeout = TIMEOUT_BASE for the first suite + TIMEOUT_PER_EXTRA per further
+REM suite, so a hung suite is killed after a bounded wait instead of stalling
+REM the whole run. A 2nd argument overrides it in seconds.
 REM NOTE: the Godot exit code is parsed from the log's "Exit code: N" line, NOT from
 REM the process handle - Start-Process ExitCode is unreliable here (reads back empty
 REM on this machine's PowerShell 5.1), so the run step only distinguishes OK vs 124.
 REM To see other arguments \addons\gdUnit4\src\core\runners\GdUnitTestCIRunner.gd  
 
 set "GODOT_BIN=F:\programs\Godot_v4.6.1-stable_win64\Godot_v4.6.1-stable_win64.exe"
-set "TEST_TARGET=res://test"
-set "TIMEOUT_SECONDS=40"
+set "TEST_ROOT=res://test"
+set "TEST_ROOT_FS=test"
+set "TIMEOUT_BASE=10"
+set "TIMEOUT_PER_EXTRA=3"
 set "LOG_FILE=.gdunit.log"
 
+set "TEST_TARGET=%TEST_ROOT%"
+set "SUITE_COUNT=0"
+for /f %%N in ('dir /b /s "%TEST_ROOT_FS%\test_*.gd" 2^>nul ^| find /c /v ""') do set "SUITE_COUNT=%%N"
+set /a TIMEOUT_SECONDS=%TIMEOUT_BASE% + ( %SUITE_COUNT% - 1 ) * %TIMEOUT_PER_EXTRA%
+if %TIMEOUT_SECONDS% LSS 1 set "TIMEOUT_SECONDS=1"
+
 if not "%~1"=="" set "TEST_TARGET=res://test/%~1"
+if not "%~2"=="" set "TIMEOUT_SECONDS=%~2"
 
 echo ========================================
 echo Test Runner
 echo Target: %TEST_TARGET%
-echo Timeout: %TIMEOUT_SECONDS%s
+echo Suites: %SUITE_COUNT%
+echo Timeout: %TIMEOUT_SECONDS%s ^(10 base + 3 per extra suite^)
 echo Log: %LOG_FILE%
 echo ========================================
 
 echo Running tests, logging to file...
 
+REM stdin is redirected from nul on purpose: a script error makes Godot drop into
+REM its "debug>" REPL, and with a live console it waits for input forever while
+REM spamming the log. With stdin closed the break aborts immediately.
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$cmd = '""%GODOT_BIN%"" --path . -s -d res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a ""%TEST_TARGET%"" > ""%LOG_FILE%"" 2>&1';" ^
+  "$cmd = '""%GODOT_BIN%"" --path . -s -d res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a ""%TEST_TARGET%"" < nul > ""%LOG_FILE%"" 2>&1';" ^
   "$p = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', $cmd -NoNewWindow -PassThru;" ^
   "if (-not $p.WaitForExit(%TIMEOUT_SECONDS% * 1000)) {" ^
   "    Write-Host ''; Write-Host 'TEST TIMEOUT - process exceeded %TIMEOUT_SECONDS% seconds!' -ForegroundColor Red;" ^

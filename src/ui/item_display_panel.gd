@@ -115,15 +115,18 @@ static func character_icon_texture(character: CharacterData) -> Texture2D:
 
 ## Builds the icon Control for an Item, a BaseWeapon or a CharacterData.
 ## Falls back to the default weapon sprite / default modifier icon.
-static func make_icon(resource: Resource) -> Control:
+## `icon_size` is the square the art fills: a caller whose plate is a different
+## size (the compact `IconCard` tile) passes its own so the art is not stranded
+## in the corner of a larger box.
+static func make_icon(resource: Resource, icon_size: Vector2 = ItemIconGenerator.BASE_SIZE) -> Control:
     if resource is CharacterData:
-        return make_texture_icon(character_icon_texture(resource as CharacterData))
+        return make_texture_icon(character_icon_texture(resource as CharacterData), icon_size)
     if resource is BaseWeapon:
-        return _make_weapon_icon(resource as BaseWeapon)
+        return _make_weapon_icon(resource as BaseWeapon, icon_size)
     if resource is Item:
-        return ItemIconGenerator.generate_icon(resource as Item)
+        return ItemIconGenerator.generate_icon(resource as Item, icon_size)
     var container := Control.new()
-    container.custom_minimum_size = ItemIconGenerator.BASE_SIZE
+    container.custom_minimum_size = icon_size
     return container
 
 
@@ -142,9 +145,9 @@ static func make_texture_icon(texture: Texture2D, size: Vector2 = ItemIconGenera
     return container
 
 
-static func _make_weapon_icon(weapon: BaseWeapon) -> Control:
+static func _make_weapon_icon(weapon: BaseWeapon, icon_size: Vector2 = ItemIconGenerator.BASE_SIZE) -> Control:
     var texture: Texture2D = weapon.sprite if weapon.sprite else load("res://src/Assets/weapons/_default.png")
-    return make_texture_icon(texture)
+    return make_texture_icon(texture, icon_size)
 
 
 ## Renders card rows as BBCode. The name row is skipped because it is already

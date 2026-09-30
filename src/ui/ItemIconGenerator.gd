@@ -6,7 +6,10 @@ class_name ItemIconGenerator
 
 const BASE_SIZE: Vector2 = Vector2(48, 48)
 
-static func generate_icon(item: Item) -> Control:
+## `icon_size` is the square the composite is laid out in: the small icons the grid
+## is drawn from scale to fill it, so a caller can render the same item at the
+## size of its own plate instead of always getting BASE_SIZE.
+static func generate_icon(item: Item, icon_size: Vector2 = BASE_SIZE) -> Control:
     var icons: Array[Texture2D] = []
 
     # 1. Get icons for stat modifiers
@@ -28,13 +31,12 @@ static func generate_icon(item: Item) -> Control:
     if icons.is_empty():
         icons.append(load("res://src/Assets/modifiers/_default.png"))
 
-    return _create_composite_texture(icons)
+    return _create_composite_texture(icons, icon_size)
 
 ## Icons are combined into a grid.
-
-static func _create_composite_texture(icons: Array[Texture2D]) -> Control:
+static func _create_composite_texture(icons: Array[Texture2D], icon_size: Vector2 = BASE_SIZE) -> Control:
     var container = Control.new()
-    container.custom_minimum_size = BASE_SIZE
+    container.custom_minimum_size = icon_size
     
     var count = icons.size()
     if count == 1:

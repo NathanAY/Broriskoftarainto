@@ -67,31 +67,7 @@ It shoulb be also good to be simmilar to other ui elemts, like tooltip or ShopIt
 Keep it small because for now there are 5 characters, but later there will be more than 15.
 But it should contain only icon and name at the bottom
 
-I found that if some infinite loops in teasts happened they processed isn't killed quikly.
-As I see in .bat files shoud do that, but likely the problem is because of TIMEOUT_MULTI=180 there.
-Can you please change it, and do a timeout 10 by default and + 5 second for every other test file. 
 
-Example of how I called it to reproduce the issue(note that the test is fixed now, so it will now fail):
-.\run_tests_gdunit_custom.bat shop_stage
-
-That I saw infinitely adding those logs to .gdunit.log file:
-
-Debugger Break, Reason: 'Cannot call method 'get_node_or_null' on a null value.'
-*Frame 0 - res://src/Systems/weapon/BaseWeapon.gd:33 in function 'apply_to'
-Enter "help" for assistance.
-debug> 
-Debugger Break, Reason: 'Cannot call method 'get_node_or_null' on a null value.'
-*Frame 0 - res://src/Systems/weapon/BaseWeapon.gd:33 in function 'apply_to'
-Enter "help" for assistance.
-debug> 
-
-Another log exampple: 
-
-Debugger Break, Reason: 'Invalid call. Nonexistent function 'get_child_index' in base 'HBoxContainer'.'
-*Frame 0 - res://src/Scenes/menu/shop_menu.gd:177 in function '_resolve_card'
-Enter "help" for assistance.
-debug> 
-Debugger Break, Reason: 'Invalid call. Nonexistent function 'get_child_index' in base 'HBoxContainer'.'
-*Frame 0 - res://src/Scenes/menu/shop_menu.gd:177 in function '_resolve_card'
-Enter "help" for assistance.
-debug> 
+I've seen in that you have executed a lot of shell commands to run some scenes. 
+Why it was needed? Is current bat files don't have all necessary funtionality?
+If it's usufull add a bat file or instructions in some document to be used for future session.

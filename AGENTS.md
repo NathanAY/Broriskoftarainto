@@ -31,6 +31,18 @@ Other behavior:
 - Partial words match several suites at once (e.g. `modifier` -> 7 suites, all run).
 - Only `test_*.gd` files are fuzzy-matched, so shared helper scripts are not run as suites.
 
+### GUT
+- All GUT tests: `.\run_tests_gut.bat`. One file: run `gut_cmdln.gd` with `-gtest=res://path/to/test.gd -gexit`.
+
+## Visual checks (rendering a scene to a PNG)
+Tests assert structure, not looks. After changing a UI, render it:
+```
+.run_scene_shot.bat res://path/to/Scene.tscn [res://out.png]
+```
+- Writes `res://scene_shot.png` by default, prints the path, and quits. Do NOT launch Godot by hand to do this: the MCP `run_project` / `get_runtime_screenshot` path returns blank frames and leaves orphan processes that lock the temp files.
+- The window flashes up briefly — a headless viewport has no framebuffer to read back.
+- The target scene must render standalone (no gameplay set up behind it). `res://test/tools/character_ui_preview.tscn` and `res://test/tools/shop_ui_preview.tscn` exist for the character menu and the shop, which both need a character in `GlobalGameState.current_character`.
+
 # Project documentation.
 - This is top-down brotato style rogulike game project on godot 4.6.
 - If docs outdatet than updated them.
@@ -51,3 +63,8 @@ Other behavior:
 - docs/systems/stats.md
 - docs/systems/ui_shop_portal.md
 - docs/systems/weapons.md
+
+## Dev tooling (`test/tools/`, not shipped)
+- `test/tools/scene_shot.tscn` + `test/tools/scene_shot.gd` — instantiates a scene named by `OS.get_cmdline_user_args()`, screenshots it, quits. Driven by `run_scene_shot.bat`.
+- `test/tools/character_ui_preview.tscn`, `test/tools/shop_ui_preview.tscn` — the character menu and the shop with a stub character wearing sample items/weapons, so they render standalone for a visual check.
+- None of these are named `test_*.gd`, so the gdUnit and GUT runners skip them even though they live under `test/`.

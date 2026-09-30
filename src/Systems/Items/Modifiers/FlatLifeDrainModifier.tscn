@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://drt3y7xeyt0gk" path="res://src/Systems/Items/modifiers/flat_life_drain_modifier.gd" id="1_3bqev"]
+
+[node name="FlatLifeDrainModifier" type="Node"]
+script = ExtResource("1_3bqev")
+effect_kind = 1

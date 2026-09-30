@@ -52,6 +52,7 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
    - `@export_multiline var tooltip_text: String` — optional one-sentence description (static flavor).
    - `@export var trigger_event: String` — the eventual trigger shown as `(Triggers on ...)`.
    - `func get_tooltip_stats() -> String` — OPTIONAL dynamic fragment built from live configured numbers (has prevelence: always called if present). Used because heal amounts, damage %, ranges, and per-stack values are configured at generation time and must read live, never stale static text.
+   - `@export var effect_kind: BaseModifier.EffectKind` — `BENEFIT` (default) or `COST`. See "Harmful modifiers" below.
    - `ItemTooltip` reads these off a temp instance once, caches per scene path, and renders `effect: <display_name> — <tooltip_text> <stats> (Triggers on <humanized trigger>)`. Falling back to a humanized scene basename when `display_name` is absent.
 
 4. Generation hooks (optional)
@@ -73,6 +74,20 @@ Lifecycle / data flow
   4. Calls `add_stack(active)` on that effect node.
 - `remove_item(item)` removes stat modifiers, then for every entry of `item.effect_scene` pops one stack of the matching effect node (via `remove_latest_stack`), detaches + frees the node on the last stack, and re-emits `on_item_removed`.
 - Modifiers live as children of the `ItemHolder` node; spawned projectiles/orbs/explosions go to `get_tree().current_scene`.
+
+Harmful modifiers (red effect line)
+- A modifier that is a net loss declares `effect_kind = EffectKind.COST`; everything else stays `BENEFIT` (the default, so all pre-existing modifiers render unchanged).
+- Path to the screen: `ItemTooltip._read_display_from_scene` / `ItemFactory._store_effect_display` read the export into the effect-display dictionary → `ItemTooltip._append_effect_row` maps it through `_tone_for_effect_kind` onto `ItemCardRow.tone` → `ItemDisplayPanel._row_bbcode` renders an EFFECT row with `effect_tone_color(tone)`, which is `COLOR_HEADING` gold at NEUTRAL and `COLOR_NEGATIVE` red at NEGATIVE.
+- `EffectKind` is mapped **by name, not cast** onto `ItemCardRow.Tone`: the two enums are separate and are free to number their entries differently (`COST` is 1 while `Tone.NEGATIVE` is 2).
+- `ItemFactory` caches the value as the `effect_kind` item metadata, so a *generated* drain still renders red through the steady-state path that skips instantiation.
+- **It is an `@export` and not a folder on purpose.** The display contract is read reflectively (a `get_property_list()` probe plus `has_method` checks), so a `modifiers/negative/` directory would be completely invisible to the tooltip and would need a path check at both reflection sites plus a second `load_scenes_from_dir` in `ItemFactory._ready`.
+
+Losing health over time
+- `regen_modifier.gd` carries a **signed** delta: subclasses return `_health_delta_per_tick(h)` and a positive value heals, a negative one drains. `FlatRegenModifier` / `PercentRegenModifier` export `health_delta` / `health_delta_percent`; `FlatLifeDrainModifier` / `PercentLifeDrainModifier` are the same code with negative defaults and `effect_kind = COST`.
+- **A drain must not go through `Health.heal()`.** `heal()` is `min(current + amount, max)`: it clamps only at the ceiling, so a negative amount drives health below zero while the entity stays alive, and it fires `on_heal` with a negative payload that every heal listener reads as a gain. `Health.apply_damage()` is the only place the dead check lives, so a drain routes there and gets the whole defender phase for free (`before_take_damage` → armor / energy shield → damage → `on_death` → `after_take_damage`).
+- Consequence worth knowing: because the drain runs the defender phase, armor reduces it and energy shield soaks it before health. That is intentional — those systems are documented as "reduces incoming damage" / "absorbs incoming damage before health" — but it does mean armor is a stat that matters against debuffs.
+- A drain emits **nothing on an attacker's bus** (`before_deal_damage`, `after_deal_damage`, `on_kill`). There is no attacker, so the only bus available is the holder's own, and a self-inflicted tick must not pay the holder its own `StatOnKillModifier` rewards for dying.
+- Exactly zero is a no-op: healing by 0 would still emit `on_heal`, and damaging by 0 would still flash a sprite and float a damage number.
 
 Scaling models (how per-stack growth is implemented)
 - Multiplicative growth: `value = base * (1.0 + bonus_per_stack * (_active_stacks() - 1))` — bomb detonation, explosive shot, poison tick base, crit multiplier bonus.
@@ -110,8 +125,10 @@ Catalog
 | PoisonModifier | `poison_modifier.gd` | `on_hit` | Applies `PoisonEffect` (100% of hit damage per tick); +50% tick damage per stack. |
 | ProjectileBounceModifier | `projectile_bounce_modifier.gd` | `on_attack` | Projectiles bounce to 3 extra targets per stack. |
 | ReflectProjectileModifier | `reflect_projectiles_modifier.gd` | `before_take_damage` | Fires 2 projectiles back at attackers; +1 per stack and larger range. |
-| FlatRegenModifier | `flat_regen_modifier.gd` (extends `regen_modifier.gd`) | passive timer | Regenerates fixed HP per tick; × stacks. No trigger event. |
-| PercentRegenModifier | `percent_regen_modifier.gd` (extends `regen_modifier.gd`) | passive timer | Regenerates % of max HP per tick; × stacks. No trigger event. |
+| FlatRegenModifier | `flat_regen_modifier.gd` (extends `regen_modifier.gd`) | passive timer | Regenerates fixed HP per tick; × stacks. No trigger event. `health_delta` is signed — a negative value drains (see "Losing health over time"). |
+| PercentRegenModifier | `percent_regen_modifier.gd` (extends `regen_modifier.gd`) | passive timer | Regenerates % of max HP per tick; × stacks. No trigger event. `health_delta_percent` is signed. |
+| FlatLifeDrainModifier | `flat_life_drain_modifier.gd` (extends `regen_modifier.gd`) | passive timer | Loses fixed HP per tick; × stacks. `effect_kind = COST`, so the card effect line is red. Routed through `Health.apply_damage`, so it can kill and runs the defender phase. |
+| PercentLifeDrainModifier | `percent_life_drain_modifier.gd` (extends `regen_modifier.gd`) | passive timer | Loses % of max HP per tick; × stacks. `effect_kind = COST`. |
 | SpinningOrbsModifier | `spinning_orbs_modifier.gd` | `on_hit` | Spawns orbiting orbs (2 base, +1 per stack) dealing 50% of base damage. |
 | SpreadModifier | `spread_modifier.gd` | `on_attack` | Spawns 2 extra projectiles per stack. |
 | StatMultiplierModifier | `stat_multiplier_modifier.gd` | `on_item_added` | Multiplies flat bonuses of a target stat from items by 2.0× per stack. Script-only (no `.tscn`; packed via `ItemBuilder`). |
@@ -121,10 +138,10 @@ Guidelines for adding a new modifier
 1. `extends BaseModifier` (`Systems/Items/Modifiers/base_modifier.gd`), matching the file's indentation style (4-space), in `Systems/Items/Modifiers/`. For a variant of an existing behavior, extend that script instead and set differing defaults in `_init()`.
 2. Stack state, `attachEventManager` caching, `_active_stacks()`, and `get_health()` come free from `BaseModifier`.
 3. Implement `attachEventManager`; subscribe your behavior with `_subscribe(trigger_event, ...)`, and to `on_stat_changes` only when you cache derived stats. Always use `_subscribe` (not raw `event_manager.subscribe`) — it handles weapon scoping when bound and unsubscribes on detach. Bail early when data is missing.
-4. Add the display contract (`display_name`, optional `tooltip_text`, `trigger_event`, and `get_tooltip_stats()` reading live values). If you add it, an item `.tres` in `Resources/items/` and a matching `XxxModifier.tscn` are needed to ship it.
+4. Add the display contract (`display_name`, optional `tooltip_text`, `trigger_event`, and `get_tooltip_stats()` reading live values). If you add it, an item `.tres` in `Resources/items/` and a matching `XxxModifier.tscn` are needed to ship it. If the modifier is a net **loss**, set `effect_kind = EffectKind.COST` so its effect line renders red.
 5. Scale per stack using `_active_stacks()`; keep the formula mirrored in the tooltip string.
 6. Tag anything you spawn to prevent recursion.
-7. Follow AGENTS.md: write/extend a test first, run it, fix, rerun. Relevant suites: `test/ui/test_character_ui_tooltip.gd` (tooltip sweep over every modifier scene) and `test/Systems/Items/`.
+7. Follow AGENTS.md: write/extend a test first, run it, fix, rerun. Relevant suites: `test/ui/test_character_ui_tooltip.gd` (tooltip sweep over every modifier scene) and `test/Systems/Items/`. New harmful modifiers and the signed-delta drain belong in `test/Systems/Items/test_negative_modifier_marking.gd` and `test_regen_modifier.gd`. After changing a card, render it: `.run_scene_shot.bat res://test/tools/shop_ui_preview.tscn`.
 
 Known limitations / TODOs
 - `remove_item` pops the most recently added stack (`remove_latest_stack`); it does not track which item instance maps to which stack index, so condition-scoped stacks' `on_condition_change` subscriptions are not removed with the stack (existing condition wiring stays stale).

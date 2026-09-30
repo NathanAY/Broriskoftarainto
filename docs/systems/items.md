@@ -33,6 +33,12 @@ Pricing (items.md, catalog `ItemPriceAnalyzer`)
   - `BaseWeapon` = 5
 - `get_sell_price(resource, ratio = 0.5)` sells a collected pickup at `round(price * ratio)` (min 1). The `ratio` is an optional callable parameter; shop default is 50% of the buy price.
 - The shop (`ShopMenu`) holds a `PriceAnalyzer` node and uses it for both buy and sell buttons.
+- **A stat item that rolled a harmful modifier is priced as a modifier (3), not as a stat item (1).** `get_price` only looks at whether `effect_scene` is non-empty, so the ~35% of generated stat items that carry a drain cross a price band. Intentional - the item really does run a behavior - but it means the stat-item tier is no longer a flat 1.
+
+Polarity: positive half and curse
+- An item's positive half and its curse can both be **behaviors**. `Item.effect_scene` is an `Array[PackedScene]`, so `ItemFactory` appends the harmful modifier as a second entry and `ItemHolder` gives each scene its own deduplicated node with its own stack. See `docs/systems/item_factory.md` for the roll and `docs/systems/modifiers.md` for how a modifier declares itself harmful.
+- **Order matters:** index 0 is always the positive half. `effect_scene_condition` is a parallel array, so a gift-first ordering keeps index 0 meaning "always on unless the item says otherwise".
+- A **stat** item has no positive scene, so when its curse is a modifier that scene is its *only* entry and its positive stat stays in `modifiers`. The card has to tell these two shapes apart - see `docs/systems/ui_shop_portal.md`.
 
 Dependencies
 - `Stats` (for stat modifiers), `EventManager` (for effect interactions), `ItemFactory` (for generating items at runtime), scene resources under `Systems/Items/Modifiers` (effects) and `Systems/Items/Buffs` (buffs/debuffs).
@@ -40,4 +46,3 @@ Dependencies
 Known limitations / TODOs
 - Removing condition managers when item is removed is TODO in `Item.remove_from()`.
 - Item stacking/unique identification relies on scene instances and `effect_scene` resource paths; may need explicit IDs for complex interactions.
-- `ItemTooltip._append_effect_row` renders only `effect_scene[0]`, so a multi-effect item shows one effect line in the shop/character tooltip even though the holder attaches all of them (`ItemIconGenerator` already composes every scene).

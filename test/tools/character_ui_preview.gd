@@ -10,7 +10,7 @@ extends Control
 
 const SAMPLE_ITEMS := [
 	"ArmorPlate", "AttackSpeedItem", "BootsOfSpeed", "CritGlass", "Knockback",
-	"PlusDamageItem", "PoisonHit", "RegenPassive", "ProjSpeed",
+	"LifeDrain", "PlusDamageItem", "PoisonHit", "RegenPassive", "ProjSpeed",
 ]
 const SAMPLE_WEAPONS := ["Fist", "Pistol", "Shotgun", "Knife", "Thorns"]
 

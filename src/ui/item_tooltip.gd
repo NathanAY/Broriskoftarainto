@@ -89,13 +89,10 @@ static func card_rows(resource: Resource) -> Array:
         _append_buff_debuff_rows(rows, item, ItemCardRow.Kind.BUFF)
     elif is_debuff_item(item):
         _append_buff_debuff_rows(rows, item, ItemCardRow.Kind.DEBUFF)
-    elif has_effect_scene(item):
-        _append_name_row(rows, item.name)
-        _append_effect_row(rows, item)
-        _append_tradeoff_rows(rows, item.modifiers)
     else:
         _append_name_row(rows, item.name)
-        _append_stat_rows(rows, item.modifiers)
+        _append_effect_rows(rows, item)
+        _append_modifier_rows(rows, item)
     return rows
 
 
@@ -176,10 +173,20 @@ static func format_value(value) -> String:
     return trimmed
 
 
-static func _append_effect_row(rows: Array, item: Item) -> void:
+## One EFFECT row per entry of `item.effect_scene` from `start_index` on, in
+## order, each toned by its own `BaseModifier.effect_kind`. An item that carries
+## both a helpful and a harmful modifier therefore shows both lines - showing only
+## the first would hide the downside from the player while the holder still
+## applied it.
+static func _append_effect_rows(rows: Array, item: Item, start_index: int = 0) -> void:
     if not has_effect_scene(item):
         return
-    var display: Dictionary = resolve_effect_display_for_item(item, item.effect_scene[0])
+    for i in range(maxi(0, start_index), item.effect_scene.size()):
+        _append_effect_row(rows, item, i)
+
+
+static func _append_effect_row(rows: Array, item: Item, index: int) -> void:
+    var display: Dictionary = resolve_effect_display_for_item(item, index)
     var effect_name := humanize_effect_name(str(display.get("name", "")))
     if effect_name.is_empty():
         return
@@ -192,11 +199,48 @@ static func _append_effect_row(rows: Array, item: Item) -> void:
         body_parts.append(stats)
     var row := ItemCardRow.new()
     row.kind = ItemCardRow.Kind.EFFECT
+    row.tone = _tone_for_effect_kind(int(display.get("effect_kind", BaseModifier.EffectKind.BENEFIT)))
     row.text = " — ".join([effect_name] + Array(body_parts))
     var trigger := str(display.get("trigger", ""))
     if not trigger.is_empty():
         row.text += " (on %s)" % humanize_trigger(trigger)
     rows.append(row)
+
+
+## An item's positive half lives either in its effect scenes (an "effect item")
+## or in its stat modifiers (a plain stat item). When any scene is a BENEFIT the
+## item is an effect item and every stat modifier on it is a cost, so they are
+## forced red; otherwise the item is a stat item that merely carries a drawback,
+## and each modifier keeps the tone its own value implies - otherwise the
+## positive stat would be rendered as a tradeoff.
+static func _append_modifier_rows(rows: Array, item: Item) -> void:
+    var force_tone := -1
+    if _has_benefit_effect(item):
+        force_tone = ItemCardRow.Tone.NEGATIVE
+    _append_stat_rows(rows, item.modifiers, force_tone)
+
+
+static func _has_benefit_effect(item: Item) -> bool:
+    if not has_effect_scene(item):
+        return false
+    for i in item.effect_scene.size():
+        var kind := int(resolve_effect_display_for_item(item, i).get(
+            "effect_kind", BaseModifier.EffectKind.BENEFIT))
+        if kind != BaseModifier.EffectKind.COST:
+            return true
+    return false
+
+
+## A modifier that declares itself a COST (life drain, ...) gets a red effect
+## line; everything else stays neutral, which the card renders as heading gold.
+## Mapped by name rather than cast: `EffectKind` and `Tone` are separate enums
+## and are free to number their entries differently.
+static func _tone_for_effect_kind(effect_kind: int) -> int:
+    match effect_kind:
+        BaseModifier.EffectKind.COST:
+            return ItemCardRow.Tone.NEGATIVE
+        _:
+            return ItemCardRow.Tone.NEUTRAL
 
 
 static func _append_tradeoff_rows(rows: Array, modifiers: Dictionary) -> void:
@@ -214,6 +258,11 @@ static func _append_buff_debuff_rows(rows: Array, item: Item, kind: int) -> void
     var tone := ItemCardRow.Tone.POSITIVE if kind == ItemCardRow.Kind.BUFF else ItemCardRow.Tone.NEGATIVE
     var payload := peek_packed_modifiers(item.effect_scene[0] if has_effect_scene(item) else null)
     _append_stat_rows(rows, payload, tone)
+    # Index 0 is the buff/debuff payload itself and is already rendered as the
+    # toned stat rows above. Any scene after it is a harmful modifier the factory
+    # added as this item's curse, so it has to be shown or the item reads as a
+    # free upgrade.
+    _append_effect_rows(rows, item, 1)
     _append_tradeoff_rows(rows, item.modifiers)
 
 
@@ -300,12 +349,22 @@ static func _append_tradeoff_lines(lines: PackedStringArray, modifiers: Dictiona
 
 
 static func _append_effect_line(lines: PackedStringArray, item: Item) -> void:
+    # Every scene, not just the first: an item with a positive and a harmful
+    # modifier must name both here too, or the hover tooltip would disagree with
+    # the card.
     if not has_effect_scene(item):
         return
-    var display: Dictionary = resolve_effect_display_for_item(item, item.effect_scene[0])
+    for i in item.effect_scene.size():
+        var line := _effect_line_text(item, i)
+        if not line.is_empty():
+            lines.append("effect: " + line)
+
+
+static func _effect_line_text(item: Item, index: int) -> String:
+    var display: Dictionary = resolve_effect_display_for_item(item, index)
     var effect_name := str(display.get("name", ""))
     if effect_name.is_empty():
-        return
+        return ""
     var head := effect_name
     var body_parts := PackedStringArray()
     var text := str(display.get("text", ""))
@@ -319,7 +378,7 @@ static func _append_effect_line(lines: PackedStringArray, item: Item) -> void:
     var trigger := str(display.get("trigger", ""))
     if not trigger.is_empty():
         head += " (Triggers on %s)" % humanize_trigger(trigger)
-    lines.append("effect: " + head)
+    return head
 
 
 static func _append_buff_debuff_lines(lines: PackedStringArray, item: Item, prefix: String) -> void:
@@ -330,6 +389,13 @@ static func _append_buff_debuff_lines(lines: PackedStringArray, item: Item, pref
     var payload := peek_packed_modifiers(item.effect_scene[0] if has_effect_scene(item) else null)
     for line in modifier_lines(payload):
         lines.append(prefix + ": " + line)
+    # Scene 0 is the payload (rendered above); anything after it is a harmful
+    # modifier that is this item's curse, so it needs a line of its own.
+    if has_effect_scene(item):
+        for i in range(1, item.effect_scene.size()):
+            var line := _effect_line_text(item, i)
+            if not line.is_empty():
+                lines.append("effect: " + line)
     _append_tradeoff_lines(lines, item.modifiers)
 
 
@@ -341,19 +407,33 @@ static func is_clean_flavor(description: String) -> bool:
 
 ## Steady state (Q8-C): prefer build-time resolved values stored on the item;
 ## fallback (Q8-A): temp instantiate, read contract fields, free, cache per path.
-static func resolve_effect_display_for_item(item: Item, scene: PackedScene) -> Dictionary:
-    if item != null and item.has_meta("effect_display_name"):
-        return {
-            "name": str(item.get_meta("effect_display_name")),
-            "text": str(item.get_meta("effect_tooltip_text")) if item.has_meta("effect_tooltip_text") else "",
-            "stats": str(item.get_meta("effect_tooltip_stats")) if item.has_meta("effect_tooltip_stats") else "",
-            "trigger": str(item.get_meta("effect_trigger")) if item.has_meta("effect_trigger") else "",
-        }
-    return resolve_effect_display(scene)
+##
+## `item` may carry several effect scenes (a positive plus a harmful one), so the
+## cache is an Array **aligned by index with `item.effect_scene`** - the same
+## convention as `Item.effect_scene_condition`. Keying by scene path would not
+## work: `_configure_dynamic_modifier` repacks randomized modifiers into a
+## `PackedScene` with an empty `resource_path`.
+static func resolve_effect_displays_for_item(item: Item) -> Array:
+    if item != null and item.has_meta("effect_displays"):
+        var cached = item.get_meta("effect_displays")
+        if typeof(cached) == TYPE_ARRAY:
+            return cached
+    return []
+
+
+## Cached display for `effect_scene[index]`, falling back to reflecting on the
+## scene when the item was never passed through `ItemFactory`.
+static func resolve_effect_display_for_item(item: Item, index: int) -> Dictionary:
+    var cached := resolve_effect_displays_for_item(item)
+    if index >= 0 and index < cached.size():
+        return cached[index]
+    if item != null and item.effect_scene != null and index >= 0 and index < item.effect_scene.size():
+        return resolve_effect_display(item.effect_scene[index])
+    return _empty_effect_display()
 
 
 static func resolve_effect_display(scene: PackedScene) -> Dictionary:
-    var empty := {"name": "", "text": "", "stats": "", "trigger": ""}
+    var empty := _empty_effect_display()
     if scene == null:
         return empty.duplicate()
     var path := str(scene.resource_path)
@@ -365,8 +445,18 @@ static func resolve_effect_display(scene: PackedScene) -> Dictionary:
     return display
 
 
+static func _empty_effect_display() -> Dictionary:
+    return {
+        "name": "",
+        "text": "",
+        "stats": "",
+        "trigger": "",
+        "effect_kind": BaseModifier.EffectKind.BENEFIT,
+    }
+
+
 static func _read_display_from_scene(scene: PackedScene) -> Dictionary:
-    var display := {"name": "", "text": "", "stats": "", "trigger": ""}
+    var display := _empty_effect_display()
     var instance: Node = scene.instantiate()
     if instance == null:
         return display
@@ -386,6 +476,12 @@ static func _read_display_from_scene(scene: PackedScene) -> Dictionary:
         var trig = instance.get("trigger_event")
         if trig != null:
             display["trigger"] = str(trig)
+    # BENEFIT / COST marker read from the BaseModifier export. Present on every
+    # modifier via the base class, but still probed defensively because this
+    # also sees plain effect scenes (explosions, projectile spawners) that are
+    # not BaseModifiers at all.
+    if props.has("effect_kind"):
+        display["effect_kind"] = int(instance.get("effect_kind"))
     if str(display["name"]).is_empty():
         display["name"] = humanize_effect_name(str(scene.resource_path.get_file().get_basename()))
     instance.free()

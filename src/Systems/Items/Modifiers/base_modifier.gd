@@ -11,6 +11,21 @@
 extends Node
 class_name BaseModifier
 
+## Whether a modifier is a net gain or a net cost for whoever holds it.
+##
+## This is purely a display concern, read by the UI through the same reflective
+## contract as `display_name` / `tooltip_text`: `ItemTooltip` and
+## `ItemFactory` pick it off an exported property, so a harmful modifier's
+## effect line renders red on an item card instead of the default gold.
+##
+## It lives on the base rather than in a separate modifiers/negative/ directory
+## precisely because that contract only sees exported properties - a folder
+## would be invisible to the tooltip.
+enum EffectKind {
+	BENEFIT,  ## net gain; renders as the default heading gold
+	COST,     ## net loss; renders red
+}
+
 var event_manager: EventManager = null
 var holder: Node = null
 var stats: Stats = null
@@ -20,6 +35,10 @@ var stacks: Array[bool] = []  # each entry = active/inactive
 ## Weapon built-in modifiers bind to their owning weapon instance; item-pickup
 ## modifiers leave it null (holder-wide, unchanged behavior).
 var bound_weapon: Object = null
+
+## Declares this modifier as a BENEFIT or a COST for UI colouring. Defaults to
+## BENEFIT so every existing modifier keeps rendering exactly as before.
+@export var effect_kind: EffectKind = EffectKind.BENEFIT
 
 ## Optional stat this modifier owns on the holder's Stats.
 ##

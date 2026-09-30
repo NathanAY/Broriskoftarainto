@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Item" format=3]
+
+[ext_resource type="PackedScene" path="res://src/Systems/Items/modifiers/FlatLifeDrainModifier.tscn" id="1_drain"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="2_sim28"]
+
+[resource]
+script = ExtResource("2_sim28")
+name = "Cursed Charm"
+description = "A charm that drinks you dry while you wear it."
+modifiers = {"damage": {"flat": 6.0}}
+effect_scene = Array[PackedScene]([ExtResource("1_drain")])
+metadata/_custom_type_script = "uid://bi8j7om4juysb"

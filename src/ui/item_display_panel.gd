@@ -170,9 +170,19 @@ static func _row_bbcode(row: ItemCardRow) -> String:
         ItemCardRow.Kind.FLAVOR:
             return "[i][color=#%s]%s[/color][/i]" % [COLOR_MUTED.to_html(false), row.text]
         ItemCardRow.Kind.EFFECT:
-            return "[color=#%s]%s[/color]" % [COLOR_HEADING.to_html(false), row.text]
+            return "[color=#%s]%s[/color]" % [effect_tone_color(row.tone).to_html(false), row.text]
         _:
             return "[color=#%s]%s[/color]" % [tone_color(row.tone).to_html(false), row.to_display()]
+
+
+## Gold is the *neutral* effect colour, so a plain effect line keeps the
+## heading gold while a modifier that declares itself a COST (life drain, ...)
+## overrides it with the tone colour. Same split as `tone_color`, but with gold
+## standing in for neutral.
+static func effect_tone_color(tone: int) -> Color:
+    if tone == ItemCardRow.Tone.NEUTRAL:
+        return COLOR_HEADING
+    return tone_color(tone)
 
 
 static func tone_color(tone: int) -> Color:

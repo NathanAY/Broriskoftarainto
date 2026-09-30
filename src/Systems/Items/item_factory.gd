@@ -9,6 +9,14 @@ var drop_pool: Array[Item] = []
 const WEAPONS_DIR: String = "res://src/Resources/weapons"
 var weapon_resources: Array[BaseWeapon] = []
 
+## How often a generated item's curse is a real harmful **modifier** rather than
+## a negated stat. Both are legitimate downsides; the modifier version is the one
+## that actually costs you something every tick, so it stays well below half.
+## Hardcoded rather than exported so the whole game shares one number; the pool
+## it draws from is `_cost_effect_scenes()`, so widening it is a matter of
+## tagging another modifier `effect_kind = COST`.
+const NEGATIVE_MODIFIER_CHANCE: float = 0.35
+
 @onready var stats: Stats = $Stats
 
 # preload or lazy-load effect/buff scenes
@@ -20,6 +28,67 @@ func _ready():
     effect_scenes = ItemBuilder.load_scenes_from_dir("res://src/Systems/Items/modifiers")
     buff_scenes.append(load("res://src/Systems/Items/Buffs/buff.tscn"))
     debuff_scene = load("res://src/Systems/Items/Buffs/DebuffSource.tscn")
+
+
+# -------------------
+# Benefit / cost scene pools
+# -------------------
+## `effect_scenes` split by `BaseModifier.effect_kind`, computed once.
+##
+## Two jobs: the positive half of an item may only roll a BENEFIT, and the
+## negative half may only roll a COST. Without the split the shop can offer
+## "Grants special effect: Life Drain" as an upside, and the same scene can be
+## picked for either half.
+var _benefit_scenes: Array[PackedScene] = []
+var _cost_scenes: Array[PackedScene] = []
+
+func _rebuild_scene_pools() -> void:
+    _benefit_scenes = []
+    _cost_scenes = []
+    for scene in effect_scenes:
+        if _scene_effect_kind(scene) == BaseModifier.EffectKind.COST:
+            _cost_scenes.append(scene)
+        else:
+            _benefit_scenes.append(scene)
+
+
+func _benefit_effect_scenes() -> Array[PackedScene]:
+    if _benefit_scenes.is_empty() and _cost_scenes.is_empty():
+        _rebuild_scene_pools()
+    return _benefit_scenes
+
+
+func _cost_effect_scenes() -> Array[PackedScene]:
+    if _benefit_scenes.is_empty() and _cost_scenes.is_empty():
+        _rebuild_scene_pools()
+    return _cost_scenes
+
+
+## Read `effect_kind` off a temp instance. Probed by name because the folder also
+## holds plain effect scenes that are not `BaseModifier`s at all; those count as
+## BENEFIT.
+func _scene_effect_kind(scene: PackedScene) -> int:
+    if scene == null:
+        return BaseModifier.EffectKind.BENEFIT
+    var instance: Node = scene.instantiate()
+    if instance == null:
+        return BaseModifier.EffectKind.BENEFIT
+    var kind := int(BaseModifier.EffectKind.BENEFIT)
+    for p in instance.get_property_list():
+        if p.name == "effect_kind":
+            kind = int(instance.get("effect_kind"))
+            break
+    instance.free()
+    return kind
+
+
+## The curse for one generated item: either a harmful modifier appended as a
+## second `effect_scene` entry, or - when the roll fails - a negated stat. The
+## two are alternatives, never both, so an item never carries a double penalty.
+func _roll_negative_modifier() -> bool:
+    if _cost_effect_scenes().is_empty():
+        return false
+    return rng.randf() < NEGATIVE_MODIFIER_CHANCE
 
 
 # -------------------
@@ -123,23 +192,32 @@ func _generate_stat_item(index: int = -1) -> Item:
     var base_value = stats.stats.get(chosen_stat, 0.0)
     var value = _generate_stat_modifiers(chosen_stat, base_value)
 
-    var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
-    var negative_base_value = stats.stats.get(negative_chosen_stat, 0.0)
-    var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
-    negative_value.set("flat", -negative_value.get("flat"))
-
-    return ItemBuilder.make_stat_item(
+    var item_modifiers := {chosen_stat: value}
+    var item := ItemBuilder.make_stat_item(
         _generate_item_name(chosen_stat),
         "Enhances %s at a cost." % [chosen_stat],
-        {chosen_stat: value, negative_chosen_stat: negative_value}
+        item_modifiers
     )
 
+    # A stat item has no positive effect scene, so a harmful one is its ONLY
+    # entry. Its positive stat therefore lives in `modifiers` and the card has to
+    # keep rendering that as a gain - `ItemTooltip._append_modifier_rows` decides
+    # this from the fact that no scene is a BENEFIT.
+    if _roll_negative_modifier():
+        var cost_scene: PackedScene = _cost_effect_scenes().pick_random()
+        item.effect_scene = [cost_scene]
+        item.description = "Enhances %s, but bleeds you dry." % [chosen_stat]
+    else:
+        item.modifiers.merge(_roll_negative_stat(str(chosen_stat), stat_names, 1.0), true)
+    return item
+
 func _generate_effect_item(index: int = -1) -> Item:
+    var benefit_scenes := _benefit_effect_scenes()
     var chosen_scene: PackedScene
     if index != -1:
         chosen_scene = effect_scenes[index]
     else:
-        chosen_scene = effect_scenes.pick_random()
+        chosen_scene = benefit_scenes.pick_random()
 
     var item_name = _generate_effect_name(chosen_scene.resource_path)
     var description := "Grants special effect: %s" % [item_name]
@@ -162,20 +240,24 @@ func _generate_effect_item(index: int = -1) -> Item:
             description += " (Triggers on %s)" % ItemTooltip.humanize_trigger(str(trig))
     temp_instance.free()
 
-    #add negative effect
-    var stat_names = _candidate_stat_names()
-    var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
-    var negative_base_value = stats.stats.get(negative_chosen_stat, 0.0)
-    var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
-    negative_value.set("flat", -negative_value.get("flat") * 2)
+    var item_scenes: Array[PackedScene] = [configured_scene]
+    var extra_modifiers := {}
+    if _roll_negative_modifier():
+        # Appended AFTER the positive half so index 0 still reads as the gift and
+        # `effect_scene_condition` stays aligned with a gift-first ordering.
+        var cost_scene: PackedScene = _cost_effect_scenes().pick_random()
+        item_scenes.append(_configure_dynamic_modifier(cost_scene))
+    else:
+        extra_modifiers = _roll_negative_stat("", _candidate_stat_names(), 2.0)
 
     var item := ItemBuilder.make_effect_item(
         item_name,
         description,
-        configured_scene,
-        {negative_chosen_stat: negative_value}
+        item_scenes[0],
+        extra_modifiers
     )
-    _store_effect_display(item, configured_scene)
+    item.effect_scene = item_scenes
+    _store_effect_display(item, item_scenes)
     return item
 
 func _generate_buff_item(index: int = -1) -> Item:
@@ -191,11 +273,6 @@ func _generate_buff_item(index: int = -1) -> Item:
     var base_value = stats.stats.get(chosen_stat, 0.0)
     var modifier_value = _generate_stat_modifiers(chosen_stat, base_value)
 
-    var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
-    var negative_base_value = stats.stats.get(negative_chosen_stat, 0.0)
-    var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
-    negative_value.set("flat", -negative_value.get("flat"))
-
     # Modifiers may randomize themselves for generation (see
     # randomize_for_generation); the packed instance's actual trigger is
     # always read back at generation time.
@@ -205,7 +282,7 @@ func _generate_buff_item(index: int = -1) -> Item:
     var description := "Grants a temporary buff: increases %s (Triggers on %s)." % [chosen_stat, ItemTooltip.humanize_trigger(buff_trigger)]
 
     var item := ItemBuilder.make_buff_item(item_name, description, chosen_stat, modifier_value, configured_buff_scene)
-    item.modifiers[negative_chosen_stat] = negative_value
+    _attach_roll_negative_half(item, str(chosen_stat), stat_names, 1.0)
     return item
 
 func _generate_debuff_item(_index: int = -1) -> Item:
@@ -224,26 +301,84 @@ func _generate_debuff_item(_index: int = -1) -> Item:
     var item_name = _generate_buff_name(chosen_scene.resource_path, chosen_stat)
     var description := "Grants a debuff: decreases %s (Triggers on %s)." % [chosen_stat, ItemTooltip.humanize_trigger(debuff_trigger)]
 
-    var negative_chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
+    var item := ItemBuilder.make_debuff_item(item_name, description, chosen_stat, modifier_value, configured_debuff_scene)
+    _attach_roll_negative_half(item, str(chosen_stat), stat_names, 2.0)
+    return item
+
+
+## The item's curse, for the generators that already have a positive effect scene
+## at index 0. Either a harmful modifier appended after it, or a negated stat.
+func _attach_roll_negative_half(item: Item, exclude: String, stat_names: Array, scale: float) -> void:
+    if _roll_negative_modifier():
+        var item_scenes: Array[PackedScene] = []
+        for scene in item.effect_scene:
+            item_scenes.append(scene)
+        var cost_scene: PackedScene = _cost_effect_scenes().pick_random()
+        item_scenes.append(_configure_dynamic_modifier(cost_scene))
+        item.effect_scene = item_scenes
+        _store_effect_display(item, item_scenes)
+    else:
+        _apply_negative_half(item, exclude, stat_names, scale)
+
+
+## One negated stat entry, scaled so an item's downside outweighs its upside
+## (`scale` 2.0 where the positive half is a flat effect).
+##
+## `exclude` is the stat the positive half already uses. Picking it again would
+## collapse both halves onto one key, and since `Dictionary.merge()` does not
+## overwrite by default the curse would vanish entirely - leaving a free item.
+func _roll_negative_stat(exclude: String, stat_names: Array, scale: float) -> Dictionary:
+    var candidates := []
+    for stat_name in stat_names:
+        if stat_name != exclude:
+            candidates.append(stat_name)
+    if candidates.is_empty():
+        return {}
+    var negative_chosen_stat = candidates[rng.randi_range(0, candidates.size() - 1)]
     var negative_base_value = stats.stats.get(negative_chosen_stat, 0.0)
     var negative_value: Dictionary = _generate_stat_modifiers(negative_chosen_stat, negative_base_value)
-    negative_value.set("flat", -negative_value.get("flat") * 2)
+    negative_value.set("flat", -negative_value.get("flat") * scale)
+    return {negative_chosen_stat: negative_value}
 
-    var item := ItemBuilder.make_debuff_item(item_name, description, chosen_stat, modifier_value, configured_debuff_scene)
-    item.modifiers[negative_chosen_stat] = negative_value
-    return item
+
+## Apply a curse dict onto an item that has no stat modifiers of its own.
+func _apply_negative_half(item: Item, exclude: String, stat_names: Array, scale: float) -> void:
+    var negative := _roll_negative_stat(exclude, stat_names, scale)
+    for stat_name in negative:
+        item.modifiers[stat_name] = negative[stat_name]
 
 # -------------------
 # Name Helpers
 # -------------------
 # Q8-C steady state: resolve modifier display text at build time so the
 # tooltip never has to instantiate per hover. Stored as item metadata.
-func _store_effect_display(item: Item, scene: PackedScene) -> void:
-    if item == null or scene == null:
+#
+# One entry per effect scene, aligned by index with `item.effect_scene` (the
+# convention `Item.effect_scene_condition` already uses), because an item can
+# carry a positive AND a harmful modifier and each needs its own name, stats,
+# trigger and BENEFIT/ COST marker.
+func _store_effect_display(item: Item, scenes: Array[PackedScene]) -> void:
+    if item == null or scenes == null:
         return
+    var displays := []
+    for scene in scenes:
+        displays.append(_read_effect_display(scene))
+    item.set_meta("effect_displays", displays)
+
+
+func _read_effect_display(scene: PackedScene) -> Dictionary:
+    var display := {
+        "name": "",
+        "text": "",
+        "stats": "",
+        "trigger": "",
+        "effect_kind": int(BaseModifier.EffectKind.BENEFIT),
+    }
+    if scene == null:
+        return display
     var instance: Node = scene.instantiate()
     if instance == null:
-        return
+        return display
     var props := {}
     for p in instance.get_property_list():
         props[p.name] = true
@@ -261,13 +396,21 @@ func _store_effect_display(item: Item, scene: PackedScene) -> void:
         var trig = instance.get("trigger_event")
         if trig != null:
             trigger = str(trig)
+    # BENEFIT / COST marker. Cached like the rest of the display so a generated
+    # life-drain item still renders its effect line red after the temp instance
+    # is gone. Probed by name because not every effect scene is a BaseModifier.
+    var effect_kind := int(BaseModifier.EffectKind.BENEFIT)
+    if props.has("effect_kind"):
+        effect_kind = int(instance.get("effect_kind"))
     instance.free()
     if display_name.is_empty():
         display_name = ItemTooltip.humanize_effect_name(str(scene.resource_path.get_file().get_basename()))
-    item.set_meta("effect_display_name", display_name)
-    item.set_meta("effect_tooltip_text", tooltip_text)
-    item.set_meta("effect_tooltip_stats", tooltip_stats)
-    item.set_meta("effect_trigger", trigger)
+    display["name"] = display_name
+    display["text"] = tooltip_text
+    display["stats"] = tooltip_stats
+    display["trigger"] = trigger
+    display["effect_kind"] = effect_kind
+    return display
 
 # Read the actual trigger_event off a (possibly dynamically configured) scene.
 func _read_scene_trigger(scene: PackedScene) -> String:

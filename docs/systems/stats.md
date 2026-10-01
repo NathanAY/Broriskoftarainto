@@ -4,7 +4,7 @@ Purpose
 - Central stat storage, modifier application and condition tracking for entities.
 
 Key scripts / scenes
-- `Systems/stats/stats.gd` (`Stats` class)
+- `src/Systems/stats/stats.gd` (`Stats` class)
 
 Data flow
 - Inputs: base stat values (exported), `add_modifier` / `remove_modifier` calls from Items/Weapons, condition updates from managers, and modifiers claiming dynamic stats via `claim_provided_stat` / `release_provided_stat` (see "Provided (dynamic) stats" below).
@@ -19,7 +19,7 @@ Provided (dynamic) stats
   - Additive shared (e.g. `armor`, `provided_stat_owned = false`): the stat already exists on the holder; the modifier is a pure consumer.
 
 Units
-- `movement_speed` is stored in meters per second (base default 0.25 m/s = 50 px/s). Use `get_movement_speed_px()` (or multiply by `Stats.PIXELS_PER_METER` = 200) when feeding velocity into physics, which works in pixels.
+- `movement_speed` is stored in meters per second, base default `1.0` (`Stats.DEFAULT_STATS`). `Stats.PIXELS_PER_METER` is `300.0`, so the base is 300 px/s. Use `get_movement_speed_px()` (or multiply by `PIXELS_PER_METER`) when feeding velocity into physics, which works in pixels.
 
 Dependencies
 - Expects `event_manager` reference (exported or found on parent). Condition managers are added via `add_condition_manager`.

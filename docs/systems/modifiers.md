@@ -4,9 +4,9 @@ Purpose
 - Modifiers ARE the "effects" half of an `Item`. While `Item.modifiers` carries plain stat values applied to `Stats`, modifiers are Node-based scripts that implement gameplay behavior (spawn extra projectiles, heal, debuff, shields, on-hit reactions, ...). They attach to an actor's `ItemHolder`, subscribe to `EventManager` events, and react to gameplay.
 
 Location and files
-- Base class: `Systems/Items/Modifiers/base_modifier.gd` (`class_name BaseModifier`) — owns the stack state, `EventManager`/holder/Stats caching, and `get_health()`.
-- Scripts: `Systems/Items/Modifiers/*_modifier.gd` (e.g. `life_leach_modifier.gd`).
-- Scenes: `Systems/Items/Modifiers/*Modifier.tscn` (one per script that ships as an item effect).
+- Base class: `src/Systems/Items/modifiers/base_modifier.gd` (`class_name BaseModifier`) — owns the stack state, `EventManager`/holder/Stats caching, and `get_health()`.
+- Scripts: `Systems/Items/modifiers/*_modifier.gd` (e.g. `life_leach_modifier.gd`).
+- Scenes: `Systems/Items/modifiers/*Modifier.tscn` (one per script that ships as an item effect).
 - Item data: `Resources/items/*.tres` reference a modifier scene via `effect_scene`.
 
 Naming conventions (enforced by the 2026 naming pass)
@@ -47,7 +47,7 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
      - Additive shared (Armor): the stat already exists on the holder; the modifier reads `get_provided_stat()` and adds its per-stack contribution in its handler.
    - Stack changes (`add_stack`/`remove_stack`/`set_stack_active`) never touch the stat value — stacks combine inside the subclass behavior, not into the owned stat.
 
-3. Display contract (tooltips)
+4. Display contract (tooltips)
    - `@export var display_name: String` — short noun shown as the effect head.
    - `@export_multiline var tooltip_text: String` — optional one-sentence description (static flavor).
    - `@export var trigger_event: String` — the eventual trigger shown as `(Triggers on ...)`.
@@ -55,19 +55,19 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
    - `@export var effect_kind: BaseModifier.EffectKind` — `BENEFIT` (default) or `COST`. See "Harmful modifiers" below.
    - `ItemTooltip` reads these off a temp instance once, caches per scene path, and renders `effect: <display_name> — <tooltip_text> <stats> (Triggers on <humanized trigger>)`. Falling back to a humanized scene basename when `display_name` is absent.
 
-4. Generation hooks (optional)
+5. Generation hooks (optional)
    - `randomize_for_generation(context: Dictionary) -> bool` — called by `ItemFactory` at generation time; rolls a random trigger/stat/value. Returns `true` when it mutated the instance so the factory repacks it. Implemented by `HealOnEventModifier` and `StatOnKillModifier`.
    - `get_generation_suffix() -> String` — postfix for the item name so randomized variants differ (`StatOnKillModifier`).
 
-5. Weapon binding (implemented in `BaseModifier`)
-   - `var bound_weapon: Object = null` — when non-null, handler events must carry this exact weapon to fire. Used by weapon built-in effects (`Systems/weapon/weapon_builtin_effects.gd`): Fist/Knife/Pistol declare their own `knockback`/`poison` via `BaseWeapon.modifiers`, and the helper instantiates these modifier scripts as real nodes bound to one weapon instance.
+6. Weapon binding (implemented in `BaseModifier`)
+   - `var bound_weapon: Object = null` — when non-null, handler events must carry this exact weapon to fire. Used by weapon built-in effects (`src/Systems/weapon/weapon_builtin_effects.gd`): Fist/Knife/Pistol declare their own `knockback`/`poison` via `BaseWeapon.modifiers`, and the helper instantiates these modifier scripts as real nodes bound to one weapon instance.
    - `_is_bound_event(data: Dictionary) -> bool` — returns `true` when `bound_weapon` is null (item-pickup path, holder-wide, unchanged) or `data.get("weapon") == bound_weapon`.
    - `_subscribe(event_name, listener)` — subscribes and records the pair. When `bound_weapon` is set, the listener is auto-wrapped so it only receives events whose payload carries the bound weapon; guard-less handlers are scoped automatically. Modifiers never write their own `if not _is_bound_event(data): return` — subscribing via `_subscribe` is enough. Events without a `weapon` key (explosion/orb sources) never match a bound modifier.
    - `_subscribe` also records every pair so `_unsubscribe_all()` can unregister before freeing. Because `EventManager` crashes on freed listeners (`LocalEventManager.gd:29`), detach MUST unsubscribe before freeing — `WeaponBuiltinEffects.detach` relies on this. Modifiers that subscribe via raw `event_manager.subscribe` bypass both the auto-scoping and the tracking; any modifier intended to work as a weapon built-in must use `_subscribe`.
 
 Lifecycle / data flow
 - `Item.effect_scene` is an `Array[PackedScene]`: one item can carry several effects, so `ItemHolder` walks the whole array. `effect_scene_condition` is the parallel array - entry `i` gates effect `i` (empty/absent = always active).
-- `ItemHolder.add_item(item)` (`Systems/Items/item_holder.gd`), once per entry of `item.effect_scene`:
+- `ItemHolder.add_item(item)` (`src/Systems/Items/item_holder.gd`), once per entry of `item.effect_scene`:
   1. Looks up an existing child by `scene_file_path == effect_scene[i].resource_path` (dedup).
   2. If new: `BaseModifier.instantiate_attached(effect_scene[i], self)`, then `item.apply_to(holder)` (stat modifiers + condition managers) and `attachEventManager(event_manager)` when the effect implements it. `apply_to` runs once per added copy, before the first new effect node is wired, so a modifier that owns a stat sees the item's own bonuses (and never twice for a multi-effect item).
   3. Decides the initial `active` flag from `item.effect_scene_condition[i]` (via `stats.get_condition`); registers an `on_condition_change` subscription bound to the new stack index so the stack turns off/on with the condition.
@@ -135,13 +135,14 @@ Catalog
 | StatOnKillModifier | `stat_on_kill_modifier.gd` | `on_kill` | Gains a randomized stat per stack (`health`, `movement_speed`, ...). |
 
 Guidelines for adding a new modifier
-1. `extends BaseModifier` (`Systems/Items/Modifiers/base_modifier.gd`), matching the file's indentation style (4-space), in `Systems/Items/Modifiers/`. For a variant of an existing behavior, extend that script instead and set differing defaults in `_init()`.
+1. `extends BaseModifier` (`src/Systems/Items/modifiers/base_modifier.gd`), matching the file's indentation style (4-space), in `Systems/Items/modifiers/`. For a variant of an existing behavior, extend that script instead and set differing defaults in `_init()`.
 2. Stack state, `attachEventManager` caching, `_active_stacks()`, and `get_health()` come free from `BaseModifier`.
 3. Implement `attachEventManager`; subscribe your behavior with `_subscribe(trigger_event, ...)`, and to `on_stat_changes` only when you cache derived stats. Always use `_subscribe` (not raw `event_manager.subscribe`) — it handles weapon scoping when bound and unsubscribes on detach. Bail early when data is missing.
 4. Add the display contract (`display_name`, optional `tooltip_text`, `trigger_event`, and `get_tooltip_stats()` reading live values). If you add it, an item `.tres` in `Resources/items/` and a matching `XxxModifier.tscn` are needed to ship it. If the modifier is a net **loss**, set `effect_kind = EffectKind.COST` so its effect line renders red.
 5. Scale per stack using `_active_stacks()`; keep the formula mirrored in the tooltip string.
 6. Tag anything you spawn to prevent recursion.
-7. Follow AGENTS.md: write/extend a test first, run it, fix, rerun. Relevant suites: `test/ui/test_character_ui_tooltip.gd` (tooltip sweep over every modifier scene) and `test/Systems/Items/`. New harmful modifiers and the signed-delta drain belong in `test/Systems/Items/test_negative_modifier_marking.gd` and `test_regen_modifier.gd`. After changing a card, render it: `.run_scene_shot.bat res://test/tools/shop_ui_preview.tscn`.
+7. Follow AGENTS.md: write/extend a test first, run it, fix, rerun. Relevant suites: `test/ui/test_character_ui_tooltip.gd` (tooltip sweep over every modifier scene) and `test/Systems/Items/`. New harmful modifiers and the signed-delta drain belong in `test/Systems/Items/test_negative_modifier_marking.gd` and `test_regen_modifier.gd`. After changing a card, render it: `.\run_scene_shot.bat res://test/tools/shop_ui_preview.tscn`.
+8. Before you call it done, budget it. `docs/systems/balance.md` §6.4 is the checklist, and it requires a measured Δ% on **both** the offense and survivability axes. The catalog entry above is the description, not the budget.
 
 Known limitations / TODOs
 - `remove_item` pops the most recently added stack (`remove_latest_stack`); it does not track which item instance maps to which stack index, so condition-scoped stacks' `on_condition_change` subscriptions are not removed with the stack (existing condition wiring stays stale).

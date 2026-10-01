@@ -1,62 +1,86 @@
 # Overview
 
-Short description
+## What this is
 - Genre: Top-down arena roguelite (wave-based shooter with boss and shop loops).
 - Core loop: Clear enemy waves → defeat boss → enter shop/upgrade phase → repeat with increased difficulty.
-- Inspiration: Brotato-style item/weapon stacking and fast-paced wave combat (as requested).
+- Inspiration: Brotato-style item/weapon stacking and fast-paced wave combat.
+- Engine: Godot 4.6. Stage: early prototype — the loop is playable, balance is not (see `docs/systems/balance_audit.md`).
 
-Major systems
-- Event Manager (LocalEventManager)
-- Player (`Scripts/character.gd` — the `Character` class, see ADR-0001)
- - Character selection / data (`docs/systems/characters.md`, `Scenes/menu/CharacterSelect.tscn`)
-- Enemies (`Scripts/Enemy.gd`, `Systems/Enemy.tscn`)
-- Stats system (`Systems/stats/stats.gd`)
-- Weapons (`Systems/weapon/*`, WeaponHolder)
-- Items (`Systems/Items/*`, Item, ItemHolder)
-- ItemFactory (`Systems/Items/item_factory.gd`)
-- Effects (`Systems/Items/Modifiers/*`) — Node behavior modules attached by items
-- Spawners (`Systems/enemy_spawner.gd`, `Systems/boss_spawner.gd`)
-- Stage flow (`Scripts/stage_manager.gd`)
-- UI & shop (Scenes/menu, `Systems/ShopPortal.tscn`)
-
-Development stage
-- Current stage: Early prototype (scripts show many TODOs and commented examples; basic gameplay loop implemented).
-
-Key gameplay pillars
+## Key gameplay pillars
 - Rapid arena combat with multiple orbiting/attached weapons.
 - Item-driven character progression: persistent modifiers, temporary buffs, and effect scenes.
 - Wave → boss → shop loop with scaling difficulty.
 - Modular systems using resource-based weapons/items to enable fast iteration.
 
-Effects (brief):
-- **Role**: Items are mostly data (attributes + metadata) and usually include one or more effects. Effects implement gameplay behavior (spawn effects, on-hit behaviors, healing, projectiles, etc.), while stat changes come from stat modifiers in `Stats.add_modifier` format.
-- **Implementation**: Effects are Node-based scripts stored in `Systems/Items/Modifiers/` (legacy folder name). They expose `attachEventManager(event_manager)` which the `ItemHolder`/`EventManager` uses to attach them to an owner actor at runtime.
-- **How they work**: Effects subscribe to the local `EventManager` events (e.g., `on_attack`, `on_hit`, `on_kill`, `on_item_added`, `on_item_removed`, `on_stat_changes`) to react to gameplay. They commonly access the holder's `Stats`, `Health`, or spawn `Projectile` scenes. Many effects support stacking via `add_stack`/`remove_stack`/`set_stack_active`.
-- **Types & examples**: periodic (e.g., `FlatRegenModifier` with a timer), reactive/spawn (e.g., `ChainModifier`, `SpreadModifier`, `HomingRocketModifier`, `BombOnHitModifier`), utility (e.g., shields, reflect, knockback), and life/health effects (e.g., `LifeLeachModifier`, `StatOnKillModifier` — configurable `target_stat`/`add_amount`, triggers on `on_kill` which the damage pipeline emits when a target dies).
-- **Notes for AI tooling**: When adding or modifying items, treat effects as small, self-contained behavioral modules that attach via the event bus and operate on the holder node. Look for `attachEventManager` and event subscriptions when tracing effect behavior. Positional perks that only touch stats are stat modifiers, not effects.
+## Reading order
 
-Architecture docs in next file
-- Scene structure, design patterns, script responsibilities docs/architecture.md
+Start here, then follow one system at a time. Every path below is repo-root-relative and checked by `test/test_doc_links.gd`, so it resolves as written.
 
-Art direction and asset generation
-- Image style, icon constraints, prompt templates `docs/visual_style.md`
+**Orientation**
+| Doc | What it answers |
+|---|---|
+| `docs/architecture.md` | Which scene is which, which script owns what, how systems talk to each other |
+| `CONTEXT.md` | What a word means. *Character* vs *Player*, *effect* vs *stat modifier*, *wave* vs *stage* |
+| `docs/visual_style.md` | Icon naming, sizes, prompt templates, where the UI palette lives |
+| `docs/systems/balance.md` | How much power a new weapon, item, modifier or character may give — **read before designing one** |
+| `docs/systems/balance_audit.md` | The 23 places the game currently breaks those balance rules |
 
-Balance rules
-- `docs/systems/balance.md` is the design reference for how much power a weapon, item, modifier or character may give: per-stat item budgets, the weapon tier table, and a worked example per new weapon. Read it before designing one.
-- Hard rule: one item may add at most **+15%** to a character's offense or survivability. Anything bigger is a weapon.
-- The file is prescriptive and the game does not obey it yet. Its **section 8 is an audit of current violations, not a to-do list** — do not "fix" it unprompted.
+**Systems** — `docs/systems/`
+| Doc | What it covers |
+|---|---|
+| `characters.md` | `CharacterData` resources, character select UI, how a character is applied at spawn |
+| `enemies.md` | `Enemy` behaviour, health, boss variant |
+| `event_manager.md` | The `LocalEventManager` event bus and the `event_contract.gd` schema checker |
+| `items.md` | The `Item` resource, `ItemHolder`, `ItemBuilder`, pricing |
+| `item_factory.md` | Procedural item generation, the gift/curse roll, `drop_pool` |
+| `modifiers.md` | Effects (the Node behaviours items attach), the `BaseModifier` contract, the full catalog |
+| `player.md` | The runtime player entity and its scene |
+| `spawners.md` | `enemy_spawner.gd`, `boss_spawner.gd`, spawn pacing |
+| `stage_manager.md` | Wave → boss → shop orchestration and loop progression |
+| `stats.md` | Stat storage, modifiers, conditions, modifier-owned (provided) stats |
+| `ui_shop_portal.md` | Shop, item cards, tooltips, the tone/colour system |
+| `weapons.md` | `BaseWeapon`, weapon scripts, built-in weapon effects, weapon resources |
 
-Major systems (event manager, player, enemies, stats, weapons, items, itemFactory, modifiers, etc.) docs in folder docs/systems/*
-- balance.md
-- characters.md
-- enemies.md
-- event_manager.md
-- item_factory.md
-- items.md
-- modifiers.md
-- player.md
-- spawners.md
-- stage_manager.md
-- stats.md
-- ui_shop_portal.md
-- weapons.md
+**Decisions** — `docs/adr/`
+| Doc | What it decided |
+|---|---|
+| `docs/adr/0001-character-means-archetype.md` | *Character* is the archetype, *Player* is the runtime entity; the code class `Character` is the Player and was deliberately left unrenamed |
+
+**Archive** — `docs/archive/`
+Implementation logs for shipped work. Kept for provenance, not current truth, and deliberately not link-checked. See `docs/archive/README.md`.
+
+## Major systems and where they live
+
+| System | Entry point |
+|---|---|
+| Event bus | `src/Scripts/LocalEventManager.gd` (`EventManager`) |
+| Player | `src/Scripts/character.gd` (`Character`) — the runtime entity, see ADR-0001 |
+| Character data & select | `src/Systems/characters/CharacterData.gd`, `src/Scenes/menu/CharacterSelect.tscn` |
+| Enemies | `src/Scripts/Enemy.gd`, `src/Systems/Enemy.tscn` |
+| Stats | `src/Systems/stats/stats.gd` (`Stats`) |
+| Weapons | `src/Systems/weapon/*`, `WeaponHolder` |
+| Items | `src/Systems/Items/*` (`Item`, `ItemHolder`, `item_holder.gd`) |
+| Effects (legacy folder `modifiers/`) | `src/Systems/Items/modifiers/*` — Node behaviours items attach to an actor |
+| Spawners | `src/Systems/enemy_spawner.gd`, `src/Systems/boss_spawner.gd` |
+| Stage flow | `src/Scripts/stage_manager.gd` |
+| UI & shop | `src/Scenes/menu/`, `src/ui/`, `src/Systems/ShopPortal.tscn` |
+| Autoloads | `src/Scripts/autoload/` — `GlobalGameState`, `SoundManager`, `MusicManager` |
+
+## Vocabulary that trips people up
+
+The one thing worth reading before the code: this project uses **effect** and **modifier** in the opposite way to what the names suggest.
+
+- An **effect** is a `Node` behaviour — a scene from `src/Systems/Items/modifiers/` that an item attaches to an actor. It subscribes to `EventManager` events and reacts (spawn a projectile, heal, apply poison).
+- A **stat modifier** is a plain `Dictionary` in `Stats.add_modifier` format. No behaviour.
+
+`CONTEXT.md` is the glossary; `docs/systems/modifiers.md` is the full contract.
+
+## Working on this project
+Rules for agents and contributors live in `AGENTS.md`: test-first, how to run the suites, how to render a scene to a PNG for a visual check, and which doc to read before which kind of change.
+
+## Conventions used across these docs
+- **[CURRENT]** — a statement about the code as it is written today. **[PROPOSED]** — the intended target state, not implemented. The distinction matters most in `docs/systems/balance.md`, where the two are different documents' worth of information, but any doc that describes an aspiration rather than an observation should tag it.
+- Each `docs/systems/*.md` follows the same shape: **Purpose**, **Key scripts / scenes**, **Data flow**, **Dependencies**, **Known limitations / TODOs**. The last section is not padding — it is where the traps are, so read it before you trust the rest.
+- Paths are **repo-root-relative** and carry the `src/` prefix. See below.
+
+The docs are checked, not trusted: `test/test_doc_links.gd` asserts every project path any doc backticks resolves, every bare filename still exists somewhere, and this index lists every doc that exists. A path here is **repo-root-relative**, so it carries the `src/` prefix — the file at Systems/stats/stats.gd is cited as `src/Systems/stats/stats.gd`.

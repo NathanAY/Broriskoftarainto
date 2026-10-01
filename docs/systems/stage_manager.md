@@ -4,7 +4,7 @@ Purpose
 - Orchestrates the high-level flow: enemy waves, boss encounters, and shop stages (loop progression).
 
 Key scripts / scenes
-- `Scripts/stage_manager.gd` (`StageManager`)
+- `src/Scripts/stage_manager.gd` (`StageManager`)
 
 Data flow
 - Inputs: timing (stage_duration), enemy counts (from `Nodes/Enemies`), player actions (shop next), boss/enemy spawner states.

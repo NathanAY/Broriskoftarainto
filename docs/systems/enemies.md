@@ -4,8 +4,8 @@ Purpose
 - Represent hostile actors (AI-controlled) with health, stats, weapons and movement behaviour.
 
 Key scripts / scenes
-- `Scripts/Enemy.gd` (`Enemy` class)
-- `Systems/Enemy.tscn` and `Systems/EnemyBoss.tscn` (boss variant)
+- `src/Scripts/Enemy.gd` (`Enemy` class)
+- `src/Systems/Enemy.tscn` and `src/Systems/EnemyBoss.tscn` (boss variant)
 - Movement behaviours under `Scenes/` or `Systems/` (referenced as `MovementBehaviour`).
 - Visual managers live as children (see `Scenes/effects/`): `HitFlashManager` (damage flash via `before_take_damage`), `TextureBurstManager` (death burst via `on_death`), `Scenes/particles/ParticleEffectManager` (hit particles via `after_take_damage`).
 
@@ -20,7 +20,7 @@ Data flow
   - `Health.apply_damage` then rejects anything that still reaches the corpse, so no hit effect plays on it.
 
 Damage taken
-- `Health.apply_damage(damage_context) -> bool` (`Systems/damage/health.gd`) is the single entry point for damage and the only place the dead check lives. It latches `Health.is_dead` on death, so a dying enemy is neither damaged nor heard from again.
+- `Health.apply_damage(damage_context) -> bool` (`src/Systems/damage/health.gd`) is the single entry point for damage and the only place the dead check lives. It latches `Health.is_dead` on death, so a dying enemy is neither damaged nor heard from again.
 - Returning `false` means "the hit did not land": callers must skip their attacker-side events (`after_deal_damage`, `on_hit`, `on_kill`) for a rejected hit, or kill rewards pay out once per corpse. See `docs/systems/event_manager.md`.
 
 Dependencies

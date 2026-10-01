@@ -4,11 +4,11 @@ Purpose
 - Item `Resource`s provide stat modifiers, effects (Node behaviors from `effect_scene`), buffs/debuffs and condition managers to actors via `ItemHolder`.
 
 Key scripts / scenes
-- `Systems/Items/Item.gd` (class_name `Item`)
-- `Systems/Items/item_holder.gd` (class_name `ItemHolder`)
-- `Systems/Items/item_pickup.gd` (pickup behavior)
-- `Systems/Items/item_builder.gd` (class_name `ItemBuilder`)
-- `Systems/Items/item_price_analyzer.gd` (class_name `ItemPriceAnalyzer`) — prices items for the shop
+- `src/Systems/Items/Item.gd` (class_name `Item`)
+- `src/Systems/Items/item_holder.gd` (class_name `ItemHolder`)
+- `src/Systems/Items/item_pickup.gd` (pickup behavior)
+- `src/Systems/Items/item_builder.gd` (class_name `ItemBuilder`)
+- `src/Systems/Items/item_price_analyzer.gd` (class_name `ItemPriceAnalyzer`) — prices items for the shop
 
 Construction (single entry point)
 - `ItemBuilder` is the canonical, static API for creating items from code. All construction goes through it:

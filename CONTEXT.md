@@ -6,12 +6,13 @@ Lazy glossary of terms used across the project docs and code. Add terms as they 
 
 **Player**:
 The runtime combat entity the human controls this run. In code today this is the
-`Character` class (`Scripts/character.gd`) and `Systems/Character.tscn`.
+`Character` class (`src/Scripts/character.gd`) and `src/Systems/Character.tscn`.
 _Avoid_: Character (when you mean the archetype), hero
 
 **Character**:
-The playable archetype chosen before a run (Rogue, Warrior, Tank), defined by
-`CharacterData` resources.
+The playable archetype chosen before a run, defined by `CharacterData` resources
+under `src/Assets/character/<id>/<Id>.tres`. The five today: Brawler,
+Multitasker (the default), Ranger, Soldier, Wildling.
 _Avoid_: Player, class, hero
 
 **Enemy**:
@@ -27,7 +28,7 @@ _Avoid_: effect, buff, debuff
 
 **Effect**:
 A Node behavior produced from an item's `effect_scene` that reacts to events (spread,
-chain, crit, poison). Lives today in `Systems/Items/Modifiers/`.
+chain, crit, poison). Lives today in `Systems/Items/modifiers/`.
 _Avoid_: modifier (when you mean stat data), buff, debuff
 
 **Buff**:

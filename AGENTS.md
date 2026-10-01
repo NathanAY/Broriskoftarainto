@@ -6,20 +6,20 @@
 # Core systems
 
 ## Player & combat
-- `Scripts/character.gd`: player entity holds `WeaponHolder` and `ItemHolder` children.
-- `Systems/damage/health.gd`: health/stats subsystem (uses modifiers and conditions).
+- `src/Scripts/character.gd`: player entity holds `WeaponHolder` and `ItemHolder` children.
+- `src/Systems/damage/health.gd`: health/stats subsystem (uses modifiers and conditions).
 
 ## Items & modifiers
-- `Scripts/item_pickup.gd`: item pickup logic.
-- `Scripts/item_factory.gd`: generates item Node instances from `.tres` resources.
-- `Systems/Items/item_holder.gd`: holds items; attaches modifier children to stats node.
-- Modifiers live in `Systems/Items/Modifiers/`. They are attached via `ItemHolder`, subscribe to events (`on_attack`, `on_hit`, `on_stat_changes`), and manipulate the holder's `Stats`/`Health` nodes.
+- `src/Systems/Items/item_pickup.gd`: item pickup logic.
+- `src/Systems/Items/item_factory.gd`: generates item Node instances from `.tres` resources.
+- `src/Systems/Items/item_holder.gd`: holds items; attaches modifier children to stats node.
+- Effects live in `src/Systems/Items/modifiers/` (lowercase `modifiers`, lowercase everything else in that path). They are attached via `ItemHolder`, subscribe to events (`on_attack`, `on_hit`, `on_stat_changes`), and manipulate the holder's `Stats`/`Health` nodes.
 
 # Testing
 
 ## Setup and run test
 - Example how to run GDUnit4 all tests: `.\run_tests_gdunit.bat`
-- Example how to run GDUnit4 specific tests: `.\run_tests_gdunit_custom.bat test_stat_creation_stat.gd`
+- Example how to run GDUnit4 specific tests: `.\run_tests_gdunit_custom.bat test_item_creation_stat.gd`
 
 ### `run_tests_gdunit_custom.bat` uses fuzzy test lookup
 The argument is matched case-insensitively against test suite paths under `test/`; `.gd`, folders and slashes/backslashes are optional, so all of these run the same suite:
@@ -34,7 +34,7 @@ Other behavior:
 ## Visual checks (rendering a scene to a PNG)
 Tests assert structure, not looks. After changing a UI, render it:
 ```
-.run_scene_shot.bat res://path/to/Scene.tscn [res://out.png]
+.\run_scene_shot.bat res://path/to/Scene.tscn [res://out.png]
 ```
 - Writes `res://scene_shot.png` by default, prints the path, and quits. Measured at ~1.5s end to end, because run, capture and quit all happen inside that one call.
 - **Prefer this over MCP for a plain render.** Every tool call is a separate round trip that costs model time before the request is even sent, so `run_project` + `get_runtime_screenshot` + `stop_project` is 3 calls and several times slower for the same PNG.
@@ -49,28 +49,23 @@ Tests assert structure, not looks. After changing a UI, render it:
 - If docs outdatet than updated them.
 
 ## The most important docs located by those path:
-- docs/ai_overview.md
-- docs/architecture.md
+- `docs/ai_overview.md` — the reading order, and an index of every other doc
+- `docs/architecture.md` — which scene/script owns what, and how systems talk
+
+## Doc conventions
+- **Paths are repo-root-relative.** `src/Systems/stats/stats.gd`, not the path with the `src/` prefix dropped. This is enforced, not stylistic.
+- **`test/test_doc_links.gd` enforces it.** It asserts every project path a doc backticks resolves, every bare filename a doc cites still exists somewhere, and that `docs/ai_overview.md` indexes every doc that exists. Run it with `.\run_tests_gdunit_custom.bat doc_links`. If you rename a file the docs cite, that test is what tells you.
+- Two spans are skipped as patterns rather than literals: anything containing `%`, `*`, `<` or `>` (e.g. `src/Assets/stats/%s.png`). Everything else in backticks is treated as a real reference.
+- `docs/archive/` is deliberately **not** checked — those are frozen logs of shipped work.
 
 ## Balance rules
 - `docs/systems/balance.md` says how much power a weapon, item or modifier is allowed to give. **Read it before designing a new weapon, item, modifier or character** — it has per-stat budget tables, the weapon tier table, and copy-paste checklists for weapons and modifiers.
 - Hard rule: **one item may add at most +15%** to a character's offense or survivability. Bigger than that is a weapon, not an item.
-- That file is prescriptive and the game does not currently obey it. Its **section 8 is an audit of existing violations, not a to-do list** — do not start "fixing" them unless the task asks for it.
+- That file is prescriptive and the game does not currently obey it. **`docs/systems/balance_audit.md` holds the 23 measured violations, the fix order, and the assumptions those numbers rest on. Do not start "fixing" them unless the task asks for it.**
+- The two files are split on purpose. `balance.md` changes only when a design decision changes; the audit changes every time someone edits a `.tres`. When you fix an audit row, delete the row rather than editing the measurement.
 
-## Major systems (event manager, player, enemies, stats, weapons, items, itemFactory, modifiers, etc.) docs in folder docs/systems/*
-- docs/systems/balance.md
-- docs/systems/characters.md
-- docs/systems/enemies.md
-- docs/systems/event_manager.md
-- docs/systems/item_factory.md
-- docs/systems/items.md
-- docs/systems/modifiers.md
-- docs/systems/player.md
-- docs/systems/spawners.md
-- docs/systems/stage_manager.md
-- docs/systems/stats.md
-- docs/systems/ui_shop_portal.md
-- docs/systems/weapons.md
+## Major systems docs
+The per-system docs live in `docs/systems/` and are indexed, with one-line descriptions, in `docs/ai_overview.md`. Do not maintain a second copy of that list here — the link test only checks the index in `ai_overview.md`, so a list that drifts in two places is exactly the problem the index replaced.
 
 ## Dev tooling (`test/tools/`, not shipped)
 - `test/tools/scene_shot.tscn` + `test/tools/scene_shot.gd` — instantiates a scene named by `OS.get_cmdline_user_args()`, screenshots it, quits. Driven by `run_scene_shot.bat`.

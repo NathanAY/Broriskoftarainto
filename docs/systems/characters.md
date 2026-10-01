@@ -3,27 +3,28 @@
 This document explains the new character system (data, UI, and integration points) and how to add new characters.
 
 ## Overview
-- Characters are data-driven Resources (`CharacterData`) stored as `.tres` files in `Resources/characters/`.
-- Selection UI: `Scenes/menu/CharacterSelect.tscn` lets the player pick a character at the start of a run.
+- Characters are data-driven Resources (`CharacterData`). Each one lives in its own folder under `src/Assets/character/`, named `<Id>.tres` next to its art — e.g. `src/Assets/character/ranger/Ranger.tres`.
+- The five characters today are **Brawler, Multitasker, Ranger, Soldier, Wildling**. Multitasker is the default (`GlobalGameState.DEFAULT_CHARACTER`).
+- Selection UI: `src/Scenes/menu/CharacterSelect.tscn` lets the player pick a character at the start of a run. It scans `src/Assets/character/` and picks up any new `.tres` without a code change.
 - The chosen character is stored in the autoload `GlobalGameState.starting_character` and applied when the player `Character` instance is created.
 
 ## Files of interest
-- `Systems/characters/CharacterData.gd` — Resource class for characters.
-- `Resources/characters/*.tres` — character definitions (examples: `Warrior.tres`, `Rogue.tres`, `Tank.tres`).
-- `Scenes/menu/CharacterSelect.tscn` + `Scenes/menu/character_select.gd` — character selection UI: a top `DetailPanel` showing the selected character, above a compact card grid of 10 columns so 15+ characters still fit, with the `ScrollContainer` scrolling for extra rows. A shared `TooltipUi` node shows the same stats on card hover, so details are visible without selecting.
-- `ui/CharacterDetailPanel.tscn` + `ui/character_detail_panel.gd` (`class_name CharacterDetailPanel`) — the top panel. It inherits the shared `ui/ItemDisplayPanel.tscn` scene (the same base as `ShopItemCard` and `TooltipUi`) at a larger scale, so the character screen and the shop cannot drift apart visually. It adds nothing of its own beyond content: `set_character_display(CharacterData)` is an alias for `set_resource()`.
-- `Scenes/menu/CharacterCard.tscn` + `Scenes/menu/character_card.gd` (`class_name CharacterCard`) — compact grid entry: icon + name only, whole card clickable (`selected` signal via `gui_input`/`select()`). The scene *inherits* `ui/IconCard.tscn` (`class_name IconCard`), the shared fixed-size tile, and the script adds only click handling and the selection highlight, so the character grid and the character menu's Items grid can never drift apart. It is not an `ItemDisplayPanel` subclass (it has no body) but borrows that class's palette via `ItemDisplayPanel.make_panel_stylebox()`, so the grid reads as part of the same UI. Selection is a gold border + gold name rather than a `modulate` tint, because tinting the whole card also recolours the character's own art.
-- `ui/character_tooltip.gd` (`class_name CharacterTooltip`) — two builders over the same data:
+- `src/Systems/characters/CharacterData.gd` — Resource class for characters.
+- `src/Assets/character/<id>/<Id>.tres` — character definitions.
+- `src/Scenes/menu/CharacterSelect.tscn` + `src/Scenes/menu/character_select.gd` — character selection UI: a top `DetailPanel` showing the selected character, above a compact card grid with a `ScrollContainer` for extra rows, so a roster well past the current five still fits. A shared `TooltipUi` node shows the same stats on card hover, so details are visible without selecting.
+- `src/ui/CharacterDetailPanel.tscn` + `src/ui/character_detail_panel.gd` (`class_name CharacterDetailPanel`) — the top panel. It inherits the shared `src/ui/ItemDisplayPanel.tscn` scene (the same base as `ShopItemCard` and `TooltipUi`) at a larger scale, so the character screen and the shop cannot drift apart visually. It adds nothing of its own beyond content: `set_character_display(CharacterData)` is an alias for `set_resource()`.
+- `src/Scenes/menu/CharacterCard.tscn` + `src/Scenes/menu/character_card.gd` (`class_name CharacterCard`) — compact grid entry: icon + name only, whole card clickable (`selected` signal via `gui_input`/`select()`). The scene *inherits* `src/ui/IconCard.tscn` (`class_name IconCard`), the shared fixed-size tile, and the script adds only click handling and the selection highlight, so the character grid and the character menu's Items grid can never drift apart. It is not an `ItemDisplayPanel` subclass (it has no body) but borrows that class's palette via `ItemDisplayPanel.make_panel_stylebox()`, so the grid reads as part of the same UI. Selection is a gold border + gold name rather than a `modulate` tint, because tinting the whole card also recolours the character's own art.
+- `src/ui/character_tooltip.gd` (`class_name CharacterTooltip`) — two builders over the same data:
   - `tooltip_lines(CharacterData)` — the original flat text (`name:`, `base <stat>:`, `starting item:` ...). Kept byte-identical; it is what any plain-text consumer reads.
   - `card_rows(CharacterData)` — the structured counterpart returning `ItemCardRow`s (`NAME` / `FLAVOR` / `STAT` / `EFFECT` / `GEAR`) with a tone each, so the detail panel and hover tooltip can colour each line. `_effect_head()` is shared by both builders so their wording cannot drift.
-- `Scripts/autoload/global_game_state.gd` — holds `starting_character` (path or Resource).
-- `Systems/characters/CharacterInitializer.gd` — applies character data to the `Stats` node on character spawn.
-- `Systems/Character.tscn` — now contains a `CharacterInitializer` Node (instance) so application is automatic.
+- `src/Scripts/autoload/global_game_state.gd` — holds `starting_character` (path or Resource).
+- `src/Systems/characters/CharacterInitializer.gd` — applies character data to the `Stats` node on character spawn.
+- `src/Systems/Character.tscn` — now contains a `CharacterInitializer` Node (instance) so application is automatic.
 
 ## CharacterData format
 - `display_name` (String): shown in UI.
 - `description` (String): short description.
-- `base_stats` (Dictionary): the archetype's own stat block — the values that differ from the default `Stats` (`health`, `movement_speed`, `damage`, `attack_speed`, ...). Each key calls `Stats.set_base_stat(stat_name, value)`. `movement_speed` is in meters per second (200 px = 1 m). **Never** put a stat here that needs a modifier to do anything (e.g. `armor`) — see below.
+- `base_stats` (Dictionary): the archetype's own stat block — the values that differ from the default `Stats` (`health`, `movement_speed`, `damage`, `attack_speed`, ...). Each key calls `Stats.set_base_stat(stat_name, value)`. `movement_speed` is in meters per second (`PIXELS_PER_METER` = 300, so base 1.0 m/s = 300 px/s). **Never** put a stat here that needs a modifier to do anything (e.g. `armor`) — see below.
 - `modifiers` (Array): everything else that makes this character different, as one flat list of two entry kinds applied in order:
   - **Dictionary** — a value, passed to `Stats.add_modifier` as-is: `{"armor": {"flat": 4}}`, `{"damage": {"percent": 0.2}}`, `{"attack_speed": {"percent": 0.2}, "condition": {...}}`.
   - **PackedScene** — a behavior: a modifier scene from `Systems/Items/modifiers/*.tscn`, instantiated and wired to the character by `BaseModifier.attach` (e.g. `ArmorModifier.tscn`).
@@ -32,15 +33,15 @@ This document explains the new character system (data, UI, and integration point
 
 Example (pseudo):
 ```
-display_name = "Rogue"
+display_name = "Brawler"
 base_stats = {"health": 35.0, "movement_speed": 0.35, "damage": 0.8}
 modifiers = [{"armor": {"flat": 4}}, <ArmorModifier.tscn>, {"attack_speed": {"percent": 0.2}}]
 ```
 
 ## How selection and application works
-1. Player picks a card in `CharacterSelect` (first character is pre-selected so the detail panel is never empty); the detail panel shows the full `CharacterTooltip` stats. On confirm the script sets `GlobalGameState.starting_character = "res://src/Resources/characters/Rogue.tres"` (string path).
+1. Player picks a card in `CharacterSelect` (first character is pre-selected so the detail panel is never empty); the detail panel shows the full `CharacterTooltip` stats. On confirm the script sets `GlobalGameState.starting_character = "res://src/Assets/character/ranger/Ranger.tres"` (string path).
 2. The flow continues to `StarterMenu` to choose weapons/items; those values are also saved in `GlobalGameState`.
-3. When the game scene creates the player `Character` (instancing `Systems/Character.tscn`), the `CharacterInitializer` node reads `GlobalGameState.starting_character`, loads the resource, and:
+3. When the game scene creates the player `Character` (instancing `src/Systems/Character.tscn`), the `CharacterInitializer` node reads `GlobalGameState.starting_character`, loads the resource, and:
    - Calls `Stats.set_base_stat` for each entry in `base_stats` (overwrites base values).
    - Walks `modifiers` and dispatches each entry **by type** (`_apply_modifier`): a Dictionary goes to `Stats.add_modifier`, a PackedScene goes to `BaseModifier.attach` (instantiate + `attachEventManager` + one active stack, under the `ItemHolder`).
    - Calls `ItemHolder.add_item` for each entry in `starting_items`.
@@ -86,7 +87,7 @@ but reads as a near-duplicate at a glance.
 `base_stats` are **absolute** values that overwrite the `Stats` defaults, not
 gains — a Ranger's `health: 35.0` replaces the default 10. So the panel shows
 the absolute number and uses colour to say whether it beats the default:
-- `Systems/stats/stats.gd` exposes `const DEFAULT_STATS` plus
+- `src/Systems/stats/stats.gd` exposes `const DEFAULT_STATS` plus
   `static func default_stat(name)`, which is the single source of truth for the
   baseline. `@export var stats` is initialised from it, so there is one table,
   not two that can disagree.
@@ -97,7 +98,7 @@ Entries in `modifiers` are real deltas, so those keep the explicit `+`/`-` and
 derive their tone from the value itself — same rule the shop cards use.
 
 ## Adding a new character
-1. Create a new resource file in `Resources/characters/` using the `CharacterData` script as the resource type (or copy an existing `.tres`).
+1. Create `src/Assets/character/<id>/<Id>.tres` using the `CharacterData` script as the resource type, next to the character's art (or copy an existing one and rename).
 2. Set `display_name`, `description`, and `base_stats` (archetype stats only). Put everything else in `modifiers` — stat dicts and/or modifier scenes.
 3. No code changes needed — `CharacterSelect` scans the folder and will display the new entry.
 

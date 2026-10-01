@@ -1,12 +1,12 @@
 # Spawners
 
 Purpose
-- Manage spawning of regular enemies and bosses, plus apply stage-based scaling and attach death-reward handlers (<code>Systems/SpawnerModifier.tscn</code>, misnamed — see glossary).
+- Manage spawning of regular enemies and bosses, plus apply stage-based scaling and attach death-reward handlers (<code>src/Systems/SpawnerModifier.tscn</code>, misnamed — see glossary).
 
 Key scripts / scenes
-- `Systems/enemy_spawner.gd` (`EnemySpawner`)
-- `Systems/boss_spawner.gd` (`BossSpawner`)
-- `Systems/SpawnerModifier.tscn` (+ `Scripts/spawner_modifier.gd`) — death rewards (money, drops, explosion, death mark)
+- `src/Systems/enemy_spawner.gd` (`EnemySpawner`)
+- `src/Systems/boss_spawner.gd` (`BossSpawner`)
+- `src/Systems/SpawnerModifier.tscn` (+ `src/Scripts/spawner_modifier.gd`) — death rewards (money, drops, explosion, death mark)
 
 Data flow
 - Inputs: `character` reference, spawn timers, `spawn_active` flags, optional death-reward handler children.

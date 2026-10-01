@@ -37,14 +37,14 @@ Every generated PNG must satisfy all of these or it will not load, or will rende
 | Weapon icon | `src/Assets/weapons/<snake_case>.png` | 80x80 | 64x64 card, and in-world as a Sprite2D |
 | Enemy sprite | `src/Assets/enemies/<snake_case>.png` | 100x100 grunt, 225x225 boss | in-world, ~0.4x half-width is the collision radius |
 | Character icon | `src/Assets/character/<id>/<id>_icon.png` | 96x96 | 64x88 card |
-| Character face | `src/Assets/character/<id>/<id>_eyes.png` / `_mouth.png` | 150x150 | overlaid on the shared body sprite |
+| Character face | `src/Assets/character/<id>/<id>_eyes.png` / `<id>_mouth.png` | 150x150 | overlaid on the shared body sprite |
 
 The two binding rules:
 
 - A stat icon filename **is** the stat key. `stats.gd` builds the path as `res://src/Assets/stats/%s.png % stat_name`. Any other name is never found.
-- A modifier icon filename **is** the lowercase basename of the modifier `.tscn`. `ItemIconGenerator.gd` derives it from `effect.resource_path`. `PoisonModifier.tscn` needs `poisonmodifier.png`.
+- A modifier icon filename **is** the lowercase basename of the modifier `.tscn`. `src/ui/ItemIconGenerator.gd` derives it from `effect.resource_path`, so `PoisonModifier.tscn` would need `poisonmodifier.png` — which does not exist yet, see "Known gaps".
 
-Fallbacks when a lookup fails: `stats/_default.png` and `modifiers/_default.png`.
+Fallbacks when a lookup fails: `src/Assets/stats/_default.png` and `src/Assets/modifiers/_default.png`.
 
 Weapons and characters use an explicit `sprite` / `small_icon` field on the `.tres`, so the filename only needs to be `snake_case` and readable. An empty weapon `sprite` falls back to `src/Assets/weapons/_default.png`.
 
@@ -134,7 +134,7 @@ no gradients, no realistic shading, no 3d render, no isometric perspective, no w
 7. Verify visually. Item icons only appear in `res://test/tools/shop_ui_preview.tscn`:
 
    ```
-   .run_scene_shot.bat res://test/tools/shop_ui_preview.tscn res://shop_shot.png
+   .\run_scene_shot.bat res://test/tools/shop_ui_preview.tscn res://shop_shot.png
    ```
 
    Character icons only appear in `res://test/tools/character_ui_preview.tscn`. Neither fixture picks up a new asset unless it is added to the fixture's `SAMPLE_ITEMS`.
@@ -143,10 +143,10 @@ no gradients, no realistic shading, no 3d render, no isometric perspective, no w
 
 ## Known gaps
 
-- Only 8 of 24 modifier scenes have a matching icon. The rest fall back to `_default.png`, and 8 icon files in `src/Assets/modifiers/` are orphaned because their names do not match any scene basename.
-- `src/Assets/modifiers/armormode.png` is a typo for `armormodifier.png`.
+- Only **2 of 25** modifier scenes have a matching icon — `BombOnHitModifier` and `SpinningOrbsModifier`. The other 23 all fall back to `_default.png`.
+- **9 icons in `src/Assets/modifiers/` are orphaned**, because their names do not match any scene basename: `armormode` (a typo for `armormodifier`), `coil_icon`, `dynamite_icon`, `fairy_icon`, `glass_cannon_icon`, `rocket`, `shuriken`, `torch`. Either rename them to the lowercase scene basename or delete them.
 - `Thorns.tres` has no `sprite` at all.
-- `Knife.tres` points at `circular_saw.png`.
+- `Knife.tres` points at `circular_saw.png`, which does not exist.
 - No custom font. Everything uses the Godot built-in. Brotato used `Anybody-Medium.ttf` if a font is ever needed.
 - No shaders anywhere in the project.
 

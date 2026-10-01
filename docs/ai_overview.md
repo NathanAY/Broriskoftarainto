@@ -21,7 +21,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 |---|---|
 | `docs/architecture.md` | Which scene is which, which script owns what, how systems talk to each other |
 | `CONTEXT.md` | What a word means. *Character* vs *Player*, *effect* vs *stat modifier*, *wave* vs *stage* |
-| `docs/visual_style.md` | Icon naming, sizes, prompt templates, where the UI palette lives |
+| `docs/visual_style.md` | Icon naming, sizes, prompt templates, the two palettes (UI vs art), menu background layers |
 | `docs/systems/balance.md` | How much power a new weapon, item, modifier or character may give — **read before designing one** |
 | `docs/systems/balance_audit.md` | The 23 places the game currently breaks those balance rules |
 

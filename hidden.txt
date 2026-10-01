@@ -35,39 +35,4 @@ func test_spread_shot_hits_multiple_enemies():
 func test_chain_projectile_selects_next_target():
 =======
 
-There is a project where I want to copy the button system effect system.
-It has some sound on mouse_enter, on_focus and press event. 
-I want to also have those button effect.
-Project path: F:\programs\Godot projects\Brotato3.6\
-Important files:
-ui/menus/global/my_menu_button.gd
-ui/menus/global/my_menu_button_parent.gd
-res://ui/sounds/button_focus.wav
-res://ui/sounds/button_press.wav
-
-You can copy sounds from that project to current.
-For now only change the Main.tscn buttons. 
-Don't create new tests now, just run one random te check if the proejct compiles
-
-Now I want to improve the the character selection screen ui in CharacterSelect.tscn
-
-You can run this scene this scene from mcp.
-res://src/Scenes/menu/CharacterSelect.tscn
-
-I have created this screenshot to see how it looks now and described 3 problems that I see:
-"C:\Users\minsk\Downloads\Screenshot 2026-09-29 154707.png"
-1. First problem about top section of character and his stats.
- it looks terrible now, it should be completly redisign.
- I want that it looks simillar to ShopItemCard.
-
-2. The tooltip for character looks mostly good, but there are no image, only (res//src/Assets/.... for some reason.
-
-3. Also update the bottom part of the screan that contains small character boxes.
-It shoulb be also good to be simmilar to other ui elemts, like tooltip or ShopItemCard.
-Keep it small because for now there are 5 characters, but later there will be more than 15.
-But it should contain only icon and name at the bottom
-
-
-I've seen in that you have executed a lot of shell commands to run some scenes. 
-Why it was needed? Is current bat files don't have all necessary funtionality?
-If it's usufull add a bat file or instructions in some document to be used for future session.
+https://pastebin.com/66W5QrDx?source=public_pastes

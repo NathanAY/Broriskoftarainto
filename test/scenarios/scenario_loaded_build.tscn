@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://src/Scenes/Game.tscn" id="1_game"]
+[ext_resource type="Script" path="res://test/scenarios/scenario_setup.gd" id="2_setup"]
+
+[node name="LoadedBuildScenario" instance=ExtResource("1_game")]
+
+[node name="ScenarioSetup" type="Node" parent="."]
+script = ExtResource("2_setup")
+scenario_title = "Loaded build"
+character_path = "res://src/Assets/character/ranger/Ranger.tres"
+weapon_names = Array[String](["Fist", "Pistol", "Knife", "Shotgun"])
+item_names = Array[String](["CritGlass", "BootsOfSpeed"])
+stacked_build = true

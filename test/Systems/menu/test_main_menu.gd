@@ -36,6 +36,24 @@ func test_main_menu_has_basic_buttons() -> void:
     assert_str(exit_button.text).is_equal("Exit")
 
 
+## The debug shortcut is an extra button beside "New game", not a replacement:
+## the character select -> StarterMenu route stays the default way to play.
+func test_debug_scenarios_button_sits_beside_new_game() -> void:
+    var box: VBoxContainer = main_menu.get_node("Control/VBoxContainer")
+    var debug_button: Button = main_menu.get_node("Control/VBoxContainer/DebugScenariosButton")
+    assert_str(debug_button.text).is_equal("Debug scenarios")
+    assert_int(box.get_child_count()).is_equal(5)
+    assert_int(debug_button.get_index()).is_equal(
+        main_menu.get_node("Control/VBoxContainer/NewGameButton").get_index() + 1
+    )
+    assert_bool(ResourceLoader.exists(main_menu.DEBUG_SCENARIOS_SCENE)).is_true()
+
+
+func test_debug_scenarios_button_is_wired() -> void:
+    var debug_button: Button = main_menu.get_node("Control/VBoxContainer/DebugScenariosButton")
+    assert_bool(debug_button.pressed.is_connected(main_menu._on_debug_scenarios_pressed)).is_true()
+
+
 func test_options_menu_hidden_initially() -> void:
     var options_menu: CanvasLayer = main_menu.get_node("OptionsMenu")
     assert_bool(options_menu.visible).is_false()

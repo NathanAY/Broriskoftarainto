@@ -1,0 +1,152 @@
+extends Node
+class_name DebugScenarioSetup
+
+## Dev-only: the state one debug scenario forces on a run.
+##
+## Every `test/scenarios/scenario_*.tscn` instances `src/Scenes/Game.tscn` and
+## ends with one node of this script, configured through the exports below. That
+## keeps a scenario to a single short file: the scene *is* the configuration, and
+## nothing has to be remembered between the picker and the run.
+##
+## The scenario never returns here - `_on_stage_applied` is the log line to read
+## when a scenario did not do what it claims.
+
+const DEFAULT_CHARACTER := "res://src/Assets/character/multitasker/Multitasker.tres"
+const ITEMS_DIR := "res://src/Resources/items"
+const WEAPONS_DIR := "res://src/Resources/weapons"
+const MODIFIERS_DIR := "res://src/Systems/Items/modifiers"
+
+enum StartMode {
+	STAGE_ONE, ## normal run: the enemy stage of `current_loop`.
+	BOSS_STAGE, ## straight to stage 2 - the enemy stage is skipped entirely.
+	LOOP, ## the enemy stage of `start_loop`, with both spawners already scaled.
+}
+
+@export var scenario_title := "Debug scenario"
+## Must be a real `src/Assets/character/<id>/<Id>.tres`: `CharacterInitializer`
+## derives the sprite folder from this path, so a synthetic resource loads with
+## no art.
+@export var character_path: String = DEFAULT_CHARACTER
+## Bare file names under `src/Resources/weapons`. The character's own
+## `starting_weapons` are added on top of these by `CharacterInitializer`, so a
+## character that ships one (Multitasker has a Fist) ends up with one more than
+## listed here.
+@export var weapon_names: Array[String] = []
+## Bare file names under `src/Resources/items`.
+@export var item_names: Array[String] = []
+## Adds the stacked mid-game build from `stacked_items()` on top of the above.
+@export var stacked_build: bool = false
+@export var start_mode: StartMode = StartMode.STAGE_ONE
+## Only read by `StartMode.LOOP`.
+@export var start_loop: int = 1
+
+
+## Runs before *any* child's `_ready`, which is what makes this the right hook:
+## `Character` and its `CharacterInitializer` both read `GlobalGameState` from
+## their own `_ready`, so the character has to be chosen here rather than after a
+## frame. The loadout below is added afterwards through the holder API instead,
+## because those holders only exist once `Character` is built.
+func _enter_tree() -> void:
+	GlobalGameState.starting_character = character_path
+	GlobalGameState.starting_weapons = []
+	GlobalGameState.starting_items = []
+
+
+func _ready() -> void:
+	# The loadout and the stage jump both need a character and a `StageManager`
+	# that have finished their own `_ready`, so they wait one frame.
+	await get_tree().process_frame
+	_equip_loadout()
+	_apply_start_mode()
+	_on_stage_applied()
+
+
+func _equip_loadout() -> void:
+	var character := get_tree().get_first_node_in_group("character") as Character
+	if character == null:
+		push_warning("DebugScenarioSetup: no character in the tree, scenario '%s' starts empty." % scenario_title)
+		return
+
+	for weapon_name in weapon_names:
+		character.weapon_holder.add_weapon(load("%s/%s.tres" % [WEAPONS_DIR, weapon_name]))
+	for item_name in item_names:
+		character.item_holder.add_item(load("%s/%s.tres" % [ITEMS_DIR, item_name]))
+	if stacked_build:
+		for item in stacked_items():
+			character.item_holder.add_item(item)
+
+
+## The mid-game build: items carrying 3-5 modifiers each, which no shipped
+## `src/Resources/items/*.tres` does - every one of those is a single modifier.
+## They are built with `ItemBuilder` rather than added as new `.tres` files so
+## the numbers stay readable next to the scenario that uses them.
+func stacked_items() -> Array[Item]:
+	return [
+		ItemBuilder.make_stat_item(
+			"Veteran's Charm",
+			"+4 and +25% damage, +15% crit, +3 flat damage, pierce 2",
+			{
+				"damage": {"flat": 4.0, "percent": 0.25},
+				"critical_chance": {"flat": 0.15},
+				"flat_damage": {"flat": 3.0},
+				"projectile_pierce": {"flat": 2.0},
+			}
+		),
+		ItemBuilder.make_effect_item(
+			"Chain Reactor",
+			"Chains on hit, and +20% damage with +30% area",
+			load("%s/ChainModifier.tscn" % MODIFIERS_DIR),
+			{
+				"damage": {"percent": 0.2},
+				"area_radius": {"percent": 0.3},
+				"attack_speed": {"percent": 0.1},
+			}
+		),
+		ItemBuilder.make_stat_item(
+			"Survivor's Ward",
+			"+30 health, 20 shield, +20% speed, +0.5 crit multiplier",
+			{
+				"health": {"flat": 30.0},
+				"energy_shield": {"flat": 20.0},
+				"movement_speed": {"percent": 0.2},
+				"critical_multiplier": {"flat": 0.5},
+			}
+		),
+	]
+
+
+func _apply_start_mode() -> void:
+	var stage_manager := get_node_or_null("../StageManager") as StageManager
+	if stage_manager == null:
+		push_warning("DebugScenarioSetup: no StageManager next to '%s'." % scenario_title)
+		return
+
+	match start_mode:
+		StartMode.STAGE_ONE:
+			# `StageManager._ready()` already ran stage 1 for us.
+			pass
+		StartMode.BOSS_STAGE:
+			# The same call `_end_stage()` makes, so the boss gets the normal
+			# scaling and the stage-end rule stays in one place.
+			stage_manager.go_to_stage(2)
+		StartMode.LOOP:
+			# Each spawner keeps its own `current_loop`. `start_new_loop()` is
+			# deliberately not used here: it advances the enemy spawner through
+			# `_on_next_stage()`, which would leave the two counters disagreeing.
+			stage_manager.current_loop = start_loop
+			stage_manager.enemy_spawner.current_loop = start_loop
+			stage_manager.boss_spawner.current_loop = start_loop
+			# Re-enter the enemy stage so the wave is sized for the new loop
+			# (`start_wave()` reads `current_loop`) instead of the loop-1 wave
+			# that `_ready()` already started.
+			stage_manager.go_to_stage(1)
+
+
+func _on_stage_applied() -> void:
+	var stage_manager := get_node_or_null("../StageManager") as StageManager
+	var stage := stage_manager.current_stage if stage_manager != null else 0
+	var loop_number := stage_manager.current_loop if stage_manager != null else 0
+	print(
+		"Debug scenario '%s': stage %d, loop %d, %d weapons, stacked build: %s"
+		% [scenario_title, stage, loop_number, weapon_names.size(), str(stacked_build)]
+	)

@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://src/Scenes/Game.tscn" id="1_game"]
+[ext_resource type="Script" path="res://test/scenarios/scenario_setup.gd" id="2_setup"]
+
+[node name="FirstBossScenario" instance=ExtResource("1_game")]
+
+[node name="ScenarioSetup" type="Node" parent="."]
+script = ExtResource("2_setup")
+scenario_title = "First stage boss"
+weapon_names = Array[String](["Pistol", "Shotgun"])
+item_names = Array[String](["ArmorPlate"])
+start_mode = 1

@@ -43,12 +43,10 @@ func test_buy_weapon_equips_in_weapon_holder() -> void:
     add_child(shop)
     var character := _build_character()
     shop.character = character
-    character.stats = character.get_node("Stats")
-    character.get_node("Stats").set_base_stat("money", 5)
-    # Character stays off-tree, so wire WeaponHolder's onready refs manually.
-    var weapon_holder: WeaponHolder = character.get_node("WeaponHolder")
-    weapon_holder.hold_owner = character
-    weapon_holder.event_manager = character.get_node("EventManager")
+    character.stats.set_base_stat("money", 5)
+    # The character stays off-tree, and needs no wiring: `weapon_holder` and the
+    # holder's own `hold_owner` resolve on access.
+    var weapon_holder: WeaponHolder = character.weapon_holder
 
     var weapon: BaseWeapon = load(PISTOL_WEAPON)
     shop._add_shop_item_entry(weapon)

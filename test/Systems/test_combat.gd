@@ -15,11 +15,10 @@ func test_character_in_combat() -> void:
 
     var _character: Character = test_scene.get_node("Character")
     var enemy = test_scene.get_node("Enemy")
-    var initial_position = enemy.global_position
-    var e_health: Health = enemy.get_node("Health")
 
     var frames := 0
     while is_instance_valid(enemy) and frames < ENEMY_MAX_FRAMES:
+        @warning_ignore("redundant_await")
         await runner.simulate_frames(5)
         frames += 5
     assert_bool(is_instance_valid(enemy)).is_false()

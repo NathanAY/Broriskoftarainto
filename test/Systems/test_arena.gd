@@ -127,13 +127,13 @@ func test_outline_color_change_keeps_ground_layout() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
 	arena.ground_seed = 4242
 	add_child(arena)
-	var before: Dictionary = {}
+	var tiles_before: Dictionary = {}
 	for cell in arena.get_ground_cells():
-		before[cell] = arena.get_cell_tile(cell)
+		tiles_before[cell] = arena.get_cell_tile(cell)
 	arena.wall_color = Color.BLUE
 	assert_that(arena.get_node("Outline").modulate).is_equal(Color.BLUE)
 	for cell in arena.get_ground_cells():
-		assert_that(arena.get_cell_tile(cell)).is_equal(before[cell])
+		assert_that(arena.get_cell_tile(cell)).is_equal(tiles_before[cell])
 
 
 ## Inner face of a wall collider: position +/- half size toward the arena.

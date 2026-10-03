@@ -16,6 +16,7 @@ func test_add_buff_item_to_character_in_combat() -> void:
     var initial_attack_speed: float  = character.stats.get_stat("attack_speed")
     assert_float(initial_attack_speed).is_equal(1.0)
     
+    @warning_ignore("redundant_await")
     await runner.simulate_frames(int(60 * 2.2))
 
     var next_attack_speed: float  = character.stats.get_stat("attack_speed")

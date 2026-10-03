@@ -149,11 +149,11 @@ func test_collected_items_and_weapons_use_the_character_menu_card() -> void:
     assert_bool((shop.collected_items_container.get_child(5) as Control).position.y > first_row_y).is_true()
 
     # Hovering a collected item still drives the shared tooltip.
-    var card: Control = shop.collected_items_container.get_child(0)
-    card.emit_signal("mouse_entered")
+    var hovered: Control = shop.collected_items_container.get_child(0)
+    hovered.emit_signal("mouse_entered")
     assert_bool(shop.tooltip.visible).is_true()
     assert_str(shop.tooltip.name_label.text).contains("Armour Plate")
-    card.emit_signal("mouse_exited")
+    hovered.emit_signal("mouse_exited")
     assert_bool(shop.tooltip.visible).is_false()
 
     character.free()
@@ -166,7 +166,6 @@ func test_buy_button_uses_card() -> void:
     var character := _build_character()
     shop.character = character
     # Hand-built Character never enters the tree, so wire the @onready shortcut manually.
-    character.stats = character.get_node("Stats")
     character.get_node("Stats").set_base_stat("money", 5)
 
     var item: Item = load(PLUS_DAMAGE_ITEM)
@@ -187,7 +186,6 @@ func test_sell_button_uses_analyzer_price() -> void:
     add_child(shop)
     var character := _build_character()
     shop.character = character
-    character.stats = character.get_node("Stats")
     character.get_node("Stats").set_base_stat("money", 0)
 
     var modifier: Item = load("res://src/Resources/items/CritGlass.tres")
@@ -387,7 +385,6 @@ func test_shop_disables_buy_when_money_is_short() -> void:
     add_child(shop)
     var character := _build_character()
     shop.character = character
-    character.stats = character.get_node("Stats")
     character.get_node("Stats").set_base_stat("money", 0)
 
     # Weapons cost 5, so with 0 money the card must be unbuyable.
@@ -422,7 +419,6 @@ func test_selling_pickup_refreshes_other_cards_affordability() -> void:
     add_child(shop)
     var character := _build_character()
     shop.character = character
-    character.stats = character.get_node("Stats")
     character.get_node("Stats").set_base_stat("money", 0)
 
     # A 5-cost weapon the player cannot afford yet.

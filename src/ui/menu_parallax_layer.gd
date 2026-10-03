@@ -102,25 +102,27 @@ func art_size() -> Vector2:
 ## Fit `art` over `viewport` so that it still covers the viewport after sliding
 ## `margin` pixels in *either* direction.
 ##
-## This is the load-bearing function. `margin` is folded into the width the fit
-## has to satisfy, so the returned rect is always at least `margin` wider than
-## the viewport on each side once it is centred. Centring is what splits that
-## slack evenly; fitting to the bare window and then offsetting by hand is how
-## the slack ends up on one side only.
-static func cover_fit(art: Vector2, viewport: Vector2, margin: float) -> Rect2:
+## This is the load-bearing function. The layer's `margin` is folded into the
+## width the fit has to satisfy, so the returned rect is always at least that
+## much wider than the viewport on each side once it is centred. Centring is what
+## splits that slack evenly; fitting to the bare window and then offsetting by
+## hand is how the slack ends up on one side only.
+## `slack_margin` is the layer's `margin`; it is not named `margin` because that
+## would shadow the class property of the same name.
+static func cover_fit(art: Vector2, viewport: Vector2, slack_margin: float) -> Rect2:
     if art.x <= 0.0 or art.y <= 0.0:
         return Rect2(Vector2.ZERO, viewport)
-    var slack := maxf(0.0, margin)
+    var slack := maxf(0.0, slack_margin)
     var needed := Vector2(viewport.x + slack * 2.0, viewport.y)
-    var scale := maxf(needed.x / art.x, needed.y / art.y)
-    var shown := art * scale
+    var fit := maxf(needed.x / art.x, needed.y / art.y)
+    var shown := art * fit
     return Rect2((viewport - shown) * 0.5, shown)
 
 
 ## How wide the art has to be so that a layer with this margin can cover the
 ## window at both ends of its travel. The number the artwork is padded to.
-static func required_art_width(viewport_width: float, margin: float) -> float:
-    return viewport_width + maxf(0.0, margin) * 2.0
+static func required_art_width(viewport_width: float, slack_margin: float) -> float:
+    return viewport_width + maxf(0.0, slack_margin) * 2.0
 
 
 # --- motion -----------------------------------------------------------------
@@ -131,19 +133,22 @@ func sway_at(elapsed: float) -> float:
     return sway_offset(travel, sway_period, elapsed + sway_phase * sway_period)
 
 
-## Sway offset in pixels, in `[-travel, travel]`.
+## Sway offset in pixels, in `[-amplitude, amplitude]`.
 ##
 ## A ping-pong across the cycle, run through a smoothstep so the velocity is zero
 ## at both turns. That dwell is the easing: the layer arrives at each end slowly
 ## and leaves it slowly, where a linear ping-pong reads as a stutter and an
 ## un-eased one reads as a bounce.
-static func sway_offset(travel: float, period: float, elapsed: float) -> float:
-    if travel <= 0.0 or period <= 0.001:
+##
+## `amplitude` is the layer's `travel`; it is not named `travel` because that
+## would shadow the exported property of the same name.
+static func sway_offset(amplitude: float, period: float, elapsed: float) -> float:
+    if amplitude <= 0.0 or period <= 0.001:
         return 0.0
     var cycle := fposmod(elapsed / period, 1.0)
     var triangle := 1.0 - absf(cycle * 2.0 - 1.0)
     var eased := triangle * triangle * (3.0 - 2.0 * triangle)
-    return travel * (eased * 2.0 - 1.0)
+    return amplitude * (eased * 2.0 - 1.0)
 
 
 ## Current horizontal shift in pixels.

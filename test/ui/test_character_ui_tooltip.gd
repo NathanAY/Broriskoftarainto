@@ -603,11 +603,11 @@ func test_character_ui_weapons_use_the_same_card_as_the_items() -> void:
     assert_bool((ui.weapons_container.get_child(5) as Control).position.y > first_row_y).is_true()
 
     # Hovering a weapon tile shows its detail in the shared tooltip.
-    var card: Control = ui.weapons_container.get_child(1)
-    card.emit_signal("mouse_entered")
+    var hovered: Control = ui.weapons_container.get_child(1)
+    hovered.emit_signal("mouse_entered")
     assert_bool(ui.tooltip.visible).is_true()
     assert_str(ui.tooltip.name_label.text).contains("Pistol")
-    card.emit_signal("mouse_exited")
+    hovered.emit_signal("mouse_exited")
     assert_bool(ui.tooltip.visible).is_false()
 
     GlobalGameState.current_character = prev_character if is_instance_valid(prev_character) else null

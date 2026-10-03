@@ -8,6 +8,7 @@ func test_shop_stage_opens_shop_automatically() -> void:
     var test_scene := runner.scene()
     get_tree().current_scene = test_scene
 
+    @warning_ignore("redundant_await")
     await runner.simulate_frames(10)
 
     var shop_menu: ShopMenu = test_scene.get_node("UI/ShopMenu")
@@ -25,6 +26,9 @@ func test_shop_stage_opens_shop_automatically() -> void:
     test_scene.free()
 
 
+## A character that is built but never enters the tree, which is how the shop
+## uses one. No wiring is needed: `Character`'s and the holders' refs to their
+## parent resolve on access, so they work while the character is detached.
 func _build_character() -> Character:
     var character := Character.new()
     character.name = "Character"
@@ -41,10 +45,6 @@ func _build_character() -> Character:
     var weapon_holder := WeaponHolder.new()
     weapon_holder.name = "WeaponHolder"
     character.add_child(weapon_holder)
-    character.stats = character.get_node("Stats")
-    # Character stays off-tree, so wire WeaponHolder's onready refs manually.
-    weapon_holder.hold_owner = character
-    weapon_holder.event_manager = character.get_node("EventManager")
     return character
 
 

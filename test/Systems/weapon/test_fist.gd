@@ -14,6 +14,7 @@ func test_fist_does_damage() -> void:
     var character: Character = test_scene.get_node("Character")
     WeaponTestSupport.equip_only_weapon(character, FIST)
 
+    @warning_ignore("redundant_await")
     await runner.simulate_frames(WeaponTestSupport.FRAMES)
 
     # The fist connected and the target survived the window. The exact total is

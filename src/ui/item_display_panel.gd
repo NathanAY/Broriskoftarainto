@@ -131,11 +131,12 @@ static func make_icon(resource: Resource, icon_size: Vector2 = ItemIconGenerator
 
 
 ## A square icon holder holding one texture, centred and aspect-preserved.
-## `size` must match the plate it is dropped into, otherwise the holder's
-## minimum size grows the plate past its intended scale.
-static func make_texture_icon(texture: Texture2D, size: Vector2 = ItemIconGenerator.BASE_SIZE) -> Control:
+## `plate_size` must match the plate it is dropped into, otherwise the holder's
+## minimum size grows the plate past its intended scale. Not named `size`
+## because that would shadow `Control.size`.
+static func make_texture_icon(texture: Texture2D, plate_size: Vector2 = ItemIconGenerator.BASE_SIZE) -> Control:
     var container := Control.new()
-    container.custom_minimum_size = size
+    container.custom_minimum_size = plate_size
     var rect := TextureRect.new()
     rect.texture = texture
     rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE

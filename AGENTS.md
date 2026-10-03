@@ -31,6 +31,30 @@ Other behavior:
 - Partial words match several suites at once (e.g. `modifier` -> 7 suites, all run).
 - Only `test_*.gd` files are fuzzy-matched, so shared helper scripts are not run as suites.
 
+## Keep `.gdunit.log` clean
+Both runners overwrite `.gdunit.log` at the repo root, so it is the complete warning list for the last run. **A green run can still be noisy** — read the log after any run that touched a script, and check the totals rather than only the lines you expected. One hand-written `.tscn` with a missing `uid` once accounted for 58 of the log's 108 warnings, because Godot re-warns on *every* load of that resource.
+
+### Baseline: 6 warnings, 19 errors — all of them expected
+- **All 19 errors are negative tests**: 15 `[EventContracts]` violations and 4 `CharacterUI` / `BuffUI` "no character assigned" guards. They assert that validation *rejects* bad input. Not yours.
+- **5 of the warnings are guard paths** too: `ShopMenu: No item_factory assigned!`, `Stats node not found under holder`, and three `BaseModifier.attach:` messages.
+- The 6th warning is `ObjectDB instances leaked at exit`.
+
+Anything in the log that is not on that list was introduced by your change.
+
+### Traps that have actually bitten this repo
+- **A bare `int` assigned to an enum-typed property.** `ItemCardRow.tone` is typed `Tone`, so a helper declared `-> int` warns at *every* call site. Type the helper's return as the enum instead of casting at each assignment; where an `int` sentinel is unavoidable, narrow it once in a helper — see `_forced_tone()` in `src/ui/item_tooltip.gd`.
+- **Parameters and locals that shadow an inherited or class member.** Rename the parameter, do not suppress: `cover_fit()` and `required_art_width()` take `slack_margin` rather than `margin`, `sway_offset()` takes `amplitude` rather than `travel`, `make_texture_icon()` takes `plate_size` rather than `size`.
+- **Never name a test local `before` or `after`.** Those are `GdUnitTestSuite` assertion methods; a local of that name shadows them and reads as though it still refers to the hook. Use `count_before`, `rect_before`, `tiles_before`.
+- **A name redeclared in a nested block.** Reusing the enclosing block's name is the "declared below in the parent block" warning. Give the inner one its own name (`hovered`).
+- **Unused locals, and private class vars written from elsewhere.** Delete unused locals. If a member is written from another class, a leading underscore is a lie and GDScript reports it unused — `BaseWeapon.bound_effect_nodes` is filled and cleared by `weapon_builtin_effects.gd`, so it carries no underscore.
+- **Integer division and narrowing.** Write `int(x / 2.0)` when the truncation is the intent, and never pass a float expression to an `int` parameter — `simulate_frames(60 * 2.5)` warns and wants `simulate_frames(150)`.
+- **Assigning `size` on a `Control` whose opposite anchors are unequal.** Godot overrides it after `_ready()` and warns. Use `set_deferred("size", ...)`, which is also the path a real window resize takes.
+- **A `.tscn` or `.tres` hand-written rather than saved from the editor.** A missing `uid="..."` attribute makes the invalid-UID warning repeat on every load. Re-save the file from the editor rather than pasting the UID in by hand.
+- **`await` on something that is not a coroutine.** gdUnit4 helpers such as `runner.simulate_frames()` return immediately, so the `await` is redundant.
+- **Do not reach for a child or the parent through `@onready`.** `@onready` waits for `_ready`, so the field reads as `null` for as long as the node is detached, and a plain initializer is no better: a scene's root runs its member initializers *before* its children are attached. Use a getter, which runs on access — `get_parent()` and `get_node_or_null()` are both valid the moment the node is parented, tree or no tree. `Character`'s five refs and both holders' `hold_owner` / `stats` / `event_manager` are getters for this reason; see `src/Scripts/character.gd`. It also means a detached character can be equipped into with no wiring, which is what `test/Systems/weapon/test_weapon_equip_detached_character.gd` pins. Do not "optimise" these back into a cached field.
+
+`@warning_ignore("...")` is a last resort and each use wants a comment saying why. It is never the fix for a shadowed name or a mistyped enum.
+
 ## Visual checks (rendering a scene to a PNG)
 Tests assert structure, not looks. After changing a UI, render it:
 ```

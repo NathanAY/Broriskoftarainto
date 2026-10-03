@@ -92,7 +92,7 @@ static func _append_base_stat_rows(rows: Array, character: CharacterData) -> voi
 
 ## The value itself is a real stat value, not a modifier delta, so it carries no
 ## "+" prefix - the colour already carries the meaning.
-static func _tone_vs_default(shown: String, default_value: float) -> int:
+static func _tone_vs_default(shown: String, default_value: float) -> ItemCardRow.Tone:
 	var number := String(shown).to_float()
 	if number > default_value:
 		return ItemCardRow.Tone.POSITIVE

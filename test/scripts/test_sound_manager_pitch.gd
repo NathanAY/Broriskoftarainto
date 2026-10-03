@@ -32,9 +32,9 @@ func test_pick_pitch_honours_range() -> void:
 
 
 func test_play_queues_and_playing_applies_valid_pitch() -> void:
-    var before: int = SoundManager.sounds_to_play.size()
+    var souds_size: int = SoundManager.sounds_to_play.size()
     SoundManager.play(preload(FOCUS_SOUND), 0.0, 2.0)
-    assert_int(SoundManager.sounds_to_play.size()).is_equal(before + 1)
+    assert_int(SoundManager.sounds_to_play.size()).is_equal(souds_size + 1)
     SoundManager._playSound()
     assert_float(SoundManager.players_available[0].pitch_scale)\
         .is_greater_equal(SoundManager.MIN_PITCH_SCALE)
@@ -58,26 +58,26 @@ func _make_button() -> UiMenuButton:
 
 func test_menu_button_plays_focus_sound_on_hover() -> void:
     var button := _make_button()
-    var before: int = SoundManager.sounds_to_play.size()
+    var souds_size: int = SoundManager.sounds_to_play.size()
     button.on_mouse_entered()
     # Exactly one sound: grab_focus() also emits focus_entered, which must not
     # stack a second copy of the focus sound on top of the hover sound.
-    assert_int(SoundManager.sounds_to_play.size()).is_equal(before + 1)
+    assert_int(SoundManager.sounds_to_play.size()).is_equal(souds_size + 1)
 
 
 func test_menu_button_hover_always_sounds_once() -> void:
     var button := _make_button()
     for _i in 10:
-        var before: int = SoundManager.sounds_to_play.size()
+        var souds_size: int = SoundManager.sounds_to_play.size()
         button.on_mouse_entered()
-        assert_int(SoundManager.sounds_to_play.size()).is_equal(before + 1)
+        assert_int(SoundManager.sounds_to_play.size()).is_equal(souds_size + 1)
 
 
 func test_menu_button_plays_press_sound_and_locks_repress() -> void:
     var button := _make_button()
-    var before: int = SoundManager.sounds_to_play.size()
+    var souds_size: int = SoundManager.sounds_to_play.size()
     button.on_pressed()
-    assert_int(SoundManager.sounds_to_play.size()).is_equal(before + 1)
+    assert_int(SoundManager.sounds_to_play.size()).is_equal(souds_size + 1)
     # Button is disabled right after pressing to swallow double clicks.
     assert_bool(button.disabled).is_true()
 
@@ -92,24 +92,24 @@ func test_menu_button_grabs_focus_on_hover() -> void:
 func test_menu_button_does_not_grab_focus_when_disabled_opt_out() -> void:
     var button := _make_button()
     button.grab_focus_with_mouse = false
-    var before: int = SoundManager.sounds_to_play.size()
+    var souds_size: int = SoundManager.sounds_to_play.size()
     button.on_mouse_entered()
     # Sound still plays, focus is left alone.
-    assert_int(SoundManager.sounds_to_play.size()).is_equal(before + 1)
+    assert_int(SoundManager.sounds_to_play.size()).is_equal(souds_size + 1)
     assert_object(button.get_viewport().gui_get_focus_owner()).is_not_same(button)
 
 
 func test_menu_button_disable_activates_round_trip() -> void:
     var button := _make_button()
     button.disable()
-    var before: int = SoundManager.sounds_to_play.size()
+    var souds_size: int = SoundManager.sounds_to_play.size()
     button.on_mouse_entered()
     button.on_pressed()
     # Muted button queues nothing.
-    assert_int(SoundManager.sounds_to_play.size()).is_equal(before)
+    assert_int(SoundManager.sounds_to_play.size()).is_equal(souds_size)
     button.activate()
     button.on_mouse_entered()
-    assert_int(SoundManager.sounds_to_play.size()).is_equal(before + 1)
+    assert_int(SoundManager.sounds_to_play.size()).is_equal(souds_size + 1)
 
 
 func test_menu_button_sounds_exist_and_are_distinct() -> void:

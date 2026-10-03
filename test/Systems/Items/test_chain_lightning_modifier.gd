@@ -20,7 +20,8 @@ func test_chain_lightnin_modifier() -> void:
     
     var item: Item = _create_item("ChainModifier.tscn", 1)
     character.item_holder.add_item(item)
-        
+    
+    @warning_ignore("redundant_await")
     await runner.simulate_frames(60 * 3)
 
     #enemy1 hit by fist twice (2 x 10 damage, fist only - no pistol here)

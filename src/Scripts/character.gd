@@ -2,11 +2,31 @@
 extends CharacterBody2D
 class_name Character
 
-@onready var event_manager: EventManager = $EventManager
-@onready var item_holder: ItemHolder = $ItemHolder
-@onready var stats: Stats = $Stats
-@onready var weapon_holder: WeaponHolder = $WeaponHolder
-@onready var anim_player: AnimationPlayer = $AnimationPlayer
+# Resolved on access rather than with `@onready`. `@onready` waits for `_ready`, so
+# these all read as null while the character is detached - and a scene's root node
+# runs its member initializers *before* its children are attached, so a plain
+# initializer would be null too. A getter runs after the children exist, which
+# makes a detached-but-fully-built character usable: the shop builds one off-tree
+# and equips items and weapons into it before it ever enters the scene.
+var event_manager: EventManager:
+    get:
+        return get_node_or_null("EventManager") as EventManager
+
+var item_holder: ItemHolder:
+    get:
+        return get_node_or_null("ItemHolder") as ItemHolder
+
+var stats: Stats:
+    get:
+        return get_node_or_null("Stats") as Stats
+
+var weapon_holder: WeaponHolder:
+    get:
+        return get_node_or_null("WeaponHolder") as WeaponHolder
+
+var anim_player: AnimationPlayer:
+    get:
+        return get_node_or_null("AnimationPlayer") as AnimationPlayer
 
 var current_target = null
 var fire_timer = 0.0
@@ -19,15 +39,15 @@ func _ready():
     for c in get_children():
         if c.has_method("attachEventManager"):
             c.attachEventManager(event_manager)
-    
+
     GlobalGameState.current_character = self
     var weapons = GlobalGameState.starting_weapons
     for weapon_path in weapons:
-        $WeaponHolder.add_weapon(load(weapon_path))
+        weapon_holder.add_weapon(load(weapon_path))
     # Items
     var items = GlobalGameState.starting_items
     for item_path in items:
-        $ItemHolder.add_item(load(item_path)) 
+        item_holder.add_item(load(item_path)) 
     
     collision_layer = 1
     # Only collide with arena walls (layer 4) — stays inside the ground.

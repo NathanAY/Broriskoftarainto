@@ -29,8 +29,9 @@ func test_bouncing_modifier() -> void:
     # only runs behaviors once pierce is exhausted), so use a plain pierce-free
     # copy for a pure bounce test.
     character.weapon_holder.add_weapon(_plain_pistol())
-        
-    await runner.simulate_frames(60 * 2.5)
+	
+    @warning_ignore("redundant_await")
+    await runner.simulate_frames(150)  # 2.5s at 60fps
 
     # enemy1 must be hit by the single pistol projectile (Fist was removed, so the
     # exact HP is one 35 damage hit; assert the hit landed at all instead of the

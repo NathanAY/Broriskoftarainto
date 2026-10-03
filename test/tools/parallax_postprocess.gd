@@ -147,7 +147,6 @@ func _grow_and_pad(image: Image, grow: int, pad: int) -> Image:
 	var out_data := PackedByteArray()
 	out_data.resize(out_width * height * 4)
 	for y in height:
-		var fill := _modal_pixel(source, width, y)
 		var row := y * width * 4
 		var out_row := y * out_width * 4
 		for x in pad:
@@ -160,26 +159,6 @@ func _grow_and_pad(image: Image, grow: int, pad: int) -> Image:
 			_write_pixel(out_data, out_row + (grown_width + pad + x) * 4,
 				PackedByteArray([0, 0, 0, 0]))
 	return Image.create_from_data(out_width, height, false, Image.FORMAT_RGBA8, out_data)
-
-
-## The most common pixel in a row, alpha included. Ties go to the leftmost
-## candidate, which is arbitrary but stable.
-func _modal_pixel(data: PackedByteArray, width: int, y: int) -> PackedByteArray:
-	var tally := {}
-	var row := y * width * 4
-	for x in width:
-		var at := row + x * 4
-		var packed := data[at] << 24 | data[at + 1] << 16 | data[at + 2] << 8 | data[at + 3]
-		tally[packed] = int(tally.get(packed, 0)) + 1
-	var best := 0
-	var best_count := -1
-	for packed: int in tally:
-		var count: int = tally[packed]
-		if count > best_count:
-			best_count = count
-			best = packed
-	return PackedByteArray([
-		(best >> 24) & 0xff, (best >> 16) & 0xff, (best >> 8) & 0xff, best & 0xff])
 
 
 func _write_pixel(out: PackedByteArray, at: int, pixel: PackedByteArray) -> void:

@@ -68,8 +68,8 @@ func after_test() -> void:
 	collect_orphan_node_details()
 
 
-func _layer(name: String) -> MenuParallaxLayer:
-	return main_menu.get_node(name) as MenuParallaxLayer
+func _layer(layer_name: String) -> MenuParallaxLayer:
+	return main_menu.get_node(layer_name) as MenuParallaxLayer
 
 
 # --- the layer stack --------------------------------------------------------
@@ -227,22 +227,27 @@ func test_layers_refit_when_the_layer_is_resized() -> void:
 	# A full-rect Control under a CanvasLayer resizes with the window. Resizing
 	# the layer directly exercises the same `resized` path without depending on
 	# the root Window accepting a new size under a test runner.
+	#
+	# The size is set deferred because the layer's opposite anchors are unequal:
+	# assigning `size` straight on a Control like that is overridden after
+	# `_ready()` and Godot warns about it. Deferring is also what a real window
+	# resize does, so this is the more faithful path, not just the quiet one.
 	var near := _layer("NearLayer")
 	var original := near.size
-	var before := near.art_rect().size
+	var rect_before := near.art_rect().size
 
-	near.size = Vector2(900, 1400)
+	near.set_deferred("size", Vector2(900, 1400))
 	await await_millis(1)
 
 	assert_vector(near.art_rect().size).override_failure_message(
-		"the layer did not refit to its new size").is_not_equal(before)
+		"the layer did not refit to its new size").is_not_equal(rect_before)
 	assert_float(near.art_rect().size.y).override_failure_message(
 		"the refitted layer does not cover its new height").is_greater_equal(1400.0 - EPS)
 	assert_float(near.art_rect().size.x).override_failure_message(
 		"the refitted layer left no room for its own sway").is_greater_equal(
 		900.0 + near.margin * 2.0 - EPS)
 
-	near.size = original
+	near.set_deferred("size", original)
 	await await_millis(1)
 
 
@@ -260,13 +265,13 @@ func test_set_shift_is_clamped_to_the_reserved_slack() -> void:
 
 func test_art_rect_moves_with_the_shift_and_nothing_else() -> void:
 	var far := _layer("FarLayer")
-	var before := far.art_rect()
+	var rect_before := far.art_rect()
 	far.set_shift(12.0)
-	var after := far.art_rect()
+	var rect_after := far.art_rect()
 
-	assert_vector(after.size).override_failure_message(
-		"shifting must not rescale the art").is_equal(before.size)
-	assert_vector(after.position - before.position).override_failure_message(
+	assert_vector(rect_after.size).override_failure_message(
+		"shifting must not rescale the art").is_equal(rect_before.size)
+	assert_vector(rect_after.position - rect_before.position).override_failure_message(
 		"the shift must be horizontal and 1:1 in pixels").is_equal(Vector2(12.0, 0.0))
 
 
@@ -422,7 +427,10 @@ func test_keyed_layers_have_transparent_overscan_baked_into_their_edges() -> voi
 		var image := (layer.get_node("Art") as TextureRect).texture.get_image()
 		var margin: int = int(layer.margin)
 		var width := image.get_width()
-		var middle_y: int = image.get_height() / 2
+		# Explicit float divide then cast: plain `int / 2` is the int-division
+		# warning, and letting the float land in an int-typed var is the
+		# narrowing-conversion one.
+		var middle_y := int(image.get_height() / 2.0)
 		for side in 2:
 			for offset in margin:
 				var x: int = offset if side == 0 else width - 1 - offset

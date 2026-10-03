@@ -14,6 +14,7 @@ func test_shotgun_does_damage() -> void:
     var character: Character = test_scene.get_node("Character")
     WeaponTestSupport.equip_only_weapon(character, SHOTGUN)
 
+    @warning_ignore("redundant_await")
     await runner.simulate_frames(WeaponTestSupport.FRAMES)
 
     # A shotgun blast is several pellets with random spread, so the damage total

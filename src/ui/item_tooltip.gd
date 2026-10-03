@@ -133,6 +133,15 @@ static func stat_rows(modifiers: Dictionary, force_tone: int = -1) -> Array:
     return rows
 
 
+## `force_tone` stays an `int` because -1 is the "no override" sentinel, so it
+## cannot be typed as `Tone` itself. This narrows the result back to `Tone` in
+## one place instead of casting at every assignment site.
+static func _forced_tone(force_tone: int, derived: ItemCardRow.Tone) -> ItemCardRow.Tone:
+    if force_tone < 0:
+        return derived
+    return force_tone as ItemCardRow.Tone
+
+
 static func _append_stat_rows(rows: Array, modifiers: Dictionary, force_tone: int = -1) -> void:
     for stat_name in modifiers:
         var mod = modifiers[stat_name]
@@ -152,10 +161,10 @@ static func _append_stat_rows(rows: Array, modifiers: Dictionary, force_tone: in
             if mod_type == "percent":
                 var shown := "%d%%" % round(float(value) * 100.0)
                 row.value = _signed(shown)
-                row.tone = force_tone if force_tone >= 0 else _tone_for_number(float(value))
+                row.tone = _forced_tone(force_tone, _tone_for_number(float(value)))
             else:
                 row.value = _signed(str(value))
-                row.tone = force_tone if force_tone >= 0 else _tone_for_number(_as_number(value))
+                row.tone = _forced_tone(force_tone, _tone_for_number(_as_number(value)))
             rows.append(row)
 
 
@@ -233,7 +242,7 @@ static func _has_benefit_effect(item: Item) -> bool:
 ## line; everything else stays neutral, which the card renders as heading gold.
 ## Mapped by name rather than cast: `EffectKind` and `Tone` are separate enums
 ## and are free to number their entries differently.
-static func _tone_for_effect_kind(effect_kind: int) -> int:
+static func _tone_for_effect_kind(effect_kind: int) -> ItemCardRow.Tone:
     match effect_kind:
         BaseModifier.EffectKind.COST:
             return ItemCardRow.Tone.NEGATIVE
@@ -317,7 +326,7 @@ static func _as_number(value) -> float:
 
 ## Tone comes from the numeric value, not the rendered string: a positive
 ## float renders as "5.0" which never carries an explicit "+".
-static func _tone_for_number(number: float) -> int:
+static func _tone_for_number(number: float) -> ItemCardRow.Tone:
     if number < 0.0:
         return ItemCardRow.Tone.NEGATIVE
     if number > 0.0:
@@ -325,7 +334,7 @@ static func _tone_for_number(number: float) -> int:
     return ItemCardRow.Tone.NEUTRAL
 
 
-static func _tone_for_value(value: String) -> int:
+static func _tone_for_value(value: String) -> ItemCardRow.Tone:
     var trimmed := value.strip_edges()
     if trimmed.begins_with("-"):
         return ItemCardRow.Tone.NEGATIVE

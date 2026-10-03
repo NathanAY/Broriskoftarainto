@@ -1,7 +1,7 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://c4vqc7nbkw3ue"]
 
-[ext_resource type="Script" uid="uid://b6ygy6hyi5r8o" path="res://src/Systems/Items/modifiers/percent_life_drain_modifier.gd" id="1_3bqev"]
+[ext_resource type="Script" path="res://src/Systems/Items/modifiers/percent_life_drain_modifier.gd" id="1_3bqev"]
 
-[node name="PercentLifeDrainModifier" type="Node"]
+[node name="PercentLifeDrainModifier" type="Node" unique_id=709023461]
 script = ExtResource("1_3bqev")
 effect_kind = 1

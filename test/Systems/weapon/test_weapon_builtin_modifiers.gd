@@ -107,10 +107,11 @@ func test_knife_builtin_poison_applied() -> void:
     e_health.max_health = 200.0
     e_health.current_health = 200.0
 
+    @warning_ignore("redundant_await")
     await runner.simulate_frames(60 * 2)
 
     # the built-in poison modifier node is bound to the knife
-    assert_that(character.weapon_holder.weapons[0]._bound_effect_nodes.size()).is_equal(1)
+    assert_that(character.weapon_holder.weapons[0].bound_effect_nodes.size()).is_equal(1)
     # enemy got poisoned (PoisonEffect lives on its Health node)
     assert_that(e_health.get_node_or_null("PoisonEffect")).is_not_null()
     # 0.25s poison ticks plus the knife hit deal far more than the 5-damage hit
@@ -131,10 +132,11 @@ func test_fist_builtin_knockback_bound() -> void:
 
     var fist := WeaponTestSupport.equip_only_weapon(character, FIST)
 
+    @warning_ignore("redundant_await")
     await runner.simulate_frames(WeaponTestSupport.FRAMES)
 
     # the built-in knockback modifier node is bound to the fist
-    assert_that(fist._bound_effect_nodes.size()).is_equal(1)
+    assert_that(fist.bound_effect_nodes.size()).is_equal(1)
     # fist damage still worked, and the target is still standing: binding the
     # knockback must not have swallowed the weapon's own hits
     var left := WeaponTestSupport.health_left(e_health)
@@ -156,17 +158,17 @@ func test_pistol_builtin_pierce_hits_enemy_behind() -> void:
     # second enemy sits on the projectile path, beyond any melee/targeting range
     var enemy2 := WeaponTestSupport.spawn_enemy_behind(test_scene, enemy, Vector2(350, 0))
 
-    var e_health := WeaponTestSupport.give_enemy_health(enemy)
     var e2_health := WeaponTestSupport.give_enemy_health(enemy2)
     var character: Character = test_scene.get_node("Character")
 
     # built-in pierce (spawn-time) + knockback (hit-event), left fully intact
     var pistol := WeaponTestSupport.equip_only_weapon(character, PISTOL)
 
+    @warning_ignore("redundant_await")
     await runner.simulate_frames(WeaponTestSupport.FRAMES)
 
     # only the bound knockback node exists for the pistol (pierce is spawn-time)
-    assert_that(pistol._bound_effect_nodes.size()).is_equal(1)
+    assert_that(pistol.bound_effect_nodes.size()).is_equal(1)
     # a piercing pistol projectile reached the enemy behind the first one, which
     # starts at full health and so must have dropped below it
     var far_left := WeaponTestSupport.health_left(e2_health)
@@ -192,9 +194,10 @@ func test_remove_weapon_detaches_builtins() -> void:
 
     character.weapon_holder.add_weapon(load(FIST))
     var fist_inst: BaseWeapon = character.weapon_holder.weapons[0]
-    assert_that(fist_inst._bound_effect_nodes.size()).is_equal(1)
+    assert_that(fist_inst.bound_effect_nodes.size()).is_equal(1)
 
     character.weapon_holder.remove_weapon(fist_inst)
+    @warning_ignore("redundant_await")
     await runner.simulate_frames(2)
 
     # after removal, the weapon's hits must no longer trigger anything

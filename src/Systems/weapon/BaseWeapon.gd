@@ -23,7 +23,10 @@ var timer: Timer     # each weapon has its own firing timer
 var sprite_node: Sprite2D  # visual instance of this weapon
 
 # Bound built-in modifier nodes created from this weapon's `modifiers` dict.
-var _bound_effect_nodes: Array[Node] = []
+# Owned by `WeaponBuiltinEffects`, which fills and clears it from outside this
+# class - hence no leading underscore. GDScript reports an underscore-prefixed
+# member that is never read *inside* its own class as unused, which this is not.
+var bound_effect_nodes: Array[Node] = []
 
 #groups to ignore (friendly fire)
 var ignore_groups: Array = []
@@ -40,15 +43,41 @@ func apply_to(holder: Node) -> void:
     holder.add_child(timer) # attach to holder so it ticks
     timer.timeout.connect(_on_timeout)
     _update_timer_wait()
-    timer.start()
+    # A Timer only ticks once it is inside the scene tree, and calling start()
+    # before that is an engine error rather than a deferred start. Weapons can be
+    # equipped while their holder is still off-tree - buying in the shop builds
+    # the character before it enters the stage - so in that case wait and start
+    # from the tree instead. Starting immediately when the timer is already live
+    # keeps the common path byte-for-byte as it was.
+    #
+    # The signal is the *timer's* own `tree_entered`, not the holder's: Godot
+    # emits a parent's `tree_entered` before it recurses into the children, so a
+    # handler on the holder would still see an off-tree timer and fail exactly as
+    # before. Waiting on the timer itself cannot run early.
+    if timer.is_inside_tree():
+        timer.start()
+    else:
+        timer.tree_entered.connect(_start_timer_when_holder_enters_tree, CONNECT_ONE_SHOT)
 
     if event_manager:
         event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
     WeaponBuiltinEffects.attach_for_weapon(self, holder, event_manager)
 
+## Deferred half of the timer start in `apply_to`, for a holder that was still
+## off-tree when the weapon was equipped. One-shot, so it fires at most once.
+func _start_timer_when_holder_enters_tree() -> void:
+    if timer and is_instance_valid(timer):
+        timer.start()
+
 func remove_from(_holder: Node) -> void:
     WeaponBuiltinEffects.detach(self)
+
+    # Cancel the deferred start if the weapon is removed before it ever reaches
+    # the tree, otherwise this stays wired to a dead weapon.
+    if timer and is_instance_valid(timer) \
+            and timer.tree_entered.is_connected(_start_timer_when_holder_enters_tree):
+        timer.tree_entered.disconnect(_start_timer_when_holder_enters_tree)
 
     if timer and is_instance_valid(timer):
         timer.stop()

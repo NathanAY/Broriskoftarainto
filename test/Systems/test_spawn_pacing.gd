@@ -76,9 +76,9 @@ func test_over_alive_cap_skips_spawn() -> void:
     spawner.use_group_spawning = false
     spawner.spawn_active = true
     _fill_enemies(enemies, 100)
-    var before: int = enemies.get_child_count()
+    var count_before: int = enemies.get_child_count()
     spawner._on_spawn_timer_timeout()
-    assert_int(enemies.get_child_count()).is_equal(before)
+    assert_int(enemies.get_child_count()).is_equal(count_before)
     assert_float(spawner.spawn_timer.wait_time).is_equal_approx(4.0, 0.001)
 
 
@@ -96,7 +96,7 @@ func test_start_wave_restarts_stopped_timer() -> void:
 func test_watchdog_shortens_long_wait_when_empty() -> void:
     var ctx: Dictionary = _build_spawner()
     var spawner: EnemySpawner = ctx["spawner"]
-    var enemies: Node = ctx["enemies"]
+    var _enemies: Node = ctx["enemies"]
     spawner.current_loop = 1
     spawner.spawn_active = true
     spawner.spawn_timer.wait_time = 4.0

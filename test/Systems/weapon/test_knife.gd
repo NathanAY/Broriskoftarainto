@@ -17,6 +17,7 @@ func test_knife_does_damage() -> void:
 
     character.weapon_holder.add_weapon(load("res://src/Resources/weapons/Knife.tres"))
 
+    @warning_ignore("redundant_await")
     await runner.simulate_frames(60 * 2)
 
     # the knife hit must damage the enemy; its built-in poison may or may not

@@ -15,6 +15,7 @@ func test_pistol_does_damage() -> void:
     var character: Character = test_scene.get_node("Character")
     WeaponTestSupport.equip_only_weapon(character, PISTOL)
 
+    @warning_ignore("redundant_await")
     await runner.simulate_frames(WeaponTestSupport.FRAMES)
 
     # The pistol connected and the target survived the window. How many shots

@@ -57,21 +57,21 @@ static func attach_for_weapon(weapon: BaseWeapon, holder: Node, em: EventManager
 		node.bound_weapon = weapon
 		parent.add_child(node)
 		node.attachEventManager(em)
-		if not weapon._bound_effect_nodes.has(node):
-			weapon._bound_effect_nodes.append(node)
+		if not weapon.bound_effect_nodes.has(node):
+			weapon.bound_effect_nodes.append(node)
 
 
 ## Unsubscribe and free every node bound to `weapon`.
 static func detach(weapon: BaseWeapon) -> void:
 	if weapon == null:
 		return
-	for node in weapon._bound_effect_nodes:
+	for node in weapon.bound_effect_nodes:
 		if not is_instance_valid(node):
 			continue
 		if node.has_method("_unsubscribe_all"):
 			node._unsubscribe_all()
 		node.queue_free()
-	weapon._bound_effect_nodes.clear()
+	weapon.bound_effect_nodes.clear()
 
 
 ## Player-facing tooltip lines for the weapon's built-in effects (e.g.

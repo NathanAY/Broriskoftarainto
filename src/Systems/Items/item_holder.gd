@@ -3,9 +3,29 @@ extends Node
 class_name ItemHolder
 
 # try to find Stats + EventManager on the parent (the entity that owns this ItemHolder)
-@onready var hold_owner: Node = get_parent()
-@onready var stats: Stats = hold_owner.get_node_or_null("Stats")
-@onready var event_manager: EventManager = hold_owner.get_node_or_null("EventManager")
+#
+# All three resolve on access rather than with `@onready`. `@onready` waits for
+# `_ready`, so they read as null for as long as the holder is detached, and an
+# item added in that window had to re-resolve them by hand. `get_parent()` and
+# `get_node_or_null` are both valid the moment the node is parented, tree or no
+# tree, so the off-tree case needs no special handling at all.
+var hold_owner: Node:
+    get:
+        return get_parent()
+
+var stats: Stats:
+    get:
+        var owner_node := hold_owner
+        if owner_node == null:
+            return null
+        return owner_node.get_node_or_null("Stats") as Stats
+
+var event_manager: EventManager:
+    get:
+        var owner_node := hold_owner
+        if owner_node == null:
+            return null
+        return owner_node.get_node_or_null("EventManager") as EventManager
 
 @export var items: Array[Item] = []
 
@@ -17,12 +37,6 @@ func add_item(item: Item) -> void:
     if item == null:
         return
     items.append(item)
-    if hold_owner == null:
-        hold_owner = get_parent()
-    if stats == null:
-        stats = hold_owner.get_node_or_null("Stats")
-    if event_manager == null:
-        event_manager = hold_owner.get_node_or_null("EventManager")
 
     _create_item_node(item)
 

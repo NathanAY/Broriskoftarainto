@@ -43,6 +43,7 @@ func test_piercing_stat_hits_enemy_behind() -> void:
 	character.item_holder.add_item(_create_pierce_item(1.0))
 	character.weapon_holder.add_weapon(_pistol_without_builtins())
 
+	@warning_ignore("redundant_await")
 	await runner.simulate_frames(FRAMES)
 
 	if not _assert_targets_alive(near_health, far_health):
@@ -70,6 +71,7 @@ func test_no_pierce_does_not_hit_enemy_behind() -> void:
 
 	character.weapon_holder.add_weapon(_pistol_without_builtins())
 
+	@warning_ignore("redundant_await")
 	await runner.simulate_frames(FRAMES)
 
 	if not _assert_targets_alive(near_health, far_health):

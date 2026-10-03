@@ -31,6 +31,13 @@ Other behavior:
 - Partial words match several suites at once (e.g. `modifier` -> 7 suites, all run).
 - Only `test_*.gd` files are fuzzy-matched, so shared helper scripts are not run as suites.
 
+## Runner exit codes and the stall watchdog
+All three GdUnit4 wrappers (`run_tests_gdunit.bat`, `run_tests_gdunit_custom.bat`, `run_tests_gdunit_custom_headless.bat`) share the same guard:
+- **124** = the run hit `TIMEOUT_BASE` + `TIMEOUT_PER_EXTRA` per extra suite.
+- **125** = **stall**, and this fires much earlier. A script error inside a test makes Godot drop into its `debug>` REPL, and because stdin is redirected from `nul` the break aborts and then *re-breaks forever*, appending the same block of lines to `.gdunit.log` at full speed until the wall-clock timeout. So while the process is alive the wrapper polls the log every 500 ms and kills the tree as soon as the tail is one block of lines repeated three times in a row — seen on two consecutive polls with the file growing in between, so a one-off coincidence cannot trip it. Expect 125 within a few seconds of the hang.
+- On 125 the log tail is the repeating block; the **first** `Debugger Break, Reason:` line is the real error, and the `*Frame 0 - res://...` line under it is the test line to fix. Nearly always it is a read on a node that was freed mid-test (`'previously freed'`), which `WeaponTestSupport.health_left()` avoids — see `src/Systems/Items/modifiers/` suites.
+
+
 ## Keep `.gdunit.log` clean
 Both runners overwrite `.gdunit.log` at the repo root, so it is the complete warning list for the last run. **A green run can still be noisy** — read the log after any run that touched a script, and check the totals rather than only the lines you expected. One hand-written `.tscn` with a missing `uid` once accounted for 58 of the log's 108 warnings, because Godot re-warns on *every* load of that resource.
 

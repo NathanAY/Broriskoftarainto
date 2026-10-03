@@ -39,11 +39,36 @@ echo Running tests, logging to file...
 
 REM stdin is redirected from nul on purpose: a script error makes Godot drop into
 REM its "debug>" REPL, and with a live console it waits for input forever while
-REM spamming the log. With stdin closed the break aborts immediately.
+REM spamming the log. With stdin closed the break aborts immediately - but the
+REM REPL still re-breaks on every re-run of the failing statement, so the log
+REM grows forever at full speed until the wall-clock timeout above fires. The
+REM stall watchdog below catches that much earlier: while the run is alive it
+REM polls the log and kills the process as soon as the tail of the file is the
+REM same block of lines repeated three times in a row, twice in a row (so a
+REM one-off coincidence cannot trip it). Exit code 125 = stalled loop.
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$cmd = '""%GODOT_BIN%"" --path . -s -d res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a ""%TEST_TARGET%"" < nul > ""%LOG_FILE%"" 2>&1';" ^
+  "$log = '%LOG_FILE%'; $timeoutMs = %TIMEOUT_SECONDS% * 1000;" ^
+  "$esc = [char]27;" ^
+  "function Get-Tail([int]$max) { try { $raw = @(Get-Content -LiteralPath $log -Tail $max -ErrorAction Stop) } catch { return @() }; $out = @(); foreach ($l in $raw) { $c = ($l -replace ($esc + '\[[0-9;]*[mG]'), '').Trim(); if ($c -ne '') { $out += $c } }; return $out };" ^
+  "function Get-RepeatPeriod($lines) { $n = $lines.Count; if ($n -lt 6) { return 0 }; $maxP = [Math]::Min(20, [int][Math]::Floor($n / 3)); for ($p = $maxP; $p -ge 2; $p--) { $s = $n - 3 * $p; $ok = $true; for ($k = 1; $k -le 2 -and $ok; $k++) { for ($j = 0; $j -lt $p; $j++) { if ($lines[$s + $j] -cne $lines[$s + $k * $p + $j]) { $ok = $false; break } } }; if ($ok) { return $p } }; return 0 };" ^
   "$p = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', $cmd -NoNewWindow -PassThru;" ^
-  "if (-not $p.WaitForExit(%TIMEOUT_SECONDS% * 1000)) {" ^
+  "$deadline = (Get-Date).AddMilliseconds($timeoutMs); $hits = 0; $prev = -1;" ^
+  "while (-not $p.HasExited -and (Get-Date) -lt $deadline) {" ^
+  "    Start-Sleep -Milliseconds 500;" ^
+  "    if ($p.HasExited) { break }" ^
+  "    $lines = Get-Tail 60; $count = $lines.Count;" ^
+  "    if ($count -eq $prev) { continue }" ^
+  "    $prev = $count;" ^
+  "    $period = Get-RepeatPeriod $lines;" ^
+  "    if ($period -ge 2) { $hits++ } else { $hits = 0 }" ^
+  "    if ($hits -ge 2) {" ^
+  "        Write-Host ''; Write-Host ('TEST STALL - the log repeats a ' + $period + '-line block; the run is stuck in a loop.');" ^
+  "        taskkill /PID $p.Id /T /F | Out-Null;" ^
+  "        exit 125;" ^
+  "    }" ^
+  "}" ^
+  "if (-not $p.HasExited) {" ^
   "    Write-Host ''; Write-Host 'TEST TIMEOUT - process exceeded %TIMEOUT_SECONDS% seconds!' -ForegroundColor Red;" ^
   "    taskkill /PID $p.Id /T /F | Out-Null;" ^
   "    exit 124;" ^
@@ -66,6 +91,26 @@ if %TEST_EXIT_CODE% EQU 124 (
     echo %LOG_FILE%
     echo.
     exit /b 124
+)
+
+if %TEST_EXIT_CODE% EQU 125 (
+    echo.
+    echo ========================================
+    echo TESTS STALLED - REPEATING LOG OUTPUT
+    echo ========================================
+    echo.
+    echo The tail of %LOG_FILE% is one block of lines repeated over and over,
+    echo which is what a script error inside a test looks like: Godot drops into
+    echo the "debug>" REPL and re-breaks on every attempt. The process was killed
+    echo as soon as the repetition was detected - long before the timeout above.
+    echo The first "Debugger Break, Reason:" line below is the real error.
+    echo --- Last 20 lines of %LOG_FILE% ---
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Test-Path '%LOG_FILE%') { Get-Content '%LOG_FILE%' | Select-Object -Last 20 | ForEach-Object { Write-Host $_ } } else { Write-Host 'No log captured.'; }"
+    echo.
+    echo Full output was saved to:
+    echo %LOG_FILE%
+    echo.
+    exit /b 125
 )
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^

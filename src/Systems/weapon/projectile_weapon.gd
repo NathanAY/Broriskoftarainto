@@ -36,7 +36,7 @@ func shoot_projectile(target: Node) -> Projectile:
     p.set_properties(projectile_props)
     
     p.base_speed = p.base_speed * _current_projectile_speed_multiplier
-    p.damage = _current_damage
+    p.damage = current_damage
     if p.has_method("set_ignore_groups"):
         var ignoreGroups = holder.get_groups().filter(func(g): return g != "damageable")
         p.set_ignore_groups(ignoreGroups)

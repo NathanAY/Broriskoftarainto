@@ -18,7 +18,7 @@ set "GODOT_BIN=F:\programs\Godot_v4.6.1-stable_win64\Godot_v4.6.1-stable_win64.e
 set "TEST_TARGET=res://test"
 set "TEST_ROOT_FS=test"
 set "TIMEOUT_BASE=10"
-set "TIMEOUT_PER_EXTRA=5"
+set "TIMEOUT_PER_EXTRA=3"
 set "LOG_FILE=.gdunit.log"
 
 set "SUITE_COUNT=0"

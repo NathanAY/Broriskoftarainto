@@ -68,8 +68,8 @@ func do_damage(body: Node) -> void:
     var ctx = DamageContext.new()
     ctx.source = get_holder()
     ctx.target = body
-    ctx.base_amount = _current_damage
-    ctx.final_amount = _current_damage
+    ctx.base_amount = current_damage
+    ctx.final_amount = current_damage
     ctx.tags.append("contact")
 
     if event_manager:

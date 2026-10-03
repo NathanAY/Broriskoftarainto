@@ -13,7 +13,29 @@ class_name BaseWeapon
 @export var sprite_offset: Vector2 = Vector2.ZERO  # for fine positioning if needed
 @export var attack_sound: Array[Resource] = []
 
-var _current_damage = base_damage  # (base_damge + get_stat("flat_damage")) * get_stat("damage")
+## Damage one swing deals: (base_damage + flat_damage) * damage.
+##
+## This is a getter rather than a cached field on purpose. `BaseWeapon` is a
+## Resource, so a member initializer runs while the object is still bare -
+## before Godot writes the `.tres` values into it. Seeding the field from
+## `base_damage` there captured the *script default* (5.0) instead of the
+## weapon's configured value, and nothing recomputed it until the first
+## `on_stat_changes` event arrived. That made the first hit of a run deal the
+## default damage while every hit after it dealt the real value.
+##
+## Computing on read also keeps damage correct for a weapon whose holder has no
+## Stats yet: `apply_to` may not have run, and a stat that changes without an
+## event can no longer leave a stale number behind.
+##
+## No leading underscore: every weapon subclass and `melee_weapon_node.gd` read
+## this, and a getter-only member that this class never reads itself is reported
+## as unused.
+var current_damage: float:
+    get:
+        if not is_instance_valid(stats):
+            return base_damage
+        return (base_damage + stats.get_stat("flat_damage")) * stats.get_stat("damage")
+
 var _current_attack_speed
 
 var holder_ref: WeakRef
@@ -122,7 +144,6 @@ func _update_timer_wait() -> void:
 
 func _on_stat_changes(_event) -> void:
     _update_timer_wait()
-    _current_damage = (base_damage + stats.get_stat("flat_damage")) * stats.get_stat("damage")
 
 func aim() -> void:
     if not sprite_node or not is_instance_valid(sprite_node):

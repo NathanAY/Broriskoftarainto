@@ -176,7 +176,7 @@ Pick an archetype first; it fixes how `WB_solo` splits into rate and per-hit dam
 
 - `base_attack_speed ∈ [0.25, 3.0]`. **3.0 is a wall, not advice**: every on-hit rider in `src/Systems/Items/modifiers/` fires per hit, and the ones with a fixed `duration` accumulate stacks at `hits_per_second × duration` (§4.5), so raising the rate raises rider bookkeeping and projectile counts faster than it raises weapon power.
 - **Pellets must never increase single-target damage.** The rule is `Σ per_hit_fraction ≤ 1.0`: 5 pellets at 20% each total exactly `base_damage` into one target and up to 2× when they split across two. At 100% each there is no reason to ever pick the single-shot weapon.
-- **[CURRENT]** `Shotgun.tres` violates this: `shotgun_weapon.gd:16` sets `p.damage = _current_damage / pellet_count * 2`, so Σ = **200%**. A Shotgun (`base_damage 5.0`, rate 0.5) therefore deals `5.0` into one target while its `WB_raw` says `2.5` — double its own budget and still half the Fist's 10.0. **[PROPOSED]** drop the `× 2`.
+- **[CURRENT]** `Shotgun.tres` violates this: `shotgun_weapon.gd:16` sets `p.damage = current_damage / pellet_count * 2`, so Σ = **200%**. A Shotgun (`base_damage 5.0`, rate 0.5) therefore deals `5.0` into one target while its `WB_raw` says `2.5` — double its own budget and still half the Fist's 10.0. **[PROPOSED]** drop the `× 2`.
 
 ### 4.3 Uptime — why range is part of the budget
 
@@ -388,7 +388,7 @@ Two notes from the current catalog:
 - `spinning_orbs_modifier.gd:67` — 2 orbs × 50% of 5.0 = 5.0 damage, independent of your weapon
 - `reflect_projectiles_modifier.gd:31` — `base_damage` stat × multiplier, per incoming hit
 
-On a Pistol (`WB_raw 4.0`), Spinning Orbs is **+125% WB_raw**. On a rifle with `base_damage 28.0` it is +18%. **Any modifier that derives damage from a stat instead of the weapon's damage context is a balance hazard**, because its value is inversely proportional to your build — it gets *stronger* as your weapon gets worse. Either read the weapon's `_current_damage` (as `Chain` does at `chain_modifier.gd:39-43`) or flag the modifier as build-dependent and budget it against the T0 baseline only.
+On a Pistol (`WB_raw 4.0`), Spinning Orbs is **+125% WB_raw**. On a rifle with `base_damage 28.0` it is +18%. **Any modifier that derives damage from a stat instead of the weapon's damage context is a balance hazard**, because its value is inversely proportional to your build — it gets *stronger* as your weapon gets worse. Either read the weapon's `current_damage` (as `Chain` does at `chain_modifier.gd:38`, which carries the already-multiplied hit through in `damage_ctx`) or flag the modifier as build-dependent and budget it against the T0 baseline only.
 
 ### 6.4 New-modifier checklist **[PROPOSED]**
 

@@ -13,8 +13,12 @@ func test_chain_lightnin_modifier() -> void:
     enemy2.global_position = enemy.global_position + Vector2(100, 300)
     test_scene.add_child(enemy2)
     
-    var e1_health: Health = enemy.get_node("Health")
-    var e2_health: Health = enemy2.get_node("Health")
+    # Both targets get the shared health budget rather than the `Stats` default of
+    # 10. A dead enemy plays its death animation and frees its node, so a target
+    # that dies inside the window leaves `health` dangling and reading it stalls
+    # the runner on the debugger prompt - see WeaponTestSupport for the why.
+    var e1_health: Health = WeaponTestSupport.give_enemy_health(enemy)
+    var e2_health: Health = WeaponTestSupport.give_enemy_health(enemy2)
 
     var character: Character = test_scene.get_node("Character")
     
@@ -24,10 +28,15 @@ func test_chain_lightnin_modifier() -> void:
     @warning_ignore("redundant_await")
     await runner.simulate_frames(60 * 3)
 
-    #enemy1 hit by fist twice (2 x 10 damage, fist only - no pistol here)
-    assert_float(e1_health.current_health).is_less(35.0)
-    #enemy2 hit by chain lightning projectile twice (2 x 10 damage)
-    assert_float(e2_health.current_health).is_less(35.0)
+    # Read through `health_left`, which reports -1.0 for a freed node so a dead
+    # target fails as an ordinary assertion instead of a script error. The exact
+    # total is not pinned: how many swings fit in the frame budget, and the
+    # chain's own reach, both decide it.
+    # enemy1 is hit by the fist; enemy2 only by the chained projectile.
+    assert_float(WeaponTestSupport.health_left(e1_health)).override_failure_message(
+        "the enemy died and freed its Health node").is_less(WeaponTestSupport.ENEMY_HEALTH)
+    assert_float(WeaponTestSupport.health_left(e2_health)).override_failure_message(
+        "the enemy died and freed its Health node").is_less(WeaponTestSupport.ENEMY_HEALTH)
     test_scene.free()
 
 

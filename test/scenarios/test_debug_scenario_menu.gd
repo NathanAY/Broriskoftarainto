@@ -13,14 +13,19 @@ extends GdUnitTestSuite
 const MENU_SCENE := "res://test/scenarios/debug_scenario_menu.tscn"
 
 var menu: CanvasLayer
+var saved_multiplier: float
 
 
 func before_test() -> void:
     menu = load(MENU_SCENE).instantiate()
     add_child(menu)
+    # The publish tests write a static that outlives the suite, so a later run
+    # must not start from whatever they last handed over.
+    saved_multiplier = DebugScenarioSetup.pending_monster_multiplier
 
 
 func after_test() -> void:
+    DebugScenarioSetup.pending_monster_multiplier = saved_multiplier
     if is_instance_valid(menu):
         menu.queue_free()
         menu = null
@@ -86,3 +91,45 @@ func test_each_row_button_opens_its_own_scenario() -> void:
 ## the press is refused.
 func test_out_of_range_index_is_refused() -> void:
     assert_str(menu.scene_path_for(menu.SCENARIOS.size())).is_empty()
+
+
+## The slider's own bounds are the contract with `EnemySpawner`: the scenario
+## hands the value straight through, so a wider slider than the spawner accepts
+## would silently clamp at one end and read as a bug in the scenario.
+func test_slider_range_matches_the_spawner_range() -> void:
+    var slider: HSlider = menu.get_node("Control/Center/Menu/MonsterRow/MonsterSlider")
+    assert_float(slider.min_value).is_equal_approx(EnemySpawner.MIN_SPAWN_MULTIPLIER, 0.001)
+    assert_float(slider.max_value).is_equal_approx(EnemySpawner.MAX_SPAWN_MULTIPLIER, 0.001)
+    assert_float(menu.MIN_MONSTER_MULTIPLIER).is_equal_approx(
+        EnemySpawner.MIN_SPAWN_MULTIPLIER, 0.001
+    )
+    assert_float(menu.MAX_MONSTER_MULTIPLIER).is_equal_approx(
+        EnemySpawner.MAX_SPAWN_MULTIPLIER, 0.001
+    )
+
+
+func test_slider_defaults_to_a_normal_run() -> void:
+    assert_float(menu._selected_multiplier()).is_equal_approx(1.0, 0.001)
+
+
+## The picked density has to reach the scenario. The static is process-wide and
+## outlives the test, so every test here sets it rather than relying on a default.
+func test_picked_density_is_handed_over() -> void:
+    var slider: HSlider = menu.get_node("Control/Center/Menu/MonsterRow/MonsterSlider")
+    slider.value = 7.5
+    menu._publish_monster_multiplier()
+    assert_float(DebugScenarioSetup.pending_monster_multiplier).is_equal_approx(7.5, 0.001)
+
+
+func test_density_handed_over_is_clamped_to_the_range() -> void:
+    var slider: HSlider = menu.get_node("Control/Center/Menu/MonsterRow/MonsterSlider")
+    # Set past the slider's own range, which is what a stale value from a
+    # previous run of the picker would look like.
+    slider.set_value_no_signal(100.0)
+    menu._publish_monster_multiplier()
+    assert_float(DebugScenarioSetup.pending_monster_multiplier).is_equal_approx(
+        EnemySpawner.MAX_SPAWN_MULTIPLIER, 0.001
+    )
+
+
+

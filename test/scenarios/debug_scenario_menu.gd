@@ -31,14 +31,22 @@ const SCENARIOS := [
 	},
 ]
 
+## Bounds of the monster-density slider, mirrored by its range in the scene.
+const MIN_MONSTER_MULTIPLIER := 0.1
+const MAX_MONSTER_MULTIPLIER := 20.0
+
 @onready var scenario_list: VBoxContainer = $Control/Center/Menu/ScenarioList
 @onready var back_button: Button = $Control/Center/Menu/BackButton
+@onready var monster_slider: HSlider = $Control/Center/Menu/MonsterRow/MonsterSlider
+@onready var monster_value_label: Label = $Control/Center/Menu/MonsterRow/MonsterValueLabel
 
 
 func _ready() -> void:
 	for index in SCENARIOS.size():
 		scenario_list.add_child(_make_row(index))
 	back_button.pressed.connect(_on_back_pressed)
+	monster_slider.value_changed.connect(_on_monster_slider_changed)
+	_on_monster_slider_changed(monster_slider.value)
 
 
 ## One button plus the line describing it, as a single row so the two stay
@@ -76,11 +84,36 @@ func _on_scenario_pressed(index: int) -> void:
 	if path == "" or not ResourceLoader.exists(path):
 		push_error("Debug scenario scene missing: " + path)
 		return
+	_publish_monster_multiplier()
 	# No global is set here on purpose. The scenario's own `ScenarioSetup` node
 	# writes the loadout into `GlobalGameState` before the character reads it,
 	# and the stage jump into `StageManager`, so the scene file carries the whole
 	# configuration and there is no second place to keep in sync.
 	get_tree().change_scene_to_file(path)
+
+
+## The density the slider currently shows, clamped to the range the spawner
+## accepts. Read back off the slider rather than kept in a field so the label and
+## the handed-off value cannot disagree.
+func _selected_multiplier() -> float:
+	return clampf(
+		monster_slider.value,
+		MIN_MONSTER_MULTIPLIER,
+		MAX_MONSTER_MULTIPLIER
+	)
+
+
+## Hands the picked density to the scenario about to be loaded. A static rather
+## than a node because the scenario scene that reads it is not in the tree yet,
+## and every scenario reads the same value, so the slider is shared instead of
+## being a per-scenario field in `SCENARIOS`. Split out of `_on_scenario_pressed`
+## so the handoff can be checked without changing scene mid-suite.
+func _publish_monster_multiplier() -> void:
+	DebugScenarioSetup.pending_monster_multiplier = _selected_multiplier()
+
+
+func _on_monster_slider_changed(value: float) -> void:
+	monster_value_label.text = "%.1fx" % value
 
 
 func _on_back_pressed() -> void:

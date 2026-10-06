@@ -21,6 +21,7 @@ var saved_character: Variant
 var saved_weapons: Array[String]
 var saved_items: Array[String]
 var saved_scene: Node
+var saved_multiplier: float
 var running_scenario: Node = null
 
 
@@ -30,12 +31,15 @@ func before_test() -> void:
     saved_weapons = GlobalGameState.starting_weapons.duplicate()
     saved_items = GlobalGameState.starting_items.duplicate()
     saved_scene = get_tree().current_scene
+    # Same story for the picker's density: a static that outlives the test.
+    saved_multiplier = DebugScenarioSetup.pending_monster_multiplier
 
 
 func after_test() -> void:
     GlobalGameState.starting_character = saved_character
     GlobalGameState.starting_weapons = saved_weapons
     GlobalGameState.starting_items = saved_items
+    DebugScenarioSetup.pending_monster_multiplier = saved_multiplier
     # Restored before the free: a `Game.tscn` left as `current_scene` would give
     # `StageManager` a node that is on its way out, and the enemies it spawns
     # keep hitting the character for as long as the test takes.
@@ -95,6 +99,48 @@ func test_loop_three_scales_both_spawners() -> void:
     # this catches.
     assert_int(stage_manager.enemy_spawner.target_enemy_count).is_equal(
         stage_manager.enemy_spawner.base_target_enemy_count + 2
+    )
+
+
+## The end of the chain: a density the picker handed over has to have reached the
+## spawner of the running game, and the wave has to be sized for it. Reading the
+## spawner rather than the static is the point - the static being set proves
+## nothing about whether the scenario applied it.
+func test_picked_density_reaches_the_running_spawner() -> void:
+    DebugScenarioSetup.pending_monster_multiplier = 3.0
+    var scenario := await _run_scenario(LOADED_BUILD)
+    var spawner: EnemySpawner = (scenario.get_node("StageManager") as StageManager).enemy_spawner
+
+    assert_float(spawner.spawn_multiplier).is_equal_approx(3.0, 0.001)
+    assert_int(spawner.target_enemy_count).override_failure_message(
+        "the wave was not resized for the picked density"
+    ).is_greater(0)
+
+
+## 1.0 is the picker's default and the shipped look, so the common path must not
+## resize anything: a scenario at the default has to size its wave from
+## `current_loop` alone.
+func test_default_density_leaves_the_shipped_wave_alone() -> void:
+    DebugScenarioSetup.pending_monster_multiplier = 1.0
+    var scenario := await _run_scenario(LOADED_BUILD)
+    var spawner: EnemySpawner = (scenario.get_node("StageManager") as StageManager).enemy_spawner
+
+    assert_int(spawner.target_enemy_count).is_equal(
+        spawner.base_target_enemy_count + spawner.current_loop - 1
+    )
+
+
+## The density is applied after `_apply_start_mode()`, because that can call
+## `start_wave()` and `start_wave()` re-sizes the wave - so loop 3 at a raised
+## density is the case where the two would otherwise overwrite each other.
+func test_density_survives_the_loop_three_stage_jump() -> void:
+    DebugScenarioSetup.pending_monster_multiplier = 2.0
+    var scenario := await _run_scenario(LOOP_THREE)
+    var spawner: EnemySpawner = (scenario.get_node("StageManager") as StageManager).enemy_spawner
+
+    assert_int(spawner.current_loop).is_equal(3)
+    assert_int(spawner.target_enemy_count).is_equal(
+        (spawner.base_target_enemy_count + 2) * 2
     )
 
 

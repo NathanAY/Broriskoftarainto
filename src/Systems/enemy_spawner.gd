@@ -17,6 +17,13 @@ class_name EnemySpawner
 @export var current_loop: int = 1
 @export var spawn_active: bool = true
 
+## Debug knob: scales how many monsters a wave fields, 1.0 being a normal run.
+## `test/scenarios/debug_scenario_menu.gd` offers this range and hands the picked
+## value to a scenario, which calls `set_spawn_multiplier()` on this spawner. The
+## scale is kept here rather than at the call site so a wave can never be half
+## scaled: population, batch and cadence all read it through the same helpers.
+@export_range(0.1, 20.0, 0.1) var spawn_multiplier: float = 1.0
+
 # Group spawning parameters
 @export var group_size = 3  # number of enemies to spawn per group
 @export var group_spawn_radius = 120.0  # radius within which group members spawn around center
@@ -38,6 +45,12 @@ var modifiers: Array = []
 var target_enemy_count: int
 var spawn_timer: Timer = null
 
+## Bounds of the debug multiplier, mirrored by the range on `spawn_multiplier`.
+## `set_spawn_multiplier()` clamps to them so a value from the debug picker
+## cannot push the arena past what `max_alive_enemies` scaling can cover.
+const MIN_SPAWN_MULTIPLIER := 0.1
+const MAX_SPAWN_MULTIPLIER := 20.0
+
 func _ready():
     spawn_timer = Timer.new()
     spawn_timer.wait_time = spawn_interval
@@ -46,21 +59,101 @@ func _ready():
     add_child(spawn_timer)
     spawn_timer.start()
     enemiesNode = get_node("../../Nodes/Enemies")
-    target_enemy_count = base_target_enemy_count
+    target_enemy_count = scaled_target_enemy_count()
     if arena == null:
         arena = get_tree().get_first_node_in_group("arena") as Arena
     for c in get_children():
         if c.has_method("attach_to_enemy"):
             modifiers.append(c)
 
+## Sets the debug multiplier and re-sizes the wave that is already running. The
+## picker hands its value over after `Game.tscn` has booted, so the export alone
+## would arrive too late: `StageManager._ready()` has already called
+## `start_wave()`, and the first tick lands about a second later.
+func set_spawn_multiplier(value: float) -> void:
+    spawn_multiplier = clampf(value, MIN_SPAWN_MULTIPLIER, MAX_SPAWN_MULTIPLIER)
+    target_enemy_count = scaled_target_enemy_count()
+
+
+## How many monsters should be alive in this wave. Floored at one, so a sub-1x
+## multiplier means a trickle rather than an empty arena: `StageManager` only
+## ends a stage once the arena is empty, so a stage that never fields anything
+## would never end.
+func scaled_target_enemy_count() -> int:
+    # `base_target_enemy_count` is an untyped export, so the sum is a Variant and
+    # has to be named before it can be typed.
+    var wave_size: int = base_target_enemy_count + current_loop - 1
+    return maxi(1, roundi(float(wave_size) * spawn_multiplier))
+
+
+## The alive-enemy ceiling, scaled. `max_alive_enemies` is left as the 1.0 value
+## so turning the multiplier up and back down cannot compound, and never below
+## the wave target, or the cap would fight the size the spawner is aiming for.
+func max_alive_for_multiplier() -> int:
+    var cap_at_1x := maxi(max_alive_enemies, scaled_target_enemy_count())
+    return maxi(cap_at_1x, roundi(float(cap_at_1x) * spawn_multiplier))
+
+
+## Monsters one spawned group holds. Floored at one, for the same reason
+## `scaled_target_enemy_count()` is.
+func scaled_group_size() -> int:
+    return maxi(1, roundi(float(group_size) * spawn_multiplier))
+
+
+## How many groups a single tick may add, scaled. Returned as `[lowest, highest]`
+## rather than sampled here, because the pair is also what `spawn_budget()` needs
+## to price a tick. `randi_range` needs a sane pair, so the bounds can only ever
+## be pushed apart, never crossed.
+func scaled_groups_per_tick() -> Array[int]:
+    var lowest := maxi(1, roundi(float(min_groups_per_spawn) * spawn_multiplier))
+    var highest := maxi(lowest, roundi(float(max_groups_per_spawn) * spawn_multiplier))
+    return [lowest, highest]
+
+
+## How many enemies the next tick is allowed to add, or 0 when nothing should.
+##
+## Two caps, and both matter. The first is the scaled batch size, so 0.1x and
+## 20x change how much a tick carries. The second is how far the arena still is
+## short of the wave target, and it is what stops 20x from dumping its whole
+## budget at once: the alive-enemy ceiling is only checked *before* a tick, so a
+## tick is free to overshoot by up to `unscaled_batch` - exactly the overshoot an
+## ordinary spawner already allows, which is also why this returns the shipped
+## batch unchanged at 1.0.
+func spawn_budget() -> int:
+    if enemiesNode == null:
+        return 0
+    if not use_group_spawning:
+        return 1
+    var unscaled_batch: int = group_size * max_groups_per_spawn
+    var scaled_batch := scaled_group_size() * scaled_groups_per_tick()[1]
+    var deficit := maxi(target_enemy_count - enemiesNode.get_child_count(), 0)
+    return mini(scaled_batch, unscaled_batch + deficit)
+
+
+## Spawn cadence under the multiplier. A 20x wave has to reach a much larger
+## population than a 1x one, and a 0.1x wave has to space its single monsters
+## out - without this the two ends of the range differ only in how crowded the
+## arena gets, and every value below 1x would behave identically.
+func scaled_spawn_interval() -> float:
+    return spawn_interval / spawn_multiplier
+
+
+func scaled_min_spawn_wait() -> float:
+    return min_spawn_wait / spawn_multiplier
+
+
+func scaled_max_spawn_wait() -> float:
+    return max_spawn_wait / spawn_multiplier
+
+
 func _on_spawn_timer_timeout():
     if spawn_active:
         var current_enemies := 0
         if enemiesNode != null:
             current_enemies = enemiesNode.get_child_count()
-        if current_enemies >= max_alive_enemies:
+        if current_enemies >= max_alive_for_multiplier():
             # Over cap: skip this tick to save perf / protect weak builds.
-            spawn_timer.wait_time = max_spawn_wait
+            spawn_timer.wait_time = scaled_max_spawn_wait()
             spawn_timer.start()
             return
         if use_group_spawning:
@@ -82,7 +175,9 @@ func _process(_delta: float) -> void:
     if spawn_timer.is_stopped():
         return
     if enemiesNode.get_child_count() == 0:
-        var refill := get_empty_refill_delay()
+        # Divided like `scaled_spawn_interval()`: a 0.1x wave wants the refill
+        # to be *slower*, which is the opposite of what a faster tick would do.
+        var refill := get_empty_refill_delay() / spawn_multiplier
         if spawn_timer.time_left > refill:
             spawn_timer.wait_time = refill
             spawn_timer.start()
@@ -91,8 +186,16 @@ func spawn_enemy_group():
     if not character:
         return
 
-    var groups_to_spawn = randi_range(min_groups_per_spawn, max_groups_per_spawn)
-    for i in range(groups_to_spawn):
+    var budget := spawn_budget()
+    if budget <= 0:
+        return
+
+    var groups_per_tick := randi_range(scaled_groups_per_tick()[0], scaled_groups_per_tick()[1])
+    var group_size_now := scaled_group_size()
+    var spawned := 0
+    for i in range(groups_per_tick):
+        if spawned >= budget:
+            break
         # Choose a center point for this group
         var character_position: Vector2 = character.global_position
         var group_center_angle = randf_range(0, TAU)
@@ -101,7 +204,8 @@ func spawn_enemy_group():
 
         # Spawn enemies within the group
         var reserved: Array = [group_center]
-        for j in range(group_size):
+        var in_this_group := mini(group_size_now, budget - spawned)
+        for j in range(in_this_group):
             # Use a timer to stagger spawns within the group
             var enemy = enemy_scene.instantiate()
             var spawn_position = _pick_spawn_position(func() -> Vector2:
@@ -122,9 +226,12 @@ func spawn_enemy_group():
             enemiesNode.add_child(enemy)
             enemy.set_target_position(character)
 
-            # Stagger spawning within the group
-            if j < group_size - 1:
-                await get_tree().create_timer(group_spawn_interval).timeout
+            # Stagger spawning within the group. Divided like
+            # `scaled_spawn_interval()`, so a 20x wave does not take half a
+            # minute to walk 60 monsters into the arena.
+            spawned += 1
+            if j < in_this_group - 1:
+                await get_tree().create_timer(group_spawn_interval / spawn_multiplier).timeout
 
 func spawn_enemy():
     if not character:
@@ -202,7 +309,7 @@ func _adjust_spawn_rate():
         multiplier = 1.0 + float(target_enemy_count - current_enemies)
     elif current_enemies > target_enemy_count:
         multiplier = max(0.1, float(target_enemy_count) / current_enemies)
-    spawn_timer.wait_time = clampf(spawn_interval / multiplier, min_spawn_wait, max_spawn_wait)
+    spawn_timer.wait_time = clampf(scaled_spawn_interval() / multiplier, scaled_min_spawn_wait(), scaled_max_spawn_wait())
     spawn_timer.start()
 
 ## Loop-scaled empty-arena refill: L1=1.0s, L2=0.85s, L3=0.7s, ... floor 0.3s.
@@ -213,10 +320,13 @@ func get_empty_refill_delay() -> float:
 ## stale long wait or a stopped timer. First tick lands ~spawn_interval (1s).
 func start_wave() -> void:
     spawn_active = true
-    target_enemy_count = base_target_enemy_count + current_loop - 1
+    # Scaled, because a debug multiplier can land either side of this call:
+    # the picker applies one before this node exists, and a scenario can change
+    # one after (which goes through `set_spawn_multiplier()`).
+    target_enemy_count = scaled_target_enemy_count()
     if spawn_timer == null:
         return
-    spawn_timer.wait_time = float(spawn_interval)
+    spawn_timer.wait_time = float(scaled_spawn_interval())
     spawn_timer.start()
 
 func _on_next_stage():

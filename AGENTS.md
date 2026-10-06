@@ -41,8 +41,8 @@ All three GdUnit4 wrappers (`run_tests_gdunit.bat`, `run_tests_gdunit_custom.bat
 ## Keep `.gdunit.log` clean
 Both runners overwrite `.gdunit.log` at the repo root, so it is the complete warning list for the last run. **A green run can still be noisy** — read the log after any run that touched a script, and check the totals rather than only the lines you expected. One hand-written `.tscn` with a missing `uid` once accounted for 58 of the log's 108 warnings, because Godot re-warns on *every* load of that resource.
 
-### Baseline: 6 warnings, 19 errors — all of them expected
-- **All 19 errors are negative tests**: 15 `[EventContracts]` violations and 4 `CharacterUI` / `BuffUI` "no character assigned" guards. They assert that validation *rejects* bad input. Not yours.
+### Baseline: 6 warnings, 20 errors — all of them expected
+- **All 20 errors are negative tests**: 15 `[EventContracts]` violations, 4 `CharacterUI` / `BuffUI` "no character assigned" guards, and `Debug scenario index out of range`. They assert that validation *rejects* bad input. Not yours.
 - **5 of the warnings are guard paths** too: `ShopMenu: No item_factory assigned!`, `Stats node not found under holder`, and three `BaseModifier.attach:` messages.
 - The 6th warning is `ObjectDB instances leaked at exit`.
 

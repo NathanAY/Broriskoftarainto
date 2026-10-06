@@ -22,6 +22,13 @@ enum StartMode {
 	LOOP, ## the enemy stage of `start_loop`, with both spawners already scaled.
 }
 
+## Monster-density multiplier for the run the picker is about to start, read by
+## every scenario as `monster_multiplier`. Static rather than a node, because the
+## picker sets it and the scenario is a *different* scene: there is no shared
+## node to hang it on, and it has to survive the scene change. The picker writes
+## it and is the only writer; a scenario never writes it back.
+static var pending_monster_multiplier: float = 1.0
+
 @export var scenario_title := "Debug scenario"
 ## Must be a real `src/Assets/character/<id>/<Id>.tres`: `CharacterInitializer`
 ## derives the sprite folder from this path, so a synthetic resource loads with
@@ -58,6 +65,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 	_equip_loadout()
 	_apply_start_mode()
+	_apply_monster_multiplier()
 	_on_stage_applied()
 
 
@@ -142,11 +150,27 @@ func _apply_start_mode() -> void:
 			stage_manager.go_to_stage(1)
 
 
+## Applies the picker's monster density. Last of the three, because
+## `_apply_start_mode()` can call `start_wave()`, which re-sizes the wave from
+## `current_loop` and would drop a multiplier set before it.
+func _apply_monster_multiplier() -> void:
+	var stage_manager := get_node_or_null("../StageManager") as StageManager
+	if stage_manager == null:
+		push_warning("DebugScenarioSetup: no StageManager next to '%s'." % scenario_title)
+		return
+	if pending_monster_multiplier == 1.0:
+		return
+	stage_manager.enemy_spawner.set_spawn_multiplier(pending_monster_multiplier)
+
+
 func _on_stage_applied() -> void:
 	var stage_manager := get_node_or_null("../StageManager") as StageManager
 	var stage := stage_manager.current_stage if stage_manager != null else 0
 	var loop_number := stage_manager.current_loop if stage_manager != null else 0
 	print(
-		"Debug scenario '%s': stage %d, loop %d, %d weapons, stacked build: %s"
-		% [scenario_title, stage, loop_number, weapon_names.size(), str(stacked_build)]
+		"Debug scenario '%s': stage %d, loop %d, %d weapons, stacked build: %s, monsters %.1fx"
+		% [
+			scenario_title, stage, loop_number, weapon_names.size(),
+			str(stacked_build), pending_monster_multiplier,
+		]
 	)

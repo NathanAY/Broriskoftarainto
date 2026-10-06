@@ -240,7 +240,7 @@ Three more things about this modifier, all **[CURRENT]**:
 
 - **`max_stacks 500` never binds** in normal play (9 stacks at 3 attacks/s). It is not a safety limit, it is dead configuration that reads like one.
 - **`damage_per_tick` is set once and never refreshed.** `poison_effect.gd:20` assigns it in `start_effect`, and later hits only call `add_poison()`. Swapping to a bigger weapon mid-fight does not raise an already-applied poison, and `poison_modifier.gd:39`'s per-stack bonus is likewise only read at application time.
-- **All poison sources on a target share one `PoisonEffect`** (`poison_modifier.gd:34-44` looks it up by name on the target's `Health`). A poisoned Knife and a poisoned Pistol therefore **add their stack counts together but both tick at whichever weapon applied poison first.** That is a correctness bug, not just a balance one.
+- **All poison sources on a target share one `PoisonEffect`** (`poison_modifier.gd:34-44` looks it up by name on the target's `Health`). A poisoned Death Aura and a poisoned Pistol therefore **add their stack counts together but both tick at whichever weapon applied poison first.** That is a correctness bug, not just a balance one.
 
 The same `hits_per_second × duration` shape applies to Bomb (`bomb_on_hit_modifier.gd:8`, 30% of hit damage but attached per hit and detonating after 3 s) and to any future stacking DoT.
 

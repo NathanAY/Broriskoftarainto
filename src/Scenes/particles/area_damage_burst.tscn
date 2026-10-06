@@ -1,0 +1,85 @@
+[gd_scene format=3 uid="uid://cgotfof2tp4yx"]
+
+[ext_resource type="Script" uid="uid://dqtfahm222s35" path="res://src/Scenes/particles/area_damage_burst.gd" id="1_burst"]
+[ext_resource type="Texture2D" uid="uid://c1k1ivpx4fwd" path="res://src/Assets/particles/particle_1.png" id="2_shard"]
+[ext_resource type="Texture2D" uid="uid://cfbq7m8yyv3lh" path="res://src/Assets/particles/particle_20.png" id="3_star"]
+
+[sub_resource type="Gradient" id="Gradient_flash"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.921569, 1, 0.898039, 0.647059, 0.588235, 0.470588, 0.470588, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_flash"]
+gradient = SubResource("Gradient_flash")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_flash"]
+particle_flag_disable_z = true
+angle_min = 1.07288e-05
+angle_max = 180.0
+direction = Vector3(0, 0, 0)
+spread = 180.0
+initial_velocity_min = 60.0
+initial_velocity_max = 260.0
+gravity = Vector3(0, 0, 0)
+damping_min = 300.0
+damping_max = 520.0
+scale_min = 0.5
+scale_max = 1.1
+color_ramp = SubResource("GradientTexture1D_flash")
+
+[sub_resource type="Gradient" id="Gradient_rim"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.898039, 1, 0.898039, 0.784314, 0.443137, 0.784314, 0.443137, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_rim"]
+gradient = SubResource("Gradient_rim")
+
+[sub_resource type="Curve" id="Curve_rim"]
+_data = [Vector2(0, 0.55), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+metadata/_snap_enabled = true
+
+[sub_resource type="CurveTexture" id="CurveTexture_rim"]
+curve = SubResource("Curve_rim")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_rim"]
+particle_flag_disable_z = true
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 0.0
+emission_ring_radius = 1.0
+emission_ring_inner_radius = 0.55
+emission_ring_cone_angle = 90.0
+angle_min = 1.07288e-05
+angle_max = 180.0
+direction = Vector3(0, 0, 0)
+spread = 180.0
+initial_velocity_min = 80.0
+initial_velocity_max = 320.0
+gravity = Vector3(0, 0, 0)
+damping_min = 40.0
+damping_max = 120.0
+scale_min = 0.3
+scale_max = 0.55
+scale_curve = SubResource("CurveTexture_rim")
+color_ramp = SubResource("GradientTexture1D_rim")
+
+[node name="AreaDamageBurst" type="Node2D" unique_id=1895964990]
+script = ExtResource("1_burst")
+
+[node name="Flash" type="GPUParticles2D" parent="." unique_id=1962060675]
+emitting = false
+amount = 10
+texture = ExtResource("3_star")
+lifetime = 0.32
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_flash")
+
+[node name="Rim" type="GPUParticles2D" parent="." unique_id=1739071285]
+emitting = false
+amount = 64
+texture = ExtResource("2_shard")
+lifetime = 0.6
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_rim")

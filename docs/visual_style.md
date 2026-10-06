@@ -231,7 +231,7 @@ The icon templates above no longer ask for a **cel-shaded highlight**. That phra
 - Only **2 of 25** modifier scenes have a matching icon — `BombOnHitModifier` and `SpinningOrbsModifier`. The other 23 all fall back to `_default.png`.
 - **9 icons in `src/Assets/modifiers/` are orphaned**, because their names do not match any scene basename: `armormode` (a typo for `armormodifier`), `coil_icon`, `dynamite_icon`, `fairy_icon`, `glass_cannon_icon`, `rocket`, `shuriken`, `torch`. Either rename them to the lowercase scene basename or delete them.
 - `Thorns.tres` has no `sprite` at all.
-- `Knife.tres` points at `circular_saw.png`, which does not exist.
+- `DeathAura.tres` borrows `circular_saw.png`, which suits the aura behaviour but is not a Death Aura icon of its own.
 - No custom font. Everything uses the Godot built-in. Brotato used `Anybody-Medium.ttf` if a font is ever needed.
 - No shaders anywhere in the project.
 - The three raw `parallax_*.jpg` files in `src/Assets/menu/` are the unprocessed Bing downloads, staged rather than shipped. Nothing references them, and they should be deleted once the art is backed up off this machine — but they are currently the only copy of the accepted artwork, and `test/tools/parallax_postprocess.gd` cannot be re-run without them.

@@ -1,15 +1,47 @@
 # res://src/scripts/weapons/AreaWeapon.gd
+#
+# A weapon that damages *everything* in range rather than one picked target.
+#
+# The behaviour is entirely the target selector's: `_on_timeout` in
+# `BaseWeapon` hands `try_shoot` whatever `target_selector.find_targets()`
+# returned, and with `AllTargetsInRangeSelector` that is every `damageable` node
+# within `weapon_range` of this weapon's own `sprite_node`. Combined with the
+# sprite orbiting the holder at `weapon_orbit_radius`, that reads as an aura
+# centred on the wielder - there is no impact point and no chosen target.
+#
+# Because the sprite is the origin of that measurement, the burst visual is
+# placed there too, so what the player sees is exactly what was damaged.
 extends BaseWeapon
 class_name AreaWeapon
+
+const BURST_SCENE := preload("res://src/Scenes/particles/area_damage_burst.tscn")
 
 func try_shoot(targets: Array[Node]) -> void:
     var holder = get_holder()
     if not holder: return
-#    TODO: implement
+    _spawn_burst(holder)
     for t in targets:
         if t.has_node("Health"):
             do_damage(t)
-                
+
+## The pulse visual for this tick.
+##
+## Parented to the holder rather than to the weapon, because a weapon is a
+## `Resource` and has no place in the tree; the holder is also what
+## `remove_from` frees, so nothing is left behind when the weapon is unequipped.
+## `local_coords` is off on both emitters, so the shards stay where they were
+## thrown instead of being dragged along by a moving holder.
+func _spawn_burst(holder: Node) -> void:
+    var burst: AreaDamageBurst = BURST_SCENE.instantiate()
+    burst.radius = weapon_range
+    holder.add_child(burst)
+    # After parenting, not before: an unparented Node2D has no parent transform
+    # to compose, so writing `global_position` first would store the sprite's
+    # world position as a *local* one and land the burst one holder-offset away.
+    # `_ready` reads `radius`, so that has to be set before `add_child`.
+    if sprite_node and is_instance_valid(sprite_node):
+        burst.global_position = sprite_node.global_position
+
 func do_damage(body):
     var ctx = DamageContext.new()
     ctx.source = get_holder()
@@ -28,4 +60,3 @@ func do_damage(body):
         event_manager.emit_event("on_hit", {"weapon": self, "body": body, "damage_context": ctx})
         if bodyHealth.current_health <= 0:
             event_manager.emit_event("on_kill", {"weapon": self, "body": body, "damage_context": ctx})
-    

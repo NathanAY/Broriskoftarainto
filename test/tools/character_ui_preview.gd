@@ -12,7 +12,7 @@ const SAMPLE_ITEMS := [
 	"ArmorPlate", "AttackSpeedItem", "BootsOfSpeed", "CritGlass", "Knockback",
 	"LifeDrain", "PlusDamageItem", "PoisonHit", "RegenPassive", "ProjSpeed",
 ]
-const SAMPLE_WEAPONS := ["Fist", "Pistol", "Shotgun", "Knife", "Thorns"]
+const SAMPLE_WEAPONS := ["Fist", "Pistol", "Shotgun", "DeathAura", "Thorns"]
 
 
 func _ready() -> void:

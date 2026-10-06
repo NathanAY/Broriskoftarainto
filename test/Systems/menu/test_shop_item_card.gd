@@ -112,7 +112,7 @@ func test_collected_items_and_weapons_use_the_character_menu_card() -> void:
         load("res://src/Resources/weapons/Fist.tres"),
         load("res://src/Resources/weapons/Pistol.tres"),
         load("res://src/Resources/weapons/Shotgun.tres"),
-        load("res://src/Resources/weapons/Knife.tres"),
+        load("res://src/Resources/weapons/DeathAura.tres"),
         load("res://src/Resources/weapons/Thorns.tres"),
     ]
     character.get_node("WeaponHolder").weapons.append_array(weapons)

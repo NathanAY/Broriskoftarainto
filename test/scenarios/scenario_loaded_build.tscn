@@ -9,6 +9,6 @@
 script = ExtResource("2_setup")
 scenario_title = "Loaded build"
 character_path = "res://src/Assets/character/ranger/Ranger.tres"
-weapon_names = Array[String](["Fist", "Pistol", "Knife", "Shotgun"])
+weapon_names = Array[String](["Fist", "Pistol", "DeathAura", "Shotgun"])
 item_names = Array[String](["CritGlass", "BootsOfSpeed"])
 stacked_build = true

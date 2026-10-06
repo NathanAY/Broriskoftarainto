@@ -1,11 +1,12 @@
 # GdUnit tests for weapon built-in modifiers (BaseWeapon.modifiers).
-# Covers: scoping (a knife's poison never fires on a fist's hits and vice versa),
-# fist knockback, knife poison, pistol built-in pierce, and detach cleanup.
+# Covers: scoping (the Death Aura's poison never fires on a fist's hits and vice
+# versa), fist knockback, Death Aura poison, pistol built-in pierce, and detach
+# cleanup.
 class_name WeaponBuiltinModifiersTest
 extends GdUnitTestSuite
 
 const FIST := "res://src/Resources/weapons/Fist.tres"
-const KNIFE := "res://src/Resources/weapons/Knife.tres"
+const DEATH_AURA := "res://src/Resources/weapons/DeathAura.tres"
 const PISTOL := "res://src/Resources/weapons/Pistol.tres"
 
 const KNOCKBACK_SCRIPT := "res://src/Systems/Items/modifiers/knockback_modifier.gd"
@@ -26,7 +27,7 @@ func test_bound_poison_only_fires_on_its_weapon() -> void:
 
     var em: EventManager = character.get_node("EventManager")
     var poison: BaseModifier = preload(POISON_SCRIPT).new()
-    poison.bound_weapon = load(KNIFE)
+    poison.bound_weapon = load(DEATH_AURA)
     poison.poison_chance = 1.0
     character.add_child(poison)
     poison.attachEventManager(em)
@@ -66,7 +67,7 @@ func test_bound_knockback_only_fires_on_its_weapon() -> void:
     character.add_child(knockback)
     knockback.attachEventManager(em)
 
-    var other_weapon: BaseWeapon = load(KNIFE).duplicate(true)
+    var other_weapon: BaseWeapon = load(DEATH_AURA).duplicate(true)
 
     var ctx := DamageContext.new()
     ctx.source = character
@@ -84,7 +85,7 @@ func test_bound_knockback_only_fires_on_its_weapon() -> void:
     test_scene.free()
 
 
-func test_knife_builtin_poison_applied() -> void:
+func test_death_aura_builtin_poison_applied() -> void:
     var runner := scene_runner("res://test/TestScene.tscn")
     var test_scene := runner.scene()
     runner.set_time_factor(5)
@@ -97,11 +98,11 @@ func test_knife_builtin_poison_applied() -> void:
     for weapon in character.weapon_holder.weapons.duplicate():
         character.weapon_holder.remove_weapon(weapon)
 
-    var knife: BaseWeapon = load(KNIFE).duplicate(true)
-    var poison_cfg: Dictionary = (knife.modifiers as Dictionary)["poison"]
+    var aura: BaseWeapon = load(DEATH_AURA).duplicate(true)
+    var poison_cfg: Dictionary = (aura.modifiers as Dictionary)["poison"]
     poison_cfg["chance"] = 1.0
     poison_cfg["tick_interval"] = 0.25
-    character.weapon_holder.add_weapon(knife)
+    character.weapon_holder.add_weapon(aura)
 
     # plenty of headroom so fast poison ticks cannot kill the enemy mid-test
     e_health.max_health = 200.0
@@ -110,11 +111,11 @@ func test_knife_builtin_poison_applied() -> void:
     @warning_ignore("redundant_await")
     await runner.simulate_frames(60 * 2)
 
-    # the built-in poison modifier node is bound to the knife
+    # the built-in poison modifier node is bound to the Death Aura
     assert_that(character.weapon_holder.weapons[0].bound_effect_nodes.size()).is_equal(1)
     # enemy got poisoned (PoisonEffect lives on its Health node)
     assert_that(e_health.get_node_or_null("PoisonEffect")).is_not_null()
-    # 0.25s poison ticks plus the knife hit deal far more than the 5-damage hit
+    # 0.25s poison ticks plus the aura hit deal far more than the 5-damage hit
     assert_float(e_health.current_health).is_less(195.0)
 
     test_scene.free()

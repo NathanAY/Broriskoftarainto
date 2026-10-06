@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="AreaWeapon" format=3 uid="uid://cl8on386uk6rp"]
+[gd_resource type="Resource" script_class="AreaWeapon" format=3 uid="uid://bwshibtm7w7qw"]
 
 [ext_resource type="Script" uid="uid://btqm0gae3kpiu" path="res://src/Systems/weapon/area_weapon.gd" id="1_363sm"]
 [ext_resource type="Resource" uid="uid://88gqpdee82ou" path="res://src/Resources/weapons/aim/all.tres" id="2_jyyv4"]
@@ -6,8 +6,8 @@
 
 [resource]
 script = ExtResource("1_363sm")
-name = "Knife"
-description = "Knife"
+name = "DeathAura"
+description = "Area weapon"
 modifiers = {
 "poison": {
 "chance": 0.5,

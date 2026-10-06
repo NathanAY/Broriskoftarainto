@@ -8,7 +8,7 @@ const SAMPLE_ITEMS := [
 	"ArmorPlate", "CritGlass", "Knockback", "LifeDrain", "PlusDamageItem",
 	"PoisonHit", "ProjSpeed", "RegenPassive",
 ]
-const SAMPLE_WEAPONS := ["Fist", "Pistol", "Shotgun", "Knife", "Thorns"]
+const SAMPLE_WEAPONS := ["Fist", "Pistol", "Shotgun", "DeathAura", "Thorns"]
 
 ## The offer row is only 4 cards wide, so the pool has to be small enough that
 ## the two hand-built polarity items are guaranteed to appear alongside a plain

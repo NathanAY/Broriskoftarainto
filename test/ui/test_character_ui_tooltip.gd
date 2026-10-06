@@ -575,7 +575,7 @@ func test_character_ui_weapons_use_the_same_card_as_the_items() -> void:
         load("res://src/Resources/weapons/Fist.tres"),
         load("res://src/Resources/weapons/Pistol.tres"),
         load("res://src/Resources/weapons/Shotgun.tres"),
-        load("res://src/Resources/weapons/Knife.tres"),
+        load("res://src/Resources/weapons/DeathAura.tres"),
         load("res://src/Resources/weapons/Fist.tres"),
         load("res://src/Resources/weapons/Thorns.tres"),
     ]

@@ -5,6 +5,7 @@ extends GdUnitTestSuite
 const CHARACTER_UI_SCENE := "res://src/ui/CharacterUI.tscn"
 const SHOP_SCENE := "res://src/Scenes/menu/ShopMenu.tscn"
 const PISTOL_WEAPON := "res://src/Resources/weapons/Pistol.tres"
+const DEATH_AURA := "res://src/Resources/weapons/DeathAura.tres"
 const PLUS_DAMAGE_ITEM := "res://src/Resources/items/PlusDamageItem.tres"
 const BUFF_SCENE := "res://src/Systems/Items/Buffs/buff.tscn"
 const DEBUFF_SCENE := "res://src/Systems/Items/Buffs/DebuffSource.tscn"
@@ -44,7 +45,24 @@ func test_weapon_tooltip_lines() -> void:
     # built-in modifiers declared on the pistol show as extra lines
     assert_that(lines).contains("pierce: 1")
     assert_that(lines).contains("knockback: 120.0")
-    assert_int(lines.size()).is_equal(6)
+    assert_that(lines).contains("description: Pistol")
+    assert_int(lines.size()).is_equal(7)
+
+
+func test_area_weapon_tooltip_lines_include_description() -> void:
+    var aura: BaseWeapon = load(DEATH_AURA)
+    var lines: PackedStringArray = ItemTooltip.tooltip_lines(aura)
+    assert_that(lines).contains("name: DeathAura")
+    assert_that(lines).contains("description: Area weapon. Radius is 50% of weapon range")
+
+
+func test_area_weapon_card_rows_include_description() -> void:
+    var aura: BaseWeapon = load(DEATH_AURA)
+    var rows: Array = ItemTooltip.weapon_card_rows(aura)
+    var texts: Array[String] = []
+    for row in rows:
+        texts.append(row.text)
+    assert_that(texts).contains("Area weapon. Radius is 50% of weapon range")
 
 
 func test_item_tooltip_lines() -> void:

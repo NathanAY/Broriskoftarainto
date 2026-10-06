@@ -104,6 +104,12 @@ func test_death_aura_builtin_poison_applied() -> void:
     poison_cfg["tick_interval"] = 0.25
     character.weapon_holder.add_weapon(aura)
 
+    # Well inside the aura's radius. `TestScene.tscn` leaves the enemy 200 units
+    # from the character, which is exactly half of `weapon_range`, so the sprite
+    # orbiting at `weapon_orbit_radius` would carry the measured distance past
+    # the edge on part of its orbit and the poison would only land some ticks.
+    enemy.global_position = character.global_position + Vector2(80.0, 0.0)
+
     # plenty of headroom so fast poison ticks cannot kill the enemy mid-test
     e_health.max_health = 200.0
     e_health.current_health = 200.0

@@ -48,6 +48,9 @@ static func tooltip_lines(resource: Resource) -> PackedStringArray:
         lines.append("damage: " + str(resource.base_damage))
         lines.append("range: " + str(resource.weapon_range))
         lines.append("attack speed: " + str(resource.base_attack_speed))
+        var desc := str(resource.description).strip_edges()
+        if not desc.is_empty():
+            lines.append("description: " + desc)
         for line in WeaponBuiltinEffects.builtin_tooltip_lines(resource):
             lines.append(line)
         return lines
@@ -102,6 +105,12 @@ static func weapon_card_rows(weapon: BaseWeapon) -> Array:
     _append_weapon_row(rows, "Damage", str(weapon.base_damage))
     _append_weapon_row(rows, "Range", str(weapon.weapon_range))
     _append_weapon_row(rows, "Attack Speed", str(weapon.base_attack_speed))
+    var desc := str(weapon.description).strip_edges()
+    if not desc.is_empty():
+        var flavor := ItemCardRow.new()
+        flavor.kind = ItemCardRow.Kind.FLAVOR
+        flavor.text = desc
+        rows.append(flavor)
     for line in WeaponBuiltinEffects.builtin_tooltip_lines(weapon):
         var split := _split_key_value(line)
         _append_weapon_row(rows, humanize_effect_name(split[0]), split[1])

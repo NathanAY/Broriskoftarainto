@@ -46,10 +46,25 @@ func _apply_window_mode():
     else:
         DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
         DisplayServer.window_set_size(mode)
-        var screen_size = DisplayServer.screen_get_size(0)
-        var new_pos = (screen_size - mode) / 2
-        DisplayServer.window_set_position(Vector2i(new_pos.x, new_pos.y))
+        # Center on the screen the window already sits on. Centering on
+        # screen_get_size(0) instead used the primary monitor and dropped the
+        # screen's position offset, so every scene change that rebuilds this
+        # menu (Main.tscn, PauseMenu.tscn) teleported the window to monitor 1.
+        var screen_id := DisplayServer.window_get_current_screen()
+        var screen_rect := Rect2i(
+            DisplayServer.screen_get_position(screen_id),
+            DisplayServer.screen_get_size(screen_id)
+        )
+        DisplayServer.window_set_position(centered_in_screen_rect(mode, screen_rect))
         window_button.text = str(mode.x) + "x" + str(mode.y)
+
+
+## Top-left position that centers `window_size` inside `screen_rect`.
+## Takes the rect rather than a screen id so it stays free of DisplayServer and
+## can be tested against any monitor layout, including an offset one.
+static func centered_in_screen_rect(window_size: Vector2i, screen_rect: Rect2i) -> Vector2i:
+    var slack := screen_rect.size - window_size
+    return screen_rect.position + Vector2i(int(slack.x / 2.0), int(slack.y / 2.0))
 
 func _apply_show_stats():
     var ui_root: Node = get_parent().get_parent()

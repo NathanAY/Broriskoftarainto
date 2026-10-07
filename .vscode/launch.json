@@ -2,6 +2,20 @@
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    //
+    // "additional_options": "--screen 1"
+    // --screen N: the Godot editor computes the game window's screen and
+    // position itself (Editor Settings > Run > Window Placement) and passes
+    // them as --screen / --position. The godot-vscode extension does not do
+    // that, so without --screen Godot falls back to the primary monitor.
+    // Screen 0 is always the primary monitor, so 1 is the other one. Use
+    // --position <x>,<y> instead for an exact placement.
+    //
+    // There is deliberately no --always-on-top here. That flag sets a
+    // persistent topmost window style, so the game would float above every
+    // other app for the whole run rather than just opening in front. Coming to
+    // the front on launch is handled by the WindowFocus autoload instead, which
+    // does it once via DisplayServer.window_move_to_foreground().
     "version": "0.2.0",
     "configurations": [
                 {
@@ -9,30 +23,35 @@
             "type": "godot",
             "request": "launch",
             "scene": "src/Scenes/menu/Main.tscn",
+            "additional_options": "--screen 1"
         },
         {
             "name": "TestScene",
             "type": "godot",
             "request": "launch",
             "scene": "test/TestScene.tscn",
+            "additional_options": "--screen 1"
         },
         {
             "name": "TestGame",
             "type": "godot",
             "request": "launch",
             "scene": "src/Scenes/TestGame.tscn",
+            "additional_options": "--screen 1"
         },
         {
             "name": "Game",
             "type": "godot",
             "request": "launch",
             "scene": "src/Scenes/Game.tscn",
+            "additional_options": "--screen 1"
         },
         {
             "name": "TestShopStage",
             "type": "godot",
             "request": "launch",
             "scene": "test/TestShopStage.tscn",
+            "additional_options": "--screen 1"
         }
     ]
 }

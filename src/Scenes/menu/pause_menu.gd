@@ -17,13 +17,6 @@ const MAIN_MENU_SCENE_PATH := "res://src/Scenes/menu/Main.tscn"
 var configure_panel_inst = null
 var configure_menu_scene: PackedScene = null
 
-var window_modes := [
-    Vector2i(1280, 720),
-    Vector2i(1920, 1080),
-    "fullscreen"
-]
-var current_index := 0
-
 func _ready():
     resume_button.pressed.connect(_on_resume_pressed)
     restart_button.pressed.connect(_on_restart_pressed)

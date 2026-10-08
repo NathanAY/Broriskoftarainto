@@ -30,6 +30,7 @@ SoundManager="*res://src/Scripts/autoload/sound_manager.gd"
 GlobalGameState="*res://src/Scripts/autoload/global_game_state.gd"
 MusicManager="*res://src/Scripts/autoload/music_manager.gd"
 WindowFocus="*res://src/Scripts/autoload/window_focus.gd"
+GameSettings="*res://src/Scripts/autoload/game_settings.gd"
 MCPRuntimeProbe="*uid://bsg12huaf1u5i"
 
 [display]

@@ -162,3 +162,23 @@ func test_options_button_shows_options_menu() -> void:
     options_menu._on_back_pressed()
     assert_bool(options_menu.visible).is_false()
     assert_bool(main_menu.get_node("Control").visible).is_true()
+
+
+## `visible` on the OptionsMenu CanvasLayer only flips the layer's own flag; it
+## says nothing about whether the Controls underneath it end up on screen. That
+## gap is what let the options menu ship broken - it was "visible", laid out at
+## a sensible rect, and still drew nothing. The layering regression lives in
+## test_options_menu_layering.gd; this pins the tree side of the same state so
+## the two failures cannot be confused for each other.
+func test_options_menu_contents_are_visible_in_the_tree_once_opened() -> void:
+    main_menu._on_options_pressed()
+    var options_menu: CanvasLayer = main_menu.get_node("OptionsMenu")
+    var options_root: Control = options_menu.get_node("Control")
+    assert_bool(options_root.is_visible_in_tree()).override_failure_message(
+        "the options root Control is not visible in the tree, so nothing is drawn"
+    ).is_true()
+    var options_button: Button = options_menu.get_node("Control/VBoxContainer/WindowButton")
+    assert_bool(options_button.is_visible_in_tree()).is_true()
+    assert_float(options_button.get_global_rect().size.x).override_failure_message(
+        "the options button has no width, so the menu laid out to nothing"
+    ).is_greater(0.0)

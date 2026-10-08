@@ -5,6 +5,7 @@
 
 [node name="OptionsMenu" type="CanvasLayer" unique_id=854644811]
 process_mode = 3
+layer = 2
 script = ExtResource("1_jrbyj")
 
 [node name="Control" type="Control" parent="." unique_id=1354663216]

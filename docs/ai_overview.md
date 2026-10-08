@@ -35,6 +35,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | `items.md` | The `Item` resource, `ItemHolder`, `ItemBuilder`, pricing |
 | `item_factory.md` | Procedural item generation, the gift/curse roll, `drop_pool` |
 | `modifiers.md` | Effects (the Node behaviours items attach), the `BaseModifier` contract, the full catalog |
+| `options.md` | The options panel: window mode, volumes, show-stats, and why the values live in an autoload rather than on the menu |
 | `player.md` | The runtime player entity and its scene |
 | `spawners.md` | `enemy_spawner.gd`, `boss_spawner.gd`, spawn pacing |
 | `stage_manager.md` | Wave → boss → shop orchestration and loop progression |
@@ -65,7 +66,7 @@ Implementation logs for shipped work. Kept for provenance, not current truth, an
 | Spawners | `src/Systems/enemy_spawner.gd`, `src/Systems/boss_spawner.gd` |
 | Stage flow | `src/Scripts/stage_manager.gd` |
 | UI & shop | `src/Scenes/menu/`, `src/ui/`, `src/Systems/ShopPortal.tscn` |
-| Autoloads | `src/Scripts/autoload/` — `GlobalGameState`, `SoundManager`, `MusicManager` |
+| Autoloads | `src/Scripts/autoload/` — `GlobalGameState`, `SoundManager`, `MusicManager`, `GameSettings` |
 
 ## Vocabulary that trips people up
 

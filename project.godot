@@ -36,6 +36,7 @@ MCPRuntimeProbe="*uid://bsg12huaf1u5i"
 
 window/size/viewport_width=1552
 window/size/viewport_height=861
+window/subwindows/embed_subwindows=false
 
 [dotnet]
 

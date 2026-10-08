@@ -3,75 +3,22 @@
 [ext_resource type="Script" uid="uid://21ma2bqbx2ju" path="res://src/Scenes/menu/main_menu.gd" id="1_main"]
 [ext_resource type="PackedScene" uid="uid://6mpb7db144uh" path="res://src/Scenes/menu/OptionsMenu.tscn" id="2_opts"]
 [ext_resource type="Script" uid="uid://c6bybvbcilgad" path="res://src/ui/menu_button.gd" id="3_menu_button"]
-[ext_resource type="Script" uid="uid://crkb1xmg73fol" path="res://src/ui/menu_parallax_layer.gd" id="4_parallax"]
 [ext_resource type="Texture2D" uid="uid://bueyvwuu4yg4a" path="res://src/Assets/menu/parallax_far.png" id="5_far_art"]
-[ext_resource type="Texture2D" uid="uid://ua3vmufexe05" path="res://src/Assets/menu/parallax_mid.png" id="6_mid_art"]
-[ext_resource type="Texture2D" uid="uid://bnyy0nd478c16" path="res://src/Assets/menu/parallax_near.png" id="7_near_art"]
 
 [node name="Main" type="CanvasLayer" unique_id=2117418476]
 script = ExtResource("1_main")
 
-[node name="FarLayer" type="Control" parent="." unique_id=1059820278]
+[node name="Background" type="TextureRect" parent="." unique_id=1059820278]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("4_parallax")
-travel = 24.0
-sway_period = 14.0
-mouse_travel = 8.0
-
-[node name="Art" type="TextureRect" parent="FarLayer" unique_id=1970894158]
-layout_mode = 1
-offset_right = 1616.0
-offset_bottom = 832.0
 mouse_filter = 2
 texture = ExtResource("5_far_art")
 expand_mode = 1
-
-[node name="MidLayer" type="Control" parent="." unique_id=621559030]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("4_parallax")
-sway_phase = 0.35
-
-[node name="Art" type="TextureRect" parent="MidLayer" unique_id=534232545]
-layout_mode = 1
-offset_right = 1676.0
-offset_bottom = 832.0
-mouse_filter = 2
-texture = ExtResource("6_mid_art")
-expand_mode = 1
-
-[node name="NearLayer" type="Control" parent="." unique_id=458361223]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("4_parallax")
-travel = 84.0
-sway_period = 7.0
-sway_phase = 0.7
-mouse_travel = 22.0
-
-[node name="Art" type="TextureRect" parent="NearLayer" unique_id=1303975327]
-layout_mode = 1
-offset_right = 1764.0
-offset_bottom = 832.0
-mouse_filter = 2
-texture = ExtResource("7_near_art")
-expand_mode = 1
+stretch_mode = 6
 
 [node name="Control" type="Control" parent="." unique_id=767722060]
 layout_mode = 3

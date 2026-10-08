@@ -56,18 +56,9 @@ Every generated PNG must satisfy all of these or it will not load, or will rende
 | Character body | `src/Assets/character/potato.png` | ~100x100 | in-world, shared by every character |
 | Character face | `src/Assets/character/<id>/<id>_eyes.png` / `<id>_mouth.png` | 150x150 | overlaid on the shared body sprite |
 | Character icon | `src/Assets/character/<id>/<id>_icon.png` | 96x96 | 64x88 card |
-| Menu background layer | `src/Assets/menu/parallax_<far\|mid\|near>.png` | 1616x832, 1676x832, 1764x832 | full-bleed, cover-fitted and swayed by `src/ui/menu_parallax_layer.gd` |
+| Menu background | `src/Assets/menu/parallax_far.png` | 1564x1042 | full-bleed, cover-fitted, static |
 
-The three menu background layers are a different animal from everything else here, and the difference is not cosmetic:
-
-- **They are not square, and not one canvas either.** Each is wider than the 1552px viewport by twice its layer's horizontal travel, because the layer slides sideways and art fitted to the bare window would uncover a gap on the first pixel of sway. The far layer needs 32px of extra width, mid 62px, near 106px.
-- **They are generated at `3:2` and post-processed**, not `1:1`. See the template below.
-- **Two of the three are keyed, not cut out.** The far layer is opaque and needs no transparency at all. Mid and near need a transparent margin on the left and right, which is what lets them slide without showing a hard edge.
-- **They carry a shared style block verbatim across all three prompts.** Change it once and all three change, which is the only way three separately generated images read as one scene.
-
-The width figures are asserted against the shipped PNGs by `test/Systems/menu/test_menu_parallax.gd`, and are derived from the `travel` and `mouse_travel` exports in `src/Scenes/menu/Main.tscn`. Change a layer's travel and its art has to be rebuilt, or the sway will show a gap.
-
-The build is a script, not a manual step — `test/tools/parallax_postprocess.gd`, which keys white to alpha, grows each row by modal fill, pads the transparent overscan, and exports the PNGs.
+The menu background is a single static image that covers the entire window. It is generated at `3:2` and post-processed to the exact canvas size needed. The background is now a plain `TextureRect` with `expand_mode = 1` and `stretch_mode = 1` (scale to fill).
 
 The two binding rules:
 
@@ -345,7 +336,7 @@ The far layer is the exception to the transparent-margin rule: it is the backdro
 
 #### Far layer — opaque backdrop
 
-The one layer with a fully written prompt rather than a template. Generated at `3:2`, opaque, canvas at least 1616px wide.
+The one layer with a fully written prompt rather than a template. Generated at `3:2`, opaque, canvas at least 1564px wide.
 
 ```
 A wide empty cartoon desert wasteland arena backdrop, viewed from a low camera angle across
@@ -394,13 +385,7 @@ The icon templates no longer ask for a **cel-shaded highlight**. That phrase ask
 1. Check `F:\programs\Godot projects\Brotato3.6\` first. Mining an existing icon is faster and always more consistent than generating. Note that its art is *flat* — the Borderlands direction above is a deliberate departure from it, so a mined asset and a generated one will not match. That tension is unresolved.
 2. Otherwise write the prompt from a template above.
 3. Run the `generate-image` skill. It saves to `~/Downloads` as `<prompt-slug>.jpg`.
-4. Post-process outside the repo: cut out the background, resize to the exact canvas, export lossless PNG. For a **menu background layer** this step is scripted — `test/tools/parallax_postprocess.gd` does the keying, the grow and the transparent overscan, and writes the PNGs the scene loads:
-
-   ```
-   godot --headless --script res://test/tools/parallax_postprocess.gd
-   ```
-
-   For a **sprite sheet** this step is not scripted yet. It needs per-cell bounding-box detection rather than a fixed slice, per "Sprite sheets" above.
+4. Post-process outside the repo: cut out the background, resize to the exact canvas, export lossless PNG. For a **menu background** this is a simple resize to 1564x1042 (no keying or overscan needed since it's a single static layer). For a **sprite sheet** this step is not scripted yet. It needs per-cell bounding-box detection rather than a fixed slice, per "Sprite sheets" above.
 5. Move into the repo at the exact path from the asset-class table. Godot generates the `.import` on next open.
 6. Wire the asset up: stat and modifier icons are found by filename, weapons and characters need the `sprite` / `small_icon` field set on the `.tres`.
 7. Verify visually. Item icons only appear in `res://test/tools/shop_ui_preview.tscn`:
@@ -411,10 +396,10 @@ The icon templates no longer ask for a **cel-shaded highlight**. That phrase ask
 
    Character icons only appear in `res://test/tools/character_ui_preview.tscn`. Neither fixture picks up a new asset unless it is added to the fixture's `SAMPLE_ITEMS`.
 
-   **Menu background layers cannot be checked on the menu itself.** All three are full-bleed, so the one in front hides the ones behind. Use `res://test/tools/menu_parallax_preview.tscn`, which gives each layer its own clipped cell pinned to the extreme of its travel, which is where a gap first appears:
+   The menu background can be checked directly on the main menu:
 
    ```
-   .\run_scene_shot.bat res://test/tools/menu_parallax_preview.tscn res://parallax.png
+   .\run_scene_shot.bat res://src/Scenes/menu/Main.tscn res://menu_shot.png
    ```
 
    **Weapons, enemies and character bodies can only be judged in-game.** They render at 80x80 and 100x100; a sheet that looks great at 1024px can turn to noise on the way down. Check detail level at size before rejecting art, and check the title's legibility over the far layer's pale sky at the same time.
@@ -431,9 +416,6 @@ The icon templates no longer ask for a **cel-shaded highlight**. That phrase ask
 - **No arena props.** `src/Assets/tiles/` is a single tile sheet. A generation run intended for the mid layer ignored the empty-upper-two-thirds instruction and produced a clean prop sheet instead — crates, dry trees, barrels, rocks, fence panels — which is on-style and currently the only arena decoration the project has. Worth promoting to a real asset class.
 - **No custom font.** Everything uses the Godot built-in. Brotato used `Anybody-Medium.ttf` if a font is ever needed.
 - **No shaders anywhere in the project.**
-- The three raw `parallax_*.jpg` files in `src/Assets/menu/` are the unprocessed Bing downloads, staged rather than shipped. Nothing references them, and they should be deleted once the art is backed up off this machine — but they are currently the only copy of the accepted artwork, and `test/tools/parallax_postprocess.gd` cannot be re-run without them.
-- The main menu's near layer may not earn its depth. It is a bottom-edge fringe of grass and two boulders rather than a framing device, so at 84px of travel it is worth eyeballing in place before keeping it.
-- No art has been generated at `3:2` for a non-menu asset yet, so the composer's behaviour at that ratio is only confirmed for background layers.
 - **The main menu title will lose legibility** against the far layer's pale sky, now that the dark full-rect scrim has been deleted. The fix is a scrim behind the `VBoxContainer` only, not a full-rect one.
 - **Mined Brotato art and generated Borderlands art will not match.** The decompile is flat with almost no texture; the direction above is painterly. Every asset in `src/Assets/` today is mined, so the project currently has no art in its own style.
 
@@ -455,4 +437,3 @@ Generated art from the sessions that settled these prompts is kept under `docs/p
 | Art provenance | `src/Systems/arena.gd:1-15` |
 | Naming convention | `hidden.txt` at repo root |
 | Art outline share and saturation | sampled directly from the shipped PNGs; see the table under "The art palette" |
-| Menu layer canvases | derived from the `travel` and `mouse_travel` exports in `src/Scenes/menu/Main.tscn`, asserted against the PNGs by `test/Systems/menu/test_menu_parallax.gd` |

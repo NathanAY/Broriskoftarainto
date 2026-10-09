@@ -40,9 +40,18 @@ Polarity: positive half and curse
 - **Order matters:** index 0 is always the positive half. `effect_scene_condition` is a parallel array, so a gift-first ordering keeps index 0 meaning "always on unless the item says otherwise".
 - A **stat** item has no positive scene, so when its curse is a modifier that scene is its *only* entry and its positive stat stays in `modifiers`. The card has to tell these two shapes apart - see `docs/systems/ui_shop_portal.md`.
 
+Buffs and debuffs
+- `src/Systems/Items/Buffs/buff.gd` (`Buff`) is the effect an item carries when it grants a temporary buff. It subscribes to its own `trigger_event` (`on_hit` by default), and every trigger calls `Stats.add_modifier()` **once per stack** - which is why three stacks of `attack_speed: {flat: 0.5}` move the stat by 1.5, and why the UI has to multiply rather than read the payload as-is. `max_stacks` is a FIFO cap: at the ceiling the oldest stack is expired to make room.
+- `src/Systems/Items/Buffs/debuff_source.gd` (`DebuffSource`) is the mirror image, and lives on the **enemy**: it subscribes on the holder that carries the item and, on `after_deal_damage`, spawns a `Debuff` on `damage_context.target`.
+- `src/Systems/Items/Buffs/debuff_instance.gd` (`Debuff`) is that spawned instance, and it lives on the **target**. A debuff does not stack at its source - every trigger makes a separate node - so the source is recorded on the instance as `Debuff.source`, and that back-reference is the only thing that lets two curses of one kind be grouped into one tile. `Debuff.timer` is the instance's own expiry timer, parented to the instance rather than to the target and started from `_ready()` (a `Timer` started off-tree does not run). `setup()` also carries `display_name` / `tooltip_text` through from the source.
+- **Display fields.** `Buff` and `DebuffSource` each export `display_name` and `tooltip_text`, both defaulting to empty. They are display-only and power no stat, so no shipped `.tres` has to set them: the HUD falls back to the humanized primary stat. `Buff.stack_count()` and `Buff.remaining_time()` are the read-only accessors the UI reads, so nothing outside the class reaches into `_active_stacks`. `remaining_time()` reports the **soonest** stack, because that is the one whose lapse the tile's duration arc has to run out by.
+- **The HUD's debuff row fills only when an enemy carries a debuff item**, and enemies carry no items in the shipped game - `src/Scripts/Enemy.gd` has the `add_item` line commented out. The row is reachable through the `Cursed enemies` debug scenario (see `docs/systems/debug_scenarios.md`), which hangs an `EnemyDebuffModifier` off the enemy spawner. Giving every enemy a debuff item in a real run would be a balance change, and `docs/systems/balance.md` governs those.
+- Rendering: `src/ui/buff_ui.gd` (`BuffUi`) draws both rows as icon tiles - see `docs/systems/ui_shop_portal.md`.
+
 Dependencies
 - `Stats` (for stat modifiers), `EventManager` (for effect interactions), `ItemFactory` (for generating items at runtime), scene resources under `Systems/Items/Modifiers` (effects) and `Systems/Items/Buffs` (buffs/debuffs).
 
 Known limitations / TODOs
 - Removing condition managers when item is removed is TODO in `Item.remove_from()`.
 - Item stacking/unique identification relies on scene instances and `effect_scene` resource paths; may need explicit IDs for complex interactions.
+- **`DebuffSource` has no `max_stacks`.** A debuff is unbounded at its source by construction - every trigger spawns another `Debuff` - so a fast weapon can pile up far more instances than a buff ever stacks. The HUD groups them into one tile with a summed total, but the underlying count is not capped anywhere.

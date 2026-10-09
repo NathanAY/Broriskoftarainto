@@ -5,6 +5,11 @@ extends Node
 @export var trigger_event: String = "after_deal_damage"
 @export var duration: float = 3.0
 @export var modifiers: Dictionary = { "armor": {"flat": -10, "percent": -0.01} }
+## Optional name carried onto every `Debuff` this source spawns. Empty falls
+## back to the humanized primary stat in the UI.
+@export var display_name: String = ""
+## Optional prose carried onto every `Debuff` this source spawns.
+@export var tooltip_text: String = ""
 
 var holder: Node
 var holder_em: EventManager
@@ -25,7 +30,10 @@ func _on_trigger(event: Dictionary):
 
     # Spawn an instance on target
     var debuff_instance := Debuff.new()
-    debuff_instance.setup(holder, target, modifiers, duration)
+    # `self` goes in as the source: debuffs do not stack at the source, so this
+    # back-reference is the only thing that lets the UI group two instances of
+    # the same curse into one tile.
+    debuff_instance.setup(holder, target, modifiers, duration, self, display_name, tooltip_text)
     target.add_child(debuff_instance)
 
     if target_em:

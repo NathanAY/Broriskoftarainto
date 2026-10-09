@@ -12,6 +12,7 @@ extends GdUnitTestSuite
 const LOADED_BUILD := "res://test/scenarios/scenario_loaded_build.tscn"
 const FIRST_BOSS := "res://test/scenarios/scenario_first_boss.tscn"
 const LOOP_THREE := "res://test/scenarios/scenario_loop_three.tscn"
+const CURSED_ENEMIES := "res://test/scenarios/scenario_cursed_enemies.tscn"
 
 ## `ScenarioSetup` waits one frame before it equips anything, so the assertions
 ## below have to sit past that frame.
@@ -142,6 +143,52 @@ func test_density_survives_the_loop_three_stage_jump() -> void:
     assert_int(spawner.target_enemy_count).is_equal(
         (spawner.base_target_enemy_count + 2) * 2
     )
+
+
+## The player's debuff row (`src/ui/buff_ui.gd`) is correct code over an empty
+## world: enemies carry no items in the shipped game, so nothing ever spawns a
+## `Debuff` on the player. This scenario exists to make that row reachable, and
+## this pins the half of it that can be checked without landing a hit: the
+## modifier is hung off the spawner AND registered with it, because
+## `EnemySpawner._ready()` collects its modifiers before the scenario's node
+## exists.
+func test_cursed_enemies_gives_every_enemy_a_debuff_item() -> void:
+    var scenario := await _run_scenario(CURSED_ENEMIES)
+    var spawner: EnemySpawner = (scenario.get_node("StageManager") as StageManager).enemy_spawner
+
+    var modifiers := spawner.modifiers.filter(func(m): return m is EnemyDebuffModifier)
+    assert_int(modifiers.size()).override_failure_message(
+        "the scenario's EnemyDebuffModifier was never registered with the spawner, so no enemy gets an item"
+    ).is_equal(1)
+    assert_bool((modifiers[0] as EnemyDebuffModifier).item_path.ends_with("MinusArmorOnHitDebuff.tres")).is_true()
+
+    # And the hook it hangs off really does fire: `attach_to_enemy()` is called
+    # once per enemy, before the enemy joins the tree, so an off-tree enemy with
+    # an `ItemHolder` is the shape it has to cope with.
+    var enemy: Enemy = load("res://src/Systems/Enemy.tscn").instantiate()
+    (modifiers[0] as EnemyDebuffModifier).attach_to_enemy(enemy, _current_character(scenario))
+    var item_holder: ItemHolder = enemy.get_node("ItemHolder")
+    assert_int(item_holder.items.size()).override_failure_message(
+        "a 1.0 chance must give every enemy the item"
+    ).is_equal(1)
+    assert_str(item_holder.items[0].name).contains("Armor")
+    enemy.free()
+
+
+## The other half: the item is a debuff item, and its `DebuffSource` is what
+## spawns the `Debuff` on whoever it hits - the path the debuff row reads.
+func test_cursed_enemies_item_is_a_debuff_source() -> void:
+    var scenario := await _run_scenario(CURSED_ENEMIES)
+    var spawner: EnemySpawner = (scenario.get_node("StageManager") as StageManager).enemy_spawner
+    var modifiers := spawner.modifiers.filter(func(m): return m is EnemyDebuffModifier)
+    var modifier: EnemyDebuffModifier = modifiers[0]
+
+    var item: Item = load(modifier.item_path)
+    var effect: Node = item.effect_scene[0].instantiate()
+    assert_that(effect).override_failure_message(
+        "the cursed item must carry a DebuffSource, or nothing lands on the player"
+    ).is_instanceof(DebuffSource)
+    effect.free()
 
 
 func test_scenario_uses_the_requested_character() -> void:

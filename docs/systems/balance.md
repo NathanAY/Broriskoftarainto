@@ -131,7 +131,7 @@ Every stat gets an explicit **Δ% per price-1 item**, plus a **cap on the total*
 | `base_damage` (stat) | **+3%** | ×2.0 | Rename to `secondary_damage`; only two modifiers read it (§6.3) |
 | `attack_range`, `area_radius` | — | — | **Remove from the candidate pool.** No code reads them |
 
-Buff and debuff items use the same table, scaled by the price-2 band: a price-2 buff gives **2× the price-1 amount** and lasts `duration` seconds (default 3.0, `buff.gd:5`), with `max_stacks 10` (`buff.gd:6`). Budget the *time-averaged* value, not the peak: `amount × min(duration, expected_uptime)`.
+Buff and debuff items use the same table, scaled by the price-2 band: a price-2 buff gives **2× the price-1 amount** and lasts `duration` seconds (default 3.0), with `max_stacks 10` — both defaults on `src/Systems/Items/Buffs/buff.gd`. Budget the *time-averaged* value, not the peak: `amount × min(duration, expected_uptime)`. A buff applies its payload **once per stack**, so the peak it actually reaches is `amount × stacks` — that is why the HUD's buff tile reports the multiplied total (`docs/systems/items.md`), and it is the number to budget against, not `amount`.
 
 ### 3.2 The curse — its budget **[PROPOSED]**
 

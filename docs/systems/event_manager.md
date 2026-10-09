@@ -33,6 +33,8 @@ Event schema (required keys; extra keys are tolerated)
 - Buffs / debuffs: `on_buff_added` / `on_buff_removed` -> `buff`, `holder`, `id`; `on_debuff_added` / `on_debuff_removed` -> `debuff`, `holder`, `target`
 - Misc: `on_crit` -> `damage_context`; `on_shield_changed` -> `self`, `amount`, `current_shield`, `max_shield`
 
+**The buff / debuff schema is unchanged and needs no change.** `on_buff_added` / `on_buff_removed` carry `buff`, `holder`, `id`; `on_debuff_added` / `on_debuff_removed` carry `debuff`, `holder`, `target` — and that is sufficient for everything the HUD reads. The display fields added to `Buff` and `DebuffSource` (`display_name`, `tooltip_text`, `Debuff.source`, `Debuff.timer`) live on the **node the payload points at**, not in the payload, precisely so no event schema had to widen. Widening it to carry a flattened `display_name` would be the mistake here: a listener can already reach it through `buff` / `debuff`.
+
 Damage pipeline ownership
 - The six damage-pipeline events split across two buses, and the split matters when writing a new damage source:
   - **Attacker side**, emitted by the weapon/effect on its own (the holder's) bus: `before_deal_damage` -> [armor, crit, high-HP modifiers] -> ... -> `after_deal_damage`, `on_hit`, `on_kill`.

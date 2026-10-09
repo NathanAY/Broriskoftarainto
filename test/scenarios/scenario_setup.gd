@@ -46,6 +46,14 @@ static var pending_monster_multiplier: float = 1.0
 @export var start_mode: StartMode = StartMode.STAGE_ONE
 ## Only read by `StartMode.LOOP`.
 @export var start_loop: int = 1
+## Bare file name under `src/Resources/items`. Given to every enemy the spawner
+## fields, so an item that curses whatever it hits actually lands on the player.
+## Enemies carry no items in the shipped game (`src/Scripts/Enemy.gd`), which is
+## why the player's debuff row needs a scenario to be reachable at all - see
+## `docs/systems/debug_scenarios.md`.
+@export var enemy_item_name: String = ""
+## 0..1 per enemy. Only read when `enemy_item_name` is set.
+@export_range(0.0, 1.0, 0.05) var enemy_item_chance: float = 1.0
 
 
 ## Runs before *any* child's `_ready`, which is what makes this the right hook:
@@ -64,6 +72,7 @@ func _ready() -> void:
 	# that have finished their own `_ready`, so they wait one frame.
 	await get_tree().process_frame
 	_equip_loadout()
+	_equip_enemy_items()
 	_apply_start_mode()
 	_apply_monster_multiplier()
 	_on_stage_applied()
@@ -123,6 +132,30 @@ func stacked_items() -> Array[Item]:
 	]
 
 
+## Hangs an `EnemyDebuffModifier` off the enemy spawner, which is the spawner's
+## own extension point: it calls `attach_to_enemy()` on every child that has the
+## method, once per enemy, before the enemy enters the tree.
+##
+## Deliberately not "give every enemy a debuff item in the shipped game": that is
+## a balance change, and `docs/systems/balance.md` governs those. This keeps the
+## player's debuff row reachable for a visual check and nothing else.
+func _equip_enemy_items() -> void:
+	if enemy_item_name.is_empty():
+		return
+	var enemy_spawner := get_node_or_null("../StageManager/EnemySpawner") as EnemySpawner
+	if enemy_spawner == null:
+		push_warning("DebugScenarioSetup: no EnemySpawner for '%s' to give items to." % scenario_title)
+		return
+	var modifier := EnemyDebuffModifier.new()
+	modifier.name = "EnemyDebuffModifier"
+	modifier.item_path = "%s/%s.tres" % [ITEMS_DIR, enemy_item_name]
+	modifier.chance = enemy_item_chance
+	enemy_spawner.add_child(modifier)
+	# `_ready()` collects the spawner's modifiers into a list before this node
+	# exists, so adding the child alone would leave it never called.
+	enemy_spawner.modifiers.append(modifier)
+
+
 func _apply_start_mode() -> void:
 	var stage_manager := get_node_or_null("../StageManager") as StageManager
 	if stage_manager == null:
@@ -168,9 +201,10 @@ func _on_stage_applied() -> void:
 	var stage := stage_manager.current_stage if stage_manager != null else 0
 	var loop_number := stage_manager.current_loop if stage_manager != null else 0
 	print(
-		"Debug scenario '%s': stage %d, loop %d, %d weapons, stacked build: %s, monsters %.1fx"
+		"Debug scenario '%s': stage %d, loop %d, %d weapons, stacked build: %s, monsters %.1fx, enemies get %s"
 		% [
 			scenario_title, stage, loop_number, weapon_names.size(),
 			str(stacked_build), pending_monster_multiplier,
+			enemy_item_name if not enemy_item_name.is_empty() else "nothing",
 		]
 	)

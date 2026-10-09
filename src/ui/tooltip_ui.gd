@@ -16,6 +16,9 @@ const HINT_ICON_SIZE := Vector2(36, 36)
 
 var _hovered_resource: Resource = null
 var _hovered_text: String = ""
+## The last buff shown through `show_buff()`, kept so `_process()` knows it has
+## something to follow and so a hidden tooltip stops moving.
+var _hovered_buff: BuffEntry = null
 
 ## Kept for callers/tests that read the tooltip body through `.label`.
 @onready var label: RichTextLabel = info_label
@@ -32,6 +35,7 @@ func show_for(resource: Resource) -> void:
         return
     _hovered_resource = resource
     _hovered_text = ""
+    _hovered_buff = null
     set_resource(resource)
     _show()
 
@@ -45,6 +49,7 @@ func show_text(text: String, icon: Texture2D = null) -> void:
         return
     _hovered_resource = null
     _hovered_text = text
+    _hovered_buff = null
     _clear_icon()
     separator.visible = false
     name_label.text = ""
@@ -56,9 +61,83 @@ func show_text(text: String, icon: Texture2D = null) -> void:
     _show()
 
 
+## Hover detail for a buff / debuff tile. A `BuffEntry` is a `RefCounted` rather
+## than a `Resource`, so it cannot ride `show_for()`; the path is modelled on
+## `show_text()` and reuses the same `_bind_hover()` wiring.
+##
+## Everything the tile does not have room for lives here: the stat rows at the
+## summed total, the stack count against the cap, the countdown, the trigger and
+## the stat's own explanation.
+func show_buff(entry: BuffEntry) -> void:
+    if entry == null:
+        return
+    _hovered_resource = null
+    _hovered_text = ""
+    _hovered_buff = entry
+
+    name_label.text = entry.resolved_name()
+    type_badge.visible = true
+    type_badge.text = "Debuff" if entry.is_debuff else "Buff"
+    separator.visible = true
+    icon_plate.visible = true
+    _add_icon(_buff_icon(entry))
+    label.text = _build_buff_bbcode(entry)
+    _show()
+
+
+## The stat art the tile uses, at the tooltip's own icon size. Falls back to the
+## shared default so the plate is never empty.
+func _buff_icon(entry: BuffEntry) -> Control:
+    var stat := BuffEntry.primary_stat(entry.modifiers)
+    if stat.is_empty():
+        return ItemDisplayPanel.make_texture_icon(Stats.get_stat_icon(""), HINT_ICON_SIZE)
+    return ItemDisplayPanel.make_texture_icon(Stats.get_stat_icon(stat), HINT_ICON_SIZE)
+
+
+## The body as BBCode, through the same `ItemCardRow` -> `_row_bbcode()` route
+## the shop cards use so a buff's stat line is coloured exactly like an item's.
+func _build_buff_bbcode(entry: BuffEntry) -> String:
+    var rows: Array = []
+    # `entry.modifiers` is already summed across the stack set, so this is the
+    # total the stat actually moved by and not one stack's worth.
+    rows.append_array(ItemTooltip.stat_rows(entry.modifiers))
+
+    if entry.stack_count > 1:
+        var text := "%d stacks" % entry.stack_count
+        if entry.max_stacks > 0:
+            text += " (max %d)" % entry.max_stacks
+        rows.append(_buff_prose_row(text))
+
+    if entry.duration > 0.0:
+        rows.append(_buff_prose_row("%.1fs of %.1fs left" % [entry.remaining, entry.duration]))
+
+    if not entry.trigger.is_empty():
+        rows.append(_buff_prose_row("Triggers on %s" % ItemTooltip.humanize_trigger(entry.trigger)))
+
+    # The effect's own sentence first, then the stat's explanation: both are
+    # prose, so both go through the muted flavor styling rather than a stat row.
+    if not entry.tooltip_text.is_empty():
+        rows.append(_buff_prose_row(entry.tooltip_text))
+    var stat_hint := ItemTooltip.stat_hint(BuffEntry.primary_stat(entry.modifiers))
+    if not stat_hint.is_empty():
+        rows.append(_buff_prose_row(stat_hint))
+
+    return ItemDisplayPanel.build_bbcode(rows)
+
+
+## A neutral EFFECT row: gold, one sentence, no tone to derive from a number.
+func _buff_prose_row(text: String) -> ItemCardRow:
+    var row := ItemCardRow.new()
+    row.kind = ItemCardRow.Kind.EFFECT
+    row.tone = ItemCardRow.Tone.NEUTRAL
+    row.text = text
+    return row
+
+
 func hide_tooltip() -> void:
     _hovered_resource = null
     _hovered_text = ""
+    _hovered_buff = null
     visible = false
 
 
@@ -80,6 +159,13 @@ func bind_to_row_text(row: Control, text: String, icon: Texture2D = null) -> voi
     _bind_hover(row, func(): show_text(text, icon))
 
 
+## Like bind_to_row(), but for a buff tile. `entry` is captured by the closure, so
+## the tooltip keeps showing the tile's own effect; `buff_ui.gd` rebinds when the
+## tile's entry changes.
+func bind_to_row_buff(row: Control, entry: BuffEntry) -> void:
+    _bind_hover(row, func(): show_buff(entry))
+
+
 func _bind_hover(row: Control, show_callback: Callable) -> void:
     row.mouse_filter = Control.MOUSE_FILTER_STOP
     for child in row.get_children():
@@ -89,7 +175,7 @@ func _bind_hover(row: Control, show_callback: Callable) -> void:
 
 
 func _process(_delta: float) -> void:
-    if _hovered_resource == null and _hovered_text.is_empty():
+    if _hovered_resource == null and _hovered_text.is_empty() and _hovered_buff == null:
         return
     if not is_instance_valid(self):
         return

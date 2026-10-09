@@ -29,7 +29,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | Doc | What it covers |
 |---|---|
 | `characters.md` | `CharacterData` resources, character select UI, how a character is applied at spawn |
-| `debug_scenarios.md` | The main menu's "Debug scenarios" button: three dev-only mid/endgame runs and how a scenario is configured |
+| `debug_scenarios.md` | The main menu's "Debug scenarios" button: four dev-only mid/endgame runs and how a scenario is configured |
 | `enemies.md` | `Enemy` behaviour, health, boss variant |
 | `event_manager.md` | The `LocalEventManager` event bus and the `event_contract.gd` schema checker |
 | `items.md` | The `Item` resource, `ItemHolder`, `ItemBuilder`, pricing |
@@ -40,7 +40,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | `spawners.md` | `enemy_spawner.gd`, `boss_spawner.gd`, spawn pacing |
 | `stage_manager.md` | Wave → boss → shop orchestration and loop progression |
 | `stats.md` | Stat storage, modifiers, conditions, modifier-owned (provided) stats |
-| `ui_shop_portal.md` | Shop, item cards, tooltips, the tone/colour system |
+| `ui_shop_portal.md` | Shop, item cards, tooltips, the tone/colour system, the HUD's buff/debuff tiles |
 | `weapons.md` | `BaseWeapon`, weapon scripts, built-in weapon effects, weapon resources |
 
 **Decisions** — `docs/adr/`

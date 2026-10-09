@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Three dev-only runs that start in a state a normal run would need several loops to reach, so a build or a balance number can be checked without playing up to it. They are reached from the main menu's **Debug scenarios** button, next to **New game** - the character select → `StarterMenu.tscn` route is still the default way to play, and nothing here is on that path.
+Four dev-only runs that start in a state a normal run would need several loops to reach, so a build or a balance number can be checked without playing up to it. They are reached from the main menu's **Debug scenarios** button, next to **New game** - the character select → `StarterMenu.tscn` route is still the default way to play, and nothing here is on that path.
 
 None of it ships. The picker, the scenarios and their tests live in `test/scenarios/`, and the only `src/` change is the button in `src/Scenes/menu/Main.tscn` plus the handler in `src/Scenes/menu/main_menu.gd`. That handler checks the picker exists first, so a build without `test/` warns instead of changing to a missing scene.
 
@@ -11,6 +11,17 @@ None of it ships. The picker, the scenarios and their tests live in `test/scenar
 | Loaded build | `test/scenarios/scenario_loaded_build.tscn` | Loop 1, stage 1, Ranger with 4 weapons and 5 items - three of which carry 3-5 modifiers each |
 | First stage boss | `test/scenarios/scenario_first_boss.tscn` | Loop 1 **stage 2**: the enemy stage is skipped and the boss spawns at once |
 | Loop 3 | `test/scenarios/scenario_loop_three.tscn` | Loop 3 stage 1: enemies already scaled by `current_loop`, boss spawner scaled to match |
+| Cursed enemies | `test/scenarios/scenario_cursed_enemies.tscn` | Loop 1, stage 1, with a **debuff item on every enemy**, so the HUD's debuff row fills. Also picks up a buff item, so both rows show at once |
+
+## Cursed enemies: making the debuff row reachable
+
+The HUD's second row shows **debuffs on the player** (`src/ui/buff_ui.gd`). Nothing spawns one in the shipped game: enemies carry no items — the `add_item` line in `src/Scripts/Enemy.gd` is commented out — so the row is correct code over an empty world until an enemy carries a `DebuffSource` item.
+
+Giving every enemy a debuff item in a real run would be a **balance change**, and `docs/systems/balance.md` governs those. So this is a scenario instead: `ScenarioSetup.enemy_item_name` hangs an `EnemyDebuffModifier` off `StageManager/EnemySpawner`.
+
+- It uses the spawner's **own extension point**: `EnemySpawner._ready()` collects every child that has `attach_to_enemy(enemy, character)` into `modifiers`, and both spawn paths call it once per enemy, before the enemy enters the tree.
+- That timing is also the trap. `_ready()` builds the list before the scenario's node exists, so `ScenarioSetup` has to `add_child()` **and** append to `enemy_spawner.modifiers` — adding the child alone leaves `attach_to_enemy()` never called and the scenario silently does nothing. `test_debug_scenarios.gd` pins that the modifier is in the list.
+- `ItemHolder.hold_owner` is a getter that resolves the moment the holder is parented, so the item wires itself up on an off-tree enemy and only has to run `_ready()` when the enemy joins.
 
 ## Monster density
 
@@ -60,6 +71,8 @@ A scenario is the scene, not a set of globals set somewhere earlier:
 - `src/Systems/enemy_spawner.gd` — `spawn_multiplier` and its `scaled_*` helpers, which is where a density is actually turned into a wave. The only `src/` change the density feature makes.
 - `src/Systems/Items/item_builder.gd`, `src/Resources/weapons`, `src/Resources/items`, `src/Systems/Items/modifiers` — the loadout.
 - `src/Assets/character/<id>/<Id>.tres` — `character_path` must be a real resource, because `CharacterInitializer` derives the sprite folder from its path.
+- `src/Systems/enemy_spawner.gd` — `modifiers` and the `attach_to_enemy()` hook the `Cursed enemies` scenario plugs into.
+- `test/scenarios/enemy_debuff_modifier.gd` (`EnemyDebuffModifier`) — the whole of the cursed-enemies behaviour: it gives one spawned enemy the scenario's item, so nothing in `src/` had to change for the debuff row to be reachable.
 
 ## Known limitations / TODOs
 

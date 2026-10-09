@@ -58,6 +58,8 @@ Every generated PNG must satisfy all of these or it will not load, or will rende
 | Character icon | `src/Assets/character/<id>/<id>_icon.png` | 96x96 | 64x88 card |
 | Menu background | `src/Assets/menu/parallax_far.png` | 1564x1042 | full-bleed, cover-fitted, static |
 
+**There is no buff or debuff art, and none is needed.** `BuffTile` has no PNG of its own: it shows the *stat's* icon, from the same `src/Assets/stats/<stat_key>.png` a stat row uses, composited through `ItemIconGenerator.make_composite_icon()` when the effect touches two or more stats. A buff is identified by which stat it moves, not by a picture of the buff, so a buff.png / debuffsource.png pair would duplicate what the stat icon already says. (Neither name is backticked on purpose: they do not exist, and `test/test_doc_links.gd` checks every backticked bare filename against the project.)
+
 The menu background is a single static image that covers the entire window. It is generated at `3:2` and post-processed to the exact canvas size needed. The background is now a plain `TextureRect` with `expand_mode = 1` and `stretch_mode = 1` (scale to fill).
 
 The two binding rules:
@@ -112,6 +114,8 @@ This table is the **UI**, and it is the one that is bright. Colours here are sem
 Anchored on `src/ui/item_display_panel.gd`.
 
 Note: color in the UI is chosen by `ItemCardRow.Tone` and `BaseModifier.EffectKind`. Do not bake a green or red glow into an icon to signal a buff.
+
+**Buff and debuff signal through the border and the label, never the icon art.** The HUD's buff tiles carry `Positive / gain / buff` green and its debuff tiles `Negative / cost / damage` red on a 2px plate border, gold on hover — the icon between them is the plain stat art, unmodulated. A shop card's debuff payload is green, which is the opposite and is not a contradiction: there the debuff lands on the enemy and is a gain to the player. See `docs/systems/ui_shop_portal.md`.
 
 ### The art palette
 
@@ -430,7 +434,9 @@ Generated art from the sessions that settled these prompts is kept under `docs/p
 | UI colors, panel stylebox | `src/ui/item_display_panel.gd:17-28`, `make_panel_stylebox()` |
 | Stat icon lookup | `src/Systems/stats/stats.gd:189-193` |
 | Modifier icon lookup | `src/ui/ItemIconGenerator.gd:22-32` |
-| Icon display sizes | `src/ui/IconCard.tscn`, `src/ui/ItemDisplayPanel.tscn`, `src/ui/TooltipUi.tscn`, `src/ui/icon_card.gd` |
+| Icon display sizes | `src/ui/IconCard.tscn`, `src/ui/ItemDisplayPanel.tscn`, `src/ui/TooltipUi.tscn`, `src/ui/icon_card.gd`, `src/ui/BuffTile.tscn` |
+| Buff / debuff border colours | `src/ui/buff_tile.gd` (`COLOR_POSITIVE` / `COLOR_NEGATIVE`, gold on hover) |
+| Buff tile duration arc | `src/ui/buff_arc.gd` — the first `CanvasItem` custom `_draw()` in the UI layer |
 | Card plates | `src/Scenes/menu/ShopItemCard.tscn:6-54` |
 | Tone semantics | `docs/systems/ui_shop_portal.md`, `docs/systems/modifiers.md` |
 | Character body / eyes / mouth / legs composition | `src/Systems/Character.tscn:36-66` |

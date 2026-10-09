@@ -29,6 +29,11 @@ const SCENARIOS := [
 		"description": "Endgame scaling: enemies spawn already buffed for loop 3. Clearing the boss wins the run.",
 		"scene": "res://test/scenarios/scenario_loop_three.tscn",
 	},
+	{
+		"title": "Cursed enemies",
+		"description": "Enemies carry a debuff item, so the HUD's debuff row fills. Also picks up a buff item.",
+		"scene": "res://test/scenarios/scenario_cursed_enemies.tscn",
+	},
 ]
 
 ## Bounds of the monster-density slider, mirrored by its range in the scene.

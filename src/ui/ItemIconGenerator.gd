@@ -33,6 +33,17 @@ static func generate_icon(item: Item, icon_size: Vector2 = BASE_SIZE) -> Control
 
     return _create_composite_texture(icons, icon_size)
 
+
+## Public entry to the compositor for callers that already have their icons.
+## The buff tile needs this: there is no buff/debuff icon art, so it collects
+## `Stats.get_stat_icon()` for every stat the effect touches and composites them
+## into one tile, the same way an item's stats are.
+static func make_composite_icon(icons: Array[Texture2D], icon_size: Vector2 = BASE_SIZE) -> Control:
+    if icons.is_empty():
+        icons.append(load("res://src/Assets/modifiers/_default.png"))
+    return _create_composite_texture(icons, icon_size)
+
+
 ## Icons are combined into a grid.
 static func _create_composite_texture(icons: Array[Texture2D], icon_size: Vector2 = BASE_SIZE) -> Control:
     var container = Control.new()

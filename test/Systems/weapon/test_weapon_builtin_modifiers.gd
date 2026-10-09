@@ -103,6 +103,10 @@ func test_death_aura_builtin_poison_applied() -> void:
     poison_cfg["chance"] = 1.0
     poison_cfg["tick_interval"] = 0.25
     character.weapon_holder.add_weapon(aura)
+    # `add_weapon` duplicates what it is given, so `aura` is the template and
+    # the live weapon - the one holding the timer and the bound effect nodes -
+    # is the holder's last entry.
+    var equipped: BaseWeapon = character.weapon_holder.weapons[0]
 
     # Well inside the aura's radius. `TestScene.tscn` leaves the enemy 200 units
     # from the character, which is exactly half of `weapon_range`, so the sprite
@@ -114,11 +118,16 @@ func test_death_aura_builtin_poison_applied() -> void:
     e_health.max_health = 200.0
     e_health.current_health = 200.0
 
+    # The window has to clear the aura's *first* tick. Its firing `Timer` counts
+    # unscaled time - `set_time_factor` above does not stretch it - so 120 frames
+    # is ~2s, which is exactly the aura's `wait_time` at half rate, and closing
+    # the window on the boundary means no tick at all and no poison. Derived from
+    # the weapon so it cannot drift when the rate changes again.
     @warning_ignore("redundant_await")
-    await runner.simulate_frames(60 * 2)
+    await runner.simulate_frames(int(equipped.timer.wait_time * 60.0 * 3.0))
 
     # the built-in poison modifier node is bound to the Death Aura
-    assert_that(character.weapon_holder.weapons[0].bound_effect_nodes.size()).is_equal(1)
+    assert_that(equipped.bound_effect_nodes.size()).is_equal(1)
     # enemy got poisoned (PoisonEffect lives on its Health node)
     assert_that(e_health.get_node_or_null("PoisonEffect")).is_not_null()
     # 0.25s poison ticks plus the aura hit deal far more than the 5-damage hit

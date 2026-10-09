@@ -31,6 +31,12 @@ Other behavior:
 - Partial words match several suites at once (e.g. `modifier` -> 7 suites, all run).
 - Only `test_*.gd` files are fuzzy-matched, so shared helper scripts are not run as suites.
 
+## Running tests from PowerShell
+Call the batch file directly — PowerShell runs `.bat` files through `cmd.exe` on its own, and no wrapper is needed:
+- `.\run_tests_gdunit_custom.bat pistol`
+- `$LASTEXITCODE` carries the runner's exit code (0 pass, 101 pass-with-orphan-warnings, 124 timeout, 125 stall, or the Godot exit code).
+- Run it from the repository root (`F:\programs\Godot projects\BRT\Broriskoftarainto`). `--path .`, `.gdunit.log` and the `test\` target lookup are all resolved against the current directory, so from anywhere else the runner finds no suites and writes its log to the wrong place.
+
 ## Runner exit codes and the stall watchdog
 All three GdUnit4 wrappers (`run_tests_gdunit.bat`, `run_tests_gdunit_custom.bat`, `run_tests_gdunit_custom_headless.bat`) share the same guard:
 - **124** = the run hit `TIMEOUT_BASE` + `TIMEOUT_PER_EXTRA` per extra suite.

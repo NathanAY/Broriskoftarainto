@@ -29,11 +29,11 @@ func _aura_radius() -> float:
 ## Health every target in this suite is raised to.
 ##
 ## It cannot be `WeaponTestSupport.ENEMY_HEALTH` (40), which is sized for a
-## weapon that lands one hit: the aura fires every second, so a 240-frame window
-## at time factor 5 is ~20 ticks, and 8 of them are enough to kill a 40-health
-## target. A dead target frees its `Health` node, which turns every following
-## assertion into a read on a dangling object. The drop is still the assertion,
-## so the budget only has to be comfortably above the damage dealt.
+## weapon that lands one hit: the aura ticks twice a second, so a 240-frame
+## window at time factor 5 is ~10 ticks, and 8 of them are enough to kill a
+## 40-health target. A dead target frees its `Health` node, which turns every
+## following assertion into a read on a dangling object. The drop is still the
+## assertion, so the budget only has to be comfortably above the damage dealt.
 const TARGET_HEALTH := 1000.0
 
 ## Bursts seen since the last `_record_bursts`. Reset by that call, so each test
@@ -50,6 +50,36 @@ func test_resource_is_an_area_weapon_aiming_at_everything() -> void:
 	assert_that(aura).is_instanceof(AreaWeapon)
 	assert_that(aura.name).is_equal("DeathAura")
 	assert_that(aura.target_selector).is_instanceof(AllTargetsInRangeSelector)
+
+
+## The aura pulses at half rate: `base_attack_speed 0.5`, so its firing timer
+## waits 2s at a character's baseline `attack_speed` of 1.0 rather than the 1s
+## `BaseWeapon` defaults to.
+##
+## Pinned through the live timer rather than only the `.tres`, because
+## `BaseWeapon._update_timer_wait` is where `base_attack_speed` and the holder's
+## `attack_speed` stat are multiplied together - a weapon whose rate was silently
+## ignored there would still pass an assertion that only reads the resource.
+func test_ticks_at_half_rate() -> void:
+	var aura: BaseWeapon = load(DEATH_AURA)
+	assert_float(aura.base_attack_speed).override_failure_message(
+		"the aura no longer ticks at half rate").is_equal(0.5)
+
+	var runner := scene_runner(WeaponTestSupport.TEST_SCENE)
+	var test_scene := runner.scene()
+	get_tree().current_scene = test_scene
+
+	var character: Character = test_scene.get_node("Character")
+	var equipped := WeaponTestSupport.equip_only_weapon(character, DEATH_AURA)
+	@warning_ignore("redundant_await")
+	await runner.simulate_frames(2)
+
+	# baseline `attack_speed` is 1.0 (`src/Systems/stats/stats.gd`), so the
+	# weapon's own rate is the whole of the product.
+	assert_float(equipped.timer.wait_time).override_failure_message(
+		"the firing timer does not wait 2s at half rate").is_equal(2.0)
+
+	test_scene.free()
 
 
 func test_damages_an_enemy_in_range() -> void:
@@ -241,6 +271,14 @@ func test_a_tick_places_its_burst_on_the_weapon_sprite() -> void:
 ## Counted through `child_entered_tree` rather than by looking at the children
 ## afterwards: a burst is gone within ~0.6s, so the child list only proves
 ## something happened if the sample lands inside a burst's life.
+##
+## The target is given [constant TARGET_HEALTH] because `BaseWeapon._on_timeout`
+## only calls `try_shoot` - and so only spawns a burst - when the *full*
+## `weapon_range` selector still finds something. `TestScene.tscn`'s enemy starts
+## on the default 10 health, which two aura ticks kill; a freed enemy then stops
+## being a target and every later tick spawns nothing. That was already latent
+## here: at the old 1s rate the second tick just beat the death animation's
+## free, and a longer gap between ticks turns it into a hard failure.
 func test_the_timer_spawns_a_burst_per_tick() -> void:
 	var runner := scene_runner(WeaponTestSupport.TEST_SCENE)
 	var test_scene := runner.scene()
@@ -248,15 +286,24 @@ func test_the_timer_spawns_a_burst_per_tick() -> void:
 	get_tree().current_scene = test_scene
 
 	var character: Character = test_scene.get_node("Character")
-	WeaponTestSupport.equip_only_weapon(character, DEATH_AURA)
+	_give_health(test_scene.get_node("Enemy"))
+	var aura := WeaponTestSupport.equip_only_weapon(character, DEATH_AURA)
+	@warning_ignore("redundant_await")
+	await runner.simulate_frames(2)
 	_record_bursts(character)
 
+	# The window is derived from the aura's own `wait_time`, not the shared
+	# `WeaponTestSupport.FRAMES`, because the firing `Timer` counts *unscaled*
+	# time - `set_time_factor` above does not stretch it. So 240 frames is ~4s
+	# regardless, which at half rate spans two ticks and lands on one whenever
+	# the window closes on a boundary. Six ticks of headroom keeps "and keeps
+	# reaching it" true whatever the rate is set to next.
 	@warning_ignore("redundant_await")
-	await runner.simulate_frames(WeaponTestSupport.FRAMES)
+	await runner.simulate_frames(int(aura.timer.wait_time * 60.0 * 6.0))
 
-	# the aura ticks once a second, so a 4s window covers several ticks. The
-	# exact count is left to the damage suites; what matters here is that the
-	# timer reaches the spawn path at all and keeps reaching it.
+	# the aura ticks every two seconds, so this window covers ~6 ticks. The exact
+	# count is left to the damage suites; what matters here is that the timer
+	# reaches the spawn path at all and keeps reaching it.
 	assert_int(spawned_bursts.size()).override_failure_message(
 		"the weapon timer fired without spawning any damage burst").is_greater(1)
 

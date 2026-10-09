@@ -102,8 +102,8 @@ func _prepare(test_scene: Node) -> Character:
 ## The second target, directly behind the first one on the projectile line: the
 ## character sits at (100,100) and shoots east, so a projectile that pierces the
 ## near enemy continues +X into this one. 350px behind puts it at 550px from the
-## character - outside the pistol's 400px range - so only a piercing projectile
-## can ever reach it.
+## character - outside the pistol's 1.33 m (≈399 px) range - so only a piercing
+## projectile can ever reach it.
 func _spawn_far_enemy(test_scene: Node, near_enemy: Enemy) -> Enemy:
 	var far_enemy: Enemy = load(ENEMY_SCENE).instantiate()
 	far_enemy.global_position = near_enemy.global_position + Vector2(350, 0)

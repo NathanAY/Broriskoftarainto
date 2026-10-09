@@ -75,7 +75,7 @@ static func detach(weapon: BaseWeapon) -> void:
 
 
 ## Player-facing tooltip lines for the weapon's built-in effects (e.g.
-## "pierce: 1", "knockback: 120.0", "poison: 50% chance, 3.0s"). Reads the
+## "pierce: 1", "knockback: 0.4 m/s", "poison: 50% chance, 3.0s"). Reads the
 ## declared `.tres` config so displayed numbers always match the live effect.
 static func builtin_tooltip_lines(weapon: BaseWeapon) -> PackedStringArray:
 	var lines := PackedStringArray()
@@ -89,7 +89,7 @@ static func builtin_tooltip_lines(weapon: BaseWeapon) -> PackedStringArray:
 			"pierce":
 				lines.append("pierce: %d" % int(config.get("amount", 0)))
 			"knockback":
-				lines.append("knockback: %s" % str(config.get("strength", 0.0)))
+				lines.append("knockback: %s m/s" % str(config.get("strength", 0.0)))
 			"poison":
 				var parts := PackedStringArray()
 				if config.has("chance"):

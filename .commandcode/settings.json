@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(.run_tests_gdunit.bat:*)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}

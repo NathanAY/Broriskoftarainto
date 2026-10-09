@@ -17,11 +17,11 @@ description = "Fist"
 base_damage = 10.0
 modifiers = {
 "knockback": {
-"strength": 250.0,
+"strength": 0.83,
 "duration": 0.2
 }
 }
-range = 300.0
+weapon_range = 1.0
 target_selector = ExtResource("3_wkow1")
 sprite = ExtResource("2_wkow1")
 attack_sound = Array[Resource]([ExtResource("1_sjfbb"), ExtResource("2_6xf22"), ExtResource("3_su6vs"), ExtResource("4_ki4yr")])

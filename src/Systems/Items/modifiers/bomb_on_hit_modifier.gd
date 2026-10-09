@@ -3,7 +3,8 @@ extends BaseModifier
 var explosion_scene := preload("res://src/Scenes/Explosion.tscn")
 var bomb_scene := preload("res://src/Scenes/Bomb.tscn") # optional, for visuals
 
-var explosion_radius := 64.0
+## Blast radius in meters (64 px); `Explosion` converts at its own boundary.
+var explosion_radius := 0.21
 var explosion_damage := 0.3 #30% of initional damage
 var detonation_delay := 3.0
 

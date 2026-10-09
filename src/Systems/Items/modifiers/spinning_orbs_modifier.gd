@@ -4,7 +4,8 @@ extends BaseModifier
 
 const ORB_COUNT := 2
 const DURATION := 3.0
-const ORBIT_RADIUS := 90
+## Orbit radius in meters (90 px). `SpinningOrb` converts it at its own boundary.
+const ORBIT_RADIUS := 0.3
 const ORBIT_SPEED := 180  # degrees per second
 const DAMAGE := 0.5 # 50% of base damage
 

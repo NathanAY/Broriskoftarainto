@@ -31,7 +31,7 @@ Two independent axes. An item is legal only if it is under the cap on **both**.
 ```
 WB = damage_per_volley × attacks_per_second
 
-# from BaseWeapon.gd:88-92 and BaseWeapon.gd:96
+# from BaseWeapon.gd:45-49 and BaseWeapon.gd:152
 damage_per_hit  = (weapon.base_damage + stats.get_stat("flat_damage")) × stats.get_stat("damage")
 attacks_per_sec = stats.get_stat("attack_speed") × weapon.base_attack_speed
 ```
@@ -150,7 +150,7 @@ There are five weapons today and there will be dozens. Every new one is designed
 
 ### 4.1 The two numbers
 
-A weapon resource (`BaseWeapon.gd`) exposes `base_damage` (`:8`), `base_attack_speed` (`:7`), `weapon_range` (`:9`) and a `modifiers` dict (`:10`) of built-in riders. Two derived figures decide everything:
+A weapon resource (`BaseWeapon.gd`) exposes `base_damage` (`:8`), `base_attack_speed` (`:7`), `weapon_range` (`:19`, **in meters**) and a `modifiers` dict (`:9`) of built-in riders. Two derived figures decide everything:
 
 ```
 WB_raw  = base_damage × base_attack_speed            # at baseline character stats
@@ -191,14 +191,14 @@ The `1 / uptime` factor is the inflation a designer applies to the `.tres` numbe
 
 | Effective range | Typical uptime | Inflate `WB_raw` by |
 |---|---|---|
-| > 600 px (ranged) | 0.95 | ×1.05 |
-| 400 – 600 px | 0.85 | ×1.18 |
-| ≤ 400 px (melee swing) | 0.70 | ×1.43 |
-| ≤ 60 px (contact / orbiting) | 0.90 | ×1.11 |
+| > 2.0 m (ranged) | 0.95 | ×1.05 |
+| 1.33 – 2.0 m | 0.85 | ×1.18 |
+| ≤ 1.33 m (melee swing) | 0.70 | ×1.43 |
+| ≤ 0.2 m (contact / orbiting) | 0.90 | ×1.11 |
 
-Movement speed is `1.0 m/s × PIXELS_PER_METER 300.0` = 300 px/s (`stats.gd:9,24`), so closing 400 px takes ~1.3 s — that is where 0.70 comes from. Use 1.0 uptime for a melee weapon with enough knockback or a dash to close reliably.
+Movement speed is `1.0 m/s`, i.e. 300 px/s at `PIXELS_PER_METER 300.0` (`stats.gd:11,94`), so closing 1.33 m (400 px) takes ~1.3 s — that is where 0.70 comes from. Use 1.0 uptime for a melee weapon with enough knockback or a dash to close reliably.
 
-**[CURRENT]** `Fist.tres` declares `range = 300.0`, but no weapon script exports a property named `range` — `BaseWeapon` exports `weapon_range`. The line is silently ignored and the Fist swings at the 400.0 default. That is why `melee_weapon_node.gd` stretch comes out 33% wider than the file intends.
+**[CURRENT]** `Fist.tres` declares `weapon_range = 1.0` (300 px) — the property `BaseWeapon` actually exports. The stale `range = 300.0`, which no script exported and which was silently ignored so the Fist swung at the 400.0 default, is gone; `melee_weapon_node.gd`'s swing and hitbox stretch now follow the 1.0 m the file authors.
 
 ### 4.4 Anti-snowball rule **[PROPOSED]**
 
@@ -379,16 +379,16 @@ Price 3, hard cap **+15% WB / +15% EHP**. Measured against the §1.1 reference f
 Two notes from the current catalog:
 
 - **`Spread` is the clearest violation**: `spread_modifier.gd:24-33` loops `range(active_count)` and spawns **two** extra projectiles per iteration, so one stack makes the weapon fire **3× as many projectiles — +200% WB** for a price-3 item. One stack should be one extra projectile (+50% at most, and that is already the whole budget).
-- **`Chain` is the same problem in target space**: `chain_modifier.gd:90` sets `max_bounces * active`, and each chain projectile deals `max(base_amount, final_amount)` — full damage. Three bounces = **+300% WB** against a pack.
+- **`Chain` is the same problem in target space**: `chain_modifier.gd:94` sets `max_bounces * active`, and each chain projectile deals `max(base_amount, final_amount)` — full damage. Three bounces = **+300% WB** against a pack.
 
 ### 6.3 Modifiers that read the wrong stat
 
-`base_damage` is a **standalone stat** defaulting to 5.0 (`stats.gd:19`). It is not the weapon's `base_damage`. Two modifiers derive their damage from it:
+`base_damage` is a **standalone stat** defaulting to 5.0 (`stats.gd:33`). It is not the weapon's `base_damage`. Two modifiers derive their damage from it:
 
-- `spinning_orbs_modifier.gd:67` — 2 orbs × 50% of 5.0 = 5.0 damage, independent of your weapon
+- `spinning_orbs_modifier.gd:68` — 2 orbs × 50% of 5.0 = 5.0 damage, independent of your weapon
 - `reflect_projectiles_modifier.gd:31` — `base_damage` stat × multiplier, per incoming hit
 
-On a Pistol (`WB_raw 4.0`), Spinning Orbs is **+125% WB_raw**. On a rifle with `base_damage 28.0` it is +18%. **Any modifier that derives damage from a stat instead of the weapon's damage context is a balance hazard**, because its value is inversely proportional to your build — it gets *stronger* as your weapon gets worse. Either read the weapon's `current_damage` (as `Chain` does at `chain_modifier.gd:38`, which carries the already-multiplied hit through in `damage_ctx`) or flag the modifier as build-dependent and budget it against the T0 baseline only.
+On a Pistol (`WB_raw 4.0`), Spinning Orbs is **+125% WB_raw**. On a rifle with `base_damage 28.0` it is +18%. **Any modifier that derives damage from a stat instead of the weapon's damage context is a balance hazard**, because its value is inversely proportional to your build — it gets *stronger* as your weapon gets worse. Either read the weapon's `current_damage` (as `Chain` does at `chain_modifier.gd:41`, which carries the already-multiplied hit through in `damage_ctx`) or flag the modifier as build-dependent and budget it against the T0 baseline only.
 
 ### 6.4 New-modifier checklist **[PROPOSED]**
 
@@ -406,6 +406,6 @@ On a Pistol (`WB_raw 4.0`), Spinning Orbs is **+125% WB_raw**. On a rifle with `
 
 ## 7. Where the current game breaks these rules
 
-Not here. See **`docs/systems/balance_audit.md`** — 23 measured violations, a fix order, and the assumptions these numbers rest on.
+Not here. See **`docs/systems/balance_audit.md`** — 22 measured violations, a fix order, and the assumptions these numbers rest on.
 
 That separation is the point of the split. This file answers "what may a new weapon give?" and changes only when a design decision changes. The audit answers "what does the game give today?" and changes every time someone edits a `.tres`. Keeping them in one file meant every balance edit had to touch the rulebook, which is exactly the pressure that stops anyone writing the rulebook down.

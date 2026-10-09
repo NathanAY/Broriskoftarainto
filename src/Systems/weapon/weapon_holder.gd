@@ -22,7 +22,9 @@ var event_manager: EventManager:
         return owner_node.get_node_or_null("EventManager") as EventManager
 @export var weapons: Array[BaseWeapon] = []   # list of Weapon .tres resources (templates)
 # visual placement config
-@export var weapon_orbit_radius: float = 60.0
+## How far from the holder each weapon sprite orbits, in **meters**. Converted
+## to pixels in `_get_weapon_position`, the only place a `Vector2` is built.
+@export var weapon_orbit_radius: float = 0.2
 @export var angle_offset: float = -PI * 1  # start at top; change if you want different start angle
 
 # `weapons` above is the single source of truth: every equipped weapon is one
@@ -179,7 +181,7 @@ func _get_weapon_position(index: int, count: int) -> Vector2:
     if count <= 0:
         return Vector2.ZERO
     var angle := angle_offset + TAU * float(index) / float(count)
-    return Vector2(cos(angle), sin(angle)) * weapon_orbit_radius
+    return Vector2(cos(angle), sin(angle)) * Stats.meters_to_px(weapon_orbit_radius)
 
 func _update_weapon_orientation(node: Sprite2D, index: int, count: int):
     var angle := angle_offset + TAU * float(index) / float(count)

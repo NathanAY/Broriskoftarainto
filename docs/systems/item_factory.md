@@ -64,7 +64,7 @@ Three structural problems, all fixable without new systems:
 
 1. **`base_value` is read from the wrong character.** `:192` reads `stats.stats` off the factory's own `$Stats` child (`ItemFactory.tscn` → `Stats.tscn` → `DEFAULT_STATS`), not from `GlobalGameState.current_character`. Generation is blind to the character that will wear the item, so a flat roll cannot be a fair percentage. **Fix**: pass the holder's `Stats` into the generator and roll a **percentage of the holder's current value**, so `+3% max_health` means the same thing on every character. The target table for that percentage is `balance.md` §3.1.
 2. **The `base_value == 1` branch (`:460`) is dead code** — identical body to the `else`.
-3. **Dead stats are in the pool.** `attack_range` and `area_radius` appear in `DEFAULT_STATS` (`stats.gd:22-23`) and have tooltip text (`item_tooltip.gd:24-25`) but nothing reads them. A generated "Attack Range Plus" costs a full price-1 slot and does literally nothing. Remove them from `_candidate_stat_names()`.
+3. **Dead stats are in the pool.** `attack_range` and `area_radius` appear in `DEFAULT_STATS` (`stats.gd:36-37`) and have tooltip text (`item_tooltip.gd:24-25`) but nothing reads them. A generated "Attack Range Plus" costs a full price-1 slot and does literally nothing. Remove them from `_candidate_stat_names()`.
 
 ## `drop_pool` is degenerate
 

@@ -1,7 +1,11 @@
 extends Node
 
 @export var homing_strength: float = 2.0   # radians per second
-@export var homing_range: float = 400.0    # how far it can lock on
+
+## How far (in meters) the module may lock on. Copied from `homing_modifier.gd`
+## / `homing_rocket_modifier.gd` and converted only against the pixel distance
+## to a candidate.
+@export var homing_range: float = 1.33
 
 var holder: Node
 var projectile: Projectile
@@ -58,7 +62,7 @@ func _find_target() -> Node:
             continue
 
         var dist = target_position.distance_to(node.global_position)
-        if dist <= homing_range and dist < closest_dist:
+        if dist <= Stats.meters_to_px(homing_range) and dist < closest_dist:
             closest_dist = dist
             closest_target = node           
 

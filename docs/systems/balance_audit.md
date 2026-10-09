@@ -18,7 +18,7 @@ Ordered by how much they break the game.
 | # | Problem | Where | Measured | Rule violated |
 |---|---|---|---|---|
 | 1 | **Spread triples weapon output.** 2 extra projectiles per stack × `active_count` | `src/Systems/Items/modifiers/spread_modifier.gd:24-33` | **+200% WB**, price 3 | rulebook §2.1 cap +15% |
-| 2 | **Chain triples weapon output.** Full-damage projectile per bounce, `max_bounces * active` | `src/Systems/Items/modifiers/chain_modifier.gd:39-43, 90` | **+300% WB** vs a pack of 4, price 3 | rulebook §2.1 cap +15% |
+| 2 | **Chain triples weapon output.** Full-damage projectile per bounce, `max_bounces * active` | `src/Systems/Items/modifiers/chain_modifier.gd:41, 94` | **+300% WB** vs a pack of 4, price 3 | rulebook §2.1 cap +15% |
 | 3 | **`StatMultiplierModifier` doubles every future item, per stack** | `src/Systems/Items/modifiers/stat_multiplier_modifier.gd:8,28` | **×4 at 2 stacks**, uncapped | rulebook §6.1 banned model |
 | 4 | **One armor item is +10% EHP; an armor *stack* is +50% EHP** | `src/Systems/Items/modifiers/armor_modifier.gd:41-46`; armor rolls a constant `1.0` (`src/Systems/Items/item_factory.gd:459`) | 4 copies → EHP **×5.06 (+406%)** | rulebook §1, §3.1 caps |
 | 5 | **Poison is +300% WB on its own.** `duration 3.0`, full hit damage per stack, `attack_speed` cancels | `src/Systems/Items/modifiers/poison_modifier.gd:11-12, 39`; `src/Systems/Items/Buffs/poison_effect.gd:63` | `poison_dps = 3.0 × weapon_dps`, at any attack speed | rulebook §4.5 |
@@ -26,17 +26,16 @@ Ordered by how much they break the game.
 | 5b | **`max_stacks 500` never binds** (9 stacks at 3 attacks/s) — dead config that reads like a safety limit | `src/Systems/Items/modifiers/poison_modifier.gd:12` | — | — |
 | 5c | **`damage_per_tick` is set once and never refreshed**, so swapping weapons mid-fight does not raise an applied poison | `src/Systems/Items/Buffs/poison_effect.gd:20`, `src/Systems/Items/modifiers/poison_modifier.gd:39` | — | — |
 | 6 | **`flat_damage` and `critical_chance` roll a constant**, because `base_value == 0` short-circuits the RNG | `src/Systems/Items/item_factory.gd:458-459` | no variance; `flat_damage +1.0` = +10-20% WB | rulebook §3.1 |
-| 7 | **Dead stats are in the generation pool** — nothing reads them | `src/Systems/stats/stats.gd:22-23`; only `src/ui/item_tooltip.gd:24-25` mentions them | **0% power**, full price | rulebook §3.1 |
+| 7 | **Dead stats are in the generation pool** — nothing reads them | `src/Systems/stats/stats.gd:36-37`; only `src/ui/item_tooltip.gd:24-25` mentions them | **0% power**, full price | rulebook §3.1 |
 | 8 | **Generation reads the wrong character.** `base_value` comes from the factory's own `Stats` child, not the holder | `src/Systems/Items/item_factory.gd:192` | a `+1.0 health` item is +0.8% on a Soldier, +2.5% on a Multitasker | `item_factory.md`, "The value roll" |
-| 9 | **`base_damage` stat is weapon-independent damage** | `src/Systems/Items/modifiers/spinning_orbs_modifier.gd:67`, `src/Systems/Items/modifiers/reflect_projectiles_modifier.gd:31` | +125% `WB_raw` on a Pistol, +18% on a rifle | rulebook §6.3 |
-| 10 | **`ExplosiveShot` deals a flat 3.0**, not a fraction of hit damage | `src/Systems/Items/modifiers/explosive_shot_modifier.gd:10` | +60% on a 5-damage Pistol, +11% on a 28-damage rifle | rulebook §4.5 |
+| 9 | **`base_damage` stat is weapon-independent damage** | `src/Systems/Items/modifiers/spinning_orbs_modifier.gd:68`, `src/Systems/Items/modifiers/reflect_projectiles_modifier.gd:31` | +125% `WB_raw` on a Pistol, +18% on a rifle | rulebook §6.3 |
+| 10 | **`ExplosiveShot` deals a flat 3.0**, not a fraction of hit damage | `src/Systems/Items/modifiers/explosive_shot_modifier.gd:12` | +60% on a 5-damage Pistol, +11% on a 28-damage rifle | rulebook §4.5 |
 | 11 | **Pistol (4.0) and Shotgun (5.0) are strictly worse than Fist (10.0)** with no compensating upside | `src/Resources/weapons/Pistol.tres`, `src/Resources/weapons/Shotgun.tres` — 4 of 5 weapons never set `base_damage`, so all sit at the 5.0 default | -60% / -50% | rulebook §2.2 T1 floor |
-| 12 | **`Crit` is dead at 1 stack** — `critical_chance` defaults to 0.0, so `randf() * 100 < 0` never fires | `src/Systems/Items/modifiers/crit_modifier.gd:27`, `src/Systems/stats/stats.gd:26` | **0% WB** until a crit item is bought | rulebook §6.2 |
+| 12 | **`Crit` is dead at 1 stack** — `critical_chance` defaults to 0.0, so `randf() * 100 < 0` never fires | `src/Systems/Items/modifiers/crit_modifier.gd:27`, `src/Systems/stats/stats.gd:39` | **0% WB** until a crit item is bought | rulebook §6.2 |
 | 13 | **Weapons cost 5 and money starts at 0**, income is +1 per kill | `src/Systems/Items/item_price_analyzer.gd:10`; `src/Scripts/spawner_modifier.gd:22-24` | a weapon costs 5 kills, earned *after* the shop opened | rulebook §2.1 |
 | 14 | **Character power spread is huge.** Wildling starts at 288 EHP against the 40 reference, while Brawler starts at +39% `WB_solo` | rulebook §6 table | Wildling **7.2×** the reference EHP, Brawler **1.39×** the reference `WB_solo` | rulebook §6 |
 | 15 | **Three of five characters start with no weapon** | `src/Assets/character/ranger/Ranger.tres`, `src/Assets/character/soldier/Soldier.tres`, `src/Assets/character/wildling/Wildling.tres` | 0 `WB_solo` at run start | rulebook §6 |
 | 16 | **`highest_hp.tres` and `lowest_hp.tres` are cross-wired** to the wrong scripts | `src/Resources/weapons/aim/highest_hp.tres` runs `LowestHealthTargetSelector`; `src/Resources/weapons/aim/lowest_hp.tres` runs `RandomTargetSelector` | Shotgun aims at the *lowest*-HP target | rulebook §4.8 checklist |
-| 17 | **`Fist.tres` declares `range = 300.0`**, which no script exports | `src/Resources/weapons/Fist.tres` vs `src/Systems/weapon/BaseWeapon.gd:9` (`weapon_range`) | silently ignored; swings at 400.0 | rulebook §4.3 |
 | 18 | **Shotgun pellets sum to 200%**, so it deals double its own `WB_raw` into one target | `src/Systems/weapon/shotgun_weapon.gd:16` | 5.0 actual vs 2.5 budgeted | rulebook §4.2 |
 | 19 | **~35% of stat items triple in price** (1 → 3) purely from the curse roll, with identical positive power | `src/Systems/Items/item_price_analyzer.gd:14-24`; `src/Systems/Items/item_factory.gd:206-208` | the price-band-as-budget mapping (rulebook §2.1) breaks for 35% of offers | rulebook §2.1 |
 | 20 | **`RegenModifier.tscn`** — the abstract, behaviourless base — is loaded as an offerable scene | `src/Systems/Items/modifiers/` | a price-3 item that does nothing | rulebook §2.1 |
@@ -65,7 +64,7 @@ Ordered by how much they break the game.
 
 These hold the numbers above. If one changes, re-derive the tables rather than trusting the figures.
 
-- `Stats.DEFAULT_STATS` (`src/Systems/stats/stats.gd:15-30`) is the reference frame for every WB and EHP number in the rulebook. If a base stat changes, rulebook §2.3's targets and §4.6's TTK bands move with it.
+- `Stats.DEFAULT_STATS` (`src/Systems/stats/stats.gd:29-44`) is the reference frame for every WB and EHP number in the rulebook. If a base stat changes, rulebook §2.3's targets and §4.6's TTK bands move with it.
 - Enemy and boss scaling numbers come from the `@export` defaults on `src/Systems/enemy_spawner.gd` and `src/Systems/boss_spawner.gd` as currently set in the scene files. Those are exports, so a scene override changes the curve and invalidates rulebook §4.6.
 - `current_loop` on the boss spawner scales from `1` while the enemy spawner scales from `0` (`src/Systems/boss_spawner.gd:58` vs `src/Systems/enemy_spawner.gd:184`). Boss HP is `10 + 500 × loop`, enemy HP is `10 + 20 × (loop − 1)`. That off-by-one is intentional-looking but is worth confirming before anyone tunes against rulebook §4.6.
 

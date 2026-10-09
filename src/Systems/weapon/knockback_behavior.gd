@@ -1,7 +1,10 @@
 extends Node
 class_name KnockbackBehavior
 
-@export var knockback_strength: float = 300.0
+## Meters per second, matching `knockback_modifier.gd`. This node copies the
+## configured value onto a projectile at spawn time and never converts it -
+## `KnockbackController.start_knockback` does.
+@export var knockback_strength: float = 1.0
 @export var knockback_duration: float = 0.2
 
 var knockback_velocity: Vector2 = Vector2.ZERO

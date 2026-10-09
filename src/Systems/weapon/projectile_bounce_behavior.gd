@@ -2,7 +2,11 @@ extends Node
 class_name ProjectileBounceBehavior
 
 @export var max_bounces: int = 300
-@export var bounce_range: float = 1000.0
+
+## How far (in meters) a bounce may search for its next target. Copies the
+## configured value from `projectile_bounce_modifier.gd` and converts only when
+## it hands the range to the selector.
+@export var bounce_range: float = 3.33
 @export var target_selector: TargetSelector   # ✅ direct reference
 
 var holder: Node
@@ -53,7 +57,8 @@ func _find_next_target(exclude: Node) -> Node:
     if not sprite_node:
         sprite_node = holder_node
 
-    var candidates = target_selector.find_targets(exclude, bounce_range, holder_node)
+    var candidates = target_selector.find_targets(
+        exclude, Stats.meters_to_px(bounce_range), holder_node)
 
     # Filter out: current target + last 2 hits
     candidates = candidates.filter(

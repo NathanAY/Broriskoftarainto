@@ -108,10 +108,11 @@ func test_death_aura_builtin_poison_applied() -> void:
     # is the holder's last entry.
     var equipped: BaseWeapon = character.weapon_holder.weapons[0]
 
-    # Well inside the aura's radius. `TestScene.tscn` leaves the enemy 200 units
-    # from the character, which is exactly half of `weapon_range`, so the sprite
-    # orbiting at `weapon_orbit_radius` would carry the measured distance past
-    # the edge on part of its orbit and the poison would only land some ticks.
+    # Well inside the aura's radius. `TestScene.tscn` leaves the enemy 200 px
+    # from the character, which is almost exactly half of `weapon_range`
+    # (1.33 m halved is ~199.5 px), so the sprite orbiting at
+    # `weapon_orbit_radius` would carry the measured distance past the edge on
+    # part of its orbit and the poison would only land some ticks.
     enemy.global_position = character.global_position + Vector2(80.0, 0.0)
 
     # plenty of headroom so fast poison ticks cannot kill the enemy mid-test

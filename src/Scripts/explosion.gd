@@ -1,7 +1,10 @@
 extends Area2D
 class_name Explosion
 
-@export var radius: float = 100.0
+## Blast radius in **meters**, the unit a designer authors and the tooltip would
+## show. `get_radius_px()` is the only pixel form - the collision shape and the
+## drawn circle both take it, so neither can drift from the authored number.
+@export var radius: float = 0.33
 @export var damage: float = 10
 @export var duration: float = 0.15
 var time_passed: float = 0.0
@@ -11,11 +14,16 @@ var event_manager: EventManager = null
 var holder: Node = null
 var stats: Stats = null
 
+## [member radius] in pixels. A getter rather than a cached field so the shape
+## keeps matching after `area_size_multiplier` rewrites `radius` in `_ready`.
+func get_radius_px() -> float:
+    return Stats.meters_to_px(radius)
+
 func _ready():
     if stats:
         var area_multiplier: float = stats.get_stat("area_size_multiplier")
         radius *= area_multiplier
-    $CollisionShape2D.shape.radius = radius
+    $CollisionShape2D.shape.radius = get_radius_px()
     connect("body_entered", Callable(self, "_on_body_entered"))
 
 func attachEventManager(em: EventManager):
@@ -31,7 +39,7 @@ func _process(delta: float):
 func _draw():
     var alpha = 1.0 - (time_passed / duration) # fade out
     var color = Color(1, 1, 1, 0.5 * alpha)  # orange, half opacity
-    draw_circle(Vector2.ZERO, radius, color)
+    draw_circle(Vector2.ZERO, get_radius_px(), color)
 
 func _on_body_entered(body: Node):
     if body.has_node("Health"):

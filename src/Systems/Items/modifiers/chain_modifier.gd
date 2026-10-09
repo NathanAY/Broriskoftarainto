@@ -3,7 +3,10 @@ extends BaseModifier
 @export var projectile_scene: PackedScene
 @export var target_selector: TargetSelector
 @export var max_bounces: int = 3
-@export var bounce_range: float = 1000
+
+## How far (in meters) a chain bounce may search for its next target. Converted
+## only where it is handed to a target selector.
+@export var bounce_range: float = 3.33
 @export var projectile_speed: float = 2000
 @export var display_name: String = "Chain"
 @export var trigger_event: String = "on_hit" #"on_attack", "on_hit", "before_take_damage"
@@ -62,7 +65,8 @@ func _find_next_target(exclude: Node) -> Node:
     var sprite_node: Node2D = holder_node.get_node_or_null("Sprite") if holder_node else null
     if not sprite_node:
         sprite_node = holder_node
-    var candidates = target_selector.find_targets(sprite_node, bounce_range, holder_node)
+    var candidates = target_selector.find_targets(
+        sprite_node, Stats.meters_to_px(bounce_range), holder_node)
     candidates = candidates.filter(func(t): return t != exclude)
     return candidates[0] if candidates.size() > 0 else null
 

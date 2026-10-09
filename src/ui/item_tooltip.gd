@@ -22,7 +22,7 @@ const STAT_HINTS: Dictionary = {
     "flat_damage": "Flat damage added to every hit.\nGreat for fast-attacking weapons with low base damage, since it scales with hits per second.",
     "attack_speed": "Attack speed multiplier. Higher = more attacks per second = more on-hit effects.",
     "area_radius": "Radius of area attacks and melee swings.",
-    "attack_range": "Maximum distance at which your weapons can hit targets.",
+    "attack_range": "Maximum distance at which your weapons can hit targets (in meters).",
     "movement_speed": "Movement speed in meters per second (m/s).",
     "armor": "Reduces incoming damage.\nFormula: final damage x (10 / (10 + armor)).\nExample: 1 armor blocks about 9%% (multiplier 0.91).\nExample: 10 armor blocks 50%% (multiplier 0.50).",
     "critical_chance": "Chance per hit to land a critical strike (in percent, 0-100).",
@@ -46,7 +46,7 @@ static func tooltip_lines(resource: Resource) -> PackedStringArray:
     if resource is BaseWeapon:
         lines.append("name: " + str(resource.name))
         lines.append("damage: " + str(resource.base_damage))
-        lines.append("range: " + str(resource.weapon_range))
+        lines.append("range: " + str(resource.weapon_range) + " m")
         lines.append("attack speed: " + str(resource.base_attack_speed))
         var desc := str(resource.description).strip_edges()
         if not desc.is_empty():
@@ -103,7 +103,7 @@ static func weapon_card_rows(weapon: BaseWeapon) -> Array:
         return rows
     _append_name_row(rows, weapon.name)
     _append_weapon_row(rows, "Damage", str(weapon.base_damage))
-    _append_weapon_row(rows, "Range", str(weapon.weapon_range))
+    _append_weapon_row(rows, "Range", str(weapon.weapon_range) + " m")
     _append_weapon_row(rows, "Attack Speed", str(weapon.base_attack_speed))
     var desc := str(weapon.description).strip_edges()
     if not desc.is_empty():

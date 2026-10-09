@@ -3,7 +3,10 @@ extends BaseModifier
 @export var display_name: String = "Projectile Bounce"
 @export var trigger_event: String = "on_attack"
 @export var max_bounces: int = 3
-@export var bounce_range: float = 1000.0
+
+## How far (in meters) a bounce may search for its next target. The behavior
+## node converts it at the point it queries the selector.
+@export var bounce_range: float = 3.33
 
 func get_tooltip_stats() -> String:
     return "Projectiles bounce to %d extra targets per stack" % max_bounces

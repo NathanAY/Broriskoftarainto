@@ -23,7 +23,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | `CONTEXT.md` | What a word means. *Character* vs *Player*, *effect* vs *stat modifier*, *wave* vs *stage* |
 | `docs/visual_style.md` | Icon naming, sizes, the Borderlands art direction, the two style blocks and two palettes (UI vs art), menu background layers, sprite sheets, the character rig |
 | `docs/systems/balance.md` | How much power a new weapon, item, modifier or character may give — **read before designing one** |
-| `docs/systems/balance_audit.md` | The 23 places the game currently breaks those balance rules |
+| `docs/systems/balance_audit.md` | The 22 places the game currently breaks those balance rules |
 
 **Systems** — `docs/systems/`
 | Doc | What it covers |

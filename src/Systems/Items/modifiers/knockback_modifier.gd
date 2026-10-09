@@ -1,14 +1,17 @@
 extends BaseModifier
 
 @export var display_name: String = "Knockback"
-@export var knockback_strength: float = 300.0
+
+## Meters per second, not pixels per second. `KnockbackController.start_knockback`
+## converts at the boundary, so nothing else in the chain touches the scale.
+@export var knockback_strength: float = 1.0
 # Display trigger: knockback itself is applied on hit (on_attack only
 # pre-attaches the behavior to projectiles).
 @export var trigger_event: String = "on_hit"
 var knockback_duration: float = 0.2
 
 func get_tooltip_stats() -> String:
-    return "Knocks back enemies with %s force" % str(knockback_strength)
+    return "Knocks back enemies at %s m/s" % str(knockback_strength)
 
 func attachEventManager(em: EventManager):
     _cache_holder(em)

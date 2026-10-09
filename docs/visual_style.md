@@ -432,7 +432,7 @@ Generated art from the sessions that settled these prompts is kept under `docs/p
 | Fact | Source |
 | --- | --- |
 | UI colors, panel stylebox | `src/ui/item_display_panel.gd:17-28`, `make_panel_stylebox()` |
-| Stat icon lookup | `src/Systems/stats/stats.gd:189-193` |
+| Stat icon lookup | `src/Systems/stats/stats.gd:203-207` |
 | Modifier icon lookup | `src/ui/ItemIconGenerator.gd:22-32` |
 | Icon display sizes | `src/ui/IconCard.tscn`, `src/ui/ItemDisplayPanel.tscn`, `src/ui/TooltipUi.tscn`, `src/ui/icon_card.gd`, `src/ui/BuffTile.tscn` |
 | Buff / debuff border colours | `src/ui/buff_tile.gd` (`COLOR_POSITIVE` / `COLOR_NEGATIVE`, gold on hover) |

@@ -6,12 +6,24 @@ class_name BaseWeapon
 @export var description: String
 @export var base_attack_speed: float = 1.0
 @export var base_damage: float = 5.0
-@export var weapon_range: float = 400.0
 @export var modifiers: Dictionary = {}
 @export var target_selector: TargetSelector
 @export var sprite: Texture2D    # assign in .tres
 @export var sprite_offset: Vector2 = Vector2.ZERO  # for fine positioning if needed
 @export var attack_sound: Array[Resource] = []
+
+## How far this weapon reaches, **in meters**. The unit the player is shown, so
+## a `.tres` reads 1.0 rather than 300 and a designer can compare two weapons
+## without converting. Convert at the point of use with [method get_range_px]
+## rather than reading this field directly.
+@export var weapon_range: float = 1.33
+
+## [member weapon_range] in pixels - the only form the target selectors, the
+## melee swing and the aura's radius take. A getter rather than a separate
+## field so the number damage is measured against cannot drift from the number
+## the tooltip prints.
+func get_range_px() -> float:
+    return Stats.meters_to_px(weapon_range)
 
 ## Damage one swing deals: (base_damage + flat_damage) * damage.
 ##
@@ -125,7 +137,7 @@ func _on_timeout() -> void:
 
     var targets: Array[Node] = []
     if target_selector:
-        targets = target_selector.find_targets(sprite_node, weapon_range, holder)
+        targets = target_selector.find_targets(sprite_node, get_range_px(), holder)
 
     if targets.size() > 0:
         try_shoot(targets)
@@ -153,7 +165,7 @@ func aim() -> void:
 
     var targets: Array[Node] = []
     if target_selector:
-        targets = target_selector.find_targets(sprite_node, weapon_range, holder)
+        targets = target_selector.find_targets(sprite_node, get_range_px(), holder)
 
     if targets.size() == 0:
         return

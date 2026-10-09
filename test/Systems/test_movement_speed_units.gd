@@ -26,7 +26,7 @@ func test_default_movement_speed_is_meters_per_second() -> void:
     stats.get_parent().free()
 
 
-func test_one_meter_per_second_maps_to_200_px() -> void:
+func test_one_meter_per_second_maps_to_300_px() -> void:
     var stats := _build_stats()
     stats.set_base_stat("movement_speed", 1.0)
     assert_float(stats.get_stat("movement_speed")).is_equal_approx(1.0, 0.0001)

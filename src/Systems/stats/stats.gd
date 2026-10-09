@@ -4,9 +4,23 @@ class_name Stats
 
 @export var event_manager: Node  # assign LocalEventManager in editor or via code
 
-## World unit scale: 200 pixels = 1 meter. Stats measured in meters (like
-## movement_speed, stored as m/s) are converted to pixels with this factor.
+## World unit scale: 300 pixels = 1 meter. Anything a designer tunes or the
+## player is shown - a stat, a weapon's range, a knockback strength - is stored
+## in meters; `meters_to_px()` is the only place that becomes pixels, at the
+## boundary where the value is handed to the physics server or a `Vector2`.
 const PIXELS_PER_METER: float = 300.0
+
+## The one conversion, for every meter-valued quantity in the project. Prefer
+## this over multiplying by [constant PIXELS_PER_METER] inline: it keeps the
+## unit of a caller obvious (`to_px(meters)` reads as meters at the call site)
+## and means the scale lives in exactly one place.
+static func meters_to_px(meters: float) -> float:
+    return meters * PIXELS_PER_METER
+
+## The inverse, for authoring and for tests that check a `.tres` against the
+## pixel value the game actually plays at.
+static func px_to_meters(pixels: float) -> float:
+    return pixels / PIXELS_PER_METER
 
 ## Canonical base values, shared by every character. `CharacterData.base_stats`
 ## overrides a subset of these, so UI that needs to know whether a character's
@@ -20,7 +34,7 @@ const DEFAULT_STATS := {
     "flat_damage": 0.0,
     "attack_speed": 1.0,
     "area_radius": 1.0,
-    "attack_range": 500.0,
+    "attack_range": 1.67,
     "movement_speed": 1.0,
     "critical_chance": 0.0,
     "critical_multiplier": 1.5,
@@ -76,9 +90,9 @@ func get_stat(stat_name: String) -> float:
     return final_value
 
 ## movement_speed is stored in meters per second; convert to pixels per second
-## for physics (200 px = 1 m).
+## for physics (300 px = 1 m).
 func get_movement_speed_px() -> float:
-    return get_stat("movement_speed") * PIXELS_PER_METER
+    return meters_to_px(get_stat("movement_speed"))
 
 
 func set_base_stat(stat_name: String, value: float):

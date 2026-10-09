@@ -19,14 +19,17 @@ class_name AreaWeapon
 
 const BURST_SCENE := preload("res://src/Scenes/particles/area_damage_burst.tscn")
 
-## The aura's damage radius, and the radius of the burst drawn on it: half of
-## `weapon_range`.
-##
-## A getter rather than an export, so the number the damage is measured against
-## and the number the player is shown cannot disagree.
+## The aura's damage radius in **meters**: half of `weapon_range`. A getter
+## rather than an export, so the number the damage is measured against and the
+## number the player is shown cannot disagree.
 var radius: float:
     get:
         return weapon_range * 0.5
+
+## The same radius in pixels, which is what the target selector measures against
+## and what the burst visual is scaled to.
+func get_radius_px() -> float:
+    return get_range_px() * 0.5
 
 ## `_targets` is what `_on_timeout` found using the full `weapon_range`, and is
 ## unused: the aura's own range is narrower, so the list is re-derived rather
@@ -35,7 +38,7 @@ var radius: float:
 func try_shoot(_targets: Array[Node]) -> void:
     var holder = get_holder()
     if not holder: return
-    var effective_targets := target_selector.find_targets(sprite_node, radius, holder)
+    var effective_targets := target_selector.find_targets(sprite_node, get_radius_px(), holder)
     _spawn_burst(holder)
     for t in effective_targets:
         if t.has_node("Health"):
@@ -50,7 +53,7 @@ func try_shoot(_targets: Array[Node]) -> void:
 ## thrown instead of being dragged along by a moving holder.
 func _spawn_burst(holder: Node) -> void:
     var burst: AreaDamageBurst = BURST_SCENE.instantiate()
-    burst.radius = radius
+    burst.radius = get_radius_px()
     holder.add_child(burst)
     # After parenting, not before: an unparented Node2D has no parent transform
     # to compose, so writing `global_position` first would store the sprite's

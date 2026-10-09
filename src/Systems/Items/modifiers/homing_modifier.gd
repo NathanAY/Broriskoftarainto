@@ -2,11 +2,14 @@ extends BaseModifier
 
 @export var display_name: String = "Homing"
 @export var homing_strength: float = 1.0   # how fast projectile can turn (radians per second)
-@export var homing_range: float = 400.0    # max distance to search for targets
+
+## Max distance to search for targets, in meters. The steering module converts
+## it at the point it compares against a pixel distance.
+@export var homing_range: float = 1.33
 @export var trigger_event: String = "on_attack"
 
 func get_tooltip_stats() -> String:
-    return "Projectiles seek targets within %s" % str(homing_range)
+    return "Projectiles seek targets within %s m" % str(homing_range)
 
 func attachEventManager(em: EventManager):
     _cache_holder(em)

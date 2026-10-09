@@ -40,11 +40,12 @@ func test_weapon_tooltip_lines() -> void:
     var lines: PackedStringArray = ItemTooltip.tooltip_lines(weapon)
     assert_that(lines).contains("name: Pistol")
     assert_that(lines).contains("damage: 5.0")
-    assert_that(lines).contains("range: 400.0")
+    assert_that(lines).contains("range: 1.33 m")
     assert_that(lines).contains("attack speed: 0.8")
-    # built-in modifiers declared on the pistol show as extra lines
+    # built-in modifiers declared on the pistol show as extra lines; the
+    # knockback strength is authored in m/s (see docs/systems/stats.md "Units").
     assert_that(lines).contains("pierce: 1")
-    assert_that(lines).contains("knockback: 120.0")
+    assert_that(lines).contains("knockback: 0.4 m/s")
     assert_that(lines).contains("description: Pistol")
     assert_int(lines.size()).is_equal(7)
 
@@ -350,7 +351,7 @@ func test_energy_shield_tooltip() -> void:
 
 func test_homing_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/HomingModifier.tscn")).is_equal(
-        "effect: Homing — Projectiles seek targets within 400.0 (Triggers on attack)")
+        "effect: Homing — Projectiles seek targets within 1.33 m (Triggers on attack)")
 
 
 func test_homing_rocket_tooltip() -> void:
@@ -365,7 +366,7 @@ func test_homing_rocket_from_target_tooltip() -> void:
 
 func test_knockback_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/KnockbackModifier.tscn")).is_equal(
-        "effect: Knockback — Knocks back enemies with 300.0 force (Triggers on hit)")
+        "effect: Knockback — Knocks back enemies at 1.0 m/s (Triggers on hit)")
 
 
 func test_stat_on_kill_tooltip() -> void:
@@ -712,7 +713,7 @@ func test_shop_menu_character_info_tooltips() -> void:
     weapon_row.emit_signal("mouse_entered")
     assert_bool(shop.tooltip.visible).is_true()
     assert_str(shop.tooltip.name_label.text).contains("Pistol")
-    assert_str(shop.tooltip.label.text).contains("+400 Range")
+    assert_str(shop.tooltip.label.text).contains("+1.33 m Range")
     weapon_row.emit_signal("mouse_exited")
     assert_bool(shop.tooltip.visible).is_false()
 

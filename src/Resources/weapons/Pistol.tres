@@ -19,7 +19,7 @@ base_attack_speed = 0.8
 modifiers = {
 "knockback": {
 "duration": 0.15,
-"strength": 120.0
+"strength": 0.4
 },
 "pierce": {
 "amount": 1

@@ -2,7 +2,11 @@ extends Node2D
 class_name SpinningOrb
 
 @export var orbit_center: Node2D
-@export var orbit_radius := 60.0
+
+## Distance from the centre the orb travels, in **meters** (the unit the
+## spawning modifier configures). Converted to pixels only where it places the
+## orb, since a `Vector2` offset is pixels.
+@export var orbit_radius: float = 0.2
 @export var orbit_speed := 360.0  # degrees per second
 @export var angle_offset := 0.0
 @export var damage := 3.0
@@ -29,7 +33,8 @@ func _process(delta: float):
     _angle += orbit_speed * delta
     var angle_rad = deg_to_rad(_angle + angle_offset)
     var center_pos = orbit_center.global_position
-    global_position = center_pos + Vector2(cos(angle_rad), sin(angle_rad)) * orbit_radius
+    var offset := Vector2(cos(angle_rad), sin(angle_rad)) * Stats.meters_to_px(orbit_radius)
+    global_position = center_pos + offset
 
     # Deal contact damage every frame
     _deal_contact_damage()

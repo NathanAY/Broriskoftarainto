@@ -13,18 +13,22 @@ const BURST_SCENE := "res://src/Scenes/particles/area_damage_burst.tscn"
 ## Distance from the character to the near enemy in `TestScene.tscn`.
 const NEAR_DISTANCE := 200.0
 
-## The aura's own damage radius, half of `weapon_range`.
+## The aura's own damage radius **in pixels**, half of `weapon_range`.
 ##
-## Read from the weapon rather than hardcoded, because it is the number the
-## damage assertions below are actually about. `TestScene.tscn` puts its enemy
-## exactly `NEAR_DISTANCE` from the character, which is *also* the radius, and
-## the weapon sprite orbits the holder at `weapon_orbit_radius` (60), so the
-## distance the selector measures swings between `radius - 60` and `radius + 60`.
-## That straddles the boundary, and the aura then damages the enemy on only part
-## of its orbit - a suite that passes or fails depending on the orbit phase.
+## `weapon_range` and `AreaWeapon.radius` are authored in meters (see
+## `docs/systems/stats.md`, "Units"), but every distance this suite measures is a
+## pixel distance, so the conversion happens once here through `Stats`. Read
+## from the weapon rather than hardcoded, because it is the number the damage
+## assertions below are actually about. `TestScene.tscn` puts its enemy
+## `NEAR_DISTANCE` (200 px) from the character, which is almost exactly the
+## radius (1.33 m halved is ~199.5 px), and the weapon sprite orbits the holder
+## at `weapon_orbit_radius` (0.2 m = 60 px), so the distance the selector
+## measures swings between `radius - 60` and `radius + 60`. That straddles the
+## boundary, and the aura then damages the enemy on only part of its orbit - a
+## suite that passes or fails depending on the orbit phase.
 ## `test_damages_an_enemy_in_range` therefore pulls its target well inside.
-func _aura_radius() -> float:
-	return load(DEATH_AURA).radius
+func _aura_radius_px() -> float:
+	return Stats.meters_to_px(load(DEATH_AURA).radius)
 
 ## Health every target in this suite is raised to.
 ##
@@ -167,7 +171,7 @@ func test_leaves_an_enemy_beyond_its_range_untouched() -> void:
 	var character: Character = test_scene.get_node("Character")
 	# past the aura's own radius, so the selector must never return it
 	var distant := WeaponTestSupport.spawn_enemy_behind(
-		test_scene, enemy, Vector2(0, _aura_radius() + 200.0))
+		test_scene, enemy, Vector2(0, _aura_radius_px() + 200.0))
 	var d_health := _give_health(distant)
 
 	WeaponTestSupport.equip_only_weapon(character, DEATH_AURA)
@@ -199,15 +203,17 @@ func test_does_not_damage_an_enemy_between_the_radius_and_weapon_range() -> void
 	var enemy: Enemy = test_scene.get_node("Enemy")
 	var character: Character = test_scene.get_node("Character")
 	# Past the radius, inside `weapon_range`, and clear of the orbit on both
-	# sides: `radius + 100` is beyond `radius + weapon_orbit_radius`, so the
-	# orbiting sprite can never measure it back inside.
+	# sides: `radius + 100` (px) is beyond `radius + weapon_orbit_radius`
+	# (60 px), so the orbiting sprite can never measure it back inside. `radius`
+	# itself is in meters, so it is converted to the pixel distance the placement
+	# needs.
 	var between := WeaponTestSupport.spawn_enemy_behind(
-		test_scene, enemy, Vector2(0, aura.radius + 100.0))
+		test_scene, enemy, Vector2(0, aura.get_radius_px() + 100.0))
 	var b_health := _give_health(between)
 	assert_float(between.global_position.distance_to(
 		character.global_position)).override_failure_message(
 		"the fixture target is not between the radius and weapon_range, so this "
-		+ "suite would pass for the wrong reason").is_less(aura.weapon_range)
+		+ "suite would pass for the wrong reason").is_less(aura.get_range_px())
 
 	WeaponTestSupport.equip_only_weapon(character, DEATH_AURA)
 
@@ -252,9 +258,11 @@ func test_a_tick_places_its_burst_on_the_weapon_sprite() -> void:
 		"the aura tick spawned no damage burst").is_equal(1)
 
 	var burst := spawned_bursts[0]
+	# `burst.radius` is pixels - `AreaWeapon` hands the burst `get_radius_px()` -
+	# so the expectation is the weapon's own pixel accessor, not the meter value.
 	assert_float(burst.radius).override_failure_message(
 		"the burst does not match half the weapon's weapon_range, so it draws a "
-		+ "circle the damage does not reach").is_equal(aura.weapon_range * 0.5)
+		+ "circle the damage does not reach").is_equal(aura.get_radius_px())
 	assert_vector(burst.global_position).override_failure_message(
 		"the burst is not centred on the weapon sprite the selector measures from"
 	).is_equal(aura.sprite_node.global_position)
@@ -356,10 +364,10 @@ func test_bursts_do_not_share_their_process_material() -> void:
 	# weapon_range would pin the authored authoring choice instead of the scaling.
 	assert_float(_rim_radius(first)).override_failure_message(
 		"the rim shards were not scaled to the weapon's own range"
-	).is_equal_approx(aura.weapon_range * 0.5 * AreaDamageBurst.START_FRACTION, RADIUS_TOLERANCE)
+	).is_equal_approx(aura.get_radius_px() * AreaDamageBurst.START_FRACTION, RADIUS_TOLERANCE)
 	assert_float(_rim_radius(last)).override_failure_message(
 		"the second weapon's burst drew the first weapon's radius"
-	).is_equal_approx(second.weapon_range * 0.5 * AreaDamageBurst.START_FRACTION, RADIUS_TOLERANCE)
+	).is_equal_approx(second.get_radius_px() * AreaDamageBurst.START_FRACTION, RADIUS_TOLERANCE)
 
 	test_scene.free()
 

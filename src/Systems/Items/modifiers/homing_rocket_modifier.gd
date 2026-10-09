@@ -3,7 +3,11 @@ extends BaseModifier
 @export var projectile_scene: PackedScene
 @export var target_selector: TargetSelector
 @export var homing_strength: float = 2.0
-@export var homing_range: int = 600
+
+## How far (in meters) the rocket may look for its next target. Converted at the
+## selector boundary in `_find_next_target`; the behavior node copies it in
+## meters.
+@export var homing_range: float = 2.0
 @export var projectile_speed: int = 250
 @export var life_time: int = 5
 @export var display_name: String = "Homing Rocket"
@@ -66,7 +70,8 @@ func _find_next_target(exclude: Node) -> Node:
     var sprite_node: Node2D = holder.get_node_or_null("Sprite")
     if not sprite_node:
         sprite_node = holder
-    var candidates = target_selector.find_targets(sprite_node, homing_range, holder)
+    var candidates = target_selector.find_targets(
+        sprite_node, Stats.meters_to_px(homing_range), holder)
     candidates = candidates.filter(func(t): return t != exclude)
     return candidates[0] if candidates.size() > 0 else null
 

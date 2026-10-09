@@ -7,7 +7,8 @@ extends BaseModifier
 
 var explosion_scene = preload("res://src/Scenes/Explosion.tscn")
 
-var explosion_radius := 64.0
+## Blast radius in meters (64 px); `Explosion` converts at its own boundary.
+var explosion_radius := 0.21
 var explosion_damage := 3.0
 
 func get_tooltip_stats() -> String:

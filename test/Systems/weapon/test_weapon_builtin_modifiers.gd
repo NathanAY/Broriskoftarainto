@@ -8,9 +8,11 @@ extends GdUnitTestSuite
 const FIST := "res://src/Resources/weapons/Fist.tres"
 const DEATH_AURA := "res://src/Resources/weapons/DeathAura.tres"
 const PISTOL := "res://src/Resources/weapons/Pistol.tres"
+const SHOTGUN := "res://src/Resources/weapons/Shotgun.tres"
 
 const KNOCKBACK_SCRIPT := "res://src/Systems/Items/modifiers/knockback_modifier.gd"
 const POISON_SCRIPT := "res://src/Systems/Items/modifiers/poison_modifier.gd"
+const EXPLOSIVE_SCRIPT := "res://src/Systems/Items/modifiers/explosive_shot_modifier.gd"
 
 
 func test_bound_poison_only_fires_on_its_weapon() -> void:
@@ -194,6 +196,88 @@ func test_pistol_builtin_pierce_hits_enemy_behind() -> void:
     assert_float(far_left).override_failure_message(
         "no projectile pierced through to the enemy behind").is_less(
             WeaponTestSupport.ENEMY_HEALTH)
+
+    test_scene.free()
+
+
+func test_bound_explosive_shot_only_fires_on_its_weapon() -> void:
+    var runner := scene_runner(WeaponTestSupport.TEST_SCENE)
+    var test_scene := runner.scene()
+    get_tree().current_scene = test_scene
+
+    var character: Character = test_scene.get_node("Character")
+    var enemy: Enemy = test_scene.get_node("Enemy")
+
+    for weapon in character.weapon_holder.weapons.duplicate():
+        character.weapon_holder.remove_weapon(weapon)
+
+    var em: EventManager = character.get_node("EventManager")
+    var explosive: BaseModifier = preload(EXPLOSIVE_SCRIPT).new()
+    explosive.bound_weapon = load(SHOTGUN)
+    character.add_child(explosive)
+    explosive.attachEventManager(em)
+
+    # A projectile far from every enemy, so the blast spawned at its position
+    # lands on nothing. The node only has to exist for `_on_hit` to read its
+    # position.
+    var projectile: Projectile = load("res://src/Systems/weapon/Projectile.tscn").instantiate()
+    projectile.global_position = Vector2(5000.0, 5000.0)
+    test_scene.add_child(projectile)
+
+    var other_weapon: BaseWeapon = load(PISTOL).duplicate(true)
+
+    var ctx := DamageContext.new()
+    ctx.source = character
+    ctx.target = enemy
+    ctx.base_amount = 10.0
+    ctx.final_amount = 10.0
+
+    # a hit from another weapon must NOT explode
+    em.emit_event("on_hit", {"projectile": projectile, "weapon": other_weapon, "body": enemy, "damage_context": ctx})
+    @warning_ignore("redundant_await")
+    await runner.simulate_frames(2)
+    assert_that(_first_explosion(test_scene)).is_null()
+
+    # a hit from the bound weapon explodes. `_spawn_explosion` is deferred, so a
+    # frame must pass before the node is in the tree.
+    em.emit_event("on_hit", {"projectile": projectile, "weapon": explosive.bound_weapon, "body": enemy, "damage_context": ctx})
+    @warning_ignore("redundant_await")
+    await runner.simulate_frames(2)
+    assert_that(_first_explosion(test_scene)).is_not_null()
+
+    test_scene.free()
+
+
+func _first_explosion(scene: Node) -> Explosion:
+    for child in scene.get_children():
+        if child is Explosion:
+            return child
+    return null
+
+
+func test_shotgun_builtin_explosive_shot_bound() -> void:
+    var runner := scene_runner(WeaponTestSupport.TEST_SCENE)
+    var test_scene := runner.scene()
+    runner.set_time_factor(5)
+    get_tree().current_scene = test_scene
+
+    var enemy: Enemy = test_scene.get_node("Enemy")
+    var e_health := WeaponTestSupport.give_enemy_health(enemy)
+    var character: Character = test_scene.get_node("Character")
+
+    var shotgun := WeaponTestSupport.equip_only_weapon(character, SHOTGUN)
+
+    @warning_ignore("redundant_await")
+    await runner.simulate_frames(WeaponTestSupport.FRAMES)
+
+    # the built-in explosive shot modifier node is bound to the shotgun
+    assert_that(shotgun.bound_effect_nodes.size()).is_equal(1)
+    # the shotgun still deals its own damage, and the target outlives the window
+    var left := WeaponTestSupport.health_left(e_health)
+    assert_float(left).override_failure_message(
+        "the enemy died and freed its Health node").is_greater(0.0)
+    assert_float(left).override_failure_message(
+        "the shotgun dealt no damage").is_less(WeaponTestSupport.ENEMY_HEALTH)
 
     test_scene.free()
 

@@ -5,6 +5,7 @@ extends GdUnitTestSuite
 const CHARACTER_UI_SCENE := "res://src/ui/CharacterUI.tscn"
 const SHOP_SCENE := "res://src/Scenes/menu/ShopMenu.tscn"
 const PISTOL_WEAPON := "res://src/Resources/weapons/Pistol.tres"
+const SHOTGUN_WEAPON := "res://src/Resources/weapons/Shotgun.tres"
 const DEATH_AURA := "res://src/Resources/weapons/DeathAura.tres"
 const PLUS_DAMAGE_ITEM := "res://src/Resources/items/PlusDamageItem.tres"
 const BUFF_SCENE := "res://src/Systems/Items/Buffs/buff.tscn"
@@ -48,6 +49,15 @@ func test_weapon_tooltip_lines() -> void:
     assert_that(lines).contains("knockback: 0.4 m/s")
     assert_that(lines).contains("description: Pistol")
     assert_int(lines.size()).is_equal(7)
+
+
+func test_shotgun_builtin_explosive_shot_line() -> void:
+    var weapon: BaseWeapon = load(SHOTGUN_WEAPON)
+    var lines: PackedStringArray = ItemTooltip.tooltip_lines(weapon)
+    assert_that(lines).contains("name: Shotgun")
+    # The shotgun's built-in explosive shot shows as a weapon line; the damage is
+    # expressed as a fraction of the hit, so the number comes from the config.
+    assert_that(lines).contains("explosive shot: 20% of hit damage")
 
 
 func test_area_weapon_tooltip_lines_include_description() -> void:
@@ -347,6 +357,11 @@ func test_emergency_heal_tooltip() -> void:
 func test_energy_shield_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/EnergyShieldModifier.tscn")).is_equal(
         "effect: Energy Shield — Shield absorbs damage, recharges 10.0 per second after 1.5s (+5.0 max shield per stack) (Triggers on before take damage)")
+
+
+func test_explosive_shot_tooltip() -> void:
+    assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/ExplosiveShotModifier.tscn")).is_equal(
+        "effect: Explosive Shot — Hits explode, dealing area damage. Explodes for 20% of hit damage (Triggers on hit)")
 
 
 func test_homing_tooltip() -> void:

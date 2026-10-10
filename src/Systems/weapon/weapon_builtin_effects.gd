@@ -3,7 +3,7 @@
 ##
 ## Weapons declare built-in effects via `BaseWeapon.modifiers`, a Dictionary keyed
 ## by effect name. Effects split into two kinds:
-## - hit-event effects (e.g. "knockback", "poison"): reuse the existing item
+## - hit-event effects (e.g. "knockback", "poison", "explosive_shot"): reuse the existing item
 ##   modifier scripts as nodes bound to the weapon, so they only fire on hits
 ##   caused by that weapon (never on another weapon's hits).
 ## - spawn-time effects (e.g. "pierce"): merged into projectile properties when
@@ -15,6 +15,7 @@ class_name WeaponBuiltinEffects
 const MODIFIER_KEY_TO_SCRIPT := {
 	"knockback": preload("res://src/Systems/Items/modifiers/knockback_modifier.gd"),
 	"poison": preload("res://src/Systems/Items/modifiers/poison_modifier.gd"),
+	"explosive_shot": preload("res://src/Systems/Items/modifiers/explosive_shot_modifier.gd"),
 }
 
 # alias config keys from the .tres dict onto the modifier script's variable names
@@ -28,6 +29,11 @@ const CONFIG_ALIASES := {
 		"duration": "duration",
 		"tick_interval": "tick_interval",
 		"max_stacks": "max_stacks",
+	},
+	"explosive_shot": {
+		"fraction": "damage_fraction_of_hit",
+		"radius": "explosion_radius",
+		"damage": "explosion_damage",
 	},
 }
 
@@ -97,6 +103,12 @@ static func builtin_tooltip_lines(weapon: BaseWeapon) -> PackedStringArray:
 				if config.has("duration"):
 					parts.append("%ss" % str(config["duration"]))
 				lines.append("poison: " + ", ".join(parts))
+			"explosive_shot":
+				var fraction := float(config.get("fraction", config.get("damage_fraction_of_hit", 0.0)))
+				if fraction > 0.0:
+					lines.append("explosive shot: %d%% of hit damage" % int(round(fraction * 100.0)))
+				else:
+					lines.append("explosive shot: %s damage" % str(config.get("damage", config.get("explosion_damage", 0.0))))
 	return lines
 
 

@@ -60,7 +60,7 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
    - `get_generation_suffix() -> String` — postfix for the item name so randomized variants differ (`StatOnKillModifier`).
 
 6. Weapon binding (implemented in `BaseModifier`)
-   - `var bound_weapon: Object = null` — when non-null, handler events must carry this exact weapon to fire. Used by weapon built-in effects (`src/Systems/weapon/weapon_builtin_effects.gd`): Fist/DeathAura/Pistol declare their own `knockback`/`poison` via `BaseWeapon.modifiers`, and the helper instantiates these modifier scripts as real nodes bound to one weapon instance.
+   - `var bound_weapon: Object = null` — when non-null, handler events must carry this exact weapon to fire. Used by weapon built-in effects (`src/Systems/weapon/weapon_builtin_effects.gd`): Fist/DeathAura/Pistol/Shotgun declare their own `knockback`/`poison`/`explosive_shot` via `BaseWeapon.modifiers`, and the helper instantiates these modifier scripts as real nodes bound to one weapon instance.
    - `_is_bound_event(data: Dictionary) -> bool` — returns `true` when `bound_weapon` is null (item-pickup path, holder-wide, unchanged) or `data.get("weapon") == bound_weapon`.
    - `_subscribe(event_name, listener)` — subscribes and records the pair. When `bound_weapon` is set, the listener is auto-wrapped so it only receives events whose payload carries the bound weapon; guard-less handlers are scoped automatically. Modifiers never write their own `if not _is_bound_event(data): return` — subscribing via `_subscribe` is enough. Events without a `weapon` key (explosion/orb sources) never match a bound modifier.
    - `_subscribe` also records every pair so `_unsubscribe_all()` can unregister before freeing. Because `EventManager` crashes on freed listeners (`LocalEventManager.gd:29`), detach MUST unsubscribe before freeing — `WeaponBuiltinEffects.detach` relies on this. Modifiers that subscribe via raw `event_manager.subscribe` bypass both the auto-scoping and the tracking; any modifier intended to work as a weapon built-in must use `_subscribe`.
@@ -114,7 +114,7 @@ Catalog
 | CritModifier | `crit_modifier.gd` | `before_deal_damage` | On crit applies crit multiplier; +0.15 crit multiplier per stack. |
 | EmergencyHealModifier | `emergency_heal_modifier.gd` | `after_take_damage` | Heals 75% max HP when below 25% HP; cooldown 60s shortens per stack. |
 | EnergyShieldModifier | `energy_shield_modifier.gd` | `before_take_damage` | Shield absorbs damage, recharges 10/s after 1.5s; +5 max shield per stack. |
-| ExplosiveShotModifier | `explosive_shot_modifier.gd` | `on_hit` | Hits explode for 3.0 area damage; +50% explosion damage per stack. |
+| ExplosiveShotModifier | `explosive_shot_modifier.gd` | `on_hit` | Each connecting hit explodes for a fraction of that hit's damage (`damage_fraction_of_hit`, default 20%); +50% per stack. Works as an item effect or a weapon built-in (the Shotgun declares it). |
 | HealOnEventModifier | `heal_on_event_modifier.gd` | randomized (`on_attack`/`on_hit`/`on_crit`/`after take damage`/... ) | Heals fixed HP per event; heal amount × active stacks. |
 | HomingModifier | `homing_modifier.gd` | `on_attack` | Adds homing steering module to projectiles; one module per stack. |
 | HomingRocketModifier | `homing_rocket_modifier.gd` | `before_take_damage` | Launches a homing rocket dealing 100% of hit damage; +1 rocket per stack. |

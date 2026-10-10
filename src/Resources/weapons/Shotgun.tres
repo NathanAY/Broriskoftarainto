@@ -16,6 +16,12 @@ projectile_scene = ExtResource("1_hd58x")
 name = "Shotgun"
 description = "Shotgun"
 base_attack_speed = 0.5
+modifiers = {
+"explosive_shot": {
+"fraction": 0.2,
+"radius": 0.21
+}
+}
 target_selector = ExtResource("3_6lkm0")
 sprite = ExtResource("7_6n3w5")
 attack_sound = Array[Resource]([ExtResource("1_4wmwi"), ExtResource("2_22c8m"), ExtResource("3_6aj5i"), ExtResource("4_r5sdm")])

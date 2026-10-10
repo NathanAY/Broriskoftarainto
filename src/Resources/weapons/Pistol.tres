@@ -16,13 +16,14 @@ projectile_scene = ExtResource("1_120iq")
 name = "Pistol"
 description = "Pistol"
 base_attack_speed = 0.8
+base_damage = 11.5
 modifiers = {
 "knockback": {
 "duration": 0.15,
 "strength": 0.4
 },
 "pierce": {
-"amount": 1
+"amount": 2
 }
 }
 target_selector = ExtResource("3_v0y1f")

@@ -88,6 +88,48 @@ All figures are `WB_solo` (§4.1) — the effective DPS a weapon actually delive
 | **T3 rare** | 13.0 – 15.5 | 1.80 – 2.20× | Late shop |
 | **T4 legendary** | 18.0 – 21.0 | 2.50 – 3.00× | ≤ 1 per run |
 
+### 2.2.1 Solo vs clear — two numbers, not one
+
+`WB_solo` ranks a weapon against **one** target. It cannot rank a weapon against a pack, because a weapon that reaches more bodies does not multiply its own per-hit damage — it spends the same budget on more targets. Every weapon therefore has two independent figures:
+
+| | Solo DPS | Clear DPS |
+|---|---|---|
+| **Measured against** | 1 enemy in range | N enemies clustered |
+| **What varies** | damage × rate × uptime | the same, × how many bodies the archetype reaches |
+| **Archetype reach** | always 1 | melee arc: all in cone · projectile: `1 + pierce` · aura: all in radius · contact: bodies touching you |
+
+Balance a weapon on **solo first**, then read clear as the archetype's payoff. A weapon that is strong on both is out of budget; a weapon strong on neither is a dead pickup. Reaching more bodies is a *legitimate* reason for a weapon to be strong in a pack — it is the entire point of the cone, the aura and the pierce — so clear DPS is bounded by the archetype, not by the same tier band.
+
+For scale, the pack figures below assume **4 clustered enemies**: the Fist sweeps an arc and hits all 4; the Pistol is capped by `pierce`; the aura catches all 4 in radius; contact assumes 2 bodies can physically touch you at once.
+
+### 2.2.2 The five weapons as measured **[CURRENT]**
+
+`docs/systems/balance_audit.md` holds what is broken; this is the balanced state the numbers below were tuned to. Fist is the T0 reference and is unchanged.
+
+| Weapon | Archetype | `base_damage` | Rate | Range | Solo | vs Fist | Clear (4) | vs Fist |
+|---|---|---|---|---|---|---|---|---|
+| **Fist** | melee arc | 10.0 | 1.0 | 1.0 | **7.0** | 1.00× | 28.0 | 1.00× |
+| Pistol | single shot + pierce 2 | 11.5 | 0.8 | 1.33 | **7.8** | 1.12× | 23.5 | 0.84× |
+| Shotgun | pellet cone, 5 pellets | 3.5 | 0.6 | 1.33 | **7.4** | 1.06× | 29.8 | 1.06× |
+| DeathAura | aura + stacking poison | 6.0 | 0.5 | 0.8 | **17.9** | **2.55×** | 71.4 | **2.55×** |
+| Thorns | contact | 5.0 | 1.6 | — | **7.2** | 1.03× | 14.4 | 0.51× |
+
+Reading the spread, which is the intended part:
+
+- **Thorns is weakest in a pack (0.51×) by design.** Only bodies physically touching you can be hit, versus the Fist's arc sweep. That is the contact archetype's cost for dealing with melee at zero range, and it should not be inflated away.
+- **The Pistol trades clear (0.84×) for reach.** `pierce 2` reaches 3 bodies, not 4, so it cannot match an arc or an aura; it pays for that with a 1.33 m range that keeps it safe.
+- **DeathAura's solo figure is a steady-state number, and it is the one weapon where the table is known to disagree with playtest.** Two effects push its *measured* output below the modelled 17.9:
+  1. It **ramps**. Poison reaches its 3-stack cap ~8 s after first contact (§4.5), so a short encounter never sees the steady state at all.
+  2. The §4.3 area uptime of **0.85 is too generous for a short aura**. That figure was chosen for an aura that is essentially always in contact with something; at 0.8 m the aura spends much of a fight with nothing in radius, and every one of those seconds is a full stop on both the weapon's hits and poison re-application. Tuning it to `base_damage 2.5` — a modelled 7.4, i.e. 1.06× the Fist — still played as *weak*, which is the measurement that the 0.85 assumption, not the `.tres` number, was the thing that was wrong.
+
+  It now sits at **2.55× the Fist on paper, above the T4 legendary ceiling**, and is the one weapon whose budget is deliberately set by feel rather than by the §4.3 table. If it now over-performs in a long fight, `max_stacks` is the cleanest lever (2 drops it to 1.75×) — it costs the player the stacking identity last, so prefer it over cutting `base_damage`, which weakens every hit including the weapon's own.
+
+Three notes on how these were derived, because they are the parts that are easy to get wrong:
+
+- **The Shotgun is budgeted on `pellet_count × base_damage`, not `base_damage`.** Each pellet deals the full `base_damage`, so `5 × 3.5 = 17.5` lands on one target at 0.6/s = `10.5` raw. Budgeting it as `3.5 × 0.6` would have understated it by 5×.
+- **DeathAura is budgeted on `base_damage × (max_stacks + rate)`, not `base_damage × rate`.** Poison deals full hit damage per stack per second, so its cap of 3 makes `(3 + 0.5) × 6.0 = 21.0` the real figure (§4.5) — `3.0` from the weapon's own hits plus `18.0` from poison at cap.
+- **The aura's range is 0.8 m, not the Fist's 1.0 m, even though both weapons reach "about a body length".** An aura is a *circle* of that radius and the Fist is an *arc*, so at equal radius the circle catches strictly more. 0.8 m keeps clear at parity with the Fist instead of above it. The previous 0.66 m was below the character's own hitbox, so it rarely pulsed at all.
+
 Full design rules and a worked example in Section 5.
 
 ### 2.3 The scaling budget across a whole run
@@ -175,8 +217,9 @@ Pick an archetype first; it fixes how `WB_solo` splits into rate and per-hit dam
 **Hard rules on the split:**
 
 - `base_attack_speed ∈ [0.25, 3.0]`. **3.0 is a wall, not advice**: every on-hit rider in `src/Systems/Items/modifiers/` fires per hit, and the ones with a fixed `duration` accumulate stacks at `hits_per_second × duration` (§4.5), so raising the rate raises rider bookkeeping and projectile counts faster than it raises weapon power.
-- **Pellets must never increase single-target damage.** The rule is `Σ per_hit_fraction ≤ 1.0`: 5 pellets at 20% each total exactly `base_damage` into one target and up to 2× when they split across two. At 100% each there is no reason to ever pick the single-shot weapon.
-- **[CURRENT]** `Shotgun.tres` violates this: `shotgun_weapon.gd:16` sets `p.damage = current_damage / pellet_count * 2`, so Σ = **200%**. A Shotgun (`base_damage 5.0`, rate 0.5) therefore deals `5.0` into one target while its `WB_raw` says `2.5` — double its own budget and still half the Fist's 10.0. **[PROPOSED]** drop the `× 2`.
+- **Pellet weapons are budgeted on the sum, not the per-pellet number.** `Shotgun.tres` deals the full `base_damage` on every pellet (`shotgun_weapon.gd`), so the number that matters is `Σ = pellet_count × base_damage` into one target. Budget `base_damage` against that sum rather than dividing it down per pellet: a shotgun that reads `5` on the card and deals `5` per pellet is honest, and the cone is what separates it from a single-shot weapon.
+- **The `WB_raw` formula for a pellet weapon is `Σ per-hit damage × rate`, not `base_damage × rate`.** `WB_raw = base_damage × base_attack_speed` (below) assumes one hit per volley, so it understates any multi-hit weapon by its hit count. For the Shotgun the correct figures are `Σ = 5 × 3.5 = 17.5` and `WB_raw = 17.5 × 0.6 = 10.5` — which is why §4.8's `WB_raw` line must be read as "one hit per volley" and a pellet weapon's `base_damage` divided out before comparison.
+- **[CURRENT]** `DeathAura.tres` is a case where this matters in the other direction: its poison deals the **full** hit damage per stack per second (`poison_modifier.gd:35`), so its steady-state output is `(max_stacks + base_attack_speed) × base_damage`, not `base_damage × base_attack_speed`. See §4.5 for how that is budgeted.
 
 ### 4.3 Uptime — why range is part of the budget
 
@@ -219,22 +262,31 @@ rider_WB = hit_damage_per_hit × hits_per_second × rider_multiplier
 
 **A rider may add at most 25% of `WB_solo`.** At 25% the rider is a flavourful bonus; at 100% it is a second weapon wearing the first weapon's clothes.
 
+**Exception — a sustained-DoT archetype, where the rider *is* the weapon.** The 25% cap assumes the weapon works without its rider and the rider is bolted on. That does not describe an aura whose identity is a stacking poison: the DoT is the damage, and budgeting it as a 25% garnish would leave the archetype unable to function. For these, budget the **whole** DoT-inclusive output against the tier band, and hold the stacking itself to the rules below:
+
+- `max_stacks` is the DoT's power knob, not a safety limit. `poison_modifier.gd` ticks `damage_per_tick × stacks` every `tick_interval`, so peak DoT dps is `base_damage × max_stacks / tick_interval` — **budget the peak, not the average.** Applications arrive at `chance × base_attack_speed`, so reaching cap takes `1 / (chance × base_attack_speed)` seconds; a weapon whose DoT needs longer than its own reach window to ramp is under-budgeted in practice even when the peak is right.
+- `duration` only has to outlast the gap between applications (`1 / (chance × base_attack_speed)`), so it is a **smoothness** knob, not a power knob. Power lives entirely in `max_stacks × tick_interval`.
+- **[CURRENT]** `DeathAura.tres` (`base_damage 6.0`, rate 0.5, `max_stacks 3`, `tick_interval 1.0`, `duration 3.0`) reaches 3 stacks in ~8 s at 50% chance, then holds `3 × 6.0 = 18.0` poison dps plus `3.0` weapon dps = `21.0` raw, `17.9` `WB_solo` at §4.3 area uptime. That is **2.55× the T0 Fist** — the weapon is budgeted against the tier band, not the rider cap, and it now sits above the T4 legendary ceiling (§2.2). See §2.2.2 for why playtest and table disagree on this weapon.
+
 The failure mode to watch for is a rider whose power is set by a `duration` rather than by a multiplier:
 
 ```
-stacks  ≈ hits_per_second × duration
-rider_dps = hit_damage × stacks = duration × weapon_dps
+stacks  ≈ hits_per_second × duration        # unbounded case
+stacks  = min(max_stacks, above)            # any DoT with a stack cap
+rider_dps = hit_damage × stacks / tick_interval
 ```
 
-Note that `attack_speed` **cancels out** here — the stack count and the weapon's own DPS both scale with hit rate. What makes this dangerous is that `duration` is a bare number with no budget attached.
+Note that `attack_speed` **cancels out** in the unbounded case — the stack count and the weapon's own DPS both scale with hit rate, leaving `duration` as the multiplier. What makes that dangerous is that `duration` is a bare number with no budget attached.
 
-`PoisonModifier` has `duration 3.0`, `tick_interval 1.0` and `max_stacks 500` (`poison_modifier.gd:11-12`), applies on every hit at 99.93% chance (`:9`), and each stack ticks for the **full hit damage** (`poison_modifier.gd:39` → `poison_effect.gd:63`). So:
+A `max_stacks` cap breaks the cancellation and is the thing to budget instead: once the cap binds, raising `base_attack_speed` stops adding stacks and only adds the weapon's own damage, so the DoT's contribution becomes a *fixed* multiple of `base_damage` rather than a runaway. That is what makes `max_stacks` a legitimate power knob under the sustained-DoT exception above.
+
+At its **script defaults**, `PoisonModifier` has `duration 3.0`, `tick_interval 1.0` and `max_stacks 500` (`poison_modifier.gd:11-12`), applies on every hit at 99.93% chance (`:9`), and each stack ticks for the **full hit damage** (`poison_modifier.gd:35` → `poison_effect.gd:52`). With an uncapped 500 the `duration` case above applies:
 
 ```
 poison_dps = 3.0 × weapon_dps
 ```
 
-**Poison alone is +300% WB, at any attack speed.** **[PROPOSED]** `duration 0.6` puts it at +60%, still above the 25% rider budget; the honest fix is `duration × multiplier = 0.25`.
+**At those defaults poison alone is +300% WB, at any attack speed.** **[PROPOSED]** `duration 0.6` puts it at +60%, still above the 25% rider budget; the honest fix for a *rider* is `duration × multiplier = 0.25`. Note this is the **item-side** default, not the weapon case: `DeathAura.tres` overrides `max_stacks` to 3 and `chance` to 0.5, which is what brings it under the sustained-DoT exception.
 
 Three more things about this modifier, all **[CURRENT]**:
 

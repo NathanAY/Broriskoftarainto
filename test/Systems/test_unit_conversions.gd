@@ -65,9 +65,9 @@ func test_death_aura_range_is_authored_directly_in_meters() -> void:
 	# The aura no longer halves `weapon_range` into a private radius: the range
 	# the card prints is the reach the damage is actually measured against.
 	var aura: AreaWeapon = load(DEATH_AURA)
-	assert_float(aura.weapon_range).is_equal_approx(0.66, METER_TOLERANCE)
+	assert_float(aura.weapon_range).is_equal_approx(0.8, METER_TOLERANCE)
 	assert_float(aura.get_range_px()).is_equal_approx(
-		Stats.meters_to_px(0.66), 0.0001)
+		Stats.meters_to_px(0.8), 0.0001)
 
 
 # --- knockback (m/s) ----------------------------------------------------------

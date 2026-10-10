@@ -41,12 +41,12 @@ func test_weapon_tooltip_lines() -> void:
     var weapon: BaseWeapon = load(PISTOL_WEAPON)
     var lines: PackedStringArray = ItemTooltip.tooltip_lines(weapon)
     assert_that(lines).contains("name: Pistol")
-    assert_that(lines).contains("damage: 5.0")
+    assert_that(lines).contains("damage: 11.5")
     assert_that(lines).contains("range: 1.33 m")
     assert_that(lines).contains("attack speed: 0.8")
     # built-in modifiers declared on the pistol show as extra lines; the
     # knockback strength is authored in m/s (see docs/systems/stats.md "Units").
-    assert_that(lines).contains("pierce: 1")
+    assert_that(lines).contains("pierce: 2")
     assert_that(lines).contains("knockback: 0.4 m/s")
     assert_that(lines).contains("description: Pistol")
     assert_int(lines.size()).is_equal(7)
@@ -89,10 +89,10 @@ func test_weapon_card_rows_are_unsigned_and_label_first() -> void:
         var typed: ItemCardRow = row
         if typed.kind == ItemCardRow.Kind.WEAPON:
             displays.append(typed.to_display())
-    assert_that(displays).contains("Damage: 5")
+    assert_that(displays).contains("Damage: 11.5")
     assert_that(displays).contains("Range: 1.33 m")
     assert_that(displays).contains("Attack Speed: 0.8 attack/sec")
-    assert_that(displays).contains("Pierce: 1")
+    assert_that(displays).contains("Pierce: 2")
     assert_that(displays).contains("Knockback: 0.4 m/s")
     for line in displays:
         assert_bool(line.begins_with("+")).override_failure_message(
@@ -114,8 +114,8 @@ func test_weapon_card_rows_include_subclass_details() -> void:
     # what a shotgun is.
     var shotgun: BaseWeapon = load(SHOTGUN_WEAPON)
     var rows := _weapon_rows(shotgun)
-    assert_that(rows).contains("Damage: 5")
-    assert_that(rows).contains("Attack Speed: 0.5 attack/sec")
+    assert_that(rows).contains("Damage: 3.5")
+    assert_that(rows).contains("Attack Speed: 0.6 attack/sec")
     assert_that(rows).contains("Pellets: 5")
 
 
@@ -126,7 +126,7 @@ func test_contact_weapon_hides_the_range_row() -> void:
     assert_bool(thorns.has_tooltip_range()).is_false()
     var rows := _weapon_rows(thorns)
     assert_that(rows).contains("Damage: 5")
-    assert_that(rows).contains("Attack Speed: 2 attack/sec")
+    assert_that(rows).contains("Attack Speed: 1.6 attack/sec")
     for line in rows:
         assert_bool(line.begins_with("Range:")).override_failure_message(
             "a contact weapon must not show a Range row, got: %s" % line).is_false()

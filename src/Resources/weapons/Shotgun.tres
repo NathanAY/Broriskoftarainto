@@ -15,7 +15,8 @@ pellet_count = 5
 projectile_scene = ExtResource("1_hd58x")
 name = "Shotgun"
 description = "Shotgun"
-base_attack_speed = 0.5
+base_attack_speed = 0.6
+base_damage = 3.5
 modifiers = {
 "explosive_shot": {
 "fraction": 0.2,

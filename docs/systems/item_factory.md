@@ -46,7 +46,7 @@ func _generate_stat_modifiers(_chosen_stat, base_value) -> Dictionary:
 
 **One formula for all 14 stats.** "5-10% of base" reads like a percentage budget and is not one.
 
-**The `base_value == 0` branch is the worst of them.** Six stats in the pool have a base of 0 (`energy_shield`, `critical_chance`, `flat_damage`, `projectile_pierce` are 0.0 in `DEFAULT_STATS`; `armor` and `lifeleach` are not in the table at all, so `.get` returns 0.0). All six roll a **hard constant `1.0`, with no RNG call and no scaling by the stat's actual scale** — a `1.0` means +1 percentage point on a 0-100 stat, +10% EHP on armor, and a doubling on a 0-1 multiplier stat.
+**The `base_value == 0` branch is the worst of them.** Six stats in the pool have a base of 0 (`energy_shield`, `critical_chance`, `flat_weapon_damage`, `projectile_pierce` are 0.0 in `DEFAULT_STATS`; `armor` and `lifeleach` are not in the table at all, so `.get` returns 0.0). All six roll a **hard constant `1.0`, with no RNG call and no scaling by the stat's actual scale** — a `1.0` means +1 percentage point on a 0-100 stat, +10% EHP on armor, and a doubling on a 0-1 multiplier stat.
 
 | Stat | Base | Roll | What 5-10% actually buys |
 |---|---|---|---|
@@ -55,10 +55,10 @@ func _generate_stat_modifiers(_chosen_stat, base_value) -> Dictionary:
 | `critical_chance` | 0.0 | **1.0 (constant)** | +1 pp of a 0-100 scale → **+0.5% WB**, and always exactly the same number. |
 | `armor` | not in `DEFAULT_STATS` | **1.0 (constant)** | **+10% EHP**, and it compounds with `ArmorModifier`'s +5/stack. |
 | `lifeleach` | not in `DEFAULT_STATS` | **1.0 (constant)** | Stat goes `1.0 → 2.0`, so `LifeLeachModifier`'s 5% lifesteal (`life_leach_modifier.gd:6,26`) **doubles to 10%**. One price-1 item doubles the build's only stat. |
-| `flat_damage` | 0.0 | **1.0 (constant)** | +10% WB on a Fist, +20% on a Shotgun. Unbounded vs weapon tier. |
+| `flat_weapon_damage` | 0.0 | **1.0 (constant)** | +10% WB on a Fist, +20% on a Shotgun. Unbounded vs weapon tier. |
 | `projectile_pierce` | 0.0 | **1.0 (constant)** | +1 target on a Pistol that already pierces 1 → **+100% WB**. |
 | `attack_range`, `area_radius` | 500.0 / 1.0 | 25-50 / 0.05-0.10 | **Nothing. No code reads either stat.** |
-| `base_damage` (stat) | 5.0 | 0.25 – 0.5 | Nothing, until you also hold Spinning Orbs or Reflect, then +5-10% (`balance.md` §6.3). |
+| `item_base_damage` | 5.0 | 0.25 – 0.5 | Nothing, until you also hold Spinning Orbs or Reflect, then +5-10% (`balance.md` §6.3). |
 
 Three structural problems, all fixable without new systems:
 

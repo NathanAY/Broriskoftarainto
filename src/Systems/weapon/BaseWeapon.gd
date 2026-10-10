@@ -42,7 +42,7 @@ func tooltip_details() -> Array:
 func has_tooltip_range() -> bool:
     return true
 
-## Damage one swing deals: (base_damage + flat_damage) * damage.
+## Damage one swing deals: (base_damage + flat_weapon_damage) * damage.
 ##
 ## This is a getter rather than a cached field on purpose. `BaseWeapon` is a
 ## Resource, so a member initializer runs while the object is still bare -
@@ -63,7 +63,7 @@ var current_damage: float:
     get:
         if not is_instance_valid(stats):
             return base_damage
-        return (base_damage + stats.get_stat("flat_damage")) * stats.get_stat("damage")
+        return (base_damage + stats.get_stat("flat_weapon_damage")) * stats.get_stat("damage")
 
 var _current_attack_speed
 

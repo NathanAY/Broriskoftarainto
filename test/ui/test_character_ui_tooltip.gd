@@ -800,8 +800,8 @@ func test_shop_menu_character_info_tooltips() -> void:
     character.free()
 
 
-func test_stat_hint_flat_damage_mentions_fast_attacking() -> void:
-    var hint: String = ItemTooltip.stat_hint("flat_damage")
+func test_stat_hint_flat_weapon_damage_mentions_fast_attacking() -> void:
+    var hint: String = ItemTooltip.stat_hint("flat_weapon_damage")
     assert_bool(hint.is_empty()).is_false()
     assert_that(hint).contains("fast-attacking weapons with low base damage")
 

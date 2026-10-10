@@ -32,11 +32,11 @@ Two independent axes. An item is legal only if it is under the cap on **both**.
 WB = damage_per_volley × attacks_per_second
 
 # from BaseWeapon.gd:45-49 and BaseWeapon.gd:152
-damage_per_hit  = (weapon.base_damage + stats.get_stat("flat_damage")) × stats.get_stat("damage")
+damage_per_hit  = (weapon.base_damage + stats.get_stat("flat_weapon_damage")) × stats.get_stat("damage")
 attacks_per_sec = stats.get_stat("attack_speed") × weapon.base_attack_speed
 ```
 
-`WB` is always evaluated **at baseline character stats** (`damage 1.0`, `flat_damage 0.0`, `attack_speed 1.0`, no items) unless stated otherwise. That is deliberate: the character's items then multiply every weapon equally, so weapons stay comparable to each other forever. A weapon's own two `.tres` numbers never change; the character around it does.
+`WB` is always evaluated **at baseline character stats** (`damage 1.0`, `flat_weapon_damage 0.0`, `attack_speed 1.0`, no items) unless stated otherwise. That is deliberate: the character's items then multiply every weapon equally, so weapons stay comparable to each other forever. A weapon's own two `.tres` numbers never change; the character around it does.
 
 Section 5 splits this into `WB_raw` (the `.tres` numbers) and `WB_solo` (after the uptime discount). `WB` here means `WB_solo` — use whichever the surrounding section names.
 
@@ -117,7 +117,7 @@ Every stat gets an explicit **Δ% per price-1 item**, plus a **cap on the total*
 |---|---|---|---|
 | `damage` | **+3%** (percent) | ×3.0 | Cleanest WB scaling; multiplies everything |
 | `attack_speed` | **+3%** (percent) | ×3.0 | Multiplies on-hit riders too (§6.1) — capped harder than it looks |
-| `flat_damage` | **+1.0** (flat) | **+3.0 total** | Flat on a 5-10 `base_damage` weapon is 10-20% WB. Cap is mandatory |
+| `flat_weapon_damage` | **+1.0** (flat) | **+3.0 total** | Flat on a 5-10 `base_damage` weapon is 10-20% WB. Cap is mandatory |
 | `health` | **+3% of max HP** | +100% | Percentage, not absolute, so it is character-independent |
 | `armor` | **+1.0** | +15 | +1 armor = +10% EHP at 0 armor, +4% at 15 |
 | `energy_shield` | **+1.5** | +30 | Recharges at 10/s, so 1 point ≈ 0.5 HP sustained |
@@ -128,7 +128,7 @@ Every stat gets an explicit **Δ% per price-1 item**, plus a **cap on the total*
 | `projectile_pierce` | **+1** | +2 | Only meaningful for projectile weapons; +1 is a doubling on a piercing one |
 | `projectile_speed_multiplier` | **+3%** | ×2.0 | Mostly uptime; low weight in the candidate pool |
 | `area_size_multiplier` | **+2%** | ×2.0 | Area damage scales ~r², so +2% radius = +4% AoE damage |
-| `base_damage` (stat) | **+3%** | ×2.0 | Rename to `secondary_damage`; only two modifiers read it (§6.3) |
+| `item_base_damage` | **+3%** | ×2.0 | Renamed from `base_damage` to say it is *not* weapon damage; only two modifiers read it (§6.3) |
 | `attack_range`, `area_radius` | — | — | **Remove from the candidate pool.** No code reads them |
 
 Buff and debuff items use the same table, scaled by the price-2 band: a price-2 buff gives **2× the price-1 amount** and lasts `duration` seconds (default 3.0), with `max_stacks 10` — both defaults on `src/Systems/Items/Buffs/buff.gd`. Budget the *time-averaged* value, not the peak: `amount × min(duration, expected_uptime)`. A buff applies its payload **once per stack**, so the peak it actually reaches is `amount × stacks` — that is why the HUD's buff tile reports the multiplied total (`docs/systems/items.md`), and it is the number to budget against, not `amount`.
@@ -383,10 +383,10 @@ Two notes from the current catalog:
 
 ### 6.3 Modifiers that read the wrong stat
 
-`base_damage` is a **standalone stat** defaulting to 5.0 (`stats.gd:33`). It is not the weapon's `base_damage`. Two modifiers derive their damage from it:
+`item_base_damage` is a **standalone stat** defaulting to 5.0 (`stats.gd:33`). It is not the weapon's `base_damage`. Two modifiers derive their damage from it:
 
 - `spinning_orbs_modifier.gd:68` — 2 orbs × 50% of 5.0 = 5.0 damage, independent of your weapon
-- `reflect_projectiles_modifier.gd:31` — `base_damage` stat × multiplier, per incoming hit
+- `reflect_projectiles_modifier.gd:31` — `item_base_damage` stat × multiplier, per incoming hit
 
 On a Pistol (`WB_raw 4.0`), Spinning Orbs is **+125% WB_raw**. On a rifle with `base_damage 28.0` it is +18%. **Any modifier that derives damage from a stat instead of the weapon's damage context is a balance hazard**, because its value is inversely proportional to your build — it gets *stronger* as your weapon gets worse. Either read the weapon's `current_damage` (as `Chain` does at `chain_modifier.gd:41`, which carries the already-multiplied hit through in `damage_ctx`) or flag the modifier as build-dependent and budget it against the T0 baseline only.
 

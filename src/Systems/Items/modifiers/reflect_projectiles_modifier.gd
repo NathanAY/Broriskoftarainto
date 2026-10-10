@@ -28,7 +28,7 @@ func _on_trigger(_event: Dictionary) -> void:
     var targets = target_selector.find_targets(holder, reflect_range * active_stacks, holder)
     if targets.is_empty():
         return
-    var damage: float = stats.get_stat("base_damage") * _current_damage_multiplier
+    var damage: float = stats.get_stat("item_base_damage") * _current_damage_multiplier
     var speed: int = int(projectile_speed * _current_projectile_speed_multiplier)
     # spawn volley toward each target
     for i in range(min(volley_projectile_count + (active_stacks - 1), targets.size())):

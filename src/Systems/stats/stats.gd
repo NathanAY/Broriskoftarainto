@@ -26,12 +26,19 @@ static func px_to_meters(pixels: float) -> float:
 ## overrides a subset of these, so UI that needs to know whether a character's
 ## value is above or below the norm (the character select screen) compares
 ## against this table rather than hardcoding its own numbers.
+## The three damage stats split cleanly by what they read, never by how much:
+## - `damage` - the global **percent multiplier** on every hit, weapon or item
+##   damage alike. 1.0 is no change, 1.7 is 170%.
+## - `flat_weapon_damage` - flat damage added to a weapon's own
+##   [member BaseWeapon.base_damage] before multipliers.
+## - `item_base_damage` - damage that belongs to no weapon at all. Only item
+##   modifiers read it, which is what distinguishes it from `damage`.
 const DEFAULT_STATS := {
     "health": 10.0,
     "energy_shield": 0.0,
     "damage": 1.0,
-    "base_damage": 5.0,
-    "flat_damage": 0.0,
+    "item_base_damage": 5.0,
+    "flat_weapon_damage": 0.0,
     "attack_speed": 1.0,
     "area_radius": 1.0,
     "attack_range": 1.67,

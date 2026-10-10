@@ -105,7 +105,7 @@ func stacked_items() -> Array[Item]:
 			{
 				"damage": {"flat": 4.0, "percent": 0.25},
 				"critical_chance": {"flat": 0.15},
-				"flat_damage": {"flat": 3.0},
+				"flat_weapon_damage": {"flat": 3.0},
 				"projectile_pierce": {"flat": 2.0},
 			}
 		),

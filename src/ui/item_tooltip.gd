@@ -17,9 +17,9 @@ static var _effect_display_cache: Dictionary = {}
 const STAT_HINTS: Dictionary = {
     "health": "Maximum hit points. You die when it reaches 0.",
     "energy_shield": "Shield that absorbs incoming damage before health. Recharges over time.",
-    "damage": "Overall damage multiplier applied to all attacks.\nFormula: (base_damage + flat_damage) * damage.",
-    "base_damage": "Base damage of your weapon before any multipliers.",
-    "flat_damage": "Flat damage added to every hit.\nGreat for fast-attacking weapons with low base damage, since it scales with hits per second.",
+    "damage": "Global damage multiplier for weapons and item damage.\n1 = 100% (no change), 1.7 = 170% damage.\nFormula: (weapon base damage + flat weapon damage) * damage.",
+    "item_base_damage": "Base damage that belongs to items rather than to a weapon.\nYour weapons ignore this - it only feeds item effects that deal their own damage.",
+    "flat_weapon_damage": "Flat damage added to a weapon's own base damage before any multipliers.\nGreat for fast-attacking weapons with low base damage, since it scales with hits per second.",
     "attack_speed": "Attack speed multiplier. Higher = more attacks per second = more on-hit effects.",
     "area_radius": "Radius of area attacks and melee swings.",
     "attack_range": "Maximum distance at which your weapons can hit targets (in meters).",

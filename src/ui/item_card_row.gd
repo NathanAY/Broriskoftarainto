@@ -35,7 +35,7 @@ var value: String = ""
 var text: String = ""
 ## Stat icon for STAT rows, `null` when the stat has no dedicated icon.
 var icon: Texture2D = null
-## Stat key before humanization, e.g. "base_damage". Used to look up `icon`.
+## Stat key before humanization, e.g. "item_base_damage". Used to look up `icon`.
 var stat_name: String = ""
 
 

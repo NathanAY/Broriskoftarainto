@@ -43,7 +43,7 @@ func test_equipped_weapon_damage_applies_character_stats_before_first_event() ->
 	# The point of the test: this is the value the first swing uses, and it must
 	# already include the character's damage multiplier. No stat-change event has
 	# been emitted since the weapon was equipped.
-	var expected := (fist.base_damage + stats.get_stat("flat_damage")) * stats.get_stat("damage")
+	var expected := (fist.base_damage + stats.get_stat("flat_weapon_damage")) * stats.get_stat("damage")
 	assert_float(stats.get_stat("damage")).is_greater(1.0).override_failure_message(
 		"brawler is meant to hit harder than the 1.0 baseline, so this test would not catch the bug")
 	assert_float(fist.current_damage).is_equal(expected).override_failure_message(

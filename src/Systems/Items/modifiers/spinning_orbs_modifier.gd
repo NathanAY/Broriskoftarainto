@@ -65,5 +65,5 @@ func _remove_orbs(timer: Timer, how_many: int, active_orbs: Array[Node]):
     timer.queue_free()
 
 func _on_stat_changes(_event):
-    _current_base_damage = stats.get_stat("base_damage")
+    _current_base_damage = stats.get_stat("item_base_damage")
     _current_damage_multiplier = stats.get_stat("damage")

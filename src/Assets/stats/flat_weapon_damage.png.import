@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dagtwjkbjawuf"
-path="res://.godot/imported/base_damage.png-dc87c000c6192f42b36f16af9bbeb65b.ctex"
+uid="uid://7fj4qow0nm87"
+path="res://.godot/imported/flat_weapon_damage.png-e070d3759c801e59adcb82fed5d451d8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://src/Assets/stats/base_damage.png"
-dest_files=["res://.godot/imported/base_damage.png-dc87c000c6192f42b36f16af9bbeb65b.ctex"]
+source_file="res://src/Assets/stats/flat_weapon_damage.png"
+dest_files=["res://.godot/imported/flat_weapon_damage.png-e070d3759c801e59adcb82fed5d451d8.ctex"]
 
 [params]
 

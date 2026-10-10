@@ -57,19 +57,24 @@ func test_resource_is_an_area_weapon_aiming_at_everything() -> void:
 	assert_that(aura.target_selector).is_instanceof(AllTargetsInRangeSelector)
 
 
-## The aura pulses at half rate: `base_attack_speed 0.5`, so its firing timer
-## waits 2s at a character's baseline `attack_speed` of 1.0 rather than the 1s
-## `BaseWeapon` defaults to.
+## The aura's firing rate is whatever `base_attack_speed` the `.tres` currently
+## declares, folded together with the holder's own `attack_speed` stat by
+## `BaseWeapon._update_timer_wait` - so the timer waits `1 / (rate x speed)` and
+## the holder's speed can retune it at runtime.
+##
+## **No literal rate is asserted here.** A weapon's numbers are balance data,
+## changed in `.tres` by design, so pinning one turns every rebalance into a red
+## suite. What has to stay true is the *mechanic*: the timer follows the weapon's
+## own rate rather than the `BaseWeapon` default of 1s, and it is derived (the
+## product of the two speeds), not authored. So the expectation is computed from
+## the values under test, and the proportionality is asserted by doubling the
+## rate and checking the wait halves.
 ##
 ## Pinned through the live timer rather than only the `.tres`, because
-## `BaseWeapon._update_timer_wait` is where `base_attack_speed` and the holder's
-## `attack_speed` stat are multiplied together - a weapon whose rate was silently
-## ignored there would still pass an assertion that only reads the resource.
-func test_ticks_at_half_rate() -> void:
-	var aura: BaseWeapon = load(DEATH_AURA)
-	assert_float(aura.base_attack_speed).override_failure_message(
-		"the aura no longer ticks at half rate").is_equal(0.5)
-
+## `_update_timer_wait` is where the two speeds are multiplied together - a
+## weapon whose rate was silently ignored there would still pass an assertion
+## that only reads the resource.
+func test_firing_timer_is_derived_from_the_weapons_own_rate() -> void:
 	var runner := scene_runner(WeaponTestSupport.TEST_SCENE)
 	var test_scene := runner.scene()
 	get_tree().current_scene = test_scene
@@ -79,12 +84,29 @@ func test_ticks_at_half_rate() -> void:
 	@warning_ignore("redundant_await")
 	await runner.simulate_frames(2)
 
-	# baseline `attack_speed` is 1.0 (`src/Systems/stats/stats.gd`), so the
-	# weapon's own rate is the whole of the product.
+	var holder_speed: float = character.get_node("Stats").get_stat("attack_speed")
+	var expected := 1.0 / maxf(0.001, equipped.base_attack_speed * holder_speed)
 	assert_float(equipped.timer.wait_time).override_failure_message(
-		"the firing timer does not wait 2s at half rate").is_equal(2.0)
+		"the firing timer does not wait 1 / (base_attack_speed x attack_speed), "
+		+ "so the aura's declared rate is not reaching its timer"
+	).is_equal_approx(expected, WAIT_TIME_TOLERANCE)
+
+	# The derivation, not a coincidence: twice the rate, half the wait. A timer
+	# hardcoded to a "reasonable" cadence fails here even when the first assertion
+	# happens to agree.
+	equipped.base_attack_speed *= 2.0
+	equipped._update_timer_wait()
+	assert_float(equipped.timer.wait_time).override_failure_message(
+		"doubling the weapon's rate did not halve its firing timer"
+	).is_equal_approx(expected * 0.5, WAIT_TIME_TOLERANCE)
 
 	test_scene.free()
+
+
+## Slack for firing-timer waits. Both sides are the same float division, but the
+## assertion runs after the weapon has been re-equipped and the stat read
+## separately, so exact equality is not guaranteed by anything.
+const WAIT_TIME_TOLERANCE := 0.001
 
 
 func test_damages_an_enemy_in_range() -> void:

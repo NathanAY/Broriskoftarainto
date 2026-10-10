@@ -29,6 +29,7 @@ const CONFIG_ALIASES := {
 		"duration": "duration",
 		"tick_interval": "tick_interval",
 		"max_stacks": "max_stacks",
+		"damage_multiplier": "damage_multiplier",
 	},
 	"explosive_shot": {
 		"fraction": "damage_fraction_of_hit",

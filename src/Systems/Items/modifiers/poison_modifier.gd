@@ -12,9 +12,15 @@ const _PoisonEffect = preload("res://src/Systems/Items/Buffs/poison_effect.gd")
 @export var max_stacks: int = 500
 @export var damage_per_stack: float = 0.5 # +50% tick damage per stack
 
-## Poison damage per tick equals 100% of the triggering hit's base damage.
+## Scales the tick damage taken from the triggering hit's damage_context.
+## 1.0 = 100% of the hit's base damage, 2.0 = 200% (twice the weapon damage).
+@export var damage_multiplier: float = 1.0
+
+## Poison damage per tick equals `damage_multiplier` of the triggering hit's base
+## damage, then grows by `damage_per_stack` for every extra modifier stack.
 func get_tooltip_stats() -> String:
-    return "Poison deals 100%% of hit damage per tick for %ss" % str(duration)
+    var pct := int(round(damage_multiplier * 100.0))
+    return "Poison deals %d%% of hit damage per tick for %ss" % [pct, str(duration)]
 
 func attachEventManager(em: Node):
     _cache_holder(em)
@@ -36,7 +42,8 @@ func _on_hit(event: Dictionary) -> void:
     var health_node = body.get_node("Health")
     # Check existing PoisonEffect on the Health node
     var existing: PoisonEffect = health_node.get_node_or_null("PoisonEffect")
-    var base_damage := float(event["damage_context"].base_amount) * (1.0 + (damage_per_stack * (_active_stacks() - 1)))
+    var hit_damage := float(event["damage_context"].base_amount) * damage_multiplier
+    var base_damage := hit_damage * (1.0 + (damage_per_stack * (_active_stacks() - 1)))
     if existing:
         existing.add_poison()
     else:

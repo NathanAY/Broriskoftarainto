@@ -133,8 +133,22 @@ func test_death_aura_builtin_poison_applied() -> void:
     assert_that(equipped.bound_effect_nodes.size()).is_equal(1)
     # enemy got poisoned (PoisonEffect lives on its Health node)
     assert_that(e_health.get_node_or_null("PoisonEffect")).is_not_null()
-    # 0.25s poison ticks plus the aura hit deal far more than the 5-damage hit
-    assert_float(e_health.current_health).is_less(195.0)
+
+    # Poison is damage *over time*, so the mechanic is that damage keeps landing
+    # after the applying hit - not that some total is reached. Asserting a total
+    # would pin `base_damage` and the poison multiplier into this suite, and both
+    # are `.tres` balance data that gets retuned without warning. So: health is
+    # down, and it keeps going down, which a hit-only effect cannot do.
+    var after_first_window := e_health.current_health
+    assert_float(after_first_window).override_failure_message(
+        "the aura's hits and poison dealt no damage at all").is_less(e_health.max_health)
+
+    @warning_ignore("redundant_await")
+    await runner.simulate_frames(int(equipped.timer.wait_time * 60.0 * 3.0))
+
+    assert_float(e_health.current_health).override_failure_message(
+        "the target took no further damage, so the poison is not ticking"
+    ).is_less(after_first_window)
 
     test_scene.free()
 

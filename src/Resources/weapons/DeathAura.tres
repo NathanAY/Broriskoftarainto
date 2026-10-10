@@ -8,15 +8,16 @@
 script = ExtResource("1_363sm")
 name = "DeathAura"
 description = "Area weapon. Hits every enemy around the wielder."
-base_attack_speed = 0.5
-base_damage = 4.0
+base_attack_speed = 2.0
+base_damage = 1.0
 weapon_range = 0.8
 modifiers = {
 "poison": {
 "chance": 0.5,
 "duration": 3.0,
-"max_stacks": 3,
-"tick_interval": 1.0
+"max_stacks": 30,
+"tick_interval": 0.5,
+"damage_multiplier": 4.0
 }
 }
 target_selector = ExtResource("2_jyyv4")

@@ -102,9 +102,19 @@ static func weapon_card_rows(weapon: BaseWeapon) -> Array:
     if weapon == null:
         return rows
     _append_name_row(rows, weapon.name)
-    _append_weapon_row(rows, "Damage", str(weapon.base_damage))
-    _append_weapon_row(rows, "Range", str(weapon.weapon_range) + " m")
-    _append_weapon_row(rows, "Attack Speed", str(weapon.base_attack_speed))
+    # Weapon base stats are the weapon's own numbers, not deltas the holder
+    # gains, so they are never signed (contrast `stat_rows`, where a "+" means
+    # a gain to the player's stats). Attack speed shows the rate it actually
+    # means, "0.8 attack/sec", instead of a bare multiplier-like number.
+    _append_weapon_row(rows, "Damage", format_value(weapon.base_damage))
+    if weapon.has_tooltip_range():
+        _append_weapon_row(rows, "Range", format_value(weapon.weapon_range) + " m")
+    _append_weapon_row(rows, "Attack Speed", format_value(weapon.base_attack_speed) + " attack/sec")
+    # Whatever the weapon's own subclass wants to add (a shotgun's pellets, ...).
+    # Asked of the weapon rather than branched on here, so a new weapon type is a
+    # weapon-script change and never another `if weapon is ...` in this file.
+    for detail in weapon.tooltip_details():
+        _append_weapon_row(rows, str(detail[0]), str(detail[1]))
     var desc := str(weapon.description).strip_edges()
     if not desc.is_empty():
         var flavor := ItemCardRow.new()
@@ -124,12 +134,14 @@ static func _append_name_row(rows: Array, display_name: String) -> void:
     rows.append(row)
 
 
+## Weapon rows are the weapon's own numbers, so they are left unsigned: a "+"
+## would read as a bonus to the holder's stats, which it never is.
 static func _append_weapon_row(rows: Array, label: String, value: String) -> void:
     var row := ItemCardRow.new()
     row.kind = ItemCardRow.Kind.WEAPON
     row.tone = _tone_for_value(value)
     row.label = label
-    row.value = _signed(value)
+    row.value = value
     rows.append(row)
 
 

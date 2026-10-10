@@ -7,8 +7,9 @@
 [resource]
 script = ExtResource("1_363sm")
 name = "DeathAura"
-description = "Area weapon. Radius is 50% of weapon range"
+description = "Area weapon. Hits every enemy around the wielder."
 base_attack_speed = 0.5
+weapon_range = 0.66
 modifiers = {
 "poison": {
 "chance": 0.5,

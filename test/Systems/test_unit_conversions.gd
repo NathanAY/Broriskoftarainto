@@ -61,11 +61,13 @@ func test_fist_range_is_one_meter() -> void:
 	assert_float(fist.get_range_px()).is_equal(300.0)
 
 
-func test_death_aura_radius_is_half_its_range_in_meters() -> void:
+func test_death_aura_range_is_authored_directly_in_meters() -> void:
+	# The aura no longer halves `weapon_range` into a private radius: the range
+	# the card prints is the reach the damage is actually measured against.
 	var aura: AreaWeapon = load(DEATH_AURA)
-	assert_float(aura.radius).is_equal_approx(aura.weapon_range * 0.5, 0.0001)
-	assert_float(aura.get_radius_px()).is_equal_approx(
-		Stats.meters_to_px(aura.weapon_range) * 0.5, 0.0001)
+	assert_float(aura.weapon_range).is_equal_approx(0.66, METER_TOLERANCE)
+	assert_float(aura.get_range_px()).is_equal_approx(
+		Stats.meters_to_px(0.66), 0.0001)
 
 
 # --- knockback (m/s) ----------------------------------------------------------

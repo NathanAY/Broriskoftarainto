@@ -57,8 +57,9 @@ func to_display() -> String:
             return text
         Kind.NAME:
             return label
-        Kind.GEAR:
-            # Value-first reads wrong for gear: "Passive Regen Starting Item".
+        Kind.GEAR, Kind.WEAPON:
+            # Label-first reads right for both: "Passive Regen Starting Item",
+            # and a weapon's own "Damage: 5" / "Attack Speed: 0.8 attack/sec".
             return "%s: %s" % [label, value]
         _:
             if value.is_empty():

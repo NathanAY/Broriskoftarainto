@@ -25,6 +25,23 @@ class_name BaseWeapon
 func get_range_px() -> float:
     return Stats.meters_to_px(weapon_range)
 
+# --- tooltip contract --------------------------------------------------------
+# `ItemTooltip.weapon_card_rows` owns the card's row format; a weapon only says
+# *what* to show. Both hooks are virtual, so a new weapon surfaces its own
+# numbers by overriding them here instead of `ItemTooltip` growing another
+# `if weapon is ShotgunWeapon` branch.
+
+## Extra `[label, value]` rows the card shows after the shared damage / range /
+## attack-speed rows. Override and append for numbers only the subclass knows
+## (a shotgun's pellet count). Keep it additive: call `super()` first.
+func tooltip_details() -> Array:
+    return []
+
+## Whether the shared "Range" row applies. A contact weapon (Thorns) is driven
+## by the holder's own hitbox rather than a reach, so it has no range to show.
+func has_tooltip_range() -> bool:
+    return true
+
 ## Damage one swing deals: (base_damage + flat_damage) * damage.
 ##
 ## This is a getter rather than a cached field on purpose. `BaseWeapon` is a

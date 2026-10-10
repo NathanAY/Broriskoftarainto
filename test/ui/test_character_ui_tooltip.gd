@@ -7,6 +7,7 @@ const SHOP_SCENE := "res://src/Scenes/menu/ShopMenu.tscn"
 const PISTOL_WEAPON := "res://src/Resources/weapons/Pistol.tres"
 const SHOTGUN_WEAPON := "res://src/Resources/weapons/Shotgun.tres"
 const DEATH_AURA := "res://src/Resources/weapons/DeathAura.tres"
+const THORNS_WEAPON := "res://src/Resources/weapons/Thorns.tres"
 const PLUS_DAMAGE_ITEM := "res://src/Resources/items/PlusDamageItem.tres"
 const BUFF_SCENE := "res://src/Systems/Items/Buffs/buff.tscn"
 const DEBUFF_SCENE := "res://src/Systems/Items/Buffs/DebuffSource.tscn"
@@ -64,7 +65,7 @@ func test_area_weapon_tooltip_lines_include_description() -> void:
     var aura: BaseWeapon = load(DEATH_AURA)
     var lines: PackedStringArray = ItemTooltip.tooltip_lines(aura)
     assert_that(lines).contains("name: DeathAura")
-    assert_that(lines).contains("description: Area weapon. Radius is 50% of weapon range")
+    assert_that(lines).contains("description: Area weapon. Hits every enemy around the wielder.")
 
 
 func test_area_weapon_card_rows_include_description() -> void:
@@ -73,7 +74,68 @@ func test_area_weapon_card_rows_include_description() -> void:
     var texts: Array[String] = []
     for row in rows:
         texts.append(row.text)
-    assert_that(texts).contains("Area weapon. Radius is 50% of weapon range")
+    assert_that(texts).contains("Area weapon. Hits every enemy around the wielder.")
+
+
+func test_weapon_card_rows_are_unsigned_and_label_first() -> void:
+    # A weapon's base stats belong to the weapon, not to the holder's stats, so
+    # they carry no "+" (a "+" reads as a stat the player gains) and read
+    # label-first like the gear rows. Attack speed is spelled as the rate
+    # "0.8 attack/sec" so the bare number cannot be mistaken for a multiplier.
+    var weapon: BaseWeapon = load(PISTOL_WEAPON)
+    var rows: Array = ItemTooltip.weapon_card_rows(weapon)
+    var displays: Array[String] = []
+    for row in rows:
+        var typed: ItemCardRow = row
+        if typed.kind == ItemCardRow.Kind.WEAPON:
+            displays.append(typed.to_display())
+    assert_that(displays).contains("Damage: 5")
+    assert_that(displays).contains("Range: 1.33 m")
+    assert_that(displays).contains("Attack Speed: 0.8 attack/sec")
+    assert_that(displays).contains("Pierce: 1")
+    assert_that(displays).contains("Knockback: 0.4 m/s")
+    for line in displays:
+        assert_bool(line.begins_with("+")).override_failure_message(
+            "weapon row must not be signed: %s" % line).is_false()
+
+
+func _weapon_rows(resource: Resource) -> Array[String]:
+    var displays: Array[String] = []
+    for row in ItemTooltip.weapon_card_rows(resource):
+        var typed: ItemCardRow = row
+        if typed.kind == ItemCardRow.Kind.WEAPON:
+            displays.append(typed.to_display())
+    return displays
+
+
+func test_weapon_card_rows_include_subclass_details() -> void:
+    # The shotgun's pellet count is the whole point of the weapon and lives on
+    # the subclass, so the card must surface it without `ItemTooltip` knowing
+    # what a shotgun is.
+    var shotgun: BaseWeapon = load(SHOTGUN_WEAPON)
+    var rows := _weapon_rows(shotgun)
+    assert_that(rows).contains("Damage: 5")
+    assert_that(rows).contains("Attack Speed: 0.5 attack/sec")
+    assert_that(rows).contains("Pellets: 5")
+
+
+func test_contact_weapon_hides_the_range_row() -> void:
+    # Thorns damages whatever touches the holder's hitbox, so it has no reach to
+    # report and the generic Range row would be a lie.
+    var thorns: BaseWeapon = load(THORNS_WEAPON)
+    assert_bool(thorns.has_tooltip_range()).is_false()
+    var rows := _weapon_rows(thorns)
+    assert_that(rows).contains("Damage: 5")
+    assert_that(rows).contains("Attack Speed: 2 attack/sec")
+    for line in rows:
+        assert_bool(line.begins_with("Range:")).override_failure_message(
+            "a contact weapon must not show a Range row, got: %s" % line).is_false()
+
+
+func test_base_weapon_default_detail_contract() -> void:
+    var bare := BaseWeapon.new()
+    assert_bool(bare.has_tooltip_range()).is_true()
+    assert_array(bare.tooltip_details()).is_empty()
 
 
 func test_item_tooltip_lines() -> void:
@@ -728,7 +790,9 @@ func test_shop_menu_character_info_tooltips() -> void:
     weapon_row.emit_signal("mouse_entered")
     assert_bool(shop.tooltip.visible).is_true()
     assert_str(shop.tooltip.name_label.text).contains("Pistol")
-    assert_str(shop.tooltip.label.text).contains("+1.33 m Range")
+    # Weapon stats are label-first and unsigned in the card/tooltip body.
+    assert_str(shop.tooltip.label.text).contains("Range: 1.33 m")
+    assert_str(shop.tooltip.label.text).contains("Attack Speed: 0.8 attack/sec")
     weapon_row.emit_signal("mouse_exited")
     assert_bool(shop.tooltip.visible).is_false()
 

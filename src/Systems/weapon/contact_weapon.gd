@@ -5,6 +5,12 @@ class_name ContactWeapon
 # Keep track of bodies inside the holder's hitbox
 var overlapping_bodies: Array = []
 
+## Thorns damages whatever enters the holder's own hitbox, so there is no reach
+## to report: the shared "Range" row would name a number the weapon never uses
+## to pick its targets (the selector gate only needs *some* target inside it).
+func has_tooltip_range() -> bool:
+    return false
+
 func apply_to(holder: Node) -> void:
     super.apply_to(holder) # parent setup (timer etc.)
     var new_sprite = Sprite2D.new()

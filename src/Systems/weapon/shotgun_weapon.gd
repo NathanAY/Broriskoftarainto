@@ -5,6 +5,13 @@ class_name ShotgunWeapon
 @export var pellet_count: int = 8
 @export var spread_angle: float = 15.0
 
+## The pellet count is what makes the shotgun read differently from the pistol,
+## and nothing in the shared base stats carries it - so the subclass reports it.
+func tooltip_details() -> Array:
+    var details := super.tooltip_details()
+    details.append(["Pellets", str(pellet_count)])
+    return details
+
 func try_shoot(targets: Array[Node]) -> void:
     SoundManager.play(attack_sound.pick_random(), -15, 0.2)
     var dir = (targets[0].global_position - sprite_node.global_position).normalized()

@@ -2,15 +2,18 @@
 #
 # A weapon that damages *everything* in range rather than one picked target.
 #
-# The behaviour is entirely the target selector's, but the range it is given is
-# not: `BaseWeapon._on_timeout` measures with the full `weapon_range`, so
-# `try_shoot` re-queries the selector with `radius` below. Halving only the burst
-# visual would leave the damage reaching twice as far as the circle the player is
-# shown. With `AllTargetsInRangeSelector` that is every `damageable` node within
-# `radius` (half of `weapon_range`) of this weapon's own `sprite_node`.
-# Combined with the sprite orbiting the holder at `weapon_orbit_radius`, that
-# reads as an aura centred on the wielder - there is no impact point and no
-# chosen target.
+# The range is entirely the target selector's: `BaseWeapon._on_timeout` measures
+# with `weapon_range` and hands `try_shoot` every `damageable` node inside it,
+# and the aura damages exactly that list. There is no second, hidden radius - on
+# an `AreaWeapon`, `weapon_range` *is* the aura's reach, so the number the card
+# prints ("Range: 0.66 m") is the circle the burst draws. An earlier version
+# halved `weapon_range` into a private `radius`, which meant the shown range was
+# twice the range that actually dealt damage.
+#
+# With `AllTargetsInRangeSelector` that is every `damageable` node within
+# `weapon_range` of this weapon's own `sprite_node`. Combined with the sprite
+# orbiting the holder at `weapon_orbit_radius`, that reads as an aura centred on
+# the wielder - there is no impact point and no chosen target.
 #
 # Because the sprite is the origin of that measurement, the burst visual is
 # placed there too, so what the player sees is exactly what was damaged.
@@ -19,28 +22,13 @@ class_name AreaWeapon
 
 const BURST_SCENE := preload("res://src/Scenes/particles/area_damage_burst.tscn")
 
-## The aura's damage radius in **meters**: half of `weapon_range`. A getter
-## rather than an export, so the number the damage is measured against and the
-## number the player is shown cannot disagree.
-var radius: float:
-    get:
-        return weapon_range * 0.5
-
-## The same radius in pixels, which is what the target selector measures against
-## and what the burst visual is scaled to.
-func get_radius_px() -> float:
-    return get_range_px() * 0.5
-
-## `_targets` is what `_on_timeout` found using the full `weapon_range`, and is
-## unused: the aura's own range is narrower, so the list is re-derived rather
-## than trusted. Underscored rather than merely tolerated, because the
-## parameter really is dead on this path.
-func try_shoot(_targets: Array[Node]) -> void:
+## The targets are what `_on_timeout` already found with `weapon_range`, which is
+## the aura's reach, so they are damaged as handed over rather than re-queried.
+func try_shoot(targets: Array[Node]) -> void:
     var holder = get_holder()
     if not holder: return
-    var effective_targets := target_selector.find_targets(sprite_node, get_radius_px(), holder)
     _spawn_burst(holder)
-    for t in effective_targets:
+    for t in targets:
         if t.has_node("Health"):
             do_damage(t)
 
@@ -53,7 +41,7 @@ func try_shoot(_targets: Array[Node]) -> void:
 ## thrown instead of being dragged along by a moving holder.
 func _spawn_burst(holder: Node) -> void:
     var burst: AreaDamageBurst = BURST_SCENE.instantiate()
-    burst.radius = get_radius_px()
+    burst.radius = get_range_px()
     holder.add_child(burst)
     # After parenting, not before: an unparented Node2D has no parent transform
     # to compose, so writing `global_position` first would store the sprite's

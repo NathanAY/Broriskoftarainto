@@ -8,8 +8,8 @@
 # of shards thrown outward that arrives at the aura's edge exactly as it dies,
 # plus a short flash where the pulse was born.
 #
-# `radius` is set from the weapon's own `radius` (half its `weapon_range`) rather
-# than baked into the scene, so the visual cannot drift away from the number the
+# `radius` is set from the weapon's own `weapon_range` rather than baked into the
+# scene, so the visual cannot drift away from the number the
 # `AllTargetsInRangeSelector` actually measures against.
 extends Node2D
 class_name AreaDamageBurst
@@ -21,7 +21,7 @@ class_name AreaDamageBurst
 const START_FRACTION := 0.55
 
 ## Distance from the centre the wavefront ends on, matching the weapon's
-## `AreaWeapon.radius`.
+## `weapon_range` (its full aura reach).
 @export var radius: float = 200.0
 
 ## Tint for both layers. The shipped weapon is toxic, hence the green; the

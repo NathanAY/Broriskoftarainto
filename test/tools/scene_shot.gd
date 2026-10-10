@@ -5,7 +5,7 @@ extends Control
 ##
 ## Driven by `run_scene_shot.bat`:
 ##
-##     run_scene_shot.bat <res://scene.tscn> [res://out.png]
+##     run_scene_shot.bat <res://scene.tscn> [res://out.png] [frames]
 ##
 ## Both values arrive as *user* args (everything after `--`), because the plain
 ## argv belongs to Godot's own options.
@@ -18,17 +18,26 @@ extends Control
 ## One frame to build the tree, one for the containers to size, one to draw.
 const FRAMES_TO_SETTLE := 3
 
+## Frames to wait past the settle, for a target that animates. Anything with a
+## duration - a particle burst above all - is only meaningful partway through,
+## and the settle alone lands on its first frame.
+const DEFAULT_EXTRA_FRAMES := 0
+
 var _target: String = ""
 var _out_path: String = ""
+var _extra_frames: int = DEFAULT_EXTRA_FRAMES
 
 
 func _ready() -> void:
 	var args: PackedStringArray = OS.get_cmdline_user_args()
 	if args.is_empty():
-		_fail("usage: run_scene_shot.bat <res://scene.tscn> [res://out.png]")
+		_fail("usage: run_scene_shot.bat <res://scene.tscn> [res://out.png] [frames]")
 		return
 	_target = args[0]
 	_out_path = args[1] if args.size() > 1 else "res://scene_shot.png"
+	# `int()` rather than a typed assignment: the argument arrives as a String,
+	# and GDScript warns on the narrowing pass rather than doing it silently.
+	_extra_frames = int(args[2]) if args.size() > 2 else DEFAULT_EXTRA_FRAMES
 
 	if not ResourceLoader.exists(_target):
 		_fail("no such scene: %s" % _target)
@@ -39,7 +48,7 @@ func _ready() -> void:
 
 
 func _shoot() -> void:
-	for i in FRAMES_TO_SETTLE:
+	for i in FRAMES_TO_SETTLE + _extra_frames:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 

@@ -11,8 +11,7 @@ Key scripts / scenes
   - **Applying the archetype** — `CharacterInitializer`, which reads `GlobalGameState.starting_character` and writes it onto `Stats` on spawn. See `docs/systems/characters.md`.
   - **Movement and collision** — `Movement` (behaviour), `Hitbox` (an `Area2D` plus its shape), and the body's own `CollisionShape2D`.
   - **Presentation** — `Node2D/Sprite2D` with `eyes` and `mouth` child sprites (the face is layered art, not one file), `Node2D/Legs` with two leg sprites, `HitFlashManager`, `ParticleEffectManager`, `AnimationPlayer`, and the HUD `HealthBar`, `DamageNumberSpawner`, `HealNumberSpawner`.
-- `src/Scenes/effects/` — `HitFlashManager` (flashes on `before_take_damage`) and `TextureBurstManager` (death burst on `on_death`).
-- `src/Scenes/particles/particle_effect_manager.gd` — hit particles on `after_take_damage`.
+- `src/Scenes/effects/`, `src/Scenes/particles/particle_effect_manager.gd` — `HitFlashManager`, `TextureBurstManager` and `ParticleEffectManager`, the three actor-attached effect managers the Player instance carries. What each subscribes to, and the rules for authoring one, are in `docs/systems/effects.md`.
 - `src/Scenes/menu/CharacterSelect.tscn` + `src/Systems/characters/CharacterData.gd` — where the archetype is picked; `CharacterData` `.tres` files live in `src/Assets/character/<id>/`.
 
 Data flow

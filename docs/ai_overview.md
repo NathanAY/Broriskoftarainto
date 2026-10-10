@@ -31,6 +31,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | `characters.md` | `CharacterData` resources, character select UI, how a character is applied at spawn |
 | `debug_scenarios.md` | The main menu's "Debug scenarios" button: four dev-only mid/endgame runs and how a scenario is configured |
 | `enemies.md` | `Enemy` behaviour, health, boss variant |
+| `effects.md` | Every VFX the game spawns — impact sparks, blast fireballs, damage flashes, death shards — and the three authoring traps that decide whether one works |
 | `event_manager.md` | The `LocalEventManager` event bus and the `event_contract.gd` schema checker |
 | `items.md` | The `Item` resource, `ItemHolder`, `ItemBuilder`, pricing |
 | `item_factory.md` | Procedural item generation, the gift/curse roll, `drop_pool` |
@@ -64,6 +65,7 @@ Implementation logs for shipped work. Kept for provenance, not current truth, an
 | Items | `src/Systems/Items/*` (`Item`, `ItemHolder`, `item_holder.gd`) |
 | Effects (legacy folder `modifiers/`) | `src/Systems/Items/modifiers/*` — Node behaviours items attach to an actor |
 | Spawners | `src/Systems/enemy_spawner.gd`, `src/Systems/boss_spawner.gd` |
+| Effects (VFX) | `src/Scenes/effects/`, `src/Scenes/particles/` — see `docs/systems/effects.md` |
 | Stage flow | `src/Scripts/stage_manager.gd` |
 | UI & shop | `src/Scenes/menu/`, `src/ui/`, `src/Systems/ShopPortal.tscn` |
 | Autoloads | `src/Scripts/autoload/` — `GlobalGameState`, `SoundManager`, `MusicManager`, `GameSettings` |

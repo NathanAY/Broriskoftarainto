@@ -110,8 +110,16 @@ Tests assert structure, not looks. After changing a UI, render it:
 ## Major systems docs
 The per-system docs live in `docs/systems/` and are indexed, with one-line descriptions, in `docs/ai_overview.md`. Do not maintain a second copy of that list here — the link test only checks the index in `ai_overview.md`, so a list that drifts in two places is exactly the problem the index replaced.
 
+**Adding or changing a VFX? Read `docs/systems/effects.md` first.** It owns `src/Scenes/effects/` and `src/Scenes/particles/` and records three traps that each cost a rebuild to find and are invisible from reading a `.tscn`: a drawn size must come from the same number the damage was measured against; `local_coords` defaults to `false`, so an emitter silently ignores its parent's scale; and the inked particle art cannot be tinted (53-72% near-black), so fire needs generated sprites from `test/tools/make_soft_particles.gd`.
+
 ## Dev tooling (`test/tools/`, not shipped)
 - `test/tools/scene_shot.tscn` + `test/tools/scene_shot.gd` — instantiates a scene named by `OS.get_cmdline_user_args()`, screenshots it, quits. Driven by `run_scene_shot.bat`.
+- **The optional 3rd argument is extra frames before the shot**, for a target that animates — see the `explosion_preview` line below for the full command. Without it the tool's own 3-frame settle lands on the target's *first* frame, which is useless for a particle burst.
+- `test/tools/explosion_preview.tscn` + `.gd` — the explosion visual on its own, at three blast radii, spawning a fresh row every few frames so any shot holds blasts at a spread of ages. Pass a frame count to look further into the effect:
+  ```
+  .\run_scene_shot.bat res://test/tools/explosion_preview.tscn res://explosion_shot.png 12
+  ```
+- `test/tools/make_soft_particles.gd` — regenerates the four ink-free particle sprites (`particle_glow`, `particle_smoke`, `particle_spark`, `particle_shard`) into `src/Assets/particles/`. Run it rather than hand-editing those PNGs: `godot --headless --path . -s res://test/tools/make_soft_particles.gd`. The shipped `particle_1.png`..`particle_27.png` **cannot** be used for fire — they are 53-72% near-black ink outline, and a particle tint multiplies the ink along with the fill, so they render as black blobs. See the explosion section of `docs/systems/weapons.md`.
 - `test/tools/character_ui_preview.tscn`, `test/tools/shop_ui_preview.tscn` — the character menu and the shop with a stub character wearing sample items/weapons, so they render standalone for a visual check.
 - The shop fixture pins its offers: it builds its own `ItemFactory` (which needs a `Stats` child), seeds `drop_pool` with a fixed `rng.seed`, and calls `load_items([])` to jump from phase 1 (icon tiles) to phase 2 (the card row whose `InfoLabel` carries the tone-coloured stat body). Phase 1 shows icons only, so it cannot show card colours. The offer pool is small and weighted (`_offer_items()`) because `get_item_from_pool_or_generate()` picks *with* replacement, so a big pool would leave the items you care about off the 4-card row. The character menu only renders icon tiles, so card-body checks must go through the shop fixture.
 - `SAMPLE_ITEMS` in the character fixture is the place to add an item you want to see rendered. Neither preview is named `test_*.gd`, so the gdUnit and GUT runners skip them.

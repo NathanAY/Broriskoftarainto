@@ -7,7 +7,7 @@ Key scripts / scenes
 - `src/Scripts/Enemy.gd` (`Enemy` class)
 - `src/Systems/Enemy.tscn` and `src/Systems/EnemyBoss.tscn` (boss variant)
 - Movement behaviours under `Scenes/` or `Systems/` (referenced as `MovementBehaviour`).
-- Visual managers live as children (see `Scenes/effects/`): `HitFlashManager` (damage flash via `before_take_damage`), `TextureBurstManager` (death burst via `on_death`), `Scenes/particles/ParticleEffectManager` (hit particles via `after_take_damage`).
+- Visual managers live as children: `HitFlashManager`, `TextureBurstManager` and `ParticleEffectManager`. All three are shared with the Player and documented together in `docs/systems/effects.md`.
 
 Data flow
 - Inputs: spawn position and modifiers from spawners; target set by spawner or StageManager.

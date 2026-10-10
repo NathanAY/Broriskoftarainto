@@ -26,7 +26,7 @@ Everything else is a reusable piece instanced into that tree:
 | `src/Systems/SpawnerModifier.tscn` | Death rewards (money, drops, explosion, death mark). Attached to spawners, despite the name — it is not a spawner. |
 | `src/Systems/stats/`, `src/Systems/weapon/`, `src/Systems/Items/` | Reusable subsystems |
 | `src/ui/` | Reusable UI scenes and scripts: cards, panels, tooltips, icon generator |
-| `src/Scenes/effects/`, `src/Scenes/particles/` | Hit flash, death texture burst, particle effects — instanced as children of actors |
+| `src/Scenes/effects/`, `src/Scenes/particles/` | Every "what just happened" visual — hit flash, death shards, impact sparks, blast fireballs. See `docs/systems/effects.md` |
 | `src/Scripts/autoload/` | Autoloads: `GlobalGameState`, `SoundManager`, `MusicManager`, `GameSettings` |
 | `src/Assets/character/<id>/` | One folder per character: its `CharacterData` `.tres` plus its art |
 

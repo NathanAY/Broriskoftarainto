@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Shell(.run_tests_gdunit.bat:*)"
+      "Shell(.run_tests_gdunit.bat:*)",
+      "Shell(.run_tests_gdunit_custom.bat:*)",
+      "Shell(.run_scene_shot.bat:*)"
     ],
     "deny": [],
     "defaultMode": "default"

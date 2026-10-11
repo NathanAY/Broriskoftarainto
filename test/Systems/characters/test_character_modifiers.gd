@@ -8,7 +8,7 @@ class_name CharacterModifiersTest
 extends GdUnitTestSuite
 
 const BRAWLER := "res://src/Assets/character/brawler/Brawler.tres"
-const WILDLING := "res://src/Assets/character/wildling/Wildling.tres"
+const SOLDIER := "res://src/Assets/character/soldier/Soldier.tres"
 const RANGER := "res://src/Assets/character/ranger/Ranger.tres"
 const CHARACTER_SCENE := "res://src/Systems/Character.tscn"
 const ARMOR_SCENE := "res://src/Systems/Items/modifiers/ArmorModifier.tscn"
@@ -64,22 +64,27 @@ func _damage_after_armor(character: Node, amount: float) -> float:
 # ---------------- the one convention ----------------
 
 func test_armor_is_declared_only_in_modifiers_never_base_stats() -> void:
-	for path in [BRAWLER, WILDLING, "res://src/Assets/character/soldier/Soldier.tres"]:
+	for path in _all_character_paths():
 		var character: CharacterData = load(path)
 		# `base_stats` is the archetype's stat block only; a stat that needs a
 		# modifier to do anything never belongs there.
 		assert_bool(character.base_stats.has("armor")).override_failure_message(
 			"%s declares armor in base_stats" % character.display_name).is_false()
-		var declares_armor := false
+		# A character declares both halves of armor (the value dict and the
+		# ArmorModifier that reads it) or neither - never one without the other.
+		var declares_value := false
+		var declares_behavior := false
 		for mod in character.modifiers:
-			if mod is Dictionary and mod.has("armor"):
-				declares_armor = true
-		assert_bool(declares_armor).override_failure_message(
-			"%s has no armor modifier entry" % character.display_name).is_true()
+			if mod is PackedScene and mod.resource_path == ARMOR_SCENE:
+				declares_behavior = true
+			elif mod is Dictionary and mod.has("armor"):
+				declares_value = true
+		assert_bool(declares_value == declares_behavior).override_failure_message(
+			"%s declares armor value/behavior separately" % character.display_name).is_true()
 
 
 func test_armor_value_and_behavior_live_in_the_same_list() -> void:
-	for path in [BRAWLER, WILDLING]:
+	for path in [BRAWLER, SOLDIER]:
 		var character: CharacterData = load(path)
 		# One list, both kinds: the value dict and the modifier scene that
 		# makes the value reduce damage.
@@ -97,12 +102,12 @@ func test_armor_value_and_behavior_live_in_the_same_list() -> void:
 # ---------------- values are applied ----------------
 
 func test_stat_dict_entry_reaches_stats() -> void:
+	var data: CharacterData = load(BRAWLER)
 	var character := await _spawn_character(BRAWLER)
 	var stats: Stats = character.get_node("Stats")
-	assert_float(stats.get_stat("armor")).is_equal_approx(4.0, 0.001)
-	assert_float(stats.get_stat("health")).is_equal_approx(95.0, 0.001)
-	# 1.15 base * 1.1 from the character modifier
-	assert_float(stats.get_stat("damage")).is_equal_approx(1.265, 0.001)
+	assert_float(stats.get_stat("armor")).is_equal_approx(_declared_armor(data), 0.001)
+	assert_float(stats.get_stat("health")).is_equal_approx(float(data.base_stats["health"]), 0.001)
+	assert_float(stats.get_stat("damage")).is_equal_approx(_expected_damage(data), 0.001)
 	character.free()
 
 
@@ -126,20 +131,19 @@ func test_declared_behavior_makes_the_declared_value_apply() -> void:
 
 func test_two_characters_using_the_same_convention() -> void:
 	var brawler := await _spawn_character(BRAWLER)
+	var brawler_armor: float = brawler.get_node("Stats").get_stat("armor")
 	var brawler_damage := _damage_after_armor(brawler, 100.0)
 	brawler.free()
 
-	var wildling := await _spawn_character(WILDLING)
-	var wildling_armor: float = wildling.get_node("Stats").get_stat("armor")
-	var wildling_damage := _damage_after_armor(wildling, 100.0)
-	wildling.free()
+	var soldier := await _spawn_character(SOLDIER)
+	var soldier_armor: float = soldier.get_node("Stats").get_stat("armor")
+	var soldier_damage := _damage_after_armor(soldier, 100.0)
+	soldier.free()
 
-	# Same declaration shape, different numbers - nothing character-specific.
-	assert_float(wildling_armor).is_equal_approx(14.0, 0.001)
-	# armor 14 -> 10 / (10 + 14)
-	assert_float(wildling_damage).is_equal_approx(100.0 * 10.0 / 24.0, 0.001)
-	# Brawler's lower armor means it takes more damage.
-	assert_float(brawler_damage).is_greater(wildling_damage)
+	# Same declaration shape, different numbers - nothing character-specific: each
+	# takes the mitigation its own declared armor implies.
+	assert_float(brawler_damage).is_equal_approx(100.0 * 10.0 / (10.0 + brawler_armor), 0.001)
+	assert_float(soldier_damage).is_equal_approx(100.0 * 10.0 / (10.0 + soldier_armor), 0.001)
 
 
 func test_character_without_modifier_scenes_declares_no_behavior() -> void:
@@ -210,3 +214,46 @@ func test_modifier_scene_entry_shows_up_in_the_character_tooltip() -> void:
 	# The declared behavior is visible in the select screen too.
 	assert_str(text).contains("effect: Armor")
 	assert_str(text).not_contains("base armor")
+
+
+# ---------------- helpers ----------------
+
+## The flat armor a character declares in its modifiers, or 0.0.
+func _declared_armor(data: CharacterData) -> float:
+	for mod in data.modifiers:
+		if mod is Dictionary and mod.has("armor"):
+			return float(mod["armor"].get("flat", 0.0))
+	return 0.0
+
+
+## base_stats damage folded with any percent damage modifiers.
+func _expected_damage(data: CharacterData) -> float:
+	var value := float(data.base_stats.get("damage", Stats.DEFAULT_STATS["damage"]))
+	for mod in data.modifiers:
+		if mod is Dictionary and mod.has("damage"):
+			value *= 1.0 + float(mod["damage"].get("percent", 0.0))
+	return value
+
+
+## Every CharacterData .tres under src/Assets/character.
+func _all_character_paths() -> PackedStringArray:
+	var paths := PackedStringArray()
+	_collect_characters("res://src/Assets/character", paths)
+	return paths
+
+
+func _collect_characters(dir_path: String, out: PackedStringArray) -> void:
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var entry := dir.get_next()
+	while entry != "":
+		var full := dir_path.path_join(entry)
+		if dir.current_is_dir():
+			if not entry.begins_with("."):
+				_collect_characters(full, out)
+		elif entry.ends_with(".tres"):
+			out.append(full)
+		entry = dir.get_next()
+	dir.list_dir_end()

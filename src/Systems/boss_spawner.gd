@@ -10,7 +10,7 @@ class_name BossSpawner
 @export var spawn_active: bool = false
 @export var boss_scene: PackedScene = preload("res://src/Systems/EnemyBoss.tscn")
 @export var current_loop: int = 1
-@export var health_growth_per_loop: float = 500
+@export var health_growth_per_loop: float = 250
 @export var damage_growth_per_loop: float = 1
 
 var enemiesNode: Node = null
@@ -60,8 +60,8 @@ func _apply_scaling() -> void:
     
     #boss_instance.item_holder.add_item(load("res://src/Resources/items/HealthMeat.tres"))
     for i in current_loop:
-        boss_instance.weapon_holder.add_weapon(load("res://src/Resources/weapons/Fist.tres"))
-        boss_instance.weapon_holder.add_weapon(load("res://src/Resources/weapons/Fist.tres"))
+        boss_instance.weapon_holder.add_weapon(load("res://src/Resources/weapons/boss/BossShotgun.tres"))
+        boss_instance.weapon_holder.add_weapon(load("res://src/Resources/weapons/boss/BossShotgun.tres"))
         if i == 2:
             boss_instance.weapon_holder.add_weapon(load("res://src/Resources/weapons/Pistol.tres"))
             boss_instance.weapon_holder.add_weapon(load("res://src/Resources/weapons/Pistol.tres"))

@@ -4,7 +4,7 @@ This document explains the new character system (data, UI, and integration point
 
 ## Overview
 - Characters are data-driven Resources (`CharacterData`). Each one lives in its own folder under `src/Assets/character/`, named `<Id>.tres` next to its art — e.g. `src/Assets/character/ranger/Ranger.tres`.
-- The five characters today are **Brawler, Multitasker, Ranger, Soldier, Wildling**. Multitasker is the default (`GlobalGameState.DEFAULT_CHARACTER`).
+- The five characters today are **Brawler, Multitasker, Ranger, Soldier, Wildling**. Multitasker is the default (`GlobalGameState.DEFAULT_CHARACTER`). Each owns a distinct attack archetype: Multitasker (Fist, baseline), Brawler (Fist melee bruiser), Ranger (Pistol + Spread, glass-cannon gunner), Soldier (Shotgun, armored mid-range), Wildling (Thorns contact, berserker). The power budget for the roster lives in `docs/systems/balance.md` §5.
 - Selection UI: `src/Scenes/menu/CharacterSelect.tscn` lets the player pick a character at the start of a run. It scans `src/Assets/character/` and picks up any new `.tres` without a code change.
 - The chosen character is stored in the autoload `GlobalGameState.starting_character` and applied when the player `Character` instance is created.
 
@@ -57,8 +57,8 @@ A stat on its own is inert: `armor` is just a number, and the
 of the declaration — and why both live in the same `modifiers` list:
 
 ```
-modifiers = [{"armor": {"flat": 14}}, <ArmorModifier.tscn>]   # Wildling
-modifiers = [{"armor": {"flat": 4}},  <ArmorModifier.tscn>]   # Brawler
+modifiers = [{"armor": {"flat": 5}}, <ArmorModifier.tscn>]   # Soldier
+modifiers = [{"armor": {"flat": 4}}, <ArmorModifier.tscn>]   # Brawler
 ```
 
 Rules that keep this the only correct way:
@@ -85,7 +85,7 @@ but reads as a near-duplicate at a glance.
 
 ## How a character's stats are coloured
 `base_stats` are **absolute** values that overwrite the `Stats` defaults, not
-gains — a Ranger's `health: 35.0` replaces the default 10. So the panel shows
+gains — a Ranger's `health: 30.0` replaces the default 10. So the panel shows
 the absolute number and uses colour to say whether it beats the default:
 - `src/Systems/stats/stats.gd` exposes `const DEFAULT_STATS` plus
   `static func default_stat(name)`, which is the single source of truth for the

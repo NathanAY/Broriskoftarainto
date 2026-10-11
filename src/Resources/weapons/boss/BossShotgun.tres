@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ShotgunWeapon" format=3 uid="uid://cq3n7bk2m5rv1"]
+
+[ext_resource type="Script" uid="uid://prg5uja0tmq4" path="res://src/Systems/weapon/shotgun_weapon.gd" id="1_bshotgun"]
+[ext_resource type="PackedScene" uid="uid://bbj577efimtbf" path="res://src/Systems/weapon/Projectile.tscn" id="2_bshotgun"]
+[ext_resource type="Resource" uid="uid://hye6t5sxe2yg" path="res://src/Resources/weapons/aim/closest.tres" id="3_bshotgun"]
+[ext_resource type="Texture2D" uid="uid://ca5udqvxkmunk" path="res://src/Assets/weapons/shotgun.png" id="4_bshotgun"]
+[ext_resource type="AudioStream" uid="uid://dsnefjhxtmimy" path="res://src/Assets/sounds/shotgun/gun_shotgun_sawed_off_shot_01.wav" id="5_bshotgun"]
+[ext_resource type="AudioStream" uid="uid://k4wp11l3lmq8" path="res://src/Assets/sounds/shotgun/gun_shotgun_sawed_off_shot_02.wav" id="6_bshotgun"]
+[ext_resource type="AudioStream" uid="uid://dpvtq674kp48u" path="res://src/Assets/sounds/shotgun/gun_shotgun_sawed_off_shot_03.wav" id="7_bshotgun"]
+[ext_resource type="AudioStream" uid="uid://b34vfixm8vslw" path="res://src/Assets/sounds/shotgun/gun_shotgun_sawed_off_shot_04.wav" id="8_bshotgun"]
+
+[resource]
+script = ExtResource("1_bshotgun")
+pellet_count = 4
+spread_angle = 22.0
+projectile_scene = ExtResource("2_bshotgun")
+name = "Boss Shotgun"
+description = "Boss weapon: slow pellets so the blast can be dodged."
+base_attack_speed = 0.6
+base_damage = 3.0
+projectile_speed = 1.0
+weapon_range = 2.5
+target_selector = ExtResource("3_bshotgun")
+sprite = ExtResource("4_bshotgun")
+attack_sound = Array[Resource]([ExtResource("5_bshotgun"), ExtResource("6_bshotgun"), ExtResource("7_bshotgun"), ExtResource("8_bshotgun")])
+metadata/_custom_type_script = "uid://2vl1rp4agc1u"

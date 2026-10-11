@@ -10,12 +10,14 @@ const SOLDIER := "res://src/Assets/character/soldier/Soldier.tres"
 
 func test_tooltip_lines_cover_name_stats_modifiers_items() -> void:
 	var res: CharacterData = load(SOLDIER)
-	var lines := CharacterTooltip.tooltip_lines(res)
-	assert_str("\n".join(lines)).contains("name: Soldier")
-	assert_str("\n".join(lines)).contains("Slow and sturdy")
-	assert_str("\n".join(lines)).contains("base health: 120")
-	assert_str("\n".join(lines)).contains("armor flat: 12")
-	assert_str("\n".join(lines)).contains("starting item:")
+	var text := "\n".join(CharacterTooltip.tooltip_lines(res))
+	assert_str(text).contains("name: Soldier")
+	assert_str(text).contains(res.description)
+	# Values come from the `.tres`, so a rebalance moves them without rotting this.
+	assert_str(text).contains("base health: " + str(res.base_stats["health"]))
+	assert_str(text).contains("armor flat: " + str(_armor_value(res)))
+	# The Soldier's gear is its weapon; the row must render whichever it ships.
+	assert_str(text).contains("starting weapon: " + str(res.starting_weapons[0].name))
 
 
 func test_item_tooltip_supports_character_data() -> void:
@@ -23,7 +25,7 @@ func test_item_tooltip_supports_character_data() -> void:
 	var lines := ItemTooltip.tooltip_lines(res)
 	assert_str("\n".join(lines)).is_equal("\n".join(CharacterTooltip.tooltip_lines(res)))
 	assert_str("\n".join(lines)).contains("name: Soldier")
-	assert_str("\n".join(lines)).contains("base health: 120")
+	assert_str("\n".join(lines)).contains("base health: " + str(res.base_stats["health"]))
 
 
 func test_card_is_compact_icon_and_name_only() -> void:
@@ -159,18 +161,22 @@ func test_base_stat_tone_follows_the_stats_default() -> void:
 	var panel = load(DETAIL_SCENE).instantiate()
 	add_child(panel)
 
-	# Soldier has 120 health against a default of 10: a gain, so it is positive.
-	var soldier: CharacterData = load(SOLDIER)
-	panel.set_resource(soldier)
+	# Synthetic values keyed off the live default, so no character's balance is
+	# pinned here: above the default reads as a gain...
+	var baseline: float = Stats.default_stat("health")
+	var sturdy := CharacterData.new()
+	sturdy.display_name = "Sturdy"
+	sturdy.base_stats = {"health": baseline * 3.0}
+	panel.set_resource(sturdy)
 	var health := _row_for(panel, "Health")
 	assert_that(health).is_not_null()
-	assert_str(health.value).is_equal("120")
+	assert_str(health.value).is_equal(ItemTooltip.format_value(baseline * 3.0))
 	assert_int(health.tone).is_equal(ItemCardRow.Tone.POSITIVE)
 
-	# A character below the default reads as a loss.
+	# ...below it reads as a loss...
 	var frail := CharacterData.new()
 	frail.display_name = "Frail"
-	frail.base_stats = {"health": 5.0}
+	frail.base_stats = {"health": baseline / 2.0}
 	panel.set_resource(frail)
 	var frail_health := _row_for(panel, "Health")
 	assert_int(frail_health.tone).is_equal(ItemCardRow.Tone.NEGATIVE)
@@ -192,17 +198,26 @@ func test_character_rows_cover_stats_modifiers_and_gear() -> void:
 	for row in rows:
 		labels.append((row as ItemCardRow).to_line())
 
-	assert_str("\n".join(labels)).contains("name: Soldier")
-	assert_str("\n".join(labels)).contains("Slow and sturdy")
-	assert_str("\n".join(labels)).contains("Health: 120")
-	assert_str("\n".join(labels)).contains("Armor: +12")
+	var text := "\n".join(labels)
+	assert_str(text).contains("name: Soldier")
+	assert_str(text).contains(soldier.description)
+	assert_str(text).contains("Health: " + ItemTooltip.format_value(soldier.base_stats["health"]))
+	assert_str(text).contains("Armor: +" + ItemTooltip.format_value(_armor_value(soldier)))
 	# Effect and gear rows render as prose / "Label: value", not "key: value".
-	assert_str("\n".join(labels)).contains("Armor — Armor reduces incoming damage.")
-	assert_str("\n".join(labels)).contains("Starting Item: Passive regen")
+	assert_str(text).contains("Armor — Armor reduces incoming damage.")
+	assert_str(text).contains("Starting Weapon: " + str(soldier.starting_weapons[0].name))
 
 	# `tooltip_lines()` is the flat contract and must stay byte-identical.
 	assert_str("\n".join(ItemTooltip.tooltip_lines(soldier))).is_equal(
 		"\n".join(CharacterTooltip.tooltip_lines(soldier)))
+
+
+## The flat armor a character declares in its modifiers, or 0.
+func _armor_value(data: CharacterData) -> Variant:
+	for mod in data.modifiers:
+		if mod is Dictionary and mod.has("armor"):
+			return mod["armor"]["flat"]
+	return 0
 
 
 func _row_for(panel: ItemDisplayPanel, label: String) -> ItemCardRow:

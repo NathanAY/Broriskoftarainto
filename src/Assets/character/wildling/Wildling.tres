@@ -1,24 +1,20 @@
 [gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://dluh4kp85fx64"]
 
-[ext_resource type="Script" uid="uid://b174fx02jtd8q" path="res://src/Systems/characters/CharacterData.gd" id="1_hfjc4"]
-[ext_resource type="Texture2D" uid="uid://ba7qf7xi6qke7" path="res://src/Assets/character/wildling/wildling_icon.png" id="2_ygipm"]
-[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="3_fm3aw"]
-[ext_resource type="Resource" uid="uid://baxmpuw46mb6o" path="res://src/Resources/items/RegenPassive.tres" id="4_quyct"]
-[ext_resource type="PackedScene" uid="uid://cdfucojif8qe6" path="res://src/Systems/Items/modifiers/ArmorModifier.tscn" id="5_quyct"]
+[ext_resource type="Script" uid="uid://b174fx02jtd8q" path="res://src/Systems/characters/CharacterData.gd" id="1_wildling"]
+[ext_resource type="Texture2D" uid="uid://ba7qf7xi6qke7" path="res://src/Assets/character/wildling/wildling_icon.png" id="2_wildling"]
+[ext_resource type="Script" uid="uid://2vl1rp4agc1u" path="res://src/Systems/weapon/BaseWeapon.gd" id="3_wildling"]
+[ext_resource type="Resource" uid="uid://bai6x23uxk0rk" path="res://src/Resources/weapons/Thorns.tres" id="4_wildling"]
 
 [resource]
-script = ExtResource("1_hfjc4")
+script = ExtResource("1_wildling")
 display_name = "Wildling"
-description = "Slow and sturdy: lower attack speed and damage, higher HP."
+description = "Berserker: fast on its feet and hurts whatever touches it, but fragile."
 base_stats = {
-"damage": 0.9,
-"health": 120.0
+"attack_speed": 1.15,
+"damage": 1.05,
+"health": 38.0,
+"movement_speed": 1.1
 }
-modifiers = [{
-"armor": {
-"flat": 14
-}
-}, ExtResource("5_quyct")]
-starting_items = Array[ExtResource("3_fm3aw")]([ExtResource("4_quyct")])
-small_icon = ExtResource("2_ygipm")
+starting_weapons = Array[ExtResource("3_wildling")]([ExtResource("4_wildling")])
+small_icon = ExtResource("2_wildling")
 metadata/_custom_type_script = "uid://b174fx02jtd8q"

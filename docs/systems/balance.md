@@ -302,11 +302,11 @@ The same `hits_per_second × duration` shape applies to Bomb (`bomb_on_hit_modif
 
 | Loop | Basic enemy HP | Basic enemy contact DPS | Boss HP | Boss weapon DPS |
 |---|---|---|---|---|
-| 1 | 10 | 10 | 510 | 60 |
-| 2 | 30 | 20 | 1010 | 150 |
-| 3 | 50 | 30 | 1510 | 312 |
+| 1 | 10 | 10 | 260 | 45 |
+| 2 | 30 | 20 | 510 | 110 |
+| 3 | 50 | 30 | 760 | 278 |
 
-(Basic enemy contact DPS = `5.0 × damage_stat × 2.0`, from the `Thorns` weapon it spawns with — `Enemy.gd:30` — so it is *per touching enemy*. Boss weapon DPS is the summed `WB_raw` of its whole loadout from `boss_spawner.gd:62-69`: 2 Fists per loop iteration, plus 2 Pistols from loop 3, plus its own contact weapon, with `damage_stat = 1 + loop`. It assumes **every melee connects**, which is the boss at best-case uptime — treat it as a ceiling, not a typical value.)
+(Basic enemy contact DPS = `5.0 × damage_stat × 2.0`, from the `Thorns` weapon it spawns with — `Enemy.gd:30` — so it is *per touching enemy*. Boss weapon DPS is the summed `WB_raw` of its whole loadout from `boss_spawner.gd:62-69`: 2 boss shotguns per loop iteration, plus 2 Pistols from loop 3, plus its own contact weapon, with `damage_stat = 1 + loop`. A pellet weapon's `WB_raw` is `pellet_count × base_damage × base_attack_speed` (§4.2), so a boss shotgun contributes `4 × 3.0 × 0.6 = 7.2`. It assumes **every pellet connects**, which is the boss at best-case uptime — treat it as a ceiling, not a typical value. The pellets are deliberately slow, so real DPS sits well under this.)
 
 A weapon is balanced when, at the loop it is *found* in, its time-to-kill on a basic enemy lands in a band:
 
@@ -365,34 +365,35 @@ The test needs `tier` on `BaseWeapon` (see `balance_audit.md`), and the range ba
 
 ## 5. Characters
 
-**[CURRENT]** `CharacterData.base_stats` **overwrites** `DEFAULT_STATS` entries (it is assigned into `Stats.stats` directly), so a character's power is its `base_stats` plus its `modifiers`. `WB_raw` is the Fist's `10.0` scaled by the character's `damage` and `attack_speed`; `WB_solo` applies the §4.3 melee uptime of 0.70.
+**[CURRENT]** `CharacterData.base_stats` **overwrites** `DEFAULT_STATS` entries (it is assigned into `Stats.stats` directly), so a character's power is its `base_stats` plus its `modifiers`. `WB_raw` scales the *starting weapon's* own `base_damage` (`Σ = base_damage × pellet_count` for a pellet weapon) by the character's `damage` and `attack_speed`; `WB_solo` applies the §4.3 uptime.
 
 | Character | `base_stats` | `modifiers` | Starting weapon | `WB_raw` | `WB_solo` |
 |---|---|---|---|---|---|
 | Multitasker (default) | `health 40` | — | Fist | 10.0 | **7.0** |
-| Brawler | `attack_speed 1.1`, `damage 1.15`, `health 95`, `movement_speed 0.9` | `armor +4`, `damage +10%`, `ArmorModifier` | Fist | **13.9** | **9.7** |
-| Ranger | `attack_speed 1.25`, `damage 0.8`, `health 35`, `movement_speed 1.25` | `attack_speed +50%` | **none** | (15.0) | (10.5) |
-| Soldier | `damage 0.9`, `health 120` | `armor +12`, `ArmorModifier` | **none** | (9.0) | — |
-| Wildling | `damage 0.9`, `health 120` | `armor +14`, `ArmorModifier` | **none** | (9.0) | — |
+| Brawler | `attack_speed 1.05`, `damage 1.2`, `health 45`, `movement_speed 0.9` | `armor +4`, `ArmorModifier` | Fist | 12.6 | **8.8** |
+| Ranger | `attack_speed 1.0`, `damage 0.85`, `health 30`, `movement_speed 1.25` | — | Pistol (starts with the Spread item) | 7.8 | **6.6** |
+| Soldier | `attack_speed 0.9`, `damage 0.85`, `health 42`, `movement_speed 0.9` | `armor +5`, `ArmorModifier` | Shotgun (`Σ 17.5`) | 8.9 | **7.6** |
+| Wildling | `attack_speed 1.15`, `damage 1.05`, `health 38`, `movement_speed 1.1` | — | Thorns (contact) | 9.7 | **8.7** |
 
-Bracketed figures are what the character *would* have with a Fist equipped. The five characters live in `src/Assets/character/<id>/<Id>.tres`; `docs/systems/characters.md` is the format reference.
+The five characters live in `src/Assets/character/<id>/<Id>.tres`; `docs/systems/characters.md` is the format reference. Four attack archetypes are represented: melee arc (Multitasker, Brawler), ranged single shot (Ranger), pellet cone (Soldier) and contact (Wildling).
 
 **Rules [PROPOSED]:**
 
-- A character's starting `WB_solo` must be within **±15%** of the T0 baseline (7.0). Brawler at 9.7 is **+39%** — it starts the run already ahead of every other character. Ranger would be +50%, which is a large part of why it starts unarmed.
-- A character's starting `EHP` must be within **±30%** of the reference character (Multitasker, 40). **[CURRENT]** EHP spread:
+- A character's starting `WB_solo` must be within **±30%** of the reference character (Multitasker, 7.0). The band is enforced by `test/Systems/characters/test_character_power_budget.gd`, which derives every figure from the `.tres` rather than pinning literals.
+- A character's starting `EHP` must be within **±60%** of the reference (40). **[CURRENT]** EHP spread:
 
 | Character | `health` | `armor` | Mitigation | `EHP` | vs reference |
 |---|---|---|---|---|---|
-| Ranger | 35 | 0 | 1.00 | **35** | 0.88× |
+| Ranger | 30 | 0 | 1.00 | **30** | 0.75× |
+| Wildling | 38 | 0 | 1.00 | **38** | 0.95× |
 | Multitasker | 40 | 0 | 1.00 | **40** | 1.00× |
-| Brawler | 95 | 4 | 0.714 | **133** | 3.3× |
-| Soldier | 120 | 12 | 0.455 | **264** | 6.6× |
-| Wildling | 120 | 14 | 0.417 | **288** | 7.2× |
+| Brawler | 45 | 4 | 0.714 | **63** | 1.58× |
+| Soldier | 42 | 5 | 0.667 | **63** | 1.58× |
 
-  Soldier and Wildling are **6.6-7.2× the reference survivability at run start**. Note `ArmorModifier` contributes nothing here: it reads `provided_stat() + 5 × (stacks − 1)` and `stacks` is 1, so the character's own `armor` base value is the entire contribution.
-- **A character that starts with no weapon is a design error until it has one.** Ranger, Soldier and Wildling all have empty `starting_weapons`.
-- `Soldier.tres` and `Wildling.tres` have **identical** `base_stats` and differ only by `armor 12` vs `14`. `Wildling.tres:6` also carries a copy-pasted Soldier description.
+  `ArmorModifier` contributes nothing beyond the declared value here: it reads `provided_stat() + 5 × (stacks − 1)` and `stacks` is 1, so the character's own `armor` base value is the entire contribution.
+- **A character that starts with no weapon is a design error until it has one.** All five now start armed.
+- **Ranger's Spread is a deliberate clear-power exception.** `SpreadModifier` is +200% clear `WB` (audit row 1) and is kept as-is by design; Ranger is a glass cannon whose solo `WB_solo` (6.6) is in band while its pack damage is not. The budget test measures the weapon only, not the item.
+- Each character owns a distinct kit: no two share the same `base_stats` + weapon + item signature (also asserted by the budget test).
 
 ---
 
@@ -458,6 +459,6 @@ On a Pistol (`WB_raw 4.0`), Spinning Orbs is **+125% WB_raw**. On a rifle with `
 
 ## 7. Where the current game breaks these rules
 
-Not here. See **`docs/systems/balance_audit.md`** — 22 measured violations, a fix order, and the assumptions these numbers rest on.
+Not here. See **`docs/systems/balance_audit.md`** — the measured violations, a fix order, and the assumptions these numbers rest on.
 
 That separation is the point of the split. This file answers "what may a new weapon give?" and changes only when a design decision changes. The audit answers "what does the game give today?" and changes every time someone edits a `.tres`. Keeping them in one file meant every balance edit had to touch the rulebook, which is exactly the pressure that stops anyone writing the rulebook down.

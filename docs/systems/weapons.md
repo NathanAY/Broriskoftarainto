@@ -13,6 +13,7 @@ Data flow
 - Processing: `WeaponHolder` duplicates resources, calls `apply_to` on weapons, creates sprite nodes and timers for firing logic; weapon scripts manage aiming and firing.
 - Outputs: weapons may add stat modifiers, spawn projectiles, emit events via `EventManager`.
 - Distances are authored in meters (see `docs/systems/stats.md`, "Units"): `weapon_range` (e.g. `1.0` m on the Fist, `0.66` m on the Death Aura, `1.33` m on the base resource) and a built-in knockback `strength` in m/s. Each converts to pixels only at the point of use.
+- `ProjectileWeapon.projectile_speed` (m/s) is the weapon-level muzzle speed, authored in the same meter scale. `0` keeps the projectile scene's own speed in px/s; a positive value overrides it before the `projectile_speed_multiplier` stat is applied. The boss uses it to slow its shotgun pellets to `1.0` m/s so they can be outrun (`src/Resources/weapons/boss/BossShotgun.tres`).
 
 Dealing damage
 - Every damage source follows one contract (`projectile.gd`, `melee_weapon_node.gd`, `contact_weapon.gd`, `area_weapon.gd`, `explosion.gd`, `orbiting_orb.gd`, `poison_effect.gd`):

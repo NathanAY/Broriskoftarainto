@@ -51,13 +51,20 @@ func after_test() -> void:
     collect_orphan_node_details()
 
 
-func test_loaded_build_equips_four_weapons_and_stacked_items() -> void:
+func test_loaded_build_equips_scenario_weapons_and_stacked_items() -> void:
     var scenario := await _run_scenario(LOADED_BUILD)
     var character: Character = scenario.get_node("Character")
+    var setup: DebugScenarioSetup = scenario.get_node("ScenarioSetup")
+    var data: CharacterData = load(setup.character_path)
 
-    assert_int(character.weapon_holder.weapons.size()).is_equal(4)
-    # Two named items plus the three stacked ones.
-    assert_int(character.item_holder.items.size()).is_equal(5)
+    # The scenario's declared loadout sits on top of the character's own kit:
+    # `CharacterInitializer` equips `starting_weapons`/`starting_items` first, then
+    # `ScenarioSetup` adds the lists below (every character now starts armed).
+    var stacked := setup.stacked_items().size() if setup.stacked_build else 0
+    assert_int(character.weapon_holder.weapons.size()).is_equal(
+        data.starting_weapons.size() + setup.weapon_names.size())
+    assert_int(character.item_holder.items.size()).is_equal(
+        data.starting_items.size() + setup.item_names.size() + stacked)
     # Every stacked item is multi-modifier, which is the point of this scenario.
     for item in character.item_holder.items:
         if item.name.begins_with("Veteran") or item.name.begins_with("Chain Reactor") \

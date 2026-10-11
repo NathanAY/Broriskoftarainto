@@ -4,6 +4,12 @@ class_name ProjectileWeapon
 
 @export var projectile_scene: PackedScene
 
+## Muzzle speed for this weapon's projectiles, in **meters per second**, the same
+## unit `weapon_range` uses. `0` keeps the projectile scene's own speed (px/s),
+## which is what the shared scenes author. Converted with `Stats.meters_to_px` at
+## the same boundary as `weapon_range`, so a designer tunes both in meters.
+@export var projectile_speed: float = 0.0
+
 var _current_projectile_speed_multiplier: float = 1
 
 func try_shoot(targets: Array[Node]) -> void:
@@ -35,6 +41,8 @@ func shoot_projectile(target: Node) -> Projectile:
         projectile_props[key] = projectile_props.get(key, 0.0) + spawn_mods[key]
     p.set_properties(projectile_props)
     
+    if projectile_speed > 0.0:
+        p.base_speed = Stats.meters_to_px(projectile_speed)
     p.base_speed = p.base_speed * _current_projectile_speed_multiplier
     p.damage = current_damage
     if p.has_method("set_ignore_groups"):

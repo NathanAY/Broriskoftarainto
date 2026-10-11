@@ -9,7 +9,6 @@
 script = ExtResource("1_main")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1059820278]
-layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -53,7 +52,7 @@ layout_mode = 2
 text = "New game"
 script = ExtResource("3_menu_button")
 
-[node name="DebugScenariosButton" type="Button" parent="Control/VBoxContainer"]
+[node name="DebugScenariosButton" type="Button" parent="Control/VBoxContainer" unique_id=917622146]
 layout_mode = 2
 text = "Debug scenarios"
 script = ExtResource("3_menu_button")

@@ -1,19 +1,26 @@
 # Main rules if changing project
-- After any feature implementation: 1. Create a test 2. Read failures 3. Fix the test/code 4. Run test again
+- After new feature implementation: 1. Create a test 2. Read failures 3. Fix the test/code 4. Run test again
 - Task -> Read relevant code -> Read testing rules/docs -> Write test -> RUN TEST -> Read error -> Fix -> RUN TEST again -> Done
 - If you have questions or options for some implementation than ask about it.
+
+# Simplicity first
+- Minimum code that solves the problem. Nothing speculative
+- No abstractions for single-use code
+- If a simpler approach exists, say so. Push back when warranted
+- If you find 200 lines and it could be 50, rewrite it
+- Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify
 
 # Core systems
 
 ## Player & combat
-- `src/Scripts/character.gd`: player entity holds `WeaponHolder` and `ItemHolder` children.
-- `src/Systems/damage/health.gd`: health/stats subsystem (uses modifiers and conditions).
+- `src/Scripts/character.gd`: player entity holds `WeaponHolder` and `ItemHolder` children
+- `src/Systems/damage/health.gd`: health/stats subsystem (uses modifiers and conditions)
 
 ## Items & modifiers
-- `src/Systems/Items/item_pickup.gd`: item pickup logic.
-- `src/Systems/Items/item_factory.gd`: generates item Node instances from `.tres` resources.
-- `src/Systems/Items/item_holder.gd`: holds items; attaches modifier children to stats node.
-- Effects live in `src/Systems/Items/modifiers/` (lowercase `modifiers`, lowercase everything else in that path). They are attached via `ItemHolder`, subscribe to events (`on_attack`, `on_hit`, `on_stat_changes`), and manipulate the holder's `Stats`/`Health` nodes.
+- `src/Systems/Items/item_pickup.gd`: item pickup logic
+- `src/Systems/Items/item_factory.gd`: generates item Node instances from `.tres` resources
+- `src/Systems/Items/item_holder.gd`: holds items; attaches modifier children to stats node
+- Effects live in `src/Systems/Items/modifiers/` (lowercase `modifiers`, lowercase everything else in that path). They are attached via `ItemHolder`, subscribe to events (`on_attack`, `on_hit`, `on_stat_changes`), and manipulate the holder's `Stats`/`Health` nodes
 
 # Testing
 
@@ -88,8 +95,9 @@ Tests assert structure, not looks. After changing a UI, render it:
 `get_editor_screenshot` (2D/3D viewport), `run_project` and `get_runtime_screenshot` Use them when the check needs a running game rather than a one-shot render: firing `simulate_input_action`, inspecting nodes mid-run, or screenshotting after several actions. `stop_project` exits cleanly, leaving only the editor process.
 
 # Project documentation.
-- This is top-down brotato style rogulike game project on godot 4.6.
-- If docs outdatet than updated them.
+- This is top-down brotato style rogulike game project on godot 4.6
+- If docs outdatet than updated them
+- If docs too complicated/long than refine it
 
 ## The most important docs located by those path:
 - `docs/ai_overview.md` — the reading order, and an index of every other doc

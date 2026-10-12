@@ -83,6 +83,35 @@ different numbers: the first is this character's baseline armor, the second is
 what each held stack adds on top. Both show up in the panel, which is correct
 but reads as a near-duplicate at a glance.
 
+## When the amount lives on the modifier, not on a stat
+Armor is the easy case because its amount is a **stat**, so one shared scene
+serves every character that names the number. Not every modifier is shaped that
+way: `FlatRegenModifier` exports `health_delta` on the scene, because a regen
+tick is not a stat and nothing reads a `regen` value out of `Stats`.
+
+So a character that wants its own regen rate declares a **configured variant**
+of the shared scene — a `.tscn` that instances the modifier and overrides the
+exports. Nothing else changes; the script, the timer, the signed-delta routing
+and the tooltip all stay shared.
+
+```
+src/Assets/character/wildling/WildlingRegenModifier.tscn
+    instances FlatRegenModifier.tscn with health_delta = 1.0
+
+Wildling.tres:  modifiers = [<WildlingRegenModifier.tscn>]
+```
+
+Rules that keep this the only correct way:
+- Put the variant next to the character's own `.tres`, **not** in
+  `Systems/Items/modifiers/`. Everything in that folder is offerable in the shop
+  (`test/Systems/Items/test_offerable_modifier_scenes.gd` sweeps it), so a
+  character-only variant dropped there would be sold as an item card.
+- The character card is built by reflecting on the scene, so it prints the
+  **configured** number, not the script's export default. If the card and the
+  in-game tick disagree, the override was not applied to the variant.
+- Prefer this over a second copy of the script. A variant scene inherits every
+  behavior change to the modifier automatically.
+
 ## Where armor shows up during a run
 Because `armor` is not in `Stats.DEFAULT_STATS`, a list built from the base stat
 keys alone hid it entirely. `Stats.display_stat_names()` is the one list both
@@ -112,7 +141,8 @@ derive their tone from the value itself — same rule the shop cards use.
 ## Adding a new character
 1. Create `src/Assets/character/<id>/<Id>.tres` using the `CharacterData` script as the resource type, next to the character's art (or copy an existing one and rename).
 2. Set `display_name`, `description`, and `base_stats` (archetype stats only). Put everything else in `modifiers` — stat dicts and/or modifier scenes.
-3. No code changes needed — `CharacterSelect` scans the folder and will display the new entry.
+3. If the behavior's amount is an export rather than a stat, declare a configured variant scene next to the `.tres` (see above).
+4. No code changes needed — `CharacterSelect` scans the folder and will display the new entry.
 
 ## Extensibility ideas
 - Optional: merge a character's `starting_weapons`/`starting_items` into `GlobalGameState` on confirm so they still appear in the StarterMenu loadout; currently they are applied directly at spawn by `CharacterInitializer`.

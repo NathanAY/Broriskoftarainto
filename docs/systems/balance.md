@@ -373,7 +373,7 @@ The test needs `tier` on `BaseWeapon` (see `balance_audit.md`), and the range ba
 | Brawler | `attack_speed 1.05`, `damage 1.2`, `health 45`, `movement_speed 0.9` | `armor +4`, `ArmorModifier` | Fist | 12.6 | **8.8** |
 | Ranger | `attack_speed 1.0`, `damage 0.85`, `health 30`, `movement_speed 1.25` | — | Pistol (starts with the Spread item) | 7.8 | **6.6** |
 | Soldier | `attack_speed 0.9`, `damage 0.85`, `health 42`, `movement_speed 0.9` | `armor +5`, `ArmorModifier` | Shotgun (`Σ 17.5`) | 8.9 | **7.6** |
-| Wildling | `attack_speed 1.15`, `damage 1.05`, `health 38`, `movement_speed 1.1` | — | Thorns (contact) | 9.7 | **8.7** |
+| Wildling | `attack_speed 1.15`, `damage 1.05`, `health 38`, `movement_speed 1.1` | `WildlingRegenModifier` (1 HP / 0.5 s) | Thorns (contact) | 9.7 | **8.7** |
 
 The five characters live in `src/Assets/character/<id>/<Id>.tres`; `docs/systems/characters.md` is the format reference. Four attack archetypes are represented: melee arc (Multitasker, Brawler), ranged single shot (Ranger), pellet cone (Soldier) and contact (Wildling).
 
@@ -391,6 +391,7 @@ The five characters live in `src/Assets/character/<id>/<Id>.tres`; `docs/systems
 | Soldier | 42 | 5 | 0.667 | **63** | 1.58× |
 
   `ArmorModifier` contributes nothing beyond the declared value here: it reads `provided_stat() + 5 × (stacks − 1)` and `stacks` is 1, so the character's own `armor` base value is the entire contribution.
+- **A character's own regen is outside the EHP table.** EHP counts armor, which reduces each hit; a regen tick recovers health over time, so folding it in would need a damage-rate model the budget test deliberately does not have. The Wildling's `1 HP / 0.5 s` is therefore an unmeasured sustain add-on on top of its listed `EHP 38` — set it low, and prefer the archetype it reinforces (the Wildling trades hits taken for speed and contact damage) over raw throughput.
 - **A character that starts with no weapon is a design error until it has one.** All five now start armed.
 - **Ranger's Spread is a deliberate clear-power exception.** `SpreadModifier` is +200% clear `WB` (audit row 1) and is kept as-is by design; Ranger is a glass cannon whose solo `WB_solo` (6.6) is in band while its pack damage is not. The budget test measures the weapon only, not the item.
 - Each character owns a distinct kit: no two share the same `base_stats` + weapon + item signature (also asserted by the budget test).

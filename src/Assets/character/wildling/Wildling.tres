@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://ba7qf7xi6qke7" path="res://src/Assets/character/wildling/wildling_icon.png" id="2_wildling"]
 [ext_resource type="Script" uid="uid://2vl1rp4agc1u" path="res://src/Systems/weapon/BaseWeapon.gd" id="3_wildling"]
 [ext_resource type="Resource" uid="uid://bai6x23uxk0rk" path="res://src/Resources/weapons/Thorns.tres" id="4_wildling"]
+[ext_resource type="PackedScene" path="res://src/Assets/character/wildling/WildlingRegenModifier.tscn" id="5_wildling"]
 
 [resource]
 script = ExtResource("1_wildling")
@@ -12,9 +13,10 @@ description = "Berserker: fast on its feet and hurts whatever touches it, but fr
 base_stats = {
 "attack_speed": 1.15,
 "damage": 1.05,
-"health": 38.0,
+"health": 50.0,
 "movement_speed": 1.1
 }
+modifiers = [ExtResource("5_wildling")]
 starting_weapons = Array[ExtResource("3_wildling")]([ExtResource("4_wildling")])
 small_icon = ExtResource("2_wildling")
 metadata/_custom_type_script = "uid://b174fx02jtd8q"

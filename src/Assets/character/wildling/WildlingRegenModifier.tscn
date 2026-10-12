@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" uid="uid://ywpq6fpoxwu1" path="res://src/Systems/Items/modifiers/FlatRegenModifier.tscn" id="1_wildling"]
+
+[node name="WildlingRegenModifier" instance=ExtResource("1_wildling")]
+health_delta = 1.0

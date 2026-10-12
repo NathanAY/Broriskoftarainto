@@ -10,9 +10,12 @@ extends GdUnitTestSuite
 const BRAWLER := "res://src/Assets/character/brawler/Brawler.tres"
 const SOLDIER := "res://src/Assets/character/soldier/Soldier.tres"
 const RANGER := "res://src/Assets/character/ranger/Ranger.tres"
+const WILDLING := "res://src/Assets/character/wildling/Wildling.tres"
 const CHARACTER_SCENE := "res://src/Systems/Character.tscn"
 const ARMOR_SCENE := "res://src/Systems/Items/modifiers/ArmorModifier.tscn"
 const ARMOR_SCRIPT := preload("res://src/Systems/Items/modifiers/armor_modifier.gd")
+const FLAT_REGEN_SCENE := "res://src/Systems/Items/modifiers/FlatRegenModifier.tscn"
+const REGEN_SCRIPT := preload("res://src/Systems/Items/modifiers/flat_regen_modifier.gd")
 
 
 func _spawn_character(character_path: String) -> Node:
@@ -48,6 +51,32 @@ func _armor_modifier_nodes(node: Node) -> Array:
 	for child in node.get_children():
 		found.append_array(_armor_modifier_nodes(child))
 	return found
+
+
+## A regen scene instantiated from FlatRegenModifier.tscn keeps that script, so
+## the search matches both the shared default and a character's own variant.
+func _regen_modifier_nodes(node: Node) -> Array:
+	var found: Array = []
+	if node.get_script() == REGEN_SCRIPT:
+		found.append(node)
+	for child in node.get_children():
+		found.append_array(_regen_modifier_nodes(child))
+	return found
+
+
+## The scene a character declares for regen, or null if it declares none.
+## Matched on the scene's own script, so a character may declare the shared
+## FlatRegenModifier or a configured variant of it.
+func _declared_regen_scene(data: CharacterData) -> PackedScene:
+	for mod in data.modifiers:
+		if not mod is PackedScene:
+			continue
+		var probe: Node = mod.instantiate()
+		var is_regen: bool = probe.get_script() == REGEN_SCRIPT
+		probe.free()
+		if is_regen:
+			return mod
+	return null
 
 
 ## Emits the damage pipeline hook and returns the resulting damage.
@@ -214,6 +243,79 @@ func test_modifier_scene_entry_shows_up_in_the_character_tooltip() -> void:
 	# The declared behavior is visible in the select screen too.
 	assert_str(text).contains("effect: Armor")
 	assert_str(text).not_contains("base armor")
+
+
+# ---------------- a character brings its own regen numbers ----------------
+
+# The Wildling's regen is a flat HP tick, and like every other stat-driven
+# behavior it is declared in `modifiers` rather than in `base_stats`. Unlike
+# armor, a regen amount is an export on the modifier itself, so the character
+# lists a scene configured with its own numbers instead of the shop default.
+
+func test_declared_regen_is_attached_and_wired() -> void:
+	var character := await _spawn_character(WILDLING)
+	var nodes := _regen_modifier_nodes(character)
+	assert_int(nodes.size()).override_failure_message(
+		"expected exactly one regen modifier under the Wildling").is_equal(1)
+	if nodes.is_empty():
+		character.free()
+		return
+	var regen: Node = nodes[0]
+	assert_that(regen.event_manager).is_not_null()
+	assert_int(regen.stacks.size()).is_equal(1)
+	character.free()
+
+
+func test_declared_regen_carries_the_characters_own_amount() -> void:
+	var data: CharacterData = load(WILDLING)
+	var declared := _declared_regen_scene(data)
+	if declared == null:
+		return
+	var configured: Node = declared.instantiate()
+	var shop_default: Node = load(FLAT_REGEN_SCENE).instantiate()
+	# The Wildling is the fragile archetype; at the shop item's rate it would
+	# out-heal anything that hits it. Its own declaration has to be weaker.
+	assert_float(float(configured.health_delta)).override_failure_message(
+		"%s declares regen at the shop item's rate" % data.display_name).is_less(
+		float(shop_default.health_delta))
+	assert_float(float(configured.interval)).is_equal(float(shop_default.interval))
+	configured.free()
+	shop_default.free()
+
+
+func test_one_regen_tick_heals_the_declared_amount() -> void:
+	var character := await _spawn_character(WILDLING)
+	var nodes := _regen_modifier_nodes(character)
+	if nodes.is_empty():
+		character.free()
+		return
+	var regen: Node = nodes[0]
+	var health: Health = character.get_node("Health")
+	health.current_health = health.max_health - 10.0
+	regen.call("_on_regen_tick")
+	assert_float(health.current_health).is_equal_approx(
+		health.max_health - 10.0 + float(regen.health_delta), 0.001)
+	character.free()
+
+
+func test_declared_regen_shows_its_own_amount_on_the_character_card() -> void:
+	var data: CharacterData = load(WILDLING)
+	var declared := _declared_regen_scene(data)
+	if declared == null:
+		return
+	var configured: Node = declared.instantiate()
+	# The card is built by reflecting on the scene, so the configured number -
+	# not the scene's export default - is what the player reads.
+	assert_str("\n".join(CharacterTooltip.tooltip_lines(data))).contains(
+		str(configured.health_delta))
+	assert_str("\n".join(CharacterTooltip.tooltip_lines(data))).contains("Flat Regen")
+	configured.free()
+
+
+func test_wildling_declares_a_regen_behavior() -> void:
+	var data: CharacterData = load(WILDLING)
+	assert_object(_declared_regen_scene(data)).override_failure_message(
+		"%s declares no regen modifier scene" % data.display_name).is_not_null()
 
 
 # ---------------- helpers ----------------

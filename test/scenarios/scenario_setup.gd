@@ -54,6 +54,10 @@ static var pending_monster_multiplier: float = 1.0
 @export var enemy_item_name: String = ""
 ## 0..1 per enemy. Only read when `enemy_item_name` is set.
 @export_range(0.0, 1.0, 0.05) var enemy_item_chance: float = 1.0
+## Adds the sandbox panel (`SandboxMenu`) and its pause-menu button, so enemies
+## with hand-typed stats can be dropped into the arena mid-run. Dev-only like the
+## rest of this folder.
+@export var sandbox: bool = false
 
 
 ## Runs before *any* child's `_ready`, which is what makes this the right hook:
@@ -75,11 +79,13 @@ func _ready() -> void:
 	_equip_enemy_items()
 	_apply_start_mode()
 	_apply_monster_multiplier()
+	_install_sandbox_menu()
+	_hold_stage_one()
 	_on_stage_applied()
 
 
 func _equip_loadout() -> void:
-	var character := get_tree().get_first_node_in_group("character") as Character
+	var character := _character()
 	if character == null:
 		push_warning("DebugScenarioSetup: no character in the tree, scenario '%s' starts empty." % scenario_title)
 		return
@@ -194,6 +200,75 @@ func _apply_monster_multiplier() -> void:
 	if pending_monster_multiplier == 1.0:
 		return
 	stage_manager.enemy_spawner.set_spawn_multiplier(pending_monster_multiplier)
+
+
+## Builds the sandbox panel and adds a button for it to the pause menu, so a
+## scenario can put hand-typed enemies into the arena without leaving the run.
+##
+## Both nodes are added in code rather than authored in the scenario `.tscn`:
+## they only exist for scenarios that ask for them, so a scene that does not want
+## a sandbox should not carry one, and one shared button beats the same button
+## copied into every sandbox scene.
+##
+## The panel is a child of this node rather than of `UI/`, because that is where
+## the scenario's other helpers live and because it keeps the whole dev-only
+## addition on one subtree that can be freed by freeing the scenario.
+func _install_sandbox_menu() -> void:
+	if not sandbox:
+		return
+	var pause_menu := get_node_or_null("../UI/PauseMenu")
+	if pause_menu == null:
+		push_warning("DebugScenarioSetup: no PauseMenu to open the sandbox from.")
+		return
+	var enemies_node := get_node_or_null("../Nodes/Enemies")
+	if enemies_node == null:
+		push_warning("DebugScenarioSetup: no Nodes/Enemies for the sandbox to spawn into.")
+		return
+
+	var menu := SandboxMenu.new()
+	menu.name = "SandboxMenu"
+	menu.setup(enemies_node, _character())
+	add_child(menu)
+
+	var button := UiMenuButton.new()
+	button.name = "SandboxButton"
+	button.text = "Sandbox"
+	button.pressed.connect(menu.open)
+	(pause_menu.get_node("Control/VBoxContainer") as VBoxContainer).add_child(button)
+
+
+## Holds the run at stage 1 with nothing spawning, so the arena holds only what
+## the sandbox panel put there. Sandbox-only, and applied after
+## `_install_sandbox_menu()` because the panel is what replaces the wave.
+##
+## Three parts, and the first is the one that matters:
+##
+## - `StageManager.stage_active = false` freezes the *stage clock*. That is a
+##   separate clock from the spawner's, and it is the one that moves the run on:
+##   `_process_enemy_stage()` counts `stage_time_elapsed` to `stage_duration`,
+##   then `_end_stage()` calls `go_to_stage(2)`, which spawns the boss and turns
+##   `spawn_active` back on. Silencing only the spawner still gets a boss at 20s.
+## - `spawn_active = false` stops the spawn cadence on its own terms, rather than
+##   relying on the stage being frozen.
+## - `spawn_timer.stop()` puts the timer to sleep, because with the stage frozen
+##   it would otherwise keep ticking and keep re-reading the empty arena through
+##   `EnemySpawner._process()`, the refill watchdog.
+func _hold_stage_one() -> void:
+	if not sandbox:
+		return
+	var stage_manager := get_node_or_null("../StageManager") as StageManager
+	if stage_manager == null:
+		push_warning("DebugScenarioSetup: no StageManager to hold for '%s'." % scenario_title)
+		return
+	stage_manager.stage_active = false
+	var spawner := stage_manager.enemy_spawner
+	spawner.spawn_active = false
+	if spawner.spawn_timer != null:
+		spawner.spawn_timer.stop()
+
+
+func _character() -> Character:
+	return get_tree().get_first_node_in_group("character") as Character
 
 
 func _on_stage_applied() -> void:

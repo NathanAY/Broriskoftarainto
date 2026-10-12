@@ -34,6 +34,11 @@ const SCENARIOS := [
 		"description": "Enemies carry a debuff item, so the HUD's debuff row fills. Also picks up a buff item.",
 		"scene": "res://test/scenarios/scenario_cursed_enemies.tscn",
 	},
+	{
+		"title": "Sandbox",
+		"description": "Empty stage 1, held there: no wave and no boss timer. A Sandbox panel in the pause menu spawns enemies with a health and movement speed you type in.",
+		"scene": "res://test/scenarios/scenario_sandbox.tscn",
+	},
 ]
 
 ## Bounds of the monster-density slider, mirrored by its range in the scene.

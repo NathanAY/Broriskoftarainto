@@ -16,6 +16,7 @@ const MAIN_MENU_SCENE_PATH := "res://src/Scenes/menu/Main.tscn"
 
 var configure_panel_inst = null
 var configure_menu_scene: PackedScene = null
+var configure_enemy_panel_inst = null
 
 func _ready():
     resume_button.pressed.connect(_on_resume_pressed)
@@ -28,6 +29,12 @@ func _ready():
     cfg_btn.text = "Configure"
     cfg_btn.pressed.connect(_on_configure_pressed)
     $Control/VBoxContainer.add_child(cfg_btn)
+    # The same panel pointed at the enemy nearest the player. Added here rather
+    # than in the scene file for the same reason as the button above.
+    var enemy_cfg_btn = UiMenuButton.new()
+    enemy_cfg_btn.text = "Configure enemy"
+    enemy_cfg_btn.pressed.connect(_on_configure_enemy_pressed)
+    $Control/VBoxContainer.add_child(enemy_cfg_btn)
     # preload ConfigureMenu scene so it behaves like options_menu
     configure_menu_scene = load("res://src/Scenes/menu/ConfigureMenu.tscn")
     main_menu_button.pressed.connect(_on_main_menu_pressed)
@@ -91,6 +98,62 @@ func _on_configure_closed():
     if configure_panel_inst and is_instance_valid(configure_panel_inst):
         configure_panel_inst.queue_free()
     configure_panel_inst = null
+
+## Opens the weapons & items panel pointed at the enemy nearest the player.
+##
+## The target is resolved at press time rather than kept, because the arena
+## changes while the game runs: an enemy held in a field would be freed by a
+## boss or by the player's own shots, and `ConfigurePanel._get_target()` falls
+## back to the player on a freed target - which would silently show the player's
+## gear under an "enemy" title.
+func _on_configure_enemy_pressed():
+    if configure_enemy_panel_inst and is_instance_valid(configure_enemy_panel_inst):
+        configure_enemy_panel_inst.visible = true
+        $Control.visible = false
+        return
+    if not configure_menu_scene:
+        push_warning("ConfigureMenu scene not found")
+        return
+    var enemy := _closest_enemy()
+    if enemy == null:
+        push_warning("PauseMenu: no enemy to configure.")
+        return
+    configure_enemy_panel_inst = configure_menu_scene.instantiate()
+    # Before `add_child()`: the panel populates its equipped lists in `_ready()`,
+    # so a target set afterwards would show the player's gear instead.
+    configure_enemy_panel_inst.target_entity = enemy
+    add_child(configure_enemy_panel_inst)
+    configure_enemy_panel_inst.visible = true
+    $Control.visible = false
+    if configure_enemy_panel_inst.has_signal("closed"):
+        configure_enemy_panel_inst.connect("closed", Callable(self, "_on_configure_enemy_closed"))
+
+## The living enemy closest to the player, or null. The "enemies" group rather
+## than "damageable": a dying enemy stays in the tree for its death animation but
+## is out of both groups, so this cannot return a corpse.
+func _closest_enemy() -> Enemy:
+    var player := get_tree().get_first_node_in_group("character") as Node2D
+    var closest: Enemy = null
+    var closest_distance := INF
+    for node in get_tree().get_nodes_in_group("enemies"):
+        var enemy := node as Enemy
+        if enemy == null or not (enemy is Node2D):
+            continue
+        # Measured from the player when there is one, so "closest" means closest
+        # to the thing being shot at rather than closest to the world origin.
+        if player == null:
+            return enemy
+        var distance := (enemy as Node2D).global_position.distance_squared_to(player.global_position)
+        if distance < closest_distance:
+            closest_distance = distance
+            closest = enemy
+    return closest
+
+func _on_configure_enemy_closed():
+    $Control.visible = true
+    if configure_enemy_panel_inst and is_instance_valid(configure_enemy_panel_inst):
+        configure_enemy_panel_inst.queue_free()
+    configure_enemy_panel_inst = null
 
 func _on_new_run_pressed():
     toggle_pause()

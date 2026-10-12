@@ -129,8 +129,21 @@ The per-system docs live in `docs/systems/` and are indexed, with one-line descr
   ```
 - `test/tools/make_soft_particles.gd` — regenerates the four ink-free particle sprites (`particle_glow`, `particle_smoke`, `particle_spark`, `particle_shard`) into `src/Assets/particles/`. Run it rather than hand-editing those PNGs: `godot --headless --path . -s res://test/tools/make_soft_particles.gd`. The shipped `particle_1.png`..`particle_27.png` **cannot** be used for fire — they are 53-72% near-black ink outline, and a particle tint multiplies the ink along with the fill, so they render as black blobs. See the explosion section of `docs/systems/weapons.md`.
 - `test/tools/character_ui_preview.tscn`, `test/tools/shop_ui_preview.tscn` — the character menu and the shop with a stub character wearing sample items/weapons, so they render standalone for a visual check.
+- `test/tools/sandbox_panel_preview.tscn` — the debug sandbox panel on its own. Its real route is the pause menu, which a one-shot render cannot reach. See `docs/systems/debug_scenarios.md`.
+- `test/tools/configure_enemy_panel_preview.tscn` — the weapons & items panel pointed at an enemy, for the same reason.
+
 - The shop fixture pins its offers: it builds its own `ItemFactory` (which needs a `Stats` child), seeds `drop_pool` with a fixed `rng.seed`, and calls `load_items([])` to jump from phase 1 (icon tiles) to phase 2 (the card row whose `InfoLabel` carries the tone-coloured stat body). Phase 1 shows icons only, so it cannot show card colours. The offer pool is small and weighted (`_offer_items()`) because `get_item_from_pool_or_generate()` picks *with* replacement, so a big pool would leave the items you care about off the 4-card row. The character menu only renders icon tiles, so card-body checks must go through the shop fixture.
 - `SAMPLE_ITEMS` in the character fixture is the place to add an item you want to see rendered. Neither preview is named `test_*.gd`, so the gdUnit and GUT runners skip them.
+
+## Debug menus shipped in `src/`
+The pause menu carries three dev panels, all added as buttons in `pause_menu.gd::_ready` rather than in `PauseMenu.tscn`:
+- **Configure** — `ConfigureMenu.tscn`, edits the player.
+- **Configure enemy** — the same panel pointed at the enemy nearest the player. Resolved at press time, not held, because the arena changes under a panel that is left open.
+- **Sandbox** — added only by `ScenarioSetup`, in sandbox scenarios only.
+
+`configure_panel.gd` edits whichever entity it was pointed at (`target_entity`, defaulting to the player), so every read goes through `_get_target()` and never through `_get_player()` directly. Two things that panel had to get right, both pinned by `test/ui/test_configure_panel_target.gd`:
+- **A freed target reads as null, not as the player.** In Godot 4 a freed object compares equal to `null`, so `target_entity != null` cannot tell "never pointed at anything" from "pointed at an enemy that has since died" — hence the separate `_was_pointed_at` flag. Falling back to the player there would swap the panel onto the player's gear under a title still naming an enemy.
+- **The `GlobalGameState` start-of-run fallbacks are player-only.** They describe the *next* run, so applying them while configuring an enemy would silently change the player's loadout instead.
 
 ## Debug scenarios (`test/scenarios/`, not shipped)
 The main menu's **Debug scenarios** button opens a picker that jumps into a run already mid/endgame; **New game** is still the default route. A scenario is one `.tscn` that instances `src/Scenes/Game.tscn` and adds a single `ScenarioSetup` node, so the scene file *is* the configuration — add a scenario by adding a dict to `SCENARIOS` in `test/scenarios/debug_scenario_menu.gd` plus a `.tscn` next to it. `docs/systems/debug_scenarios.md` has the details, including why the loop-3 scenario sets `StageManager.current_loop` and both spawners' counters by hand instead of calling `start_new_loop()`.

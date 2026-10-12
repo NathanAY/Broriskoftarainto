@@ -96,6 +96,28 @@ func get_stat(stat_name: String) -> float:
             final_value *= 1.0 + mod[stat_name].get("percent", 0.0)
     return final_value
 
+## The stat names a stats panel should list: every base stat, plus any stat that
+## exists only because a modifier provides it.
+##
+## `armor` is deliberately absent from [constant DEFAULT_STATS] - it is a number
+## nothing reads unless an ArmorModifier listens (see `CharacterData`), so a
+## character that has one declares it in `modifiers` instead. Iterating the base
+## keys alone therefore hid it entirely. Modifier-only stats are listed while
+## their value is non-zero, so a character with no armor shows no armor row.
+func display_stat_names() -> Array:
+    var names: Array = stats.keys()
+    for mod in modifiers:
+        if typeof(mod) != TYPE_DICTIONARY:
+            continue
+        for key in mod.keys():
+            var stat_name := str(key)
+            if stat_name == "condition" or names.has(stat_name):
+                continue
+            if get_stat(stat_name) != 0.0:
+                names.append(stat_name)
+    return names
+
+
 ## movement_speed is stored in meters per second; convert to pixels per second
 ## for physics (300 px = 1 m).
 func get_movement_speed_px() -> float:

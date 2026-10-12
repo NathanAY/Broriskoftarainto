@@ -65,11 +65,11 @@ func _update_stats() -> void:
     if not stats_node:
         return
 
-    # iterate over base stat keys (Stats.gd stores a `stats` dict)
     if not stats_node.stats:
         return
 
-    for stat_name in stats_node.stats.keys():
+    # Base stats plus modifier-only ones (armor), which are not in the base keys.
+    for stat_name in stats_node.display_stat_names():
         var hbox = HBoxContainer.new()
 
         # Add Icon
@@ -102,10 +102,11 @@ func _on_stat_changed(event) -> void:
     var stat_name: String = event["stat_name"]
     var new_value: float = event["final_value"]
     var lbl = value_labels.get(stat_name, null)
-    if lbl:
+    if lbl and stats_node.stats.has(stat_name):
         lbl.text = "%s: %.2f" % [str(stat_name).capitalize(), new_value]
     else:
-        # new stat not present in UI — rebuild full list
+        # A stat that is not a base key (armor) appears and disappears with its
+        # value, so its row can only be added or removed by a full rebuild.
         _update_stats()
 
 # Called when EventManager emits on_stat_changes(stat_name, value)

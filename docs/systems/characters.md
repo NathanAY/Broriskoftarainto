@@ -83,6 +83,18 @@ different numbers: the first is this character's baseline armor, the second is
 what each held stack adds on top. Both show up in the panel, which is correct
 but reads as a near-duplicate at a glance.
 
+## Where armor shows up during a run
+Because `armor` is not in `Stats.DEFAULT_STATS`, a list built from the base stat
+keys alone hid it entirely. `Stats.display_stat_names()` is the one list both
+in-game stat panels read (`src/ui/character_ui.gd` and `src/ui/player_ui.gd`):
+every base stat, plus any stat that only a modifier provides, and those extra
+names only while their value is non-zero. So Brawler shows `Armor: 4.00`, and
+the row appears and disappears as armor items are picked up and sold.
+
+`src/Scenes/menu/configure_panel.gd` is a different list — it walks
+`DEFAULT_STATS` directly to build its editor rows, so it still has no armor
+field.
+
 ## How a character's stats are coloured
 `base_stats` are **absolute** values that overwrite the `Stats` defaults, not
 gains — a Ranger's `health: 30.0` replaces the default 10. So the panel shows

@@ -7,9 +7,6 @@ script = ExtResource("2_f3c55")
 name = "Proj speed"
 description = "Proj speed"
 modifiers = {
-"armor": {
-"flat": 100
-},
 "projectile_speed_multiplier": {
 "flat": 4.0
 }

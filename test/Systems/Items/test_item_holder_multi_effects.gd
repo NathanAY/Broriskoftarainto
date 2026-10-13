@@ -116,11 +116,15 @@ func test_stat_modifiers_are_applied_once_not_once_per_effect() -> void:
     var holder := _build_holder()
     var stats: Stats = holder.get_node("Stats")
 
-    holder.get_node("ItemHolder").add_item(
-        _multi_effect_item([load(ARMOR_SCENE), load(LIFE_LEACH_SCENE)], {"damage": {"flat": 5.0}})
-    )
+    var item := _multi_effect_item([load(ARMOR_SCENE), load(LIFE_LEACH_SCENE)], {"damage": {"flat": 5.0}})
+    holder.get_node("ItemHolder").add_item(item)
 
-    assert_int(stats.modifiers.size()).is_equal(1)
+    # The item's own dict lands on Stats exactly once, however many effects it
+    # carries. It is counted by identity rather than as the whole list, because a
+    # modifier that grants a stat of its own publishes its own entry there -
+    # ArmorModifier publishes its per-stack armor - so the list is not the item's
+    # alone.
+    assert_int(stats.modifiers.count(item.modifiers)).is_equal(1)
     assert_float(stats.get_stat("damage")).is_equal_approx(6.0, 0.001)
 
     holder.free()

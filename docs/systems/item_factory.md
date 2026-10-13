@@ -31,6 +31,8 @@ Entry points
 
 The candidate stat pool (`:104-115`) is every key in `Stats.DEFAULT_STATS` plus every `provided_stat` a modifier advertises (`lifeleach`, `armor`). **Uniform pick, no weighting** — the factory has no idea that `attack_range` is worth 0% and `lifeleach` is worth double.
 
+`armor` is a candidate but is never **rolled**: `LISTENER_ONLY_STATS` filters it out of `_gratable_stat_names()`, which is what the stat / buff / debuff generators and `_roll_negative_stat` pick from. Armor only reduces damage while an `ArmorModifier` listens, so a bare `{"armor": 1}` item would show armor in the stat panel and change nothing on a character without the modifier. It reaches the player as the `ArmorModifier` effect item instead, which publishes its per-stack armor into the stat (`armor_modifier.gd`).
+
 Modifiers may randomize themselves at generation time via `randomize_for_generation(context)` (`:432`). Two do: `HealOnEventModifier` picks one of five trigger/heal pairs, `StatOnKillModifier` picks a target stat and a 5-10%-of-base amount. Treat any new modifier that implements this hook as a **weapon-grade** design (`balance.md` §6.2) — it is choosing its own power.
 
 ## The value roll, and why it is the core balance bug
@@ -46,14 +48,14 @@ func _generate_stat_modifiers(_chosen_stat, base_value) -> Dictionary:
 
 **One formula for all 14 stats.** "5-10% of base" reads like a percentage budget and is not one.
 
-**The `base_value == 0` branch is the worst of them.** Six stats in the pool have a base of 0 (`energy_shield`, `critical_chance`, `flat_weapon_damage`, `projectile_pierce` are 0.0 in `DEFAULT_STATS`; `armor` and `lifeleach` are not in the table at all, so `.get` returns 0.0). All six roll a **hard constant `1.0`, with no RNG call and no scaling by the stat's actual scale** — a `1.0` means +1 percentage point on a 0-100 stat, +10% EHP on armor, and a doubling on a 0-1 multiplier stat.
+**The `base_value == 0` branch is the worst of them.** Five stats in the pool have a base of 0 (`energy_shield`, `critical_chance`, `flat_weapon_damage`, `projectile_pierce` are 0.0 in `DEFAULT_STATS`; `lifeleach` is not in the table at all, so `.get` returns 0.0). All five roll a **hard constant `1.0`, with no RNG call and no scaling by the stat's actual scale** — a `1.0` means +1 percentage point on a 0-100 stat and a doubling on a 0-1 multiplier stat.
 
 | Stat | Base | Roll | What 5-10% actually buys |
 |---|---|---|---|
 | `health` | 10.0 | 0.5 – 1.0 | +0.4% on a Soldier (120 HP) … +2.5% on a Multitasker (40 HP). Same item, 6× spread. |
 | `attack_speed` | 1.0 | 0.05 – 0.10 | +5-10% WB. Also multiplies every on-hit rider (`balance.md` §6.1). |
 | `critical_chance` | 0.0 | **1.0 (constant)** | +1 pp of a 0-100 scale → **+0.5% WB**, and always exactly the same number. |
-| `armor` | not in `DEFAULT_STATS` | **1.0 (constant)** | **+10% EHP**, and it compounds with `ArmorModifier`'s +5/stack. |
+| `armor` | not in `DEFAULT_STATS`, and never rolled | — | Filtered out of the rollable pool (see above). Armor comes from the `ArmorModifier` item's own per-stack bonus. |
 | `lifeleach` | not in `DEFAULT_STATS` | **1.0 (constant)** | Stat goes `1.0 → 2.0`, so `LifeLeachModifier`'s 5% lifesteal (`life_leach_modifier.gd:6,26`) **doubles to 10%**. One price-1 item doubles the build's only stat. |
 | `flat_weapon_damage` | 0.0 | **1.0 (constant)** | +10% WB on a Fist, +20% on a Shotgun. Unbounded vs weapon tier. |
 | `projectile_pierce` | 0.0 | **1.0 (constant)** | +1 target on a Pistol that already pierces 1 → **+100% WB**. |

@@ -35,8 +35,7 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
    - Per-event handlers stay idempotent and cheap: bail out early when the event lacks what they need.
    - Spawned objects are tagged to avoid recursive triggers (see "Anti-recursion" below).
    - `static instantiate_attached(scene, parent) -> Node` — the one place an effect scene becomes a live node (`instantiate()` + `add_child()`). Wiring is left to the caller because the effect kinds differ: modifiers go through `attachEventManager`, while buffs / poison effects wire themselves in their own `_ready()` from their `ItemHolder` parent.
-   - `static attach(scene, parent, em) -> BaseModifier` — the full contract for a `BaseModifier` scene: `instantiate_attached` + `attachEventManager(em)` + one `add_stack(true)`. Used by hosts that merely declare a modifier scene (a character's `CharacterData.modifiers`); warns and returns `null` when the scene is not a `BaseModifier` or `em` is null, so a misconfigured declaration never silently does nothing.
-
+   - `static attach(scene, parent, em) -> BaseModifier` — the full contract for a `BaseModifier` scene: `instantiate_attached` + `attachEventManager(em)` + one `add_stack(true)`, and it marks the node `is_declared_baseline = true`. Used by hosts that merely declare a modifier scene (a character's `CharacterData.modifiers`); warns and returns `null` when the scene is not a `BaseModifier` or `em` is null, so a misconfigured declaration never silently does nothing. The flag says that this node's first stack stands for what the host **declared**, not for an item the holder picked up — `ArmorModifier` skips it when counting held stacks, so a character does not gain its baseline armor twice while its first armor item still counts in full.
 3. Owning a stat (implemented in `BaseModifier`)
    - A modifier can OWN a stat on the holder's `Stats` node by setting `provided_stat` (e.g. `LifeLeach` owns `lifesteal`). The stat is **dynamic**: it exists while at least one claiming modifier is attached (reference-counted) and is erased when the last one detaches.
    - Contract fields: `provided_stat` (name, `""` = none), `provided_stat_default` (base installed on first claim, e.g. `1.0`), `provided_stat_owned` (`true` = claim/release dynamic presence; `false` = the stat already exists, e.g. armor, modifier is a pure consumer).
@@ -44,8 +43,8 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
    - **The modifier never writes the stat.** Behavior handlers read the live value through `get_provided_stat()`. Stat items/buffs/debuffs compose with the installed base via the normal `add_modifier` pipeline and can drive the value negative.
    - Two semantics:
      - Multiplier (LifeLeach): stat base is `1.0`; stacks drive the power, the stat scales it — `heal = LIFESTEAL_PER_STACK * _active_stacks() * get_provided_stat()` (1 item = 5%, 2 = 10%; a stat item `flat -2` makes the multiplier `-1.0` → negative leach).
-     - Additive shared (Armor): the stat already exists on the holder; the modifier reads `get_provided_stat()` and adds its per-stack contribution in its handler.
-   - Stack changes (`add_stack`/`remove_stack`/`set_stack_active`) never touch the stat value — stacks combine inside the subclass behavior, not into the owned stat.
+     - Additive shared (Armor): the stat already exists on the holder; the modifier reads `get_provided_stat()`, and publishes its per-held-stack contribution **into that same stat** as an ordinary modifier so the stat panels and the damage formula cannot disagree.
+   - Stack changes (`add_stack`/`remove_stack`/`set_stack_active`) never touch an **owned** stat — stacks combine inside the subclass behavior. A modifier that publishes into a *shared* stat does republish on a stack change, which is the one case where a stack writes a value (`ArmorModifier._publish_armor`).
 
 4. Display contract (tooltips)
    - `@export var display_name: String` — short noun shown as the effect head.
@@ -108,7 +107,7 @@ Events used
 Catalog
 | Modifier (class) | Script | Trigger event | Effect |
 |---|---|---|---|
-| ArmorModifier | `armor_modifier.gd` | `before_take_damage` | Reduces damage by armor formula `10/(10+armor)`; +5 armor per stack. Reads the (existing) `armor` stat — pure consumer, not owned. The stat alone is inert: a character must also list this scene in `CharacterData.modifiers` alongside its `armor` value (see `docs/systems/characters.md`). |
+| ArmorModifier | `armor_modifier.gd` | `before_take_damage` | Reduces damage by armor formula `10/(10+armor)`; +5 armor per held stack. Publishes that bonus into the (existing) `armor` stat as an ordinary modifier, so the stat panels list the armor the character really has — pure consumer, not owned. A character's declared baseline stack (`BaseModifier.is_declared_baseline`) publishes nothing, because the armor that character declares beside the scene is already in the stat; every stack an item adds counts in full. |
 | BombOnHitModifier | `bomb_on_hit_modifier.gd` | `on_hit` | Attaches a bomb to the target, explodes for 30% of hit damage after 3s; +20% explosion damage per stack. |
 | ChainModifier | `chain_modifier.gd` | `on_hit` | Spawns a chain projectile that chains to 3 extra targets per stack. |
 | CritModifier | `crit_modifier.gd` | `before_deal_damage` | On crit applies crit multiplier; +0.15 crit multiplier per stack. |

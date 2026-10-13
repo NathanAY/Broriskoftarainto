@@ -99,6 +99,17 @@ func _is_bound_event(data: Dictionary) -> bool:
 func _active_stacks() -> int:
 	return max(1, stacks.count(true))
 
+## True for a node [method attach] created - a behavior a character declared in
+## `CharacterData.modifiers`, not an item the holder picked up.
+##
+## The distinction matters because a declared baseline arrives with a stack of
+## its own (that is what makes it "attached"), while that stack is not a held
+## item: the character's armor, damage or whatever the modifier reads is declared
+## as a value beside the scene. So a modifier that grants something per held item
+## counts the stacks above this one - see `ArmorModifier._stack_bonus`. Without
+## the flag a character's baseline would eat the first item's bonus.
+var is_declared_baseline: bool = false
+
 func add_stack(active: bool):
 	stacks.append(active)
 	_on_stacks_changed()
@@ -210,5 +221,8 @@ static func attach(scene: PackedScene, parent: Node, em: EventManager) -> BaseMo
 		return null
 	var instance := node as BaseModifier
 	instance.attachEventManager(em)
+	# The stack is what marks the behavior as live, and for a declared baseline it
+	# stands for the character's own declaration rather than a held item.
+	instance.is_declared_baseline = true
 	instance.add_stack(true)
 	return instance

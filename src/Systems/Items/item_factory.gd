@@ -114,6 +114,24 @@ func _candidate_stat_names() -> Array:
                 instance.free()
     return _candidate_stats
 
+## Stat names that only do anything while one of the modifier scenes is listening
+## for them. `armor` reduces damage solely through an ArmorModifier, so a bare
+## `{"armor": ...}` entry is a number nothing reads - and it would still be listed
+## in the stat panel as armor the character does not really have. Armor therefore
+## never rolls as a plain stat value: it reaches the player as the ArmorModifier
+## item, which publishes its armor into the stat (see `armor_modifier.gd`).
+const LISTENER_ONLY_STATS: Array[String] = ["armor"]
+
+## The candidates a stat value may be rolled from: the full candidate list minus
+## the listener-only stats. Armor stays in `_candidate_stat_names()` because the
+## modifier advertises it, it is simply not a value an item may hand out alone.
+func _gratable_stat_names() -> Array:
+    var names: Array = []
+    for stat_name in _candidate_stat_names():
+        if not stat_name in LISTENER_ONLY_STATS:
+            names.append(stat_name)
+    return names
+
 func get_item_from_pool_or_generate() -> Item:
     var pool_size = drop_pool.size()
 
@@ -186,7 +204,7 @@ func generate_random_item() -> Item:
     return _generate_debuff_item()
 
 func _generate_stat_item(index: int = -1) -> Item:
-    var stat_names = _candidate_stat_names()
+    var stat_names = _gratable_stat_names()
     var index_to_use = index if index != -1 else rng.randi_range(0, stat_names.size() - 1)
     var chosen_stat = stat_names[index_to_use]
     var base_value = stats.stats.get(chosen_stat, 0.0)
@@ -261,7 +279,7 @@ func _generate_effect_item(index: int = -1) -> Item:
     return item
 
 func _generate_buff_item(index: int = -1) -> Item:
-    var stat_names = _candidate_stat_names()
+    var stat_names = _gratable_stat_names()
 
     var chosen_scene: PackedScene
     if index != -1:
@@ -286,7 +304,7 @@ func _generate_buff_item(index: int = -1) -> Item:
     return item
 
 func _generate_debuff_item(_index: int = -1) -> Item:
-    var stat_names = _candidate_stat_names()
+    var stat_names = _gratable_stat_names()
     var chosen_scene: PackedScene = debuff_scene
 
     var chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
@@ -330,7 +348,9 @@ func _attach_roll_negative_half(item: Item, exclude: String, stat_names: Array, 
 func _roll_negative_stat(exclude: String, stat_names: Array, scale: float) -> Dictionary:
     var candidates := []
     for stat_name in stat_names:
-        if stat_name != exclude:
+        # A curse on a listener-only stat is as dead as the positive half would
+        # be: on a character without the modifier, negated armor changes nothing.
+        if stat_name != exclude and not stat_name in LISTENER_ONLY_STATS:
             candidates.append(stat_name)
     if candidates.is_empty():
         return {}

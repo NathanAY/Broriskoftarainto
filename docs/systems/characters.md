@@ -74,14 +74,23 @@ Rules that keep this the only correct way:
 - Armor items picked up later bring their own `ArmorModifier` instance; the
   handler's "strongest armor source wins" guard (`ctx.armor_applied`) keeps a hit
   reduced exactly once no matter how many armor sources are live.
+- An armor item never declares armor as a plain stat value. It attaches the
+  modifier, which **publishes** its per-stack bonus into the `armor` stat
+  (`_publish_armor`), so the stat, the damage formula and the panels are one
+  number. `ItemFactory.LISTENER_ONLY_STATS` keeps armor out of the rollable stat
+  pool for the same reason a character must declare both halves: a bare
+  `{"armor": ...}` is inert on a character with no `ArmorModifier`.
+- The modifier's **first** stack means different things on the two paths, and
+  `BaseModifier.is_declared_baseline` is what tells them apart. A stack from
+  `BaseModifier.attach` (a character's declared behavior) stands for the armor
+  that character declares beside the scene, which is already in the stat, so it
+  publishes nothing. A stack from `ItemHolder` is a held item and counts in full
+  — so a single armor item from the shop, a drop or the Configure panel is worth
+  its full `armor_per_stack`, and only the *items above* the character's baseline
+  stack add on top of it.
 
 `CharacterTooltip` renders both halves: stat dicts as `armor flat: 4` and
 modifier scenes as `effect: Armor — ... (Triggers on before take damage)`.
-
-Note that `armor: {flat: 4}` and `ArmorModifier.armor_per_stack` are two
-different numbers: the first is this character's baseline armor, the second is
-what each held stack adds on top. Both show up in the panel, which is correct
-but reads as a near-duplicate at a glance.
 
 ## When the amount lives on the modifier, not on a stat
 Armor is the easy case because its amount is a **stat**, so one shared scene
@@ -119,6 +128,11 @@ in-game stat panels read (`src/ui/character_ui.gd` and `src/ui/player_ui.gd`):
 every base stat, plus any stat that only a modifier provides, and those extra
 names only while their value is non-zero. So Brawler shows `Armor: 4.00`, and
 the row appears and disappears as armor items are picked up and sold.
+
+The value in that row is the same number the damage formula reads, because an
+armor item's bonus is published into the stat rather than kept inside the
+modifier. `test/Systems/Items/test_armor_stat_visibility.gd` pins both halves of
+that.
 
 `src/Scenes/menu/configure_panel.gd` is a different list — it walks
 `DEFAULT_STATS` directly to build its editor rows, so it still has no armor

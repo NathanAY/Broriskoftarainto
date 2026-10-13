@@ -27,6 +27,34 @@ func attachEventManager(em: EventManager):
     _regen_timer.one_shot = false
     _regen_timer.timeout.connect(_on_regen_tick)
     add_child(_regen_timer)
+    _publish_rate()
+
+## Republish on every stack change, so the rate the panel shows tracks pickups,
+## sales and a condition toggling a stack inactive.
+func _on_stacks_changed() -> void:
+    _publish_rate()
+
+## Publish the character's net rate, in the per-second unit of the stat this
+## subclass names, so the stat panels show what the timer is actually doing.
+##
+## `_active_stacks()` is the same multiplier `_on_regen_tick` applies, floor
+## included, so the panel and the tick cannot disagree. Unlike armor there is no
+## declared-baseline exception: a regen amount lives on the modifier, not on a
+## value the character declares beside the scene, so even a character's own
+## baseline stack is a full stack of regen.
+func _publish_rate() -> void:
+    _publish_stat_value(_regen_stat_name(), _regen_per_second() * _active_stacks())
+
+## The stat this modifier's rate is published into, or "" to publish nothing.
+## The four subclasses split two stats: the flat pair (regen / life drain) into
+## HP per second, the percent pair into percentage points of max HP per second.
+func _regen_stat_name() -> String:
+    return ""
+
+## This modifier's rate in the unit of [method _regen_stat_name], before stacks.
+## Signed: a drain publishes a negative rate and lands in the same row.
+func _regen_per_second() -> float:
+    return 0.0
 
 func _on_regen_tick():
     if stacks.is_empty():

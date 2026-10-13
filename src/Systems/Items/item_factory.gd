@@ -115,12 +115,18 @@ func _candidate_stat_names() -> Array:
     return _candidate_stats
 
 ## Stat names that only do anything while one of the modifier scenes is listening
-## for them. `armor` reduces damage solely through an ArmorModifier, so a bare
-## `{"armor": ...}` entry is a number nothing reads - and it would still be listed
-## in the stat panel as armor the character does not really have. Armor therefore
-## never rolls as a plain stat value: it reaches the player as the ArmorModifier
-## item, which publishes its armor into the stat (see `armor_modifier.gd`).
-const LISTENER_ONLY_STATS: Array[String] = ["armor"]
+## for them. `armor` reduces damage solely through an ArmorModifier and the two
+## regen rates only fire through a regen modifier, so a bare `{"armor": ...}` /
+## `{"flat_regen_per_second": ...}` entry is a number nothing reads - and it would
+## still be listed in the stat panel as a benefit the character does not really
+## get. These therefore never roll as plain stat values: they reach the player as
+## the modifier item, which publishes its value into the stat (see
+## `armor_modifier.gd` and `regen_modifier.gd`).
+const LISTENER_ONLY_STATS: Array[String] = [
+	"armor",
+	"flat_regen_per_second",
+	"percent_regen_per_second",
+]
 
 ## The candidates a stat value may be rolled from: the full candidate list minus
 ## the listener-only stats. Armor stays in `_candidate_stat_names()` because the

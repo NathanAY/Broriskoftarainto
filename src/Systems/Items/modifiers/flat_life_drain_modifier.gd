@@ -10,6 +10,14 @@ func _init():
     display_name = "Life Drain"
     effect_kind = EffectKind.COST
 
+func _regen_stat_name() -> String:
+    # The same stat as flat regen: the panel row is the character's net HP/s, and
+    # this half is simply the negative contribution.
+    return "flat_regen_per_second"
+
+func _regen_per_second() -> float:
+    return health_delta / interval
+
 ## Dynamic fragment so generated values are always shown, never stale static text.
 func get_tooltip_stats() -> String:
     return "Loses %s HP every %ss" % [str(absf(health_delta)), str(interval)]

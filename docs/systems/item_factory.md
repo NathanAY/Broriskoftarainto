@@ -31,7 +31,7 @@ Entry points
 
 The candidate stat pool (`:104-115`) is every key in `Stats.DEFAULT_STATS` plus every `provided_stat` a modifier advertises (`lifeleach`, `armor`). **Uniform pick, no weighting** — the factory has no idea that `attack_range` is worth 0% and `lifeleach` is worth double.
 
-`armor` is a candidate but is never **rolled**: `LISTENER_ONLY_STATS` filters it out of `_gratable_stat_names()`, which is what the stat / buff / debuff generators and `_roll_negative_stat` pick from. Armor only reduces damage while an `ArmorModifier` listens, so a bare `{"armor": 1}` item would show armor in the stat panel and change nothing on a character without the modifier. It reaches the player as the `ArmorModifier` effect item instead, which publishes its per-stack armor into the stat (`armor_modifier.gd`).
+`armor`, `flat_regen_per_second` and `percent_regen_per_second` are candidates but are never **rolled**: `LISTENER_ONLY_STATS` filters them out of `_gratable_stat_names()`, which is what the stat / buff / debuff generators and `_roll_negative_stat` pick from. Each only does something while its modifier scene listens, so a bare `{"armor": 1}` item would show a benefit in the stat panel and change nothing on a character without the modifier. They reach the player as the modifier item instead (`ArmorModifier`, `FlatRegenModifier`, ...), which publishes its value into the stat — see `docs/systems/stats.md`.
 
 Modifiers may randomize themselves at generation time via `randomize_for_generation(context)` (`:432`). Two do: `HealOnEventModifier` picks one of five trigger/heal pairs, `StatOnKillModifier` picks a target stat and a 5-10%-of-base amount. Treat any new modifier that implements this hook as a **weapon-grade** design (`balance.md` §6.2) — it is choosing its own power.
 
@@ -56,6 +56,7 @@ func _generate_stat_modifiers(_chosen_stat, base_value) -> Dictionary:
 | `attack_speed` | 1.0 | 0.05 – 0.10 | +5-10% WB. Also multiplies every on-hit rider (`balance.md` §6.1). |
 | `critical_chance` | 0.0 | **1.0 (constant)** | +1 pp of a 0-100 scale → **+0.5% WB**, and always exactly the same number. |
 | `armor` | not in `DEFAULT_STATS`, and never rolled | — | Filtered out of the rollable pool (see above). Armor comes from the `ArmorModifier` item's own per-stack bonus. |
+| `flat_regen_per_second` / `percent_regen_per_second` | not in `DEFAULT_STATS`, and never rolled | — | Same. The regen items already exist as effect items, and each publishes its per-second rate into the stat. |
 | `lifeleach` | not in `DEFAULT_STATS` | **1.0 (constant)** | Stat goes `1.0 → 2.0`, so `LifeLeachModifier`'s 5% lifesteal (`life_leach_modifier.gd:6,26`) **doubles to 10%**. One price-1 item doubles the build's only stat. |
 | `flat_weapon_damage` | 0.0 | **1.0 (constant)** | +10% WB on a Fist, +20% on a Shotgun. Unbounded vs weapon tier. |
 | `projectile_pierce` | 0.0 | **1.0 (constant)** | +1 target on a Pistol that already pierces 1 → **+100% WB**. |

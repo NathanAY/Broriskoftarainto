@@ -5,16 +5,6 @@ extends BaseModifier
 @export var trigger_event: String = "before_take_damage"
 @export var armor_per_stack: float = 5.0
 
-## This modifier's own armor contribution, published into the holder's `armor`
-## stat as an ordinary modifier.
-##
-## Armor used to be `stat armor + per-stack bonus`, summed inside the damage
-## handler below. That kept the bonus out of `Stats`, and since the stat panels
-## list the stat, an armor item that was working showed no armor at all. The stat
-## is now the single number: the formula reads it, the panels show it, and they
-## cannot disagree.
-var _published_armor: Dictionary = {}
-
 func get_tooltip_stats() -> String:
     return "+%d armor per stack" % int(armor_per_stack)
 
@@ -31,13 +21,9 @@ func attachEventManager(em: Node):
     _subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
     _publish_armor()
 
-func detach() -> void:
-    _unpublish_armor()
-    super.detach()
-
-## Publish the bonus again whenever the stack count moves, so the stat tracks
-## pickups and sales. The same effect scene is deduplicated into one node per
-## holder, so one `_published_armor` covers every copy of every armor item.
+## Republish whenever the stack count moves, so the stat tracks pickups and sales.
+## The same effect scene is deduplicated into one node per holder, so this one
+## published value covers every copy of every armor item.
 func _on_stacks_changed() -> void:
     _publish_armor()
 
@@ -55,28 +41,11 @@ func _stack_bonus() -> float:
         held_stacks -= 1
     return armor_per_stack * max(0, held_stacks)
 
+## Push the held-item armor into the `armor` stat. Armor used to be summed here in
+## the damage handler instead, which kept it out of `Stats` - and since the stat
+## panels list the stat, an armor item that was working showed no armor at all.
 func _publish_armor() -> void:
-    if not stats:
-        return
-    var bonus := _stack_bonus()
-    if is_equal_approx(bonus, _published_bonus()):
-        return
-    _unpublish_armor()
-    if bonus > 0.0:
-        _published_armor = {"armor": {"flat": bonus}}
-        stats.add_modifier(_published_armor)
-
-## Called twice on the way out (BaseModifier.remove_stack already detaches when
-## the last stack goes, then ItemHolder detaches again before freeing), so an
-## empty `_published_armor` is what makes the second call a no-op.
-func _unpublish_armor() -> void:
-    if _published_armor.is_empty() or not is_instance_valid(stats):
-        return
-    stats.remove_modifier(_published_armor)
-    _published_armor = {}
-
-func _published_bonus() -> float:
-    return float(_published_armor.get("armor", {}).get("flat", 0.0))
+    _publish_stat_value(provided_stat, _stack_bonus())
 
 func _on_before_take_damage(event):
     var ctx: DamageContext = event["damage_context"]

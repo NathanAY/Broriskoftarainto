@@ -63,6 +63,60 @@ var bound_weapon: Object = null
 # on freed listeners). Each entry: [event_name, callable].
 var _subscriptions: Array = []
 
+## What this modifier has published into the holder's SHARED stats of its own,
+## keyed by stat name -> the modifier dict it added to `Stats.modifiers`.
+##
+## `provided_stat_owned = false` means the modifier does not claim the stat, but
+## it may still have to WRITE it: `ArmorModifier` and the regen modifiers both
+## grant a per-stack amount that no character declares. Publishing it is what
+## makes the amount visible - the stat panels list the stat, so an amount kept
+## inside the modifier is an amount the player cannot see. [method detach] takes
+## every entry back off again.
+var _published_values: Dictionary = {}
+
+
+## Publish `value` as `stat_name` on the holder's Stats, for whatever the caller
+## already scaled by the active stacks.
+##
+## A published value is an ordinary modifier, so a stat item / buff / debuff on
+## the same stat composes with it and can drive it negative - which is how a life
+## drain ends up in the same row as the regen it cancels. Publishing zero is a
+## removal rather than a no-op entry, so the stat stops being listed while the
+## character has none of this.
+func _publish_stat_value(stat_name: String, value: float) -> void:
+	if not stats or stat_name.is_empty():
+		return
+	if is_equal_approx(value, _published_value(stat_name)):
+		return
+	_unpublish_stat_value(stat_name)
+	if value != 0.0:
+		var entry := {stat_name: {"flat": value}}
+		_published_values[stat_name] = entry
+		stats.add_modifier(entry)
+
+
+## Take one published value back off the Stats. Safe to call for a stat that was
+## never published, and on a holder whose Stats node has already gone.
+func _unpublish_stat_value(stat_name: String) -> void:
+	if not _published_values.has(stat_name):
+		return
+	var entry: Dictionary = _published_values[stat_name]
+	_published_values.erase(stat_name)
+	if is_instance_valid(stats):
+		stats.remove_modifier(entry)
+
+
+func _unpublish_all_stat_values() -> void:
+	for stat_name in _published_values.keys():
+		_unpublish_stat_value(stat_name)
+
+
+## The value currently published under `stat_name`, or 0.0 when nothing is.
+func _published_value(stat_name: String) -> float:
+	if not _published_values.has(stat_name):
+		return 0.0
+	return float(_published_values[stat_name].get(stat_name, {}).get("flat", 0.0))
+
 ## Subscribe and record the pair. When this modifier is bound to a weapon
 ## (`bound_weapon != null`), the listener is auto-wrapped so it only reacts to
 ## events from that weapon. That way per-handler `_is_bound_event` guards are
@@ -166,11 +220,13 @@ func _release_provided_stat() -> void:
 		return
 	stats.release_provided_stat(provided_stat)
 
-## Full detach: release the owned stat and unsubscribe all recorded subscriptions.
-## Called by `remove_stack` when the last stack is removed; lifecycle owners
-## (ItemHolder) may also call it directly before freeing the node.
+## Full detach: release the owned stat, take every published value back off the
+## Stats, and unsubscribe all recorded subscriptions. Called by `remove_stack`
+## when the last stack is removed; lifecycle owners (ItemHolder) may also call it
+## directly before freeing the node.
 func detach() -> void:
 	_release_provided_stat()
+	_unpublish_all_stat_values()
 	_unsubscribe_all()
 
 ## The holder's Health node, or null when it is missing.

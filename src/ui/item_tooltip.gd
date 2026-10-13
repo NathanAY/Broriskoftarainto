@@ -25,6 +25,8 @@ const STAT_HINTS: Dictionary = {
     "attack_range": "Maximum distance at which your weapons can hit targets (in meters).",
     "movement_speed": "Movement speed in meters per second (m/s).",
     "armor": "Reduces incoming damage.\nFormula: final damage x (10 / (10 + armor)).\nExample: 1 armor blocks about 9%% (multiplier 0.91).\nExample: 10 armor blocks 50%% (multiplier 0.50).",
+    "flat_regen_per_second": "Health recovered each second, before damage.\nA life drain item subtracts from this, so a negative number means you are losing health faster than you regain it.",
+    "percent_regen_per_second": "Percent of your MAX health recovered each second, before damage.\nA percent life drain item subtracts from this.",
     "critical_chance": "Chance per hit to land a critical strike (in percent, 0-100).",
     "critical_multiplier": "Critical strikes multiply your damage by this value (1.5 = 150%%).",
     "area_size_multiplier": "Multiplier for the size of explosions and area effects.",

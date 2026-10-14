@@ -229,8 +229,19 @@ func _update_condition_managers() -> void:
         if manager.has_method("update"):
             manager.update(condition_update_interval)
 
+## The icon a stat row, item card or buff tile shows.
+##
+## The stats folder is the primary home: a stat icon filename **is** the stat key.
+## A stat that only exists because a modifier publishes into it - `armor` before it
+## had art of its own, and the two regen rates - has no natural key of its own, so
+## its art is filed under `src/Assets/modifiers/` and named after the stat key too.
+## That second lookup is why the modifier folder holds `flat_regen_per_second.png`:
+## the modifier scene names are a different naming scheme (`ItemIconGenerator`
+## derives those from the effect scene's basename) and nothing here knows which
+## scene published a given stat.
 static func get_stat_icon(stat_name: String) -> Texture2D:
-    var path = "res://src/Assets/stats/%s.png" % stat_name
-    if ResourceLoader.exists(path):
-        return load(path)
+    for folder in ["stats", "modifiers"]:
+        var path = "res://src/Assets/%s/%s.png" % [folder, stat_name]
+        if ResourceLoader.exists(path):
+            return load(path)
     return load("res://src/Assets/stats/_default.png")

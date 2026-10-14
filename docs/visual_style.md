@@ -51,6 +51,7 @@ Every generated PNG must satisfy all of these or it will not load, or will rende
 | --- | --- | --- | --- |
 | Stat icon | `src/Assets/stats/<stat_key>.png` | 96x96 | 24x24 in stat lists, 36-64x36 in item cards |
 | Modifier / effect icon | `src/Assets/modifiers/<modifier_scene_basename>.to_lower()>.png` | 96x96 | 36x36 tooltip, 48x48 tile, 64x64 card |
+| Modifier-published stat icon | `src/Assets/modifiers/<stat_key>.png` | 96x96 | 24x24 in stat lists, 36-64x36 in item cards |
 | Weapon icon | `src/Assets/weapons/<snake_case>.png` | 80x80 | 64x64 card, and in-world as a Sprite2D |
 | Enemy sprite | `src/Assets/enemies/<snake_case>.png` | 100x100 grunt, 225x225 boss | in-world, ~0.4x half-width is the collision radius |
 | Character body | `src/Assets/character/potato.png` | ~100x100 | in-world, shared by every character |
@@ -66,8 +67,10 @@ The two binding rules:
 
 - A stat icon filename **is** the stat key. `stats.gd` builds the path as `res://src/Assets/stats/%s.png % stat_name`. Any other name is never found.
 - A modifier icon filename **is** the lowercase basename of the modifier `.tscn`. `src/ui/ItemIconGenerator.gd` derives it from `effect.resource_path`, so `PoisonModifier.tscn` would need `poisonmodifier.png` — which does not exist yet, see "Known gaps".
+- A **modifier-published stat** icon is named after the **stat key**, and lives in the modifiers folder. `Stats.get_stat_icon()` searches `src/Assets/stats/` first and falls through to `src/Assets/modifiers/`, so a stat that only exists because a modifier publishes into it — `armor`, `flat_regen_per_second`, `percent_regen_per_second` — is drawn from the modifiers folder rather than from `_default.png`. The naming is the stat key and *not* the modifier scene basename precisely because `get_stat_icon()` receives only the stat name: nothing at that call site knows which scene published it, so a `flatregenmodifier.png` would be unreachable. Filename collisions across the two folders are resolved in favour of the stats folder, which is why `armor.png` in `src/Assets/stats/` keeps winning over the modifiers folder.
+- **A modifier that publishes a stat needs its art under BOTH names, or the stat row and the item card disagree.** The two lookups are independent and neither falls back to the other: `Stats.get_stat_icon()` wants `<stat_key>.png`, `ItemIconGenerator` wants `<scene_basename>.to_lower()>.png`. `FlatRegenModifier.tscn` publishing `flat_regen_per_second` therefore needs `flat_regen_per_second.png` *and* `flatregenmodifier.png` — byte-identical copies, so the row and the card show the same drawing. This is the one place in the asset spec where the same art is deliberately stored twice, and it is what makes a stat row and its item card match.
 
-Fallbacks when a lookup fails: `src/Assets/stats/_default.png` and `src/Assets/modifiers/_default.png`.
+Fallbacks when a lookup fails: `src/Assets/stats/_default.png` and `src/Assets/modifiers/_default.png`. A missing `.import` sidecar reads as exactly the same failure as a missing file, so run `godot --headless --path . --import` after adding art by script rather than from the editor.
 
 Weapons and characters use an explicit `sprite` / `small_icon` field on the `.tres`, so the filename only needs to be `snake_case` and readable. An empty weapon `sprite` falls back to `src/Assets/weapons/_default.png`.
 
@@ -412,8 +415,8 @@ The icon templates no longer ask for a **cel-shaded highlight**. That phrase ask
 
 ## Known gaps
 
-- Only **2 of 25** modifier scenes have a matching icon — `BombOnHitModifier` and `SpinningOrbsModifier`. The other 23 all fall back to `_default.png`.
-- **9 icons in `src/Assets/modifiers/` are orphaned**, because their names do not match any scene basename: `armormode` (a typo for `armormodifier`), `coil_icon`, `dynamite_icon`, `fairy_icon`, `glass_cannon_icon`, `rocket`, `shuriken`, `torch`. Either rename them to the lowercase scene basename or delete them.
+- Only **6 of 25** modifier scenes have a matching icon — `BombOnHitModifier`, `SpinningOrbsModifier`, and the four regen/drain scenes. The other 19 all fall back to `_default.png` (the coiled spring).
+- **9 icons in `src/Assets/modifiers/` are orphaned**, because their names do not match any scene basename: `armormode` (a typo for `armormodifier`), `coil_icon`, `dynamite_icon`, `fairy_icon`, `glass_cannon_icon`, `rocket`, `shuriken`, `torch`. Either rename them to the lowercase scene basename or delete them. "Orphaned" means only that `ItemIconGenerator` will not find them; note that a stat-key icon in this folder is deliberately *not* scene-named, so `flat_regen_per_second.png` belongs to the rule above and is not one of these.
 - `Thorns.tres` has no `sprite` at all.
 - `DeathAura.tres` borrows `circular_saw.png`, which suits the aura behaviour but is not a Death Aura icon of its own.
 - **There is no per-character body.** Every character shares `src/Assets/character/potato.png`, hardcoded in `src/Systems/Character.tscn`. Generated bodies exist but are not wired, and adding them means changing the scene to point at a per-id texture. Not started.

@@ -21,7 +21,8 @@ Everything else is a reusable piece instanced into that tree:
 | Path | Role |
 |---|---|
 | `src/Systems/Character.tscn` | The Player scene — see `docs/systems/player.md` for its child contract |
-| `src/Systems/Enemy.tscn`, `src/Systems/EnemyBoss.tscn` | Enemy and boss scenes; both take `Stats`, `Health`, `WeaponHolder`, `ItemHolder`, `EventManager` as children |
+| `src/Systems/Enemy.tscn`, `src/Systems/EnemyBoss.tscn`, `src/Systems/EnemyBulwark.tscn` | Enemy scenes. The basic enemy, the boss and the roster types; all of them take `Stats`, `Health`, `WeaponHolder`, `ItemHolder`, `EventManager` as children. An enemy type is a scene, not a class — see `docs/systems/enemies.md` |
+| `src/Systems/enemies/enemy_spawn_entry.gd` | One row of the regular spawner's table: the enemy scene, its weight, and the loop it unlocks on. See `docs/systems/spawners.md` |
 | `src/Systems/ShopPortal.tscn` | The shop entry portal spawned after a boss dies |
 | `src/Systems/SpawnerModifier.tscn` | Death rewards (money, drops, explosion, death mark). Attached to spawners, despite the name — it is not a spawner. |
 | `src/Systems/stats/`, `src/Systems/weapon/`, `src/Systems/Items/` | Reusable subsystems |
@@ -37,6 +38,9 @@ There is no separate `MainScene`; `Game.tscn` is the gameplay entry, and the men
 - `src/Scripts/LocalEventManager.gd` (`EventManager`): the lightweight pub/sub bus every system talks through.
 - `src/Scripts/character.gd` (`Character`): player logic, equipment (`WeaponHolder`, `ItemHolder`), event subscriptions.
 - `src/Scripts/Enemy.gd`: enemy behaviour wrapper — health, weapons, movement.
+- `src/Systems/movement/bahaviour/`: the movement behaviours. `MovementBehaviour` is the base; `ChaseMovementBehaviour`, `ChaseDistanceMovementBehaviour`, `WanderAroundMovementBehaviour` and `ChargeMovementBehaviour` are the concrete ones. A behaviour is duck-typed against a `CharacterBody2D` and reaches the creature's `target`, `stats`, `anim_player` and `sprite`, so a new AI is a script plus a `.tscn` rather than a new enemy class.
+- `src/Systems/damage/area_burst_on_enter.gd`: an optional enemy child that damages everything in the `damageable` group inside its radius when its owner dies.
+- `src/Systems/enemies/split_on_death.gd` (`SplitOnDeath`): an optional enemy child that spawns smaller copies of its owner when it dies.
 - `src/Systems/stats/stats.gd` (`Stats`): base stats, modifiers, conditions, and modifier-owned (provided) stats.
 - `src/Systems/weapon/*`: weapon resources (`BaseWeapon`) plus the runtime firing/aiming scripts.
 - `src/Systems/Items/*`: the `Item` resource, `ItemHolder`, `item_pickup`, `ItemBuilder`, and `ItemFactory`.

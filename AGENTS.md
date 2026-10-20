@@ -22,6 +22,10 @@
 - `src/Systems/Items/item_holder.gd`: holds items; attaches modifier children to stats node
 - Effects live in `src/Systems/Items/modifiers/` (lowercase `modifiers`, lowercase everything else in that path). They are attached via `ItemHolder`, subscribe to events (`on_attack`, `on_hit`, `on_stat_changes`), and manipulate the holder's `Stats`/`Health` nodes
 
+## Enemies
+- `src/Scripts/Enemy.gd`: the script every enemy runs. An enemy *type* is a **scene**, not a class: `src/Systems/Enemy.tscn` (grunt), `src/Systems/EnemyBulwark.tscn` (roster row). The roster and how a row is added are in `docs/systems/enemies.md`
+- `src/Systems/enemy_spawner.gd`: spawns from a table of `EnemySpawnEntry` rows; the table itself is filled in `src/Scenes/Game.tscn`
+
 # Testing
 
 ## Setup and run test
@@ -130,6 +134,8 @@ The per-system docs live in `docs/systems/` and are indexed, with one-line descr
   ```
 - `test/tools/make_soft_particles.gd` — regenerates the four ink-free particle sprites (`particle_glow`, `particle_smoke`, `particle_spark`, `particle_shard`) into `src/Assets/particles/`. Run it rather than hand-editing those PNGs: `godot --headless --path . -s res://test/tools/make_soft_particles.gd`. The shipped `particle_1.png`..`particle_27.png` **cannot** be used for fire — they are 53-72% near-black ink outline, and a particle tint multiplies the ink along with the fill, so they render as black blobs. See the explosion section of `docs/systems/weapons.md`.
 - `test/tools/character_ui_preview.tscn`, `test/tools/shop_ui_preview.tscn` — the character menu and the shop with a stub character wearing sample items/weapons, so they render standalone for a visual check.
+- `test/tools/enemy_gallery_preview.tscn` + `.gd` — the enemy roster in a row on a plain backdrop, so the whole set can be judged in one shot: `.\run_scene_shot.bat res://test/tools/enemy_gallery_preview.tscn res://enemies.png`. Add a roster row to the `ROSTER` list when its enemy ships.
+- `test/tools/extract_enemy_sprites.gd` — cuts the roster's art out of the enemy sprite sheet into `src/Assets/enemies/` as 100x100 PNGs with the white backdrop keyed out. Run it rather than slicing the sheet by hand: `godot --headless --path . -s res://test/tools/extract_enemy_sprites.gd`. The sheet's grid is never clean, so the tool flood-fills the backdrop in from the border and splits what is left into connected components instead of slicing equal rectangles.
 - `test/tools/sandbox_panel_preview.tscn` — the debug sandbox panel on its own. Its real route is the pause menu, which a one-shot render cannot reach. See `docs/systems/debug_scenarios.md`.
 - `test/tools/configure_enemy_panel_preview.tscn` — the weapons & items panel pointed at an enemy, for the same reason.
 

@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://c5mkhi6kbs6kl"]
+
+[ext_resource type="Script" uid="uid://dqb4r5oycddhc" path="res://src/Systems/damage/area_burst_on_enter.gd" id="1_burst"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_burst"]
+radius = 270.0
+
+[node name="AreaBurstOnEnter" type="Area2D"]
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_burst")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_burst")

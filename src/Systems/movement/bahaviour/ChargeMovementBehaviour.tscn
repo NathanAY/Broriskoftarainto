@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bj5vf1b3sgu61"]
+
+[ext_resource type="Script" uid="uid://cgqft7a36l4yd" path="res://src/Systems/movement/bahaviour/charge_movement_behaviour.gd" id="1_charge"]
+
+[node name="MovementBehaviour" type="Node"]
+script = ExtResource("1_charge")

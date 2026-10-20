@@ -302,11 +302,26 @@ The same `hits_per_second × duration` shape applies to Bomb (`bomb_on_hit_modif
 
 | Loop | Basic enemy HP | Basic enemy contact DPS | Boss HP | Boss weapon DPS |
 |---|---|---|---|---|
-| 1 | 10 | 10 | 260 | 45 |
-| 2 | 30 | 20 | 510 | 110 |
-| 3 | 50 | 30 | 760 | 278 |
+| 1 | 10 | 8 | 260 | 45 |
+| 2 | 30 | 16 | 510 | 110 |
+| 3 | 50 | 24 | 760 | 278 |
 
-(Basic enemy contact DPS = `5.0 × damage_stat × 2.0`, from the `Thorns` weapon it spawns with — `Enemy.gd:30` — so it is *per touching enemy*. Boss weapon DPS is the summed `WB_raw` of its whole loadout from `boss_spawner.gd:62-69`: 2 boss shotguns per loop iteration, plus 2 Pistols from loop 3, plus its own contact weapon, with `damage_stat = 1 + loop`. A pellet weapon's `WB_raw` is `pellet_count × base_damage × base_attack_speed` (§4.2), so a boss shotgun contributes `4 × 3.0 × 0.6 = 7.2`. It assumes **every pellet connects**, which is the boss at best-case uptime — treat it as a ceiling, not a typical value. The pellets are deliberately slow, so real DPS sits well under this.)
+(Basic enemy contact DPS = `5.0 × damage_stat × 1.6`, from the `Thorns` weapon it spawns with — `Enemy.gd` — so it is *per touching enemy*. That weapon is now the `contact_weapon` export's default, so an enemy that clears it does not hurt on touch at all, and the number above is only the basic enemy's. Boss weapon DPS is the summed `WB_raw` of its whole loadout from `boss_spawner.gd`: 2 boss shotguns per loop iteration, plus 2 Pistols from loop 3, plus its own contact weapon, with `damage_stat = 1 + loop`. A pellet weapon's `WB_raw` is `pellet_count × base_damage × base_attack_speed` (§4.2), so a boss shotgun contributes `4 × 3.0 × 0.6 = 7.2`. It assumes **every pellet connects**, which is the boss at best-case uptime — treat it as a ceiling, not a typical value. The pellets are deliberately slow, so real DPS sits well under this.)
+
+**[CURRENT]** the roster of enemy types. These numbers are `.tscn` data, not design constants: a type is rebalanced by editing its scene, and `docs/systems/enemies.md` describes what each one is.
+
+| Type | Scene | Health | Speed (m/s) | Contact DPS | Role |
+|---|---|---|---|---|---|
+| Grunt | `src/Systems/Enemy.tscn` | 10 | 1.0 | 8 | The baseline the loop table above is written against. |
+| Bulwark | `src/Systems/EnemyBulwark.tscn` | 30 | 0.4 | 8 | A slow wall: three times the grunt's health at a third of its speed. |
+
+**The rule a new type has to keep.** A type is a *shape* of threat, not a bigger number, so it has to differ from the basic enemy in what it asks of the player:
+
+- Its **time to kill** may be longer, but only if the player has a way to avoid the fight. The Bulwark's health triples its TTK, and its speed drops to a third, so the answer is to walk around it rather than to out-shoot it. A type that is both slower to kill *and* faster than the player is a stat check, not a shape.
+- Its **threat** may not be a damage number the basic enemy also has. The Bulwark carries the same Thorns the grunt does, so its danger is the wall it is, not the damage it does.
+- Its **cost to the player** is judged at the loop it appears in, like a weapon (§4.6): a type that appears at loop 1 has to fit the loop-1 TTK band, and one that appears later has the later band's power to match.
+
+The numbers themselves are not pinned by tests — `test/Systems/test_enemy_variant_loadouts.gd` compares one enemy against another, so a balance pass does not have to touch a test.
 
 A weapon is balanced when, at the loop it is *found* in, its time-to-kill on a basic enemy lands in a band:
 

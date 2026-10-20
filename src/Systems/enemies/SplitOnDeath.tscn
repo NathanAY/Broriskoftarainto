@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bsslu3h00kb35"]
+
+[ext_resource type="Script" uid="uid://fptlpgwf3mq1" path="res://src/Systems/enemies/split_on_death.gd" id="1_split"]
+
+[node name="SplitOnDeath" type="Node"]
+script = ExtResource("1_split")

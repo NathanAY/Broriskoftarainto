@@ -70,6 +70,8 @@ const ALLOWED_MISSING := {
 		"balance.md prescribes this suite in its [PROPOSED] new-weapon checklist",
 	"res://scene_shot.png":
 		"runtime output of run_scene_shot.bat, written on demand, never committed",
+	"res://enemies.png":
+		"runtime output of run_scene_shot.bat for the enemy gallery, written on demand, never committed",
 }
 
 var _basenames := {}

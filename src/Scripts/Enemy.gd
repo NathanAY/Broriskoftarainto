@@ -15,6 +15,10 @@ class_name Enemy
 var target: Node = null
 var _alive: bool = true
 
+## Contact damage. Thorns hooks the body's own Hitbox, so an enemy that should
+## not hurt on touch sets this to null and arms itself some other way.
+@export var contact_weapon: BaseWeapon = preload("res://src/Resources/weapons/Thorns.tres")
+
 ## Soft crowd separation: force starts pulling once two enemies get closer
 ## than SEPARATION_FACTOR * body radius (hard body-body collision is disabled
 ## so packed crowds no longer shove/slide each other into unnatural paths).
@@ -27,7 +31,10 @@ const SEPARATION_FORCE_SCALE: float = 2.5
 func _ready():
     add_to_group("enemies")  # Add enemy to a group
     add_to_group("damageable")
-    $WeaponHolder.add_weapon(load("res://src/Resources/weapons/Thorns.tres"))
+    # Contact damage is optional: an enemy that should not hurt on touch arms
+    # no contact weapon at all, and gets its threat from something else.
+    if contact_weapon != null:
+        $WeaponHolder.add_weapon(contact_weapon)
     # item_holder.add_item(load("res://src/Resources/items/BootsOfSpeed.tres"))
     
     collision_layer = 2
@@ -61,7 +68,7 @@ func _physics_process(_delta):
 ## naturally. Uses the body's collision radius so bigger bodies (bosses)
 ## separate more; stable anti-symmetric pairing keeps exact overlaps apart.
 func _separation_force() -> Vector2:
-    var radius := _body_radius()
+    var radius := body_radius()
     var sep_radius := radius * SEPARATION_FACTOR
     if sep_radius <= 0.0:
         return Vector2.ZERO
@@ -88,7 +95,9 @@ func _separation_force() -> Vector2:
     return force
 
 
-func _body_radius() -> float:
+## The radius of the body collider. Read by the crowd separation and by the
+## split node, which puts the children in a ring around the corpse.
+func body_radius() -> float:
     if collisition_shape != null and collisition_shape.shape is CircleShape2D:
         return (collisition_shape.shape as CircleShape2D).radius
     return 0.0

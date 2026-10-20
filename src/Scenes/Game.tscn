@@ -13,6 +13,21 @@
 [ext_resource type="PackedScene" uid="uid://bo2o0mwe3usc3" path="res://src/Scenes/menu/PauseMenu.tscn" id="18_jn8rg"]
 [ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://src/Scenes/menu/ShopMenu.tscn" id="18_x3xnh"]
 [ext_resource type="PackedScene" uid="uid://xn354lgrh8jk" path="res://src/Systems/Arena.tscn" id="20_arena"]
+[ext_resource type="Script" uid="uid://cr7xbkandgpbl" path="res://src/Systems/enemies/enemy_spawn_entry.gd" id="21_entry"]
+[ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://src/Systems/Enemy.tscn" id="22_grunt"]
+[ext_resource type="PackedScene" uid="uid://bbldlamw7jps2" path="res://src/Systems/EnemyBulwark.tscn" id="23_bulwark"]
+
+[sub_resource type="Resource" id="Resource_grunt"]
+script = ExtResource("21_entry")
+scene = ExtResource("22_grunt")
+weight = 1.0
+min_loop = 1
+
+[sub_resource type="Resource" id="Resource_bulwark"]
+script = ExtResource("21_entry")
+scene = ExtResource("23_bulwark")
+weight = 0.4
+min_loop = 1
 
 [node name="Main" type="Node2D" unique_id=1823240247]
 script = ExtResource("1_x3xnh")
@@ -25,6 +40,7 @@ character = NodePath("../Character")
 
 [node name="EnemySpawner" parent="StageManager" unique_id=357063823 node_paths=PackedStringArray("character") instance=ExtResource("4_tfod6")]
 character = NodePath("../../Character")
+spawn_table = Array[ExtResource("21_entry")]([SubResource("Resource_grunt"), SubResource("Resource_bulwark")])
 
 [node name="SpawnerModifier" parent="StageManager/EnemySpawner" unique_id=571715030 node_paths=PackedStringArray("itemFactory") instance=ExtResource("3_alh3a")]
 itemFactory = NodePath("../../../ItemFactory")

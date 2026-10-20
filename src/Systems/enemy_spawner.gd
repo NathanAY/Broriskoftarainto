@@ -31,6 +31,12 @@ class_name EnemySpawner
 @export var min_groups_per_spawn = 1  # minimum number of groups to spawn at once
 @export var max_groups_per_spawn = 2  # maximum number of groups to spawn at once (randomized)
 @export var use_group_spawning = true  # toggle between single spawn and group spawn mode
+## The enemy types this wave can spawn. Each row names a scene, how likely it is
+## to come up, and the loop it unlocks on. An empty table falls back to
+## `fallback_enemy_scene`, so a scene that forgot to fill it still spawns.
+@export var spawn_table: Array[EnemySpawnEntry] = []
+## Spawned when the table is empty or every row is still locked behind its loop.
+@export var fallback_enemy_scene: PackedScene = preload("res://src/Systems/Enemy.tscn")
 ## Keep spawned enemies at least this far apart from each other (any two alive
 ## enemies at spawn time). Enemy body diameter is ~82 (radius 41), so 90 leaves
 ## a small gap instead of spawning buddies that immediately shove each other.
@@ -39,7 +45,6 @@ class_name EnemySpawner
 ## so spawning never deadlocks when a packed arena wall forces overlaps.
 @export var max_spawn_attempts: int = 12
 
-var enemy_scene = preload("res://src/Systems/Enemy.tscn")
 var enemiesNode: Node = null
 var modifiers: Array = []
 var target_enemy_count: int
@@ -182,6 +187,34 @@ func _process(_delta: float) -> void:
             spawn_timer.wait_time = refill
             spawn_timer.start()
 
+## Picks the scene for the next enemy out of the spawn table.
+##
+## A row is open once the current loop has reached its `min_loop`, so the roster
+## widens as the run goes on rather than every type showing up in wave one.
+## The open rows are drawn by weight - a row with no weight never comes up -
+## and a table that is empty, or one whose every row is still locked, falls
+## back to `fallback_enemy_scene`.
+func pick_enemy_scene() -> PackedScene:
+    var open: Array[EnemySpawnEntry] = []
+    var total := 0.0
+    for entry in spawn_table:
+        if entry == null or entry.scene == null:
+            continue
+        if current_loop < entry.min_loop:
+            continue
+        if entry.weight <= 0.0:
+            continue
+        open.append(entry)
+        total += entry.weight
+    if open.is_empty():
+        return fallback_enemy_scene
+    var roll := randf() * total
+    for entry in open:
+        roll -= entry.weight
+        if roll <= 0.0:
+            return entry.scene
+    return open[open.size() - 1].scene
+
 func spawn_enemy_group():
     if not character:
         return
@@ -207,7 +240,7 @@ func spawn_enemy_group():
         var in_this_group := mini(group_size_now, budget - spawned)
         for j in range(in_this_group):
             # Use a timer to stagger spawns within the group
-            var enemy = enemy_scene.instantiate()
+            var enemy = pick_enemy_scene().instantiate()
             var spawn_position = _pick_spawn_position(func() -> Vector2:
                 var angle = randf_range(0, TAU)
                 var radius = randf_range(0, group_spawn_radius)
@@ -237,7 +270,7 @@ func spawn_enemy():
     if not character:
         return
 
-    var enemy = enemy_scene.instantiate()
+    var enemy = pick_enemy_scene().instantiate()
     var character_position: Vector2 = character.global_position
     var spawn_position = _pick_spawn_position(func() -> Vector2:
         var angle = randf_range(0, TAU)

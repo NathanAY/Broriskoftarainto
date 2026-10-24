@@ -315,6 +315,7 @@ The same `hits_per_second × duration` shape applies to Bomb (`bomb_on_hit_modif
 | Grunt | `src/Systems/Enemy.tscn` | 10 | 1.0 | 8 | The baseline the loop table above is written against. |
 | Bulwark | `src/Systems/EnemyBulwark.tscn` | 30 | 0.4 | 8 | A slow wall: three times the grunt's health at a third of its speed. |
 | Gunner | `src/Systems/EnemyGunner.tscn` | 7 | 0.9 | 0 | Ranged: it holds a firing distance and shoots the shared `Pistol` (`11.5 x 0.8 = 9.2` DPS), which the player can dodge, so it is weaker and slower than the grunt at touch range. |
+| Slimeling | `src/Systems/EnemySlimeling.tscn` | 6 | 1.0 | 8 | Splits: it dies into three children at `split_scale` 0.6, each with scaled health, speed, damage and collider, so its real TTK is the parent plus three minis. Weaker than the grunt up front to pay for the bodies it leaves behind. |
 
 **The rule a new type has to keep.** A type is a *shape* of threat, not a bigger number, so it has to differ from the basic enemy in what it asks of the player:
 

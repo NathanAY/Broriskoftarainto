@@ -14,6 +14,7 @@ extends GdUnitTestSuite
 const GRUNT_SCENE := "res://src/Systems/Enemy.tscn"
 const BULWARK_SCENE := "res://src/Systems/EnemyBulwark.tscn"
 const GUNNER_SCENE := "res://src/Systems/EnemyGunner.tscn"
+const SLIMELING_SCENE := "res://src/Systems/EnemySlimeling.tscn"
 
 ## The roster, by row. What each row arms and how it differs from the basic
 ## enemy is its role, so it belongs here rather than in the assertions.
@@ -34,6 +35,15 @@ const VARIANTS := [
 		"weapon": "ranged",
 		# It is not a wall and not a sprinter: it trades speed for range.
 		"slower_than_grunt": true,
+	},
+	{
+		"name": "Slimeling",
+		"scene": "res://src/Systems/EnemySlimeling.tscn",
+		# It dies into copies of itself, so it keeps the contact weapon: each
+		# mini is a body you still have to deal with.
+		"weapon": "contact",
+		# It is a soft target: the split is what it costs you, not its health.
+		"fragile_than_grunt": true,
 	},
 ]
 
@@ -122,6 +132,35 @@ func _spawn_target(distance: float) -> Node2D:
 	return target
 
 
+## Kills an enemy outright, the way a hit harder than its whole health would.
+func _kill(enemy: Enemy) -> void:
+	var health := enemy.get_node("Health") as Health
+	var ctx := DamageContext.new()
+	ctx.source = enemy
+	ctx.target = enemy
+	ctx.base_amount = health.max_health + 1.0
+	ctx.final_amount = ctx.base_amount
+	ctx.tags.append("melee")
+	health.apply_damage(ctx)
+
+
+## Every enemy in the test world except `original`. A splitter adds its children
+## into the dead enemy's own container, which is the world here.
+func _enemies_in_world(original: Enemy) -> Array:
+	var out: Array = []
+	for child in _world_root().get_children():
+		if child is Enemy and child != original:
+			out.append(child)
+	return out
+
+
+## The split children are added with `call_deferred`, so the tree has to settle
+## before they are there.
+func _settle() -> void:
+	for _i in range(3):
+		await get_tree().process_frame
+
+
 func test_every_variant_carries_the_enemy_contract() -> void:
 	for variant in VARIANTS:
 		var enemy := _spawn_enemy(variant["scene"])
@@ -173,6 +212,10 @@ func test_every_variant_moves_away_from_the_basic_enemy_in_its_direction() -> vo
 			assert_float(variant_enemy.stats.get_stat("health")).override_failure_message(
 				"%s is not tougher than the basic enemy" % variant["name"]
 			).is_greater(grunt.stats.get_stat("health"))
+		if variant.get("fragile_than_grunt", false):
+			assert_float(variant_enemy.stats.get_stat("health")).override_failure_message(
+				"%s is not frailer than the basic enemy" % variant["name"]
+			).is_less(grunt.stats.get_stat("health"))
 		if variant.get("slower_than_grunt", false):
 			assert_float(variant_enemy.stats.get_stat("movement_speed")).override_failure_message(
 				"%s is not slower than the basic enemy" % variant["name"]
@@ -288,6 +331,50 @@ func test_a_dead_enemy_stops_firing() -> void:
 	assert_int(gunner.weapon_holder.weapons.size()).override_failure_message(
 		"the dead Gunner still carries its weapon"
 	).is_equal(0)
+
+
+func test_the_slimeling_splits_into_copies_of_itself() -> void:
+	var slimeling := _spawn_enemy(SLIMELING_SCENE)
+	var splitter := slimeling.get_node_or_null("SplitOnDeath") as SplitOnDeath
+	assert_object(splitter).override_failure_message(
+		"the Slimeling carries no splitter, so it dies like a grunt"
+	).is_not_null()
+	var parent_health := slimeling.stats.get_stat("health")
+	var parent_radius := slimeling.body_radius()
+
+	_kill(slimeling)
+	await _settle()
+
+	var minis := _enemies_in_world(slimeling)
+	assert_int(minis.size()).override_failure_message(
+		"the Slimeling did not split into its children"
+	).is_equal(splitter.split_count)
+	for mini_enemy in minis:
+		var child := mini_enemy as Enemy
+		assert_that(child.scene_file_path).override_failure_message(
+			"a Slimeling child is not a Slimeling"
+		).is_equal(SLIMELING_SCENE)
+		assert_float(child.body_radius()).override_failure_message(
+			"a Slimeling child is the same size as its parent"
+		).is_less(parent_radius)
+		assert_float((child.get_node("Health") as Health).max_health).override_failure_message(
+			"a Slimeling child is as tough as its parent"
+		).is_less(parent_health)
+
+
+func test_the_slimelings_minis_do_not_split_again() -> void:
+	var slimeling := _spawn_enemy(SLIMELING_SCENE)
+	_kill(slimeling)
+	await _settle()
+	var minis_before := _enemies_in_world(slimeling).size()
+	assert_int(minis_before).is_greater(0)
+
+	_kill(_enemies_in_world(slimeling)[0] as Enemy)
+	await _settle()
+
+	assert_int(_enemies_in_world(slimeling).size()).override_failure_message(
+		"a Slimeling mini split again, so a stage could never end"
+	).is_equal(minis_before)
 
 
 func test_the_game_spawns_every_variant() -> void:

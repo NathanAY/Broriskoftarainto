@@ -16,7 +16,8 @@
 [ext_resource type="Script" uid="uid://cr7xbkandgpbl" path="res://src/Systems/enemies/enemy_spawn_entry.gd" id="21_entry"]
 [ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://src/Systems/Enemy.tscn" id="22_grunt"]
 [ext_resource type="PackedScene" uid="uid://bbldlamw7jps2" path="res://src/Systems/EnemyBulwark.tscn" id="23_bulwark"]
-[ext_resource type="PackedScene" uid="uid://c8qk3m1n7g2ra" path="res://src/Systems/EnemyGunner.tscn" id="24_gunner"]
+[ext_resource type="PackedScene" path="res://src/Systems/EnemyGunner.tscn" id="24_gunner"]
+[ext_resource type="PackedScene" uid="uid://e501pr285aa" path="res://src/Systems/EnemySlimeling.tscn" id="25_slimeling"]
 
 [sub_resource type="Resource" id="Resource_grunt"]
 script = ExtResource("21_entry")
@@ -36,6 +37,12 @@ scene = ExtResource("24_gunner")
 weight = 0.4
 min_loop = 1
 
+[sub_resource type="Resource" id="Resource_slimeling"]
+script = ExtResource("21_entry")
+scene = ExtResource("25_slimeling")
+weight = 0.4
+min_loop = 1
+
 [node name="Main" type="Node2D" unique_id=1823240247]
 script = ExtResource("1_x3xnh")
 
@@ -47,7 +54,7 @@ character = NodePath("../Character")
 
 [node name="EnemySpawner" parent="StageManager" unique_id=357063823 node_paths=PackedStringArray("character") instance=ExtResource("4_tfod6")]
 character = NodePath("../../Character")
-spawn_table = Array[ExtResource("21_entry")]([SubResource("Resource_grunt"), SubResource("Resource_bulwark"), SubResource("Resource_gunner")])
+spawn_table = Array[ExtResource("21_entry")]([SubResource("Resource_grunt"), SubResource("Resource_bulwark"), SubResource("Resource_gunner"), SubResource("Resource_slimeling")])
 
 [node name="SpawnerModifier" parent="StageManager/EnemySpawner" unique_id=571715030 node_paths=PackedStringArray("itemFactory") instance=ExtResource("3_alh3a")]
 itemFactory = NodePath("../../../ItemFactory")

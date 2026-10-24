@@ -1,0 +1,87 @@
+[gd_scene format=3 uid="uid://e501pr285aa"]
+
+[ext_resource type="Script" uid="uid://cs2dub84x6wjd" path="res://src/Scripts/Enemy.gd" id="1_r5v6p"]
+[ext_resource type="Texture2D" uid="uid://dl4sssvbej2s7" path="res://src/Assets/enemies/slimeling.png" id="2_twham"]
+[ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://src/Systems/LocalEventManager.tscn" id="3_10wkk"]
+[ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://src/ui/HealthBar.tscn" id="4_qty8r"]
+[ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://src/Systems/stats/Stats.tscn" id="5_qv8uo"]
+[ext_resource type="PackedScene" uid="uid://bymf3sqpkbdcr" path="res://src/Systems/Items/ItemHolder.tscn" id="6_0lngm"]
+[ext_resource type="PackedScene" uid="uid://cskdgn6s7qlfo" path="res://src/Systems/weapon/WeaponHolder.tscn" id="7_hvdt1"]
+[ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://src/Systems/damage/Health.tscn" id="8_uvjna"]
+[ext_resource type="PackedScene" uid="uid://jsw2vxmrn6yc" path="res://src/Scenes/particles/ParticleEffectManager.tscn" id="9_yw6dd"]
+[ext_resource type="PackedScene" uid="uid://cx3p26icyy5wu" path="res://src/animations/animation_player.tscn" id="10_58ao5"]
+[ext_resource type="AnimationLibrary" uid="uid://cwclbp73qaped" path="res://src/animations/enemy_animations.res" id="11_r1xls"]
+[ext_resource type="PackedScene" uid="uid://c0miaq2nbp3m6" path="res://src/Systems/movement/bahaviour/ChaseMovementBehaviour.tscn" id="12_pdagp"]
+[ext_resource type="PackedScene" uid="uid://cmvgx8sqctngm" path="res://src/Scenes/effects/TextureBurstManager.tscn" id="13_burst"]
+[ext_resource type="PackedScene" uid="uid://brgr2yeaajlxi" path="res://src/Scenes/effects/HitFlashManager.tscn" id="14_flash"]
+[ext_resource type="PackedScene" uid="uid://bsslu3h00kb35" path="res://src/Systems/enemies/SplitOnDeath.tscn" id="15_split"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_kpr8r"]
+radius = 41.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_uihya"]
+radius = 45.2769
+
+[node name="Enemy" type="CharacterBody2D"]
+script = ExtResource("1_r5v6p")
+
+[node name="Node2D" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
+texture = ExtResource("2_twham")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_kpr8r")
+one_way_collision_margin = 1.2
+
+[node name="Hitbox" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("CircleShape2D_uihya")
+
+[node name="EventManager" parent="." instance=ExtResource("3_10wkk")]
+
+[node name="HealthBar" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("4_qty8r")]
+event_manager = NodePath("../EventManager")
+
+[node name="Stats" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("5_qv8uo")]
+event_manager = NodePath("../EventManager")
+stats = {
+"attack_range": 1.67,
+"attack_speed": 1.0,
+"area_radius": 1.0,
+"area_size_multiplier": 1.0,
+"critical_chance": 0.0,
+"critical_multiplier": 1.5,
+"damage": 1.0,
+"energy_shield": 0.0,
+"flat_weapon_damage": 0.0,
+"health": 6.0,
+"item_base_damage": 5.0,
+"movement_speed": 1.0,
+"projectile_pierce": 0.0,
+"projectile_speed_multiplier": 1.0
+}
+
+[node name="ItemHolder" parent="." instance=ExtResource("6_0lngm")]
+
+[node name="WeaponHolder" parent="." instance=ExtResource("7_hvdt1")]
+
+[node name="Health" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_uvjna")]
+event_manager = NodePath("../EventManager")
+
+[node name="ParticleEffectManager" parent="." instance=ExtResource("9_yw6dd")]
+
+[node name="TextureBurstManager" parent="." instance=ExtResource("13_burst")]
+
+[node name="HitFlashManager" parent="." instance=ExtResource("14_flash")]
+
+[node name="AnimationPlayer" parent="." instance=ExtResource("10_58ao5")]
+libraries/ = ExtResource("11_r1xls")
+autoplay = &""
+
+[node name="MovementBehaviour" parent="." instance=ExtResource("12_pdagp")]
+
+[node name="SplitOnDeath" parent="." instance=ExtResource("15_split")]
+split_count = 3
+split_scale = 0.6

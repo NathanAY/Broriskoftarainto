@@ -5,12 +5,12 @@ each a different *shape of threat* rather than a different number, plus the
 infrastructure to spawn a mix of them and swap their stats from the editor.
 
 Status: **Stage 0 — the enabling work — is implemented** (0.1 to 0.5, each with its
-own test suite), and **Stage 1 rows 1 and 2 — the Gunner and the Bulwark — are
-shipped**: the sprites, the enemy scenes, the spawn-table rows and the gallery
-preview. The other three rows of Stage 1 and the two stretch items (0.6 Blink,
-0.7 front shield) are not started. The "What exists today" section below describes
-the state *before* Stage 0 and is left as the record of why the enabling work was
-needed.
+own test suite), and **Stage 1 rows 1, 2 and 3 — the Gunner, the Bulwark and the
+Slimeling — are shipped**: the enemy scenes, the spawn-table rows, the gallery
+preview and the sprites. The other two rows of Stage 1 and the two stretch items
+(0.6 Blink, 0.7 front shield) are not started. The "What exists today" section below
+describes the state *before* Stage 0 and is left as the record of why the enabling work
+was needed.
 
 ## What exists today (and why this plan is not just "add 6 scenes")
 
@@ -280,7 +280,7 @@ constants — see "Numbers are data" below.
 > **Shipped** as `src/Systems/EnemyGunner.tscn`, with the art at
 > `src/Assets/enemies/gunner.png`. The sheet's top-right cell was the
 > placeholder; the shipped art is a hand-delivered high-resolution image
-> (source kept at `docs/plans/images/enemies/Goblin.png`) normalised to the
+> (source kept at `docs/plans/images/enemies/gunner.png`) normalised to the
 > roster's 100x100 / 85%-fill canvas. The sheet cell is therefore **not** in
 > the extractor's `CELLS` table, so re-running the tool cannot overwrite it.
 > Leaving the delivered resolution in place is the trap here: `Sprite2D` draws
@@ -371,6 +371,32 @@ constants — see "Numbers are data" below.
   Either regenerate this one opaque or use the turtle for the splitter. Do not ship the
   translucent cell as-is.
 
+> **Shipped** as `src/Systems/EnemySlimeling.tscn`, with the delivered opaque jelly at
+> `src/Assets/enemies/slimeling.png`, normalised to the roster's 100x100 / 85%-fill
+> canvas. The source is kept at `docs/plans/images/enemies/jelly-splitter.png`. It
+> replaces the placeholder the row first shipped with — a green-tinted copy of the basic
+> enemy's `src/Assets/enemies/spitter.png`, whose tint sat on `Node2D` rather than the
+> `Sprite2D` because `HitFlashManager` tweens the sprite's own `modulate` and resets it to
+> white on every hit. The sheet's jelly cell is still deliberately *not* used: it is the
+> translucent one the row warns about, and a see-through enemy reads as a hole in the
+> arena; the delivered art is fully opaque.
+>
+> Hand-writing the scene also left `src/Scenes/Game.tscn` pointing at a UID the scene
+> never registered, so Godot logged an invalid-UID warning on every load and fell back to
+> the path. The reference now uses the scene's real UID.
+>
+> The row is config on top of 0.3, exactly as planned: `ChaseMovementBehaviour`, the
+> default contact weapon (a mini is still a body you have to deal with), health below
+> the grunt's, and a `SplitOnDeath` child with `split_count` 3 and `split_scale` 0.6.
+> `split_scene` is empty, so each child is another Slimeling and the splitter reads the
+> scene path off the owner.
+>
+> The test rows are in `test/Systems/test_enemy_variant_loadouts.gd`: the generic
+> "frailer than the grunt" row, plus two tests of the mechanic rather than the numbers —
+> the parent dies into `split_count` children that are the same scene, smaller and
+> frailer than the parent, and killing a child spawns nothing, because a split that
+> chains would never let the stage end.
+
 ### 4. Lancer — telegraph and charge
 
 - Sprite: crimson worm, bottom middle.
@@ -433,10 +459,12 @@ test/Systems/test_enemy_variant_loadouts.gd    # 1.x: each scene arms what it sh
 > `test/Systems/damage/test_area_burst_on_enter.gd`,
 > `test/Systems/test_charge_movement_behaviour.gd` and
 > `test/Systems/test_enemy_variant_loadouts.gd`. The last one is the Stage 1 suite, and it
-> has the Bulwark and the Gunner in it: each row declares the weapon its role arms, and
-> the Gunner also gets tests for its firing distance sitting inside its own weapon's
-> reach, for holding that distance instead of walking into the player, and for actually
-> damaging a body at range.
+> has the Bulwark, the Gunner and the Slimeling in it: each row declares the weapon its
+> role arms and how it differs from the grunt, and the Gunner also gets tests for its
+> firing distance sitting inside its own weapon's reach, for holding that distance instead
+> of walking into the player, and for actually damaging a body at range. The Slimeling's
+> two extra tests cover the split itself: the children are copies of its own scene and are
+> smaller than it, and a child does not split again.
 >
 > One extra shared helper came out of it:
 > `test/Systems/damageable_body.gd` (`DamageableBody`) — a minimal body with a `Health`
@@ -575,7 +603,7 @@ render, square 1:1.
    end including sprite extraction and the gallery preview. **Done.**
 3. **0.2** spawn table, with its test. Needed before any of the rows are actually *seen*. **Done.**
 4. **Stage 1 rows 1, 3, 5** — the three that need only config on top of 0.1/0.2.
-   **Row 1 (Gunner) done**, rows 3 and 5 are not.
+   **Rows 1 (Gunner) and 3 (Slimeling) done**, row 5 is not.
 5. **0.5 + Stage 1 row 4 (Lancer)** — the first genuinely new AI plus its own animation
    library. **0.5 done**, the row itself is not.
 6. **0.4** was folded into row 5; if that lands late, split it back out. **Done, split back out.**
@@ -585,10 +613,11 @@ render, square 1:1.
 
 - `docs/systems/enemies.md` — the roster, and the death-animation and stage-end
   limitations it already lists, which the splitter interacts with. **The Stage 0 half is
-  updated, and so are the roster rows for the Bulwark and the Gunner.**
+  updated, and so are the roster rows for the Bulwark, the Gunner and the Slimeling.**
 - `docs/systems/spawners.md` — the spawn table replaces "always `Enemy.tscn`". **Done.**
 - `docs/systems/balance.md` — per-type budget rows and the enemy TTK numbers. **The
-  contact-weapon note is updated, and the per-type rows carry the Bulwark and the Gunner.**
+  contact-weapon note is updated, and the per-type rows carry the Bulwark, the Gunner and
+  the Slimeling.**
 - `docs/architecture.md` — the new behaviours and the enemy scenes it names. **The Stage 0
   half is updated, and so is the list of enemy scenes.**
 

@@ -39,6 +39,11 @@ const MIN_CREATURE_PIXELS := 4000
 ## the cell's position in the grid: x is the column, y is the row. A cell is
 ## listed when its enemy ships, so the sheet's other creatures are not written
 ## out as art that nothing uses yet.
+##
+## The Gunner's cell is deliberately absent: its shipped art was replaced with a
+## hand-delivered high-resolution image, so writing the sheet cell here would
+## overwrite it. That art is normalised to this tool's 100x100 / 85%-fill canvas
+## by hand instead.
 const CELLS := {
 	"bulwark": Vector2i(1, 0),
 }

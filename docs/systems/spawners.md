@@ -23,7 +23,7 @@ The regular spawner used to spawn one hardcoded scene — `src/Systems/Enemy.tsc
 
 A row is a `Resource` rather than one of two parallel exported arrays, because the inspector cannot check that two arrays are the same length, and hand-synchronised parallel arrays rot the first time someone adds a row.
 
-The table itself lives in the **gameplay scene**, not in `src/Systems/EnemySpawner.tscn`: `src/Scenes/Game.tscn` fills the `EnemySpawner` node's `spawn_table` with one row per enemy type. The spawner scene stays a generic spawner, and a scene that instantiates it without a table still spawns the fallback enemy. The current rows are the grunt and the Bulwark; see `docs/systems/enemies.md` for what each one is.
+The table itself lives in the **gameplay scene**, not in `src/Systems/EnemySpawner.tscn`: `src/Scenes/Game.tscn` fills the `EnemySpawner` node's `spawn_table` with one row per enemy type. The spawner scene stays a generic spawner, and a scene that instantiates it without a table still spawns the fallback enemy. The current rows are the grunt, the Bulwark and the Gunner; see `docs/systems/enemies.md` for what each one is.
 
 ## Spawn pacing (see glossary: Wave, Stage, Loop, Spawn pacing)
 - Base `spawn_interval = 1s`; each Wave entry calls `start_wave()` so the first tick lands ~1s (no stale stopped/long timer).

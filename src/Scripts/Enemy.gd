@@ -112,6 +112,7 @@ func _die(_event: Dictionary):
     # moment it dies and let Health reject anything that still reaches it.
     remove_from_group("enemies")
     remove_from_group("damageable")
+    _silence_weapons()
     call_deferred("_disable_colision")
     anim_player.play("death")
     anim_player.animation_finished.connect(
@@ -120,6 +121,15 @@ func _die(_event: Dictionary):
                 queue_free(),
         CONNECT_ONE_SHOT
     ) 
+
+## Stops the corpse shooting. A weapon's firing timer lives on the
+## `WeaponHolder`, not on this node, so it keeps ticking through the death
+## animation: a ranged enemy that died mid-cycle fired one last shot from its
+## body. Removing the weapon stops its timer and frees its visual.
+func _silence_weapons():
+    for weapon in weapon_holder.weapons.duplicate():
+        weapon_holder.remove_weapon(weapon)
+
 
 func _disable_colision():
     collisition_shape.disabled = true

@@ -21,7 +21,7 @@ Everything else is a reusable piece instanced into that tree:
 | Path | Role |
 |---|---|
 | `src/Systems/Character.tscn` | The Player scene — see `docs/systems/player.md` for its child contract |
-| `src/Systems/Enemy.tscn`, `src/Systems/EnemyBoss.tscn`, `src/Systems/EnemyBulwark.tscn` | Enemy scenes. The basic enemy, the boss and the roster types; all of them take `Stats`, `Health`, `WeaponHolder`, `ItemHolder`, `EventManager` as children. An enemy type is a scene, not a class — see `docs/systems/enemies.md` |
+| `src/Systems/Enemy.tscn`, `src/Systems/EnemyBoss.tscn`, `src/Systems/EnemyBulwark.tscn`, `src/Systems/EnemyGunner.tscn` | Enemy scenes. The basic enemy, the boss and the roster types; all of them take `Stats`, `Health`, `WeaponHolder`, `ItemHolder`, `EventManager` as children. An enemy type is a scene, not a class - see `docs/systems/enemies.md` |
 | `src/Systems/enemies/enemy_spawn_entry.gd` | One row of the regular spawner's table: the enemy scene, its weight, and the loop it unlocks on. See `docs/systems/spawners.md` |
 | `src/Systems/ShopPortal.tscn` | The shop entry portal spawned after a boss dies |
 | `src/Systems/SpawnerModifier.tscn` | Death rewards (money, drops, explosion, death mark). Attached to spawners, despite the name — it is not a spawner. |

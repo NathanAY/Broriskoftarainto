@@ -15,6 +15,7 @@ extends Node2D
 const ROSTER := [
 	{"name": "Grunt", "scene": "res://src/Systems/Enemy.tscn"},
 	{"name": "Bulwark", "scene": "res://src/Systems/EnemyBulwark.tscn"},
+	{"name": "Gunner", "scene": "res://src/Systems/EnemyGunner.tscn"},
 ]
 
 ## How far apart two enemies stand, in pixels. Comfortably more than the

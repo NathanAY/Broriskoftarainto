@@ -4,7 +4,7 @@ extends MovementBehaviour
 @export var target: NodePath
 @export var stop_distance: float = 200.0
 
-func process_movement(creature_self: CharacterBody2D, delta: float) -> void:
+func process_movement(creature_self: CharacterBody2D, _delta: float) -> void:
     var node = creature_self.target
     if not node: return
 

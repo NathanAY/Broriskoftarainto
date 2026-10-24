@@ -13,6 +13,7 @@ extends GdUnitTestSuite
 
 const GRUNT_SCENE := "res://src/Systems/Enemy.tscn"
 const BULWARK_SCENE := "res://src/Systems/EnemyBulwark.tscn"
+const GUNNER_SCENE := "res://src/Systems/EnemyGunner.tscn"
 
 ## The roster, by row. What each row arms and how it differs from the basic
 ## enemy is its role, so it belongs here rather than in the assertions.
@@ -21,9 +22,17 @@ const VARIANTS := [
 		"name": "Bulwark",
 		"scene": "res://src/Systems/EnemyBulwark.tscn",
 		# It is the contact-damage wall, so it keeps Thorns.
-		"arms_contact_weapon": true,
+		"weapon": "contact",
 		# It trades its speed for its health. That is the whole row.
 		"tougher_than_grunt": true,
+		"slower_than_grunt": true,
+	},
+	{
+		"name": "Gunner",
+		"scene": "res://src/Systems/EnemyGunner.tscn",
+		# It shoots, so it arms a projectile weapon and no contact weapon.
+		"weapon": "ranged",
+		# It is not a wall and not a sprinter: it trades speed for range.
 		"slower_than_grunt": true,
 	},
 ]
@@ -47,27 +56,54 @@ const REQUIRED_CHILDREN := [
 ## attacks a second, so this covers its first swing with room to spare.
 const PHYSICS_FRAMES := 75
 
-## Physics frames the Bulwark needs to close a visible gap. It walks at a
+## Physics frames a variant needs to close a visible gap. The Bulwark walks at a
 ## fraction of the basic enemy's speed, so it needs a few.
 const CHASE_FRAMES := 20
 
 ## Where the chase target stands, in pixels, so the enemy has to walk.
 const CHASE_DISTANCE := 400.0
 
+## Physics frames the Gunner needs to walk from `GUNNER_START_DISTANCE` into its
+## firing distance. The gap is closed at a fraction of the basic enemy's speed,
+## so this is generous rather than tuned.
+const GUNNER_FRAMES := 80
+
+## Where the Gunner's target starts, in pixels: far outside its firing distance,
+## so it has to walk before it can hold the line.
+const GUNNER_START_DISTANCE := 320.0
+
+## Physics frames a shot needs to leave the Gunner and reach a target standing
+## in its reach. The pistol fires at 0.8 attacks a second and its projectile
+## crosses the gap in well under a second.
+const SHOOT_FRAMES := 130
+
+## Where the body the Gunner shoots stands, in pixels. Inside the pistol's
+## reach, so the shot is legal, but outside the firing distance, so the Gunner
+## is walking towards it rather than standing on top of it.
+const GUNNER_TARGET_DISTANCE := 300.0
+
 var _world: Node2D = null
 
 
 func after_test() -> void:
 	if is_instance_valid(_world):
+		if get_tree().current_scene == _world:
+			get_tree().current_scene = null
 		_world.free()
 
 
 ## The container the test's actors live in.
+##
+## It is parented to the tree root and made the current scene, because a weapon
+## spawns its projectiles into `get_tree().current_scene`, and a GdUnit suite has
+## none of its own. `current_scene` only accepts a child of the root, so this
+## node cannot live under the suite.
 func _world_root() -> Node2D:
 	if not is_instance_valid(_world):
 		_world = Node2D.new()
 		_world.name = "World"
-		add_child(_world)
+		get_tree().root.add_child(_world)
+		get_tree().current_scene = _world
 	return _world
 
 
@@ -76,6 +112,14 @@ func _spawn_enemy(scene_path: String) -> Enemy:
 	var enemy: Enemy = load(scene_path).instantiate()
 	_world_root().add_child(enemy)
 	return enemy
+
+
+## A bare target at `distance` pixels to the right of the world origin.
+func _spawn_target(distance: float) -> Node2D:
+	var target := Node2D.new()
+	_world_root().add_child(target)
+	target.global_position = Vector2(distance, 0.0)
+	return target
 
 
 func test_every_variant_carries_the_enemy_contract() -> void:
@@ -90,32 +134,46 @@ func test_every_variant_carries_the_enemy_contract() -> void:
 			).is_true()
 
 
-func test_every_variant_arms_the_contact_weapon_its_role_says() -> void:
+func test_every_variant_arms_the_weapons_its_role_says() -> void:
 	for variant in VARIANTS:
 		var enemy := _spawn_enemy(variant["scene"])
-		var weapons: Array[BaseWeapon] = enemy.weapon_holder.weapons
-		if variant["arms_contact_weapon"]:
-			assert_int(weapons.size()).override_failure_message(
-				"%s should be armed with one contact weapon" % variant["name"]
-			).is_equal(1)
-			assert_bool(weapons[0] is ContactWeapon).override_failure_message(
-				"%s should be armed with a contact weapon" % variant["name"]
-			).is_true()
-		else:
-			assert_int(weapons.size()).override_failure_message(
-				"%s should not be armed with a contact weapon" % variant["name"]
-			).is_equal(0)
+		# A weapon placed in the scene is equipped one idle frame after the
+		# enemy enters the tree (`WeaponHolder._ready` defers it so the timer
+		# can be attached to a settled parent), so read the loadout after that.
+		await get_tree().process_frame
+		var contact_count := 0
+		var ranged_count := 0
+		for weapon in enemy.weapon_holder.weapons:
+			if weapon is ContactWeapon:
+				contact_count += 1
+			elif weapon is ProjectileWeapon:
+				ranged_count += 1
+		match variant["weapon"]:
+			"contact":
+				assert_int(contact_count).override_failure_message(
+					"%s should be armed with one contact weapon" % variant["name"]
+				).is_equal(1)
+				assert_int(ranged_count).override_failure_message(
+					"%s should not be armed with a ranged weapon" % variant["name"]
+				).is_equal(0)
+			"ranged":
+				assert_int(ranged_count).override_failure_message(
+					"%s should be armed with one ranged weapon" % variant["name"]
+				).is_equal(1)
+				assert_int(contact_count).override_failure_message(
+					"%s should not hurt on touch" % variant["name"]
+				).is_equal(0)
 
 
 func test_every_variant_moves_away_from_the_basic_enemy_in_its_direction() -> void:
 	for variant in VARIANTS:
 		var variant_enemy := _spawn_enemy(variant["scene"])
 		var grunt := _spawn_enemy(GRUNT_SCENE)
-		if variant["tougher_than_grunt"]:
+		if variant.get("tougher_than_grunt", false):
 			assert_float(variant_enemy.stats.get_stat("health")).override_failure_message(
 				"%s is not tougher than the basic enemy" % variant["name"]
 			).is_greater(grunt.stats.get_stat("health"))
-		if variant["slower_than_grunt"]:
+		if variant.get("slower_than_grunt", false):
 			assert_float(variant_enemy.stats.get_stat("movement_speed")).override_failure_message(
 				"%s is not slower than the basic enemy" % variant["name"]
 			).is_less(grunt.stats.get_stat("movement_speed"))
@@ -150,10 +208,8 @@ func test_the_bulwark_hurts_on_touch() -> void:
 
 func test_the_bulwark_chases_its_target() -> void:
 	var bulwark := _spawn_enemy(BULWARK_SCENE)
-	var target := Node2D.new()
-	_world_root().add_child(target)
+	var target := _spawn_target(CHASE_DISTANCE)
 	var start_x := bulwark.global_position.x
-	target.global_position = Vector2(start_x + CHASE_DISTANCE, 0.0)
 	bulwark.set_target_position(target)
 
 	for _i in range(CHASE_FRAMES):
@@ -164,15 +220,87 @@ func test_the_bulwark_chases_its_target() -> void:
 	).is_greater(start_x + 1.0)
 
 
-func test_the_game_spawns_the_bulwark() -> void:
+func test_the_gunner_shoots_from_inside_its_weapons_reach() -> void:
+	# The row's whole point is that its threat arrives from a distance, so its
+	# firing distance has to sit inside its own weapon's reach. Both numbers
+	# are read live: this is a relationship, not a balance value.
+	var gunner := _spawn_enemy(GUNNER_SCENE)
+	await get_tree().process_frame
+	assert_int(gunner.weapon_holder.weapons.size()).override_failure_message(
+		"the Gunner has no weapon to shoot with"
+	).is_equal(1)
+	var stop_distance: float = gunner.behaviour.get("stop_distance")
+	assert_float(stop_distance).override_failure_message(
+		"the Gunner's firing distance is outside its weapon's reach"
+	).is_less_equal(gunner.weapon_holder.weapons[0].get_range_px())
+
+
+func test_the_gunner_holds_its_firing_distance() -> void:
+	var gunner := _spawn_enemy(GUNNER_SCENE)
+	var target := _spawn_target(GUNNER_START_DISTANCE)
+	gunner.set_target_position(target)
+	var stop_distance: float = gunner.behaviour.get("stop_distance")
+
+	for _i in range(GUNNER_FRAMES):
+		await get_tree().physics_frame
+
+	var settled := gunner.global_position.distance_to(target.global_position)
+	assert_float(settled).override_failure_message(
+		"the Gunner did not walk in to its firing distance"
+	).is_less(GUNNER_START_DISTANCE)
+	assert_float(settled).override_failure_message(
+		"the Gunner walked past its firing distance instead of holding it"
+	).is_between(stop_distance * 0.8, stop_distance * 1.2)
+
+
+func test_the_gunner_damages_a_body_at_range() -> void:
+	var gunner := _spawn_enemy(GUNNER_SCENE)
+	var target_position := Vector2(GUNNER_TARGET_DISTANCE, 0.0)
+	var health := DamageableBody.spawn(_world_root(), target_position)
+	gunner.set_target_position(health.get_parent())
+
+	for _i in range(SHOOT_FRAMES):
+		await get_tree().physics_frame
+
+	assert_float(WeaponTestSupport.health_left(health)).override_failure_message(
+		"the Gunner's pistol did not reach the body standing in its reach"
+	).is_less(100.0)
+
+
+func test_a_dead_enemy_stops_firing() -> void:
+	# A weapon's firing timer lives on the `WeaponHolder`, not on the enemy, so
+	# it keeps ticking after `Enemy._physics_process` returns early for a corpse.
+	# Without stopping it, a Gunner fires one last shot from its body.
+	var gunner := _spawn_enemy(GUNNER_SCENE)
+	await get_tree().process_frame
+	assert_int(gunner.weapon_holder.weapons.size()).is_equal(1)
+	var weapon: BaseWeapon = gunner.weapon_holder.weapons[0]
+
+	var damage := DamageContext.new()
+	damage.target = gunner
+	damage.base_amount = gunner.health_node.current_health + 1.0
+	damage.final_amount = damage.base_amount
+	assert_bool(gunner.health_node.apply_damage(damage)).is_true()
+
+	assert_object(weapon.timer).override_failure_message(
+		"the dead Gunner's weapon is still ticking"
+	).is_null()
+	assert_int(gunner.weapon_holder.weapons.size()).override_failure_message(
+		"the dead Gunner still carries its weapon"
+	).is_equal(0)
+
+
+func test_the_game_spawns_every_variant() -> void:
 	# The roster only reaches the arena if the game's spawn table names it, so
 	# this is the wiring the whole plan hangs on.
 	var game: Node = auto_free(load("res://src/Scenes/Game.tscn").instantiate())
 	var spawner := game.get_node("StageManager/EnemySpawner") as EnemySpawner
-	var found := false
+	var spawned: Array[String] = []
 	for row in spawner.spawn_table:
-		if row.scene != null and row.scene.resource_path == BULWARK_SCENE:
-			found = true
-	assert_bool(found).override_failure_message(
-		"the game's spawn table has no Bulwark row, so the roster never reaches the arena"
-	).is_true()
+		if row.scene != null:
+			spawned.append(row.scene.resource_path)
+	for variant in VARIANTS:
+		assert_bool(variant["scene"] in spawned).override_failure_message(
+			"the game's spawn table has no %s row, so the roster never reaches the arena"
+			% variant["name"]
+		).is_true()

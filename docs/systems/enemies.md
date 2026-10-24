@@ -5,7 +5,7 @@
 
 ## Key scripts / scenes
 - `src/Scripts/Enemy.gd` (`Enemy` class)
-- `src/Systems/Enemy.tscn`, `src/Systems/EnemyBoss.tscn` (boss variant), `src/Systems/EnemyBulwark.tscn` (roster variant) — see "The roster" below
+- `src/Systems/Enemy.tscn`, `src/Systems/EnemyBoss.tscn` (boss variant), `src/Systems/EnemyBulwark.tscn` and `src/Systems/EnemyGunner.tscn` (roster variants) — see "The roster" below
 - Movement behaviours under `Scenes/` or `Systems/` (referenced as `MovementBehaviour`).
 - `src/Systems/movement/bahaviour/charge_movement_behaviour.gd` (`ChargeMovementBehaviour`) — the charger: walk in, telegraph, then charge along a locked direction. See "Charging" below.
 - `src/Systems/damage/area_burst_on_enter.gd` (`AreaBurstOnEnter`) — an optional enemy child that damages everything standing in its radius when the enemy dies.
@@ -20,6 +20,7 @@
 - Leaving the world on death: `Enemy._die` is re-entrancy guarded (`if not _alive: return`) and, because the corpse stays in the tree for the whole ~0.7s death animation, it also
   - leaves the `enemies` and `damageable` groups, so target selectors stop acquiring it (`lowest_hp` used to actively prefer a corpse with health <= 0),
   - disables both colliders: the body `CollisionShape2D` and `Hitbox/CollisionShape2D`. The hitbox is an `Area2D`, so it outlives the body shape going away and the melee sweep's area raycast would otherwise keep resolving the corpse through it.
+  - disarms its weapons. A weapon's firing timer lives on the `WeaponHolder` and keeps ticking after `_physics_process` returns early, so without this a ranged enemy fired one last shot out of its own corpse.
   - `Health.apply_damage` then rejects anything that still reaches the corpse, so no hit effect plays on it.
 
 ## Damage taken
@@ -40,9 +41,12 @@ An enemy type is a **scene**, not a class. `Enemy.gd` is the script every enemy 
 |---|---|---|
 | Grunt | `src/Systems/Enemy.tscn` | The baseline. Walks at you and hurts on touch. |
 | Bulwark | `src/Systems/EnemyBulwark.tscn` | A slow wall. Three times the grunt's health at a third of its speed, and it still hurts on touch. |
+| Gunner | `src/Systems/EnemyGunner.tscn` | Shoots from a fixed distance. No contact damage: its threat arrives as projectiles, so it asks you to break line of sight or close the gap. |
 | Boss | `src/Systems/EnemyBoss.tscn` | The loop's boss, with a weapon loadout of its own. See `docs/systems/spawners.md`. |
 
 Adding a type is therefore: copy `src/Systems/Enemy.tscn`, point the sprite at new art, change the stats, and add a row to the spawn table in `src/Scenes/Game.tscn`. No script changes, because the behaviour is duck-typed against the enemy.
+
+The Gunner is the row that proves an enemy can be a *ranged* threat: it is the basic enemy with `contact_weapon` cleared, the shared `Pistol.tres` placed in its `WeaponHolder`, and `ChaseDistanceMovementBehaviour` walking it in to a firing distance instead of onto the player. Its pistol targets whatever is in the `damageable` group that its holder is not grouped with, which is the player: the `enemies` group is what keeps an enemy from shooting its own kind.
 
 The numbers are `.tscn` data, so they are rebalanced without touching a script. That is also why `test/Systems/test_enemy_variant_loadouts.gd` compares one enemy against another instead of against a literal.
 
@@ -52,8 +56,12 @@ The numbers are `.tscn` data, so they are rebalanced without touching a script. 
 ### The collider has to match the art
 The body collider is a circle around the drawn creature, so it scales with the sprite. A bigger sprite wearing the old collider is a wall the player walks straight through; a collider far larger than the art is a wall the player cannot touch. The roster's enemies share the 100x100 canvas the asset table specifies, so they share the basic enemy's collider.
 
-### The art comes out of a sheet
+### The art is a 100x100 canvas
+Every roster sprite is a 100x100 PNG with the creature filling about 85% of its longest side, and the scene draws it at `scale 1`. That is what makes the collider comparison meaningful: the test reads the texture's width, not the drawn width.
+
 The roster's art was generated as one six-creature sheet and cut up afterwards. `test/tools/extract_enemy_sprites.gd` does the cutting: it flood-fills the white backdrop in from the sheet's border, splits what is left into connected components and writes each one out as a 100x100 PNG. The grid in a generated sheet is never clean, so slicing it into equal rectangles cuts creatures in half.
+
+The Gunner's shipped art was delivered as a single high-resolution image instead of being cut from the sheet, so its cell is no longer listed in the extractor's `CELLS` table — running the tool must not overwrite it. It is normalised to the same 100x100 / 85%-fill canvas before it is saved into `src/Assets/enemies/`, and the untouched high-resolution source is kept at `docs/plans/images/enemies/Goblin.png`. A sprite left at its delivered resolution would draw several times larger than the rest of the roster, because `Sprite2D` draws a texture at its pixel size.
 
 ## Splitting
 `SplitOnDeath` is an optional child on an enemy scene. It subscribes to the owner's `on_death` and spawns smaller copies of the enemy when it dies.
@@ -95,7 +103,7 @@ Two things about it are the mechanic rather than the tuning:
 - `Stats` (child), `Health`, `WeaponHolder`, `ItemHolder`, `EventManager`, MovementBehaviour.
 
 ## Known limitations / TODOs
-- The roster is one type deep: the grunt and the Bulwark. The rest of the variety plan - a ranged gunner, a splitter, a charger, a bomber - is not built yet.
+- The roster is three types deep: the grunt, the Bulwark and the Gunner. The rest of the variety plan - a splitter, a charger, a bomber - is not built yet.
 - Death handling uses animation_finished connect with a short anonymous callback — works but can be fragile if animations change. `_die` is re-entrancy guarded, so a duplicate `on_death` cannot restart the animation, but the callback still depends on the animation being named `death`.
 - `StageManager` and `EnemySpawner` end a stage on `Nodes/Enemies.get_child_count() == 0`, so a corpse still holds the stage open for the remainder of its death animation.
 - The charger's telegraph plays the shared `idle` animation. There is no windup clip, and `src/animations/enemy_animations.res` is shared with the player, so a charger needs its own animation library before it can telegraph with one.

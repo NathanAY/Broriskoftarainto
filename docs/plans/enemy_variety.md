@@ -5,11 +5,12 @@ each a different *shape of threat* rather than a different number, plus the
 infrastructure to spawn a mix of them and swap their stats from the editor.
 
 Status: **Stage 0 — the enabling work — is implemented** (0.1 to 0.5, each with its
-own test suite), and **Stage 1 row 2 — the Bulwark — is shipped**: the sprite, the
-enemy scene, the spawn-table row and the gallery preview. The other four rows of
-Stage 1 and the two stretch items (0.6 Blink, 0.7 front shield) are not started.
-The "What exists today" section below describes the state *before* Stage 0 and is
-left as the record of why the enabling work was needed.
+own test suite), and **Stage 1 rows 1 and 2 — the Gunner and the Bulwark — are
+shipped**: the sprites, the enemy scenes, the spawn-table rows and the gallery
+preview. The other three rows of Stage 1 and the two stretch items (0.6 Blink,
+0.7 front shield) are not started. The "What exists today" section below describes
+the state *before* Stage 0 and is left as the record of why the enabling work was
+needed.
 
 ## What exists today (and why this plan is not just "add 6 scenes")
 
@@ -276,6 +277,54 @@ constants — see "Numbers are data" below.
   the retreat half of the behaviour is a small follow-up (`back away when closer than
   `retreat_distance`); do not add it before the stand-and-shoot version has been played.
 
+> **Shipped** as `src/Systems/EnemyGunner.tscn`, with the art at
+> `src/Assets/enemies/gunner.png`. The sheet's top-right cell was the
+> placeholder; the shipped art is a hand-delivered high-resolution image
+> (source kept at `docs/plans/images/enemies/Goblin.png`) normalised to the
+> roster's 100x100 / 85%-fill canvas. The sheet cell is therefore **not** in
+> the extractor's `CELLS` table, so re-running the tool cannot overwrite it.
+> Leaving the delivered resolution in place is the trap here: `Sprite2D` draws
+> a texture at its pixel size, so a 313x273 file rendered several times larger
+> than the 100x100 roster sprites and the collider no longer matched it.
+>
+> The row is config on top of 0.1 and 0.2, as planned: `contact_weapon` is null,
+> the shared `src/Resources/weapons/Pistol.tres` sits in the `WeaponHolder`, and
+> `ChaseDistanceMovementBehaviour` walks it in to `stop_distance` 140 - about a
+> third of the pistol's 1.33 m reach. Because it reuses the existing pistol
+> instead of adding a file to `src/Resources/weapons/`, the shop-placement trap
+> did not come up; an enemy weapon that needs its own numbers would still go in
+> a subdirectory beside `boss/`.
+>
+> **Three things the row turned up.**
+>
+> The first is that a weapon placed in an enemy scene is equipped **one idle
+> frame after** the enemy enters the tree: `WeaponHolder._ready` defers the
+> equip so the firing timer can be attached to a settled parent. The loadout
+> test therefore has to await `process_frame` before it reads
+> `weapon_holder.weapons`, or it sees the template still sitting in the array.
+>
+> The second is that `ChaseDistanceMovementBehaviour` had never been used, so
+> its unused `delta` parameter had never been compiled into a warning. Renaming
+> it `_delta` is the whole fix, and the row is what surfaced it.
+>
+> The third is that a weapon spawns its projectiles into
+> `get_tree().current_scene`, which a GdUnit suite does not have. The suite that
+> fires the Gunner parents its world to the tree root and makes it the current
+> scene; `current_scene` only accepts a child of the root, so it cannot live
+> under the suite.
+>
+> Re-running the extraction tool also rewrote `src/Assets/enemies/bulwark.png`
+> from the same sheet cell: the committed cut predated the tool's current
+> transparent-pixel handling, and the tool now reproduces the newer one
+> deterministically.
+>
+> The row also surfaced a defect the grunt could never show: a weapon's firing
+> timer lives on the `WeaponHolder` and keeps ticking after `Enemy._physics_process`
+> returns early for a corpse, so a Gunner that died mid-cycle fired one last shot
+> out of its own body. `Enemy._die` now disarms the corpse (`_silence_weapons`),
+> pinned by `test_a_dead_enemy_stops_firing` in the variant suite. That is a
+> change to every enemy, including the boss.
+
 ### 2. Bulwark — slow, high life
 
 - Sprite: spiked iron-shell turtle, top middle.
@@ -384,7 +433,10 @@ test/Systems/test_enemy_variant_loadouts.gd    # 1.x: each scene arms what it sh
 > `test/Systems/damage/test_area_burst_on_enter.gd`,
 > `test/Systems/test_charge_movement_behaviour.gd` and
 > `test/Systems/test_enemy_variant_loadouts.gd`. The last one is the Stage 1 suite, and it
-> has the Bulwark in it.
+> has the Bulwark and the Gunner in it: each row declares the weapon its role arms, and
+> the Gunner also gets tests for its firing distance sitting inside its own weapon's
+> reach, for holding that distance instead of walking into the player, and for actually
+> damaging a body at range.
 >
 > One extra shared helper came out of it:
 > `test/Systems/damageable_body.gd` (`DamageableBody`) — a minimal body with a `Health`
@@ -523,6 +575,7 @@ render, square 1:1.
    end including sprite extraction and the gallery preview. **Done.**
 3. **0.2** spawn table, with its test. Needed before any of the rows are actually *seen*. **Done.**
 4. **Stage 1 rows 1, 3, 5** — the three that need only config on top of 0.1/0.2.
+   **Row 1 (Gunner) done**, rows 3 and 5 are not.
 5. **0.5 + Stage 1 row 4 (Lancer)** — the first genuinely new AI plus its own animation
    library. **0.5 done**, the row itself is not.
 6. **0.4** was folded into row 5; if that lands late, split it back out. **Done, split back out.**
@@ -532,10 +585,10 @@ render, square 1:1.
 
 - `docs/systems/enemies.md` — the roster, and the death-animation and stage-end
   limitations it already lists, which the splitter interacts with. **The Stage 0 half is
-  updated, and so is the roster's first row.**
+  updated, and so are the roster rows for the Bulwark and the Gunner.**
 - `docs/systems/spawners.md` — the spawn table replaces "always `Enemy.tscn`". **Done.**
 - `docs/systems/balance.md` — per-type budget rows and the enemy TTK numbers. **The
-  contact-weapon note is updated, and the per-type rows now carry the Bulwark.**
+  contact-weapon note is updated, and the per-type rows carry the Bulwark and the Gunner.**
 - `docs/architecture.md` — the new behaviours and the enemy scenes it names. **The Stage 0
   half is updated, and so is the list of enemy scenes.**
 

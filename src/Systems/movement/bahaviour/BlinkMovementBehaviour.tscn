@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/Systems/movement/bahaviour/blink_movement_behaviour.gd" id="1_blink"]
+
+[node name="MovementBehaviour" type="Node"]
+script = ExtResource("1_blink")

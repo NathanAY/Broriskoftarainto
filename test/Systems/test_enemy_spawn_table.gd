@@ -95,3 +95,70 @@ func test_the_spawner_spawns_the_scene_the_table_picks() -> void:
     var spawned := enemies.get_child(0) as Enemy
     assert_object(spawned).is_not_null()
     assert_that(spawned.scene_file_path).is_equal(BOSS_SCENE)
+
+
+func test_a_pack_row_spawns_its_whole_pack() -> void:
+    var ctx := _build_tree()
+    var spawner: EnemySpawner = ctx["spawner"]
+    var enemies: Node = ctx["enemies"]
+    spawner.use_group_spawning = false
+    var entry := _entry(ENEMY_SCENE)
+    entry.pack_size = 8
+    spawner.spawn_table = [entry]
+
+    spawner.spawn_enemy()
+
+    assert_int(enemies.get_child_count()).override_failure_message(
+        "a pack row spawned fewer bodies than its pack size"
+    ).is_equal(entry.pack_size)
+
+
+func test_an_elite_row_scales_the_enemy_from_its_unlock_loop() -> void:
+    var ctx := _build_tree()
+    var spawner: EnemySpawner = ctx["spawner"]
+    var enemies: Node = ctx["enemies"]
+    spawner.use_group_spawning = false
+    # Isolate the elite multiplier: the loop scaling would otherwise add health
+    # on its own and hide which mechanism did it.
+    spawner.health_growth_per_loop = 0.0
+    spawner.damage_growth_per_loop = 0.0
+    var entry := _entry(ENEMY_SCENE)
+    entry.elite_min_loop = 3
+    spawner.spawn_table = [entry]
+
+    spawner.current_loop = 1
+    spawner.spawn_enemy()
+    var normal := enemies.get_child(0) as Enemy
+    var normal_health := normal.stats.get_stat("health")
+
+    spawner.current_loop = 3
+    spawner.spawn_enemy()
+    var elite := enemies.get_child(1) as Enemy
+
+    assert_float(elite.stats.get_stat("health")).override_failure_message(
+        "an elite row spawned a normal-health enemy at its unlock loop"
+    ).is_greater(normal_health)
+    var visual := elite.get_node("Node2D") as CanvasItem
+    assert_bool(visual.modulate.is_equal_approx(Color.WHITE)).override_failure_message(
+        "an elite was not tinted, so it reads as an ordinary enemy"
+    ).is_false()
+
+
+func test_a_row_below_its_elite_loop_is_not_elite() -> void:
+    var ctx := _build_tree()
+    var spawner: EnemySpawner = ctx["spawner"]
+    var enemies: Node = ctx["enemies"]
+    spawner.use_group_spawning = false
+    spawner.health_growth_per_loop = 0.0
+    var entry := _entry(ENEMY_SCENE)
+    entry.elite_min_loop = 3
+    spawner.spawn_table = [entry]
+
+    spawner.current_loop = 1
+    spawner.spawn_enemy()
+
+    var normal := enemies.get_child(0) as Enemy
+    var visual := normal.get_node("Node2D") as CanvasItem
+    assert_bool(visual.modulate.is_equal_approx(Color.WHITE)).override_failure_message(
+        "an enemy was elite before its row's unlock loop"
+    ).is_true()

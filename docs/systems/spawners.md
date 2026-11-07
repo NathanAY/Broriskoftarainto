@@ -18,12 +18,16 @@
 The regular spawner used to spawn one hardcoded scene — `src/Systems/Enemy.tscn` — for every wave of every run. It now spawns from a table:
 
 - **`spawn_table`** — an array of `EnemySpawnEntry` rows. A row names the enemy scene, how likely it is to come up (`weight`), and the loop it unlocks on (`min_loop`). A row with no weight never comes up.
+- **`pack_size`** — how many bodies one draw of a row spawns. A pack enemy arrives as a group; an ordinary row is a pack of one. The Swarmer row uses 8.
+- **`elite_min_loop`** — from that loop on the row spawns the same scene as an elite: `elite_health_multiplier` and `elite_damage_multiplier` scale its base stats and `elite_tint` multiplies its `Node2D` container. `0` means the row never turns elite. Every shipped row uses 3.
 - **`fallback_enemy_scene`** — what is spawned when the table is empty, or when every row is still locked behind its loop. It defaults to `src/Systems/Enemy.tscn`, so a scene that forgot to fill the table still spawns.
-- **`pick_enemy_scene()`** — the draw. Rows whose `min_loop` the current loop has not reached are closed; the open rows are drawn by weight.
+- **`pick_spawn_entry()`** — the draw. Rows whose `min_loop` the current loop has not reached are closed; the open rows are drawn by weight. `pick_enemy_scene()` is the scene-only wrapper for callers that do not need the pack or elite fields.
 
 A row is a `Resource` rather than one of two parallel exported arrays, because the inspector cannot check that two arrays are the same length, and hand-synchronised parallel arrays rot the first time someone adds a row.
 
-The table itself lives in the **gameplay scene**, not in `src/Systems/EnemySpawner.tscn`: `src/Scenes/Game.tscn` fills the `EnemySpawner` node's `spawn_table` with one row per enemy type. The spawner scene stays a generic spawner, and a scene that instantiates it without a table still spawns the fallback enemy. The current rows are the grunt, the Bulwark, the Gunner and the Slimeling; see `docs/systems/enemies.md` for what each one is.
+A group is drawn from **one row**, so a pack arrives together. That also means an ordinary row's group is a small group of the same type rather than a mixed handful; the variety comes from the next tick's draw.
+
+The table itself lives in the **gameplay scene**, not in `src/Systems/EnemySpawner.tscn`: `src/Scenes/Game.tscn` fills the `EnemySpawner` node's `spawn_table` with one row per enemy type. The spawner scene stays a generic spawner, and a scene that instantiates it without a table still spawns the fallback enemy. The current rows are the grunt, the Bulwark, the Gunner, the Slimeling, the Lancer, the Toadstinker, the Blink, the Shieldbearer and the Swarmer; see `docs/systems/enemies.md` for what each one is.
 
 ## Spawn pacing (see glossary: Wave, Stage, Loop, Spawn pacing)
 - Base `spawn_interval = 1s`; each Wave entry calls `start_wave()` so the first tick lands ~1s (no stale stopped/long timer).

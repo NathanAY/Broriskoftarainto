@@ -15,6 +15,11 @@ const GRUNT_SCENE := "res://src/Systems/Enemy.tscn"
 const BULWARK_SCENE := "res://src/Systems/EnemyBulwark.tscn"
 const GUNNER_SCENE := "res://src/Systems/EnemyGunner.tscn"
 const SLIMELING_SCENE := "res://src/Systems/EnemySlimeling.tscn"
+const LANCER_SCENE := "res://src/Systems/EnemyLancer.tscn"
+const TOADSTINKER_SCENE := "res://src/Systems/EnemyToadstinker.tscn"
+const BLINK_SCENE := "res://src/Systems/EnemyBlink.tscn"
+const SHIELDBEARER_SCENE := "res://src/Systems/EnemyShieldbearer.tscn"
+const SWARMER_SCENE := "res://src/Systems/EnemySwarmer.tscn"
 
 ## The roster, by row. What each row arms and how it differs from the basic
 ## enemy is its role, so it belongs here rather than in the assertions.
@@ -44,6 +49,51 @@ const VARIANTS := [
 		"weapon": "contact",
 		# It is a soft target: the split is what it costs you, not its health.
 		"fragile_than_grunt": true,
+	},
+	{
+		"name": "Lancer",
+		"scene": "res://src/Systems/EnemyLancer.tscn",
+		# The charge is a body check, so it still hurts on touch.
+		"weapon": "contact",
+		# Its threat is the locked charge, not a bigger health pool.
+		"fragile_than_grunt": true,
+		"behaviour": "charge",
+	},
+	{
+		"name": "Toadstinker",
+		"scene": "res://src/Systems/EnemyToadstinker.tscn",
+		# It arms no weapon: the threat is the blast it leaves when it dies.
+		"weapon": "none",
+		"fragile_than_grunt": true,
+		"has_burst": true,
+	},
+	{
+		"name": "Blink",
+		"scene": "res://src/Systems/EnemyBlink.tscn",
+		# It reappears next to you and then touches you like the basic enemy.
+		"weapon": "contact",
+		"fragile_than_grunt": true,
+		"behaviour": "blink",
+	},
+	{
+		"name": "Shieldbearer",
+		"scene": "res://src/Systems/EnemyShieldbearer.tscn",
+		# It still hurts on touch; the shield is what makes you approach it.
+		"weapon": "contact",
+		# It pays for the shield with speed and gets a little health back.
+		"tougher_than_grunt": true,
+		"slower_than_grunt": true,
+		"has_shield": true,
+	},
+	{
+		"name": "Swarmer",
+		"scene": "res://src/Systems/EnemySwarmer.tscn",
+		# A pack of tiny bodies, each of which still hurts on touch.
+		"weapon": "contact",
+		# It is the opposite trade: one hit kills it, but it closes fast.
+		"fragile_than_grunt": true,
+		"faster_than_grunt": true,
+		"smaller_than_grunt": true,
 	},
 ]
 
@@ -202,6 +252,13 @@ func test_every_variant_arms_the_weapons_its_role_says() -> void:
 				assert_int(contact_count).override_failure_message(
 					"%s should not hurt on touch" % variant["name"]
 				).is_equal(0)
+			"none":
+				assert_int(contact_count).override_failure_message(
+					"%s arms a contact weapon but its threat is a death burst" % variant["name"]
+				).is_equal(0)
+				assert_int(ranged_count).override_failure_message(
+					"%s arms a weapon it should not have" % variant["name"]
+				).is_equal(0)
 
 
 func test_every_variant_moves_away_from_the_basic_enemy_in_its_direction() -> void:
@@ -220,6 +277,14 @@ func test_every_variant_moves_away_from_the_basic_enemy_in_its_direction() -> vo
 			assert_float(variant_enemy.stats.get_stat("movement_speed")).override_failure_message(
 				"%s is not slower than the basic enemy" % variant["name"]
 			).is_less(grunt.stats.get_stat("movement_speed"))
+		if variant.get("faster_than_grunt", false):
+			assert_float(variant_enemy.stats.get_stat("movement_speed")).override_failure_message(
+				"%s is not faster than the basic enemy" % variant["name"]
+			).is_greater(grunt.stats.get_stat("movement_speed"))
+		if variant.get("smaller_than_grunt", false):
+			assert_float(variant_enemy.body_radius()).override_failure_message(
+				"%s is not smaller than the basic enemy" % variant["name"]
+			).is_less(grunt.body_radius())
 
 
 func test_every_variant_collider_matches_its_art() -> void:
@@ -231,10 +296,34 @@ func test_every_variant_collider_matches_its_art() -> void:
 		var enemy := _spawn_enemy(variant["scene"])
 		var sprite := enemy.get_node("Node2D/Sprite2D") as Sprite2D
 		assert_object(sprite.texture).is_not_null()
-		var width := float(sprite.texture.get_width())
+		# The drawn width, not the texture width: the Swarmer is a smaller
+		# creature drawn from the shared roster canvas.
+		var width := float(sprite.texture.get_width()) * sprite.scale.x
 		assert_float(enemy.body_radius()).override_failure_message(
 			"the collider of %s does not match its drawn creature" % variant["name"]
 		).is_between(width * 0.3, width * 0.5)
+
+
+func test_every_variant_carries_the_trick_its_role_says() -> void:
+	for variant in VARIANTS:
+		var enemy := _spawn_enemy(variant["scene"])
+		match variant.get("behaviour", ""):
+			"charge":
+				assert_bool(enemy.behaviour is ChargeMovementBehaviour).override_failure_message(
+					"%s does not use the charge behaviour" % variant["name"]
+				).is_true()
+			"blink":
+				assert_bool(enemy.behaviour is BlinkMovementBehaviour).override_failure_message(
+					"%s does not use the blink behaviour" % variant["name"]
+				).is_true()
+		if variant.get("has_burst", false):
+			assert_object(enemy.get_node_or_null("AreaBurstOnEnter") as AreaBurstOnEnter).override_failure_message(
+				"%s carries no death burst" % variant["name"]
+			).is_not_null()
+		if variant.get("has_shield", false):
+			assert_object(enemy.get_node_or_null("FrontShield") as FrontShield).override_failure_message(
+				"%s carries no front shield" % variant["name"]
+			).is_not_null()
 
 
 func test_the_bulwark_hurts_on_touch() -> void:
@@ -375,6 +464,64 @@ func test_the_slimelings_minis_do_not_split_again() -> void:
 	assert_int(_enemies_in_world(slimeling).size()).override_failure_message(
 		"a Slimeling mini split again, so a stage could never end"
 	).is_equal(minis_before)
+
+
+func test_the_lancer_charges_faster_than_it_walks() -> void:
+	var lancer := _spawn_enemy(LANCER_SCENE)
+	lancer.set_physics_process(false)
+	var target := _spawn_target(100.0)
+	lancer.set_target_position(target)
+	var walk_speed := lancer.stats.get_movement_speed_px()
+	var charge := lancer.behaviour as ChargeMovementBehaviour
+	assert_object(charge).override_failure_message(
+		"the Lancer's behaviour is not the charger"
+	).is_not_null()
+
+	# Approach -> windup, windup -> charge, then one charging tick.
+	charge.process_movement(lancer, 0.1)
+	charge.process_movement(lancer, charge.windup_time)
+	charge.process_movement(lancer, 0.1)
+
+	assert_float(lancer.velocity.length()).override_failure_message(
+		"the Lancer's charge is no faster than its walk"
+	).is_greater(walk_speed)
+
+
+func test_the_toadstinker_detonates_when_it_dies() -> void:
+	var toadstinker := _spawn_enemy(TOADSTINKER_SCENE)
+	var body_health := DamageableBody.spawn(
+		_world_root(), toadstinker.global_position + Vector2(30.0, 0.0))
+	var health_before := body_health.current_health
+
+	_kill(toadstinker)
+
+	assert_float(WeaponTestSupport.health_left(body_health)).override_failure_message(
+		"the Toadstinker died without damaging the body standing next to it"
+	).is_less(health_before)
+
+
+func test_the_game_spawns_swarmers_in_packs() -> void:
+	var game: Node = auto_free(load("res://src/Scenes/Game.tscn").instantiate())
+	var spawner := game.get_node("StageManager/EnemySpawner") as EnemySpawner
+	var found := false
+	for row in spawner.spawn_table:
+		if row.scene != null and row.scene.resource_path == SWARMER_SCENE:
+			found = true
+			assert_int(row.pack_size).override_failure_message(
+				"the Swarmer row draws one body instead of a pack"
+			).is_greater(1)
+	assert_bool(found).override_failure_message(
+		"the game's spawn table has no Swarmer row, so packs never arrive"
+	).is_true()
+
+
+func test_the_game_makes_every_roster_row_elite_from_loop_three() -> void:
+	var game: Node = auto_free(load("res://src/Scenes/Game.tscn").instantiate())
+	var spawner := game.get_node("StageManager/EnemySpawner") as EnemySpawner
+	for row in spawner.spawn_table:
+		assert_int(row.elite_min_loop).override_failure_message(
+			"a roster row never turns elite, so loop 3 is the same mix as loop 1"
+		).is_equal(3)
 
 
 func test_the_game_spawns_every_variant() -> void:

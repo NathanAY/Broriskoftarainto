@@ -316,6 +316,11 @@ The same `hits_per_second × duration` shape applies to Bomb (`bomb_on_hit_modif
 | Bulwark | `src/Systems/EnemyBulwark.tscn` | 30 | 0.4 | 8 | A slow wall: three times the grunt's health at a third of its speed. |
 | Gunner | `src/Systems/EnemyGunner.tscn` | 7 | 0.9 | 0 | Ranged: it holds a firing distance and shoots the shared `Pistol` (`11.5 x 0.8 = 9.2` DPS), which the player can dodge, so it is weaker and slower than the grunt at touch range. |
 | Slimeling | `src/Systems/EnemySlimeling.tscn` | 6 | 1.0 | 8 | Splits: it dies into three children at `split_scale` 0.6, each with scaled health, speed, damage and collider, so its real TTK is the parent plus three minis. Weaker than the grunt up front to pay for the bodies it leaves behind. |
+| Lancer | `src/Systems/EnemyLancer.tscn` | 8 | 0.9 | 8 | Charges: it walks in, telegraphs, then drives along a locked direction at `charge_speed_scale` 2.8. Frailer than the grunt, because the charge is what makes contact. |
+| Toadstinker | `src/Systems/EnemyToadstinker.tscn` | 5 | 1.1 | 0 | Detonates on death for 8 inside 1.0 m. It arms no contact weapon; the threat is where it dies. Frailer and a little faster than the grunt. |
+| Blink | `src/Systems/EnemyBlink.tscn` | 8 | 1.0 | 8 | Teleports into a 220 px ring around the player every 3 s. It still hurts on touch, so the repositioning is the whole row. |
+| Shieldbearer | `src/Systems/EnemyShieldbearer.tscn` | 14 | 0.8 | 8 | A 70-degree front shield zeroes hits from its facing. Tougher and slower than the grunt; the answer is to get behind it. |
+| Swarmer | `src/Systems/EnemySwarmer.tscn` | 1 | 1.4 | 8 | One hit point, 0.55 drawn scale, and the Swarmer row spawns 8 at a time (`pack_size`). The pack is the threat, so its per-body budget is deliberately the lowest. |
 
 **The rule a new type has to keep.** A type is a *shape* of threat, not a bigger number, so it has to differ from the basic enemy in what it asks of the player:
 

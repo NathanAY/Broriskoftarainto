@@ -4,13 +4,14 @@ Goal: the arena stops being one grey blob walking at you. Six distinct enemy typ
 each a different *shape of threat* rather than a different number, plus the
 infrastructure to spawn a mix of them and swap their stats from the editor.
 
-Status: **Stage 0 — the enabling work — is implemented** (0.1 to 0.5, each with its
-own test suite), and **Stage 1 rows 1, 2 and 3 — the Gunner, the Bulwark and the
-Slimeling — are shipped**: the enemy scenes, the spawn-table rows, the gallery
-preview and the sprites. The other two rows of Stage 1 and the two stretch items
-(0.6 Blink, 0.7 front shield) are not started. The "What exists today" section below
-describes the state *before* Stage 0 and is left as the record of why the enabling work
-was needed.
+Status: **Stage 0 — the enabling work — is implemented** (0.1 to 0.7, each with its
+own test suite), and **every roster row is shipped**: the Gunner, the Bulwark, the
+Slimeling, the Lancer, the Toadstinker, the Blink, the Shieldbearer and the Swarmer,
+plus the Elites spawn-row option. The scenes, spawn-table rows, mechanics and tests
+are in place. The Gunner, the Bulwark and the Slimeling have their delivered art; the
+five later rows currently draw the shared default enemy sprite and are waiting for
+their own. The "What exists today" section below describes the state *before* Stage 0
+and is left as the record of why the enabling work was needed.
 
 ## What exists today (and why this plan is not just "add 6 scenes")
 
@@ -245,6 +246,12 @@ teleport to a random point within `blink_radius` of the target and re-enter `APP
 with a short fade so the jump is not a pop-in. This is the cheapest "unfair-feeling but
 fair" enemy in the set and is worth doing after the five core rows ship.
 
+> **Shipped** as `src/Systems/movement/bahaviour/blink_movement_behaviour.gd`,
+> `BlinkMovementBehaviour.tscn` and `src/Systems/EnemyBlink.tscn`. It teleports into a
+> ring around its target every `blink_interval`, clears its velocity on the blink
+> frame, and fades back in on the `Node2D` container so the hit flash cannot wipe the
+> fade. The sprite is the shared default until the slug art arrives.
+
 ### 0.7 Front shield (stretch)
 
 A front-shield scene plus script under `src/Systems/damage/`, as an optional enemy
@@ -409,6 +416,11 @@ constants — see "Numbers are data" below.
   `docs/visual_style.md` already records that as a shape rule. Either regenerate as a
   shallow S or accept that the collider circle and the sprite disagree.
 
+> **Shipped** as `src/Systems/EnemyLancer.tscn`. It uses `ChargeMovementBehaviour`
+> (0.5), keeps the default contact weapon so the charge connects, and telegraphs with
+> the shared `idle` clip - the windup animation library is still the documented
+> limitation. The sprite is the shared default until the crimson-worm art arrives.
+
 ### 5. Toadstinker — detonates on death
 
 - Sprite: fat orange toad, bottom right.
@@ -416,6 +428,11 @@ constants — see "Numbers are data" below.
   you, and the player should be able to kill it at range to make that happen or not happen.
 - Optional `AreaBurstOnEnter` child from 0.4. `contact_weapon` null.
 - `src/Scenes/effects/` already has the blast visuals, so this is mostly wiring.
+
+> **Shipped** as `src/Systems/EnemyToadstinker.tscn`: `contact_weapon` null, a
+> `ChaseMovementBehaviour`, health below the grunt's, and an `AreaBurstOnEnter` child
+> at 8 damage inside 1.0 m. The sprite is the shared default until the toad art
+> arrives.
 
 ### Elites
 
@@ -562,6 +579,11 @@ Plain pure white background, no text, no frame, no border, no drop shadow, squar
 isolated single creature.
 ```
 
+> **Shipped** as `src/Systems/damage/front_shield.gd`, `FrontShield.tscn` and
+> `src/Systems/EnemyShieldbearer.tscn`. It zeroes `final_amount` for a source inside
+> `half_arc_degrees` of the sprite's `flip_h` facing, which leaves the sides and rear
+> open. The sprite is the shared default until the shield art arrives.
+
 ### Swarmer (row 8)
 
 ```
@@ -571,6 +593,15 @@ six thin legs and two short antennae, chunky rounded exaggerated cartoon proport
 centered, filling the frame. Plain pure white background, no text, no frame, no border, no
 drop shadow, square 1:1, isolated single creature.
 ```
+
+> **Shipped** as `src/Systems/EnemySwarmer.tscn`: 1 health, 0.55 drawn scale, a smaller
+> collider, and `pack_size = 8` on its spawn row. The sprite is the shared default until
+> the insect art arrives.
+>
+> **Elites shipped** as an `EnemySpawnEntry` option rather than a ninth scene:
+> `elite_min_loop` (3 on every shipped row), `elite_health_multiplier`,
+> `elite_damage_multiplier` and `elite_tint`. The tint is applied to `Node2D`, so the
+> hit flash, which tweens the sprite's own modulate, cannot reset it.
 
 ### Extra cells for a second sheet, if the roster grows past eight
 
@@ -603,23 +634,23 @@ render, square 1:1.
    end including sprite extraction and the gallery preview. **Done.**
 3. **0.2** spawn table, with its test. Needed before any of the rows are actually *seen*. **Done.**
 4. **Stage 1 rows 1, 3, 5** — the three that need only config on top of 0.1/0.2.
-   **Rows 1 (Gunner) and 3 (Slimeling) done**, row 5 is not.
+   **Rows 1 (Gunner), 3 (Slimeling) and 5 (Toadstinker) done.**
 5. **0.5 + Stage 1 row 4 (Lancer)** — the first genuinely new AI plus its own animation
-   library. **0.5 done**, the row itself is not.
+   library. **0.5 and the row done**; the windup still uses the shared `idle` clip.
 6. **0.4** was folded into row 5; if that lands late, split it back out. **Done, split back out.**
-7. Stretch: **0.6** Blink, **0.7** Shieldbearer, **Swarmer**, **Elites**.
+7. Stretch: **0.6** Blink, **0.7** Shieldbearer, **Swarmer**, **Elites**. **All done.**
 
 ## Docs to update when this ships
 
 - `docs/systems/enemies.md` — the roster, and the death-animation and stage-end
-  limitations it already lists, which the splitter interacts with. **The Stage 0 half is
-  updated, and so are the roster rows for the Bulwark, the Gunner and the Slimeling.**
-- `docs/systems/spawners.md` — the spawn table replaces "always `Enemy.tscn`". **Done.**
+  limitations it already lists, which the splitter interacts with. **Updated for every
+  roster row and the new mechanics.**
+- `docs/systems/spawners.md` — the spawn table replaces "always `Enemy.tscn`". **Done,
+  including `pack_size` and the elite fields.**
 - `docs/systems/balance.md` — per-type budget rows and the enemy TTK numbers. **The
-  contact-weapon note is updated, and the per-type rows carry the Bulwark, the Gunner and
-  the Slimeling.**
-- `docs/architecture.md` — the new behaviours and the enemy scenes it names. **The Stage 0
-  half is updated, and so is the list of enemy scenes.**
+  contact-weapon note is updated, and the per-type rows carry every roster row.**
+- `docs/architecture.md` — the new behaviours and the enemy scenes it names. **Updated
+  for the Blink behaviour, the front shield and all enemy scenes.**
 
 **Do not index this plan in `docs/ai_overview.md`.**
 `test/test_doc_links.gd::test_index_does_not_list_archived_plans_as_live` asserts that

@@ -195,6 +195,15 @@ func _process(_delta: float) -> void:
 ## and a table that is empty, or one whose every row is still locked, falls
 ## back to `fallback_enemy_scene`.
 func pick_enemy_scene() -> PackedScene:
+    var entry := pick_spawn_entry()
+    return entry.scene if entry != null else fallback_enemy_scene
+
+
+## The row the next enemy is drawn from, or null when the table is empty (or
+## every row is still locked), in which case the spawner uses
+## `fallback_enemy_scene`. The scene-only wrapper above is what most callers
+## want; this one is for the pack and elite fields, which live on the row.
+func pick_spawn_entry() -> EnemySpawnEntry:
     var open: Array[EnemySpawnEntry] = []
     var total := 0.0
     for entry in spawn_table:
@@ -207,13 +216,13 @@ func pick_enemy_scene() -> PackedScene:
         open.append(entry)
         total += entry.weight
     if open.is_empty():
-        return fallback_enemy_scene
+        return null
     var roll := randf() * total
     for entry in open:
         roll -= entry.weight
         if roll <= 0.0:
-            return entry.scene
-    return open[open.size() - 1].scene
+            return entry
+    return open[open.size() - 1]
 
 func spawn_enemy_group():
     if not character:
@@ -229,6 +238,10 @@ func spawn_enemy_group():
     for i in range(groups_per_tick):
         if spawned >= budget:
             break
+        # One row per group, so a pack arrives together rather than being split
+        # across draws.
+        var entry := pick_spawn_entry()
+        var pack := _pack_size(entry)
         # Choose a center point for this group
         var character_position: Vector2 = character.global_position
         var group_center_angle = randf_range(0, TAU)
@@ -237,27 +250,15 @@ func spawn_enemy_group():
 
         # Spawn enemies within the group
         var reserved: Array = [group_center]
-        var in_this_group := mini(group_size_now, budget - spawned)
+        var in_this_group := mini(maxi(group_size_now, pack), budget - spawned)
         for j in range(in_this_group):
-            # Use a timer to stagger spawns within the group
-            var enemy = pick_enemy_scene().instantiate()
             var spawn_position = _pick_spawn_position(func() -> Vector2:
                 var angle = randf_range(0, TAU)
                 var radius = randf_range(0, group_spawn_radius)
                 return group_center + Vector2(cos(angle), sin(angle)) * radius
             , reserved)
             reserved.append(spawn_position)
-            enemy.global_position = spawn_position
-
-            # Apply modifiers
-            for mod in modifiers:
-                mod.attach_to_enemy(enemy, character)
-
-            # Apply stage-based scaling
-            _apply_stage_scaling(enemy)
-
-            enemiesNode.add_child(enemy)
-            enemy.set_target_position(character)
+            _spawn_from_entry(entry, spawn_position)
 
             # Stagger spawning within the group. Divided like
             # `scaled_spawn_interval()`, so a 20x wave does not take half a
@@ -270,23 +271,57 @@ func spawn_enemy():
     if not character:
         return
 
-    var enemy = pick_enemy_scene().instantiate()
+    var entry := pick_spawn_entry()
+    var pack := _pack_size(entry)
     var character_position: Vector2 = character.global_position
-    var spawn_position = _pick_spawn_position(func() -> Vector2:
-        var angle = randf_range(0, TAU)
-        return character_position + Vector2(cos(angle), sin(angle)) * 500.0
-    , [])
-    enemy.global_position = spawn_position
+    var reserved: Array = []
+    for i in range(pack):
+        var spawn_position = _pick_spawn_position(func() -> Vector2:
+            var angle = randf_range(0, TAU)
+            return character_position + Vector2(cos(angle), sin(angle)) * 500.0
+        , reserved)
+        reserved.append(spawn_position)
+        _spawn_from_entry(entry, spawn_position)
 
-    # Apply modifiers
+
+## How many bodies one draw of `entry` spawns. The fallback scene has no row, so
+## it is always a pack of one.
+func _pack_size(entry: EnemySpawnEntry) -> int:
+    return maxi(entry.pack_size, 1) if entry != null else 1
+
+
+## Instantiates one enemy from `entry`, applies the spawner's modifiers, the
+## row's elite scaling and the loop's stage scaling, then adds it to the shared
+## enemy container and points it at the player. Both spawn paths go through
+## here so a pack member and a lone spawn cannot drift apart.
+func _spawn_from_entry(entry: EnemySpawnEntry, spawn_position: Vector2) -> Enemy:
+    var scene: PackedScene = entry.scene if entry != null else fallback_enemy_scene
+    var enemy := scene.instantiate() as Enemy
+    enemy.global_position = spawn_position
     for mod in modifiers:
         mod.attach_to_enemy(enemy, character)
-
-    # Apply stage-based scaling
+    _apply_elite_scaling(enemy, entry)
     _apply_stage_scaling(enemy)
-
     enemiesNode.add_child(enemy)
     enemy.set_target_position(character)
+    return enemy
+
+
+## Applies a row's elite multipliers once the run has reached its
+## `elite_min_loop`. The tint goes on the visual container rather than the
+## sprite: `HitFlashManager` tweens the sprite's own modulate and resets it to
+## white on every hit, which would wipe an elite's colour the first time it is
+## struck.
+func _apply_elite_scaling(enemy: Node, entry: EnemySpawnEntry) -> void:
+    if entry == null or entry.elite_min_loop <= 0 or current_loop < entry.elite_min_loop:
+        return
+    var stats = enemy.get_node_or_null("Stats")
+    if stats:
+        stats.set_base_stat("health", stats.stats["health"] * entry.elite_health_multiplier)
+        stats.set_base_stat("damage", stats.stats["damage"] * entry.elite_damage_multiplier)
+    var visual := enemy.get_node_or_null("Node2D") as CanvasItem
+    if visual != null:
+        visual.modulate = entry.elite_tint
 
 ## Clamp a spawn point inside the arena (no-op when no arena is present,
 ## so scenes without ground keep the old ring-around-character behavior).

@@ -17,12 +17,23 @@ const ROSTER := [
 	{"name": "Bulwark", "scene": "res://src/Systems/EnemyBulwark.tscn"},
 	{"name": "Gunner", "scene": "res://src/Systems/EnemyGunner.tscn"},
 	{"name": "Slimeling", "scene": "res://src/Systems/EnemySlimeling.tscn"},
+	{"name": "Lancer", "scene": "res://src/Systems/EnemyLancer.tscn"},
+	{"name": "Toadstinker", "scene": "res://src/Systems/EnemyToadstinker.tscn"},
+	{"name": "Blink", "scene": "res://src/Systems/EnemyBlink.tscn"},
+	{"name": "Shieldbearer", "scene": "res://src/Systems/EnemyShieldbearer.tscn"},
+	{"name": "Swarmer", "scene": "res://src/Systems/EnemySwarmer.tscn"},
 ]
 
 ## How far apart two enemies stand, in pixels. Comfortably more than the
 ## crowd separation radius, so the enemies in the row do not shove each other
 ## apart before the shot.
 const SPACING := 220.0
+
+## The roster is wider than one screen, so it wraps into rows.
+const PER_ROW := 5
+
+## Vertical distance between two rows, in pixels.
+const ROW_SPACING := 190.0
 
 ## The backdrop, the same dark panel the UI draws on.
 const BACKDROP := Color(0.149, 0.161, 0.196)
@@ -37,9 +48,13 @@ func _ready() -> void:
 	var count := ROSTER.size()
 	for index in count:
 		var entry: Dictionary = ROSTER[index]
-		var x := centre.x + (float(index) - (float(count) - 1.0) * 0.5) * SPACING
-		_add_enemy(entry, x, centre.y - 60.0)
-		_add_label(entry, x, centre.y + 70.0)
+		var row := int(index / float(PER_ROW))
+		var column: int = index % PER_ROW
+		var in_row := mini(PER_ROW, count - row * PER_ROW)
+		var x := centre.x + (float(column) - (float(in_row) - 1.0) * 0.5) * SPACING
+		var y := centre.y + (float(row) - 0.5) * ROW_SPACING
+		_add_enemy(entry, x, y - 60.0)
+		_add_label(entry, x, y + 70.0)
 
 
 ## A full-screen backdrop behind the row.

@@ -5,10 +5,12 @@
 
 ## Key scripts / scenes
 - `src/Scripts/Enemy.gd` (`Enemy` class)
-- `src/Systems/Enemy.tscn`, `src/Systems/EnemyBoss.tscn` (boss variant), `src/Systems/EnemyBulwark.tscn`, `src/Systems/EnemyGunner.tscn` and `src/Systems/EnemySlimeling.tscn` (roster variants) — see "The roster" below
+- `src/Systems/Enemy.tscn`, `src/Systems/EnemyBoss.tscn` (boss variant), `src/Systems/EnemyBulwark.tscn`, `src/Systems/EnemyGunner.tscn`, `src/Systems/EnemySlimeling.tscn`, `src/Systems/EnemyLancer.tscn`, `src/Systems/EnemyToadstinker.tscn`, `src/Systems/EnemyBlink.tscn`, `src/Systems/EnemyShieldbearer.tscn` and `src/Systems/EnemySwarmer.tscn` (roster variants) — see "The roster" below
 - Movement behaviours under `Scenes/` or `Systems/` (referenced as `MovementBehaviour`).
 - `src/Systems/movement/bahaviour/charge_movement_behaviour.gd` (`ChargeMovementBehaviour`) — the charger: walk in, telegraph, then charge along a locked direction. See "Charging" below.
+- `src/Systems/movement/bahaviour/blink_movement_behaviour.gd` (`BlinkMovementBehaviour`) — chases, then teleports to a ring around its target. See "Blinking" below.
 - `src/Systems/damage/area_burst_on_enter.gd` (`AreaBurstOnEnter`) — an optional enemy child that damages everything standing in its radius when the enemy dies.
+- `src/Systems/damage/front_shield.gd` (`FrontShield`) — an optional enemy child that ignores hits landing on its front arc. See "Front shield" below.
 - `src/Systems/enemies/split_on_death.gd` (`SplitOnDeath`) — an optional enemy child that spawns smaller copies of the enemy when it dies. See "Splitting" below.
 - Visual managers live as children: `HitFlashManager`, `TextureBurstManager` and `ParticleEffectManager`. All three are shared with the Player and documented together in `docs/systems/effects.md`.
 
@@ -43,6 +45,11 @@ An enemy type is a **scene**, not a class. `Enemy.gd` is the script every enemy 
 | Bulwark | `src/Systems/EnemyBulwark.tscn` | A slow wall. Three times the grunt's health at a third of its speed, and it still hurts on touch. |
 | Gunner | `src/Systems/EnemyGunner.tscn` | Shoots from a fixed distance. No contact damage: its threat arrives as projectiles, so it asks you to break line of sight or close the gap. |
 | Slimeling | `src/Systems/EnemySlimeling.tscn` | Dies into three smaller copies of itself. Frailer than the grunt and just as fast, so the fight is the second and third wave of bodies rather than the first one. |
+| Lancer | `src/Systems/EnemyLancer.tscn` | Walks in, telegraphs, then charges along the direction it locked. Hurts on touch, so the charge is what connects. |
+| Toadstinker | `src/Systems/EnemyToadstinker.tscn` | Arms no weapon and detonates when it dies. Frailer and a little faster than the grunt: it wants to die next to you, and killing it at range is how you decline. |
+| Blink | `src/Systems/EnemyBlink.tscn` | Chases, then reappears in a ring around you every few seconds. It keeps the contact weapon, so the repositioning is the threat. |
+| Shieldbearer | `src/Systems/EnemyShieldbearer.tscn` | Turns away every hit that lands on its front arc. Tougher and slower than the grunt; you have to get behind it. |
+| Swarmer | `src/Systems/EnemySwarmer.tscn` | Tiny, one hit point, faster than the grunt, and arrives in packs of eight. The pack is the threat, not any one body. |
 | Boss | `src/Systems/EnemyBoss.tscn` | The loop's boss, with a weapon loadout of its own. See `docs/systems/spawners.md`. |
 
 Adding a type is therefore: copy `src/Systems/Enemy.tscn`, point the sprite at new art, change the stats, and add a row to the spawn table in `src/Scenes/Game.tscn`. No script changes, because the behaviour is duck-typed against the enemy.
@@ -102,11 +109,36 @@ Two things about it are the mechanic rather than the tuning:
 - **The direction is locked when the windup ends** and is not re-aimed during the charge. A charge that tracks the player is just a fast walk, and the player would have no way to dodge it.
 - **The charge speed is a temporary `Stats` boost, not a velocity.** `Enemy._physics_process` clamps the velocity to `stats.get_movement_speed_px()` after the behaviour has run, so a behaviour that set `velocity = direction * 400` would be clamped straight back to walk speed. The boost is a `Stats` modifier, so it comes off again at the start of `RECOVER` — and on death, which the behaviour watches for on the enemy's own event bus.
 
+## Blinking
+`BlinkMovementBehaviour` is a movement behaviour node, like the charger. It chases normally, and every `blink_interval` it teleports to a random point in a ring around its target:
+
+- **`blink_interval`** — seconds between blinks.
+- **`blink_radius`** / **`min_blink_distance`** — the ring the creature reappears in, in pixels.
+- **`fade_time`** — the reappearance fade.
+
+The blink clears the velocity, so the creature does not carry its old heading into the new spot. The fade runs on the `Node2D` container rather than the sprite, because `HitFlashManager` tweens the sprite's own modulate and would wipe a fade placed there.
+
+The shipped Blink uses the shared default sprite while its own art is pending; the behaviour is what the row adds.
+
+## Front shield
+`FrontShield` is an optional child on an enemy scene. It subscribes to the owner's `before_take_damage` and zeroes `final_amount` when `DamageContext.source` sits inside a frontal arc of the sprite's facing.
+
+- **`half_arc_degrees`** — half the width of the protected arc, measured from the facing direction. The shipped Shieldbearer uses 70°, which leaves its sides and rear open.
+- The facing is the sprite's `flip_h`, which every movement behaviour already writes. A source with no position, or the owner itself, is not blocked.
+- It is a targeting puzzle rather than a damage wall: every other roster type asks you to move, and this one asks you to move *around*.
+
+## Packs and elites
+Both are spawner rows rather than enemy scripts, so they apply to any scene:
+
+- **`pack_size`** on `EnemySpawnEntry` — one draw spawns this many copies of the row's scene. The Swarmer row uses 8. A pack overrides the spawner's ordinary group size for that draw, and the spawn budget still caps it.
+- **`elite_min_loop`** and the multipliers on `EnemySpawnEntry` — from that loop on, the row spawns the same scene with multiplied health and damage and a tint on its `Node2D` container. Every shipped row turns elite at loop 3. The tint lives on `Node2D` so the hit flash cannot reset it.
+
 ## Dependencies
 - `Stats` (child), `Health`, `WeaponHolder`, `ItemHolder`, `EventManager`, MovementBehaviour.
 
 ## Known limitations / TODOs
-- The roster is four types deep: the grunt, the Bulwark, the Gunner and the Slimeling. The rest of the variety plan - a charger, a bomber - is not built yet.
+- The roster's five newer types use the shared default enemy sprite until their own art arrives: `src/Systems/EnemyLancer.tscn`, `src/Systems/EnemyToadstinker.tscn`, `src/Systems/EnemyBlink.tscn`, `src/Systems/EnemyShieldbearer.tscn` and `src/Systems/EnemySwarmer.tscn` all point at `src/Assets/enemies/spitter.png`. Replace the texture on each scene when the art ships.
+- The Swarmer is drawn at 0.55 scale with a smaller collider, so the collider test reads the drawn width rather than the texture width.
 - Death handling uses animation_finished connect with a short anonymous callback — works but can be fragile if animations change. `_die` is re-entrancy guarded, so a duplicate `on_death` cannot restart the animation, but the callback still depends on the animation being named `death`.
 - `StageManager` and `EnemySpawner` end a stage on `Nodes/Enemies.get_child_count() == 0`, so a corpse still holds the stage open for the remainder of its death animation.
 - The charger's telegraph plays the shared `idle` animation. There is no windup clip, and `src/animations/enemy_animations.res` is shared with the player, so a charger needs its own animation library before it can telegraph with one.

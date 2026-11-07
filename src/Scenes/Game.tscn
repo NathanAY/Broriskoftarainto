@@ -17,31 +17,76 @@
 [ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://src/Systems/Enemy.tscn" id="22_grunt"]
 [ext_resource type="PackedScene" uid="uid://bbldlamw7jps2" path="res://src/Systems/EnemyBulwark.tscn" id="23_bulwark"]
 [ext_resource type="PackedScene" path="res://src/Systems/EnemyGunner.tscn" id="24_gunner"]
-[ext_resource type="PackedScene" uid="uid://e501pr285aa" path="res://src/Systems/EnemySlimeling.tscn" id="25_slimeling"]
+[ext_resource type="PackedScene" path="res://src/Systems/EnemySlimeling.tscn" id="25_slimeling"]
+[ext_resource type="PackedScene" path="res://src/Systems/EnemyLancer.tscn" id="26_lancer"]
+[ext_resource type="PackedScene" path="res://src/Systems/EnemyToadstinker.tscn" id="27_toadstinker"]
+[ext_resource type="PackedScene" path="res://src/Systems/EnemyBlink.tscn" id="28_blink"]
+[ext_resource type="PackedScene" path="res://src/Systems/EnemyShieldbearer.tscn" id="29_shieldbearer"]
+[ext_resource type="PackedScene" path="res://src/Systems/EnemySwarmer.tscn" id="30_swarmer"]
 
 [sub_resource type="Resource" id="Resource_grunt"]
 script = ExtResource("21_entry")
 scene = ExtResource("22_grunt")
 weight = 1.0
 min_loop = 1
+elite_min_loop = 3
 
 [sub_resource type="Resource" id="Resource_bulwark"]
 script = ExtResource("21_entry")
 scene = ExtResource("23_bulwark")
 weight = 0.4
 min_loop = 1
+elite_min_loop = 3
 
 [sub_resource type="Resource" id="Resource_gunner"]
 script = ExtResource("21_entry")
 scene = ExtResource("24_gunner")
 weight = 0.4
 min_loop = 1
+elite_min_loop = 3
 
 [sub_resource type="Resource" id="Resource_slimeling"]
 script = ExtResource("21_entry")
 scene = ExtResource("25_slimeling")
 weight = 0.4
 min_loop = 1
+elite_min_loop = 3
+
+[sub_resource type="Resource" id="Resource_lancer"]
+script = ExtResource("21_entry")
+scene = ExtResource("26_lancer")
+weight = 0.4
+min_loop = 1
+elite_min_loop = 3
+
+[sub_resource type="Resource" id="Resource_toadstinker"]
+script = ExtResource("21_entry")
+scene = ExtResource("27_toadstinker")
+weight = 0.4
+min_loop = 1
+elite_min_loop = 3
+
+[sub_resource type="Resource" id="Resource_blink"]
+script = ExtResource("21_entry")
+scene = ExtResource("28_blink")
+weight = 0.35
+min_loop = 2
+elite_min_loop = 3
+
+[sub_resource type="Resource" id="Resource_shieldbearer"]
+script = ExtResource("21_entry")
+scene = ExtResource("29_shieldbearer")
+weight = 0.35
+min_loop = 2
+elite_min_loop = 3
+
+[sub_resource type="Resource" id="Resource_swarmer"]
+script = ExtResource("21_entry")
+scene = ExtResource("30_swarmer")
+weight = 0.3
+min_loop = 2
+pack_size = 8
+elite_min_loop = 3
 
 [node name="Main" type="Node2D" unique_id=1823240247]
 script = ExtResource("1_x3xnh")
@@ -54,7 +99,7 @@ character = NodePath("../Character")
 
 [node name="EnemySpawner" parent="StageManager" unique_id=357063823 node_paths=PackedStringArray("character") instance=ExtResource("4_tfod6")]
 character = NodePath("../../Character")
-spawn_table = Array[ExtResource("21_entry")]([SubResource("Resource_grunt"), SubResource("Resource_bulwark"), SubResource("Resource_gunner"), SubResource("Resource_slimeling")])
+spawn_table = Array[ExtResource("21_entry")]([SubResource("Resource_grunt"), SubResource("Resource_bulwark"), SubResource("Resource_gunner"), SubResource("Resource_slimeling"), SubResource("Resource_lancer"), SubResource("Resource_toadstinker"), SubResource("Resource_blink"), SubResource("Resource_shieldbearer"), SubResource("Resource_swarmer")])
 
 [node name="SpawnerModifier" parent="StageManager/EnemySpawner" unique_id=571715030 node_paths=PackedStringArray("itemFactory") instance=ExtResource("3_alh3a")]
 itemFactory = NodePath("../../../ItemFactory")

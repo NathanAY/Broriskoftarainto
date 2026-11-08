@@ -353,6 +353,37 @@ func test_the_fit_survives_a_playing_animation() -> void:
 		AssetSizes.ENEMY_SPRITE * 0.8, AssetSizes.ENEMY_SPRITE * 1.2)
 
 
+## A source PNG drawn onto the roster canvas is minified every frame, and the
+## footstep animation keeps changing the scale so the sample footprint moves with
+## it. A plain linear filter only reads a 2x2 texel block, so a 1024px file on the
+## 100px canvas aliases into shimmering "pixelated reflections" over the bright and
+## dark parts of the arena. Both halves are required: the import must carry the mip
+## chain and the sprite must ask for it - a filter without mipmaps has nothing to
+## sample.
+func test_source_size_art_samples_with_mipmaps() -> void:
+	var source_size := 0
+	for variant in VARIANTS:
+		var enemy := _spawn_enemy(variant["scene"])
+		var sprite := enemy.get_node("Node2D/Sprite2D") as Sprite2D
+		if sprite.texture == null or sprite.texture.get_width() <= int(enemy.art_width):
+			continue
+		source_size += 1
+		assert_int(sprite.texture_filter).override_failure_message(
+			"%s draws its %dpx source on the %.0fpx canvas without mipmapped sampling, so it shimmers"
+			% [variant["name"], sprite.texture.get_width(), enemy.art_width]
+		).is_equal(CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS)
+		var config := ConfigFile.new()
+		assert_int(config.load(sprite.texture.resource_path + ".import")).override_failure_message(
+			"%s has no readable import config" % variant["name"]
+		).is_equal(OK)
+		assert_bool(config.get_value("params", "mipmaps/generate", false)).override_failure_message(
+			"%s imports without mipmaps, so its sprite filter has nothing to sample" % variant["name"]
+		).is_true()
+	assert_int(source_size).override_failure_message(
+		"no variant uses source-size art, so the mipmap rule is untested here"
+	).is_greater(0)
+
+
 func test_every_variant_carries_the_trick_its_role_says() -> void:
 	for variant in VARIANTS:
 		var enemy := _spawn_enemy(variant["scene"])

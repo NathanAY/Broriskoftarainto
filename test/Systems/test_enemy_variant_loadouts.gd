@@ -298,10 +298,58 @@ func test_every_variant_collider_matches_its_art() -> void:
 		assert_object(sprite.texture).is_not_null()
 		# The drawn width, not the texture width: the Swarmer is a smaller
 		# creature drawn from the shared roster canvas.
-		var width := float(sprite.texture.get_width()) * sprite.scale.x
+		var width := enemy.drawn_width()
 		assert_float(enemy.body_radius()).override_failure_message(
 			"the collider of %s does not match its drawn creature" % variant["name"]
 		).is_between(width * 0.3, width * 0.5)
+
+
+## A source PNG must not reach the screen at its file size. The Lancer's art is
+## authored far above the roster canvas and `Enemy._fit_sprite()` is what puts it
+## back on it; without that fit it would draw at 512px in a 100px arena. The bound
+## is an upper limit rather than an equality because the Swarmer is deliberately
+## authored smaller than the canvas.
+func test_no_variant_draws_larger_than_the_roster_canvas() -> void:
+	for variant in VARIANTS:
+		var enemy := _spawn_enemy(variant["scene"])
+		var drawn := enemy.drawn_width()
+		assert_float(drawn).override_failure_message(
+			"%s draws %.0fpx wide, past the %.0fpx canvas: its source-size art was never fitted"
+			% [variant["name"], drawn, AssetSizes.ENEMY_SPRITE]
+		).is_less_equal(AssetSizes.ENEMY_SPRITE + 0.5)
+
+
+## The other half of the fit: an enemy whose art is authored above the canvas is
+## drawn exactly on it. Asserting the Lancer's texture is larger than the canvas
+## keeps this suite honest if that file ever gets re-exported small.
+func test_source_size_art_is_drawn_on_the_roster_canvas() -> void:
+	var enemy := _spawn_enemy(LANCER_SCENE)
+	var sprite := enemy.get_node("Node2D/Sprite2D") as Sprite2D
+	assert_int(sprite.texture.get_width()).override_failure_message(
+		"the Lancer no longer uses source-size art, so the fit is untested here"
+	).is_greater(int(AssetSizes.ENEMY_SPRITE))
+	assert_float(enemy.drawn_width()).is_equal_approx(AssetSizes.ENEMY_SPRITE, 0.5)
+
+
+## The fit has to survive the animations, which is the whole reason it is written
+## on the container and not on the sprite: `idle` and `move` animate
+## `Sprite2D:scale`, so a fit written there is replaced on the animation's first
+## frame. This is the regression that shipped a 512px Lancer.
+func test_the_fit_survives_a_playing_animation() -> void:
+	var enemy := _spawn_enemy(LANCER_SCENE)
+	var fitted := enemy.visual.scale.x
+	enemy.anim_player.play("move")
+	for _frame in 3:
+		await get_tree().process_frame
+
+	assert_float(enemy.visual.scale.x).override_failure_message(
+		"the animation overwrote the draw scale, so the art is back at %dpx"
+		% enemy.sprite.texture.get_width()
+	).is_equal_approx(fitted, 0.001)
+	# The sprite's own scale is the animation's business; it may squash and
+	# stretch, but only around the fitted size.
+	assert_float(enemy.drawn_width()).is_between(
+		AssetSizes.ENEMY_SPRITE * 0.8, AssetSizes.ENEMY_SPRITE * 1.2)
 
 
 func test_every_variant_carries_the_trick_its_role_says() -> void:

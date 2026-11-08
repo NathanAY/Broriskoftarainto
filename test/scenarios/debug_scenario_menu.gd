@@ -15,6 +15,11 @@ const MAIN_MENU_SCENE := "res://src/Scenes/menu/Main.tscn"
 
 const SCENARIOS := [
 	{
+		"title": "Sandbox",
+		"description": "Empty stage 1, held there: no wave and no boss timer. A Spawn enemy panel in the pause menu puts enemies you configure into the arena.",
+		"scene": "res://test/scenarios/scenario_sandbox.tscn",
+	},
+	{
 		"title": "Loaded build",
 		"description": "Loop 1, stage 1. Four weapons and items carrying 3-5 modifiers each.",
 		"scene": "res://test/scenarios/scenario_loaded_build.tscn",
@@ -35,9 +40,9 @@ const SCENARIOS := [
 		"scene": "res://test/scenarios/scenario_cursed_enemies.tscn",
 	},
 	{
-		"title": "Sandbox",
-		"description": "Empty stage 1, held there: no wave and no boss timer. A Sandbox panel in the pause menu spawns enemies with a health and movement speed you type in.",
-		"scene": "res://test/scenarios/scenario_sandbox.tscn",
+		"title": "Enemy preview",
+		"description": "Every enemy type, boss included, in a ring around you. The stage is frozen and they cannot hurt you, so the whole roster can be walked and watched.",
+		"scene": "res://test/scenarios/scenario_enemy_preview.tscn",
 	},
 ]
 

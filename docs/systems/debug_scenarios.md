@@ -2,23 +2,26 @@
 
 ## Purpose
 
-Five dev-only runs that start in a state a normal run would need several loops to reach, so a build or a balance number can be checked without playing up to it. The **Sandbox** one goes the other way: it starts ordinary and hands you the controls. They are reached from the main menu's **Debug scenarios** button, next to **New game** - the character select → `StarterMenu.tscn` route is still the default way to play, and nothing here is on that path.
+Six dev-only runs that start in a state a normal run would need several loops to reach, so a build or a balance number can be checked without playing up to it. The **Sandbox** one goes the other way: it starts ordinary and hands you the controls. They are reached from the main menu's **Debug scenarios** button, next to **New game** - the character select → `StarterMenu.tscn` route is still the default way to play, and nothing here is on that path.
 
 None of it ships. The picker, the scenarios and their tests live in `test/scenarios/`, and the only `src/` change is the button in `src/Scenes/menu/Main.tscn` plus the handler in `src/Scenes/menu/main_menu.gd`. That handler checks the picker exists first, so a build without `test/` warns instead of changing to a missing scene.
 
 | Scenario | Scene | What it starts as |
 |---|---|---|
+| Sandbox | `test/scenarios/scenario_sandbox.tscn` | Plain loop 1 stage 1, plus a **Spawn enemy** panel in the pause menu that puts the enemy type you pick, with a health, movement speed and amount you type in, into the arena |
 | Loaded build | `test/scenarios/scenario_loaded_build.tscn` | Loop 1, stage 1, Ranger with 4 weapons and 5 items - three of which carry 3-5 modifiers each |
 | First stage boss | `test/scenarios/scenario_first_boss.tscn` | Loop 1 **stage 2**: the enemy stage is skipped and the boss spawns at once |
 | Loop 3 | `test/scenarios/scenario_loop_three.tscn` | Loop 3 stage 1: enemies already scaled by `current_loop`, boss spawner scaled to match |
 | Cursed enemies | `test/scenarios/scenario_cursed_enemies.tscn` | Loop 1, stage 1, with a **debuff item on every enemy**, so the HUD's debuff row fills. Also picks up a buff item, so both rows show at once |
-| Sandbox | `test/scenarios/scenario_sandbox.tscn` | Plain loop 1 stage 1, plus a **Sandbox** panel in the pause menu that spawns enemies with a health, movement speed and amount you type in |
+| Enemy preview | `test/scenarios/scenario_enemy_preview.tscn` | Frozen stage 1 with **one of every enemy type**, boss included, in a ring around the player. The roster chases but cannot hurt you, so the whole set can be walked and watched |
 
 ## Sandbox: typing the numbers instead of scaling to them
 
 Every other scenario answers "what does the game look like at loop 3" by moving the run there. The sandbox answers "what does this one number do" by putting it on one enemy, and that is a different job: a balance pass wants an enemy at exactly 100000 health and 0 speed, not a wave scaled to an approximation of it.
 
-`ScenarioSetup.sandbox = true` builds a `SandboxMenu` (`test/scenarios/sandbox_menu.gd`) as a child of itself, and adds a **Sandbox** button to the pause menu's `Control/VBoxContainer`. The panel has three spinboxes - health (0 - 1,000,000, default 100000), movement speed (0 - 20 m/s, default 0) and amount (1 - 100) - and a **Spawn** button, laid out in code rather than as a `.tscn` so a dev panel cannot drift from the script that drives it.
+`ScenarioSetup.sandbox = true` builds a `SandboxMenu` (`test/scenarios/sandbox_menu.gd`) as a child of itself, and adds a **Spawn enemy** button to the pause menu's `Control/VBoxContainer`. The panel has an enemy picker, three spinboxes - health (0 - 1,000,000, default 100000), movement speed (0 - 20 m/s, default 0) and amount (1 - 100) - and a **Spawn** button, laid out in code rather than as a `.tscn` so a dev panel cannot drift from the script that drives it.
+
+The picker is built from `SandboxMenu.ENEMY_TYPES`, which holds one row today: the roster's basic enemy, `src/Systems/Enemy.tscn`. Adding a type is one entry in that list - the panel builds its items from it, so a new type cannot be left out of the UI, and `spawn_configured()` instantiates whatever the picker shows.
 
 Three things it has to get right, and each is pinned by `test/scenarios/test_sandbox_scenario.gd`:
 
@@ -28,7 +31,7 @@ Three things it has to get right, and each is pinned by `test/scenarios/test_san
 
 Enemies land under `Nodes/Enemies` - the same node `StageManager` watches - on a ring around the player, so a batch does not stack on one pixel. `spawn_configured()` returns what it spawned, which is what makes it checkable without going through the UI.
 
-**The run is held at stage 1.** `ScenarioSetup._hold_stage_one()` runs after the panel is installed and sets three things, so the arena holds only what the panel put there - a number read off an enemy is that enemy, not the wave's contribution to it.
+**The run is held at stage 1.** `ScenarioSetup._freeze_stage()` runs after the panel is installed and sets three things, so the arena holds only what the panel put there - a number read off an enemy is that enemy, not the wave's contribution to it.
 
 The one that matters is `StageManager.stage_active = false`. There are **two clocks**, and silencing the obvious one is not enough:
 
@@ -54,6 +57,17 @@ Giving every enemy a debuff item in a real run would be a **balance change**, an
 - It uses the spawner's **own extension point**: `EnemySpawner._ready()` collects every child that has `attach_to_enemy(enemy, character)` into `modifiers`, and both spawn paths call it once per enemy, before the enemy enters the tree.
 - That timing is also the trap. `_ready()` builds the list before the scenario's node exists, so `ScenarioSetup` has to `add_child()` **and** append to `enemy_spawner.modifiers` — adding the child alone leaves `attach_to_enemy()` never called and the scenario silently does nothing. `test_debug_scenarios.gd` pins that the modifier is in the list.
 - `ItemHolder.hold_owner` is a getter that resolves the moment the holder is parented, so the item wires itself up on an off-tree enemy and only has to run `_ready()` when the enemy joins.
+
+## Enemy preview: the whole roster in one arena
+
+`EnemySpawner.spawn_table` is sampled by weight, so no ordinary run fields every enemy type. `ScenarioSetup.spawn_enemy_roster` puts one of each scene in `ENEMY_ROSTER` - grunt through boss - on a 420px ring around the character, which is the only way to judge a set of sprites against each other.
+
+**It is a gallery, not a fight.** Both halves of an enemy's threat are removed, and the two halves need different timing:
+
+- the **contact weapon** is cleared **before `add_child()`**, because `Enemy._ready()` is what arms it from `contact_weapon`;
+- the **ranged weapon** is removed afterwards, out of `WeaponHolder.weapons`, because it is authored into the Gunner's own scene. `remove_weapon()` also frees its visual and stops its firing timer.
+
+They still chase (`set_target_position(character)`), because a still sprite cannot show the one thing a legless enemy has to get right: the walk, and the `flip_h` as it crosses in front of the player. `test_debug_scenarios.gd` pins both halves of the disarm and that every roster scene was fielded exactly once.
 
 ## Monster density
 
@@ -94,7 +108,7 @@ A scenario is the scene, not a set of globals set somewhere earlier:
 3. Still in that `_ready()`, `_apply_start_mode()` drives `StageManager` through its own seams — `go_to_stage(2)` for the boss, or `current_loop` on the manager and **both** spawners followed by `go_to_stage(1)` for loop 3.
 4. `_apply_monster_multiplier()` hands the picker's density to `StageManager.enemy_spawner`, last because of the `start_wave()` ordering above.
 5. `_install_sandbox_menu()` builds the sandbox panel and its pause-menu button, but only for a scenario that asked for one.
-6. `_hold_stage_one()` freezes `StageManager.stage_active` and silences `EnemySpawner`, sandbox scenarios only, so the arena is empty and the run stays on stage 1 until the panel fills it.
+6. `_freeze_stage()` freezes `StageManager.stage_active` and silences `EnemySpawner`, for the sandbox panel and the roster preview alike, so the arena holds only what the scenario put there and the run stays on stage 1.
 7. `_on_stage_applied()` prints one line saying which stage, loop and monster density the run landed on. That print is the thing to read when a scenario did not do what it claims.
 
 `stacked_items()` builds its items with `ItemBuilder` rather than shipping new `.tres` files, because every item in `src/Resources/items/` is a single modifier and the point of this scenario is the multi-modifier stack. The numbers stay next to the scenario that uses them.
@@ -109,6 +123,7 @@ A scenario is the scene, not a set of globals set somewhere earlier:
 - `src/Systems/enemy_spawner.gd` — `modifiers` and the `attach_to_enemy()` hook the `Cursed enemies` scenario plugs into.
 - `test/scenarios/enemy_debuff_modifier.gd` (`EnemyDebuffModifier`) — the whole of the cursed-enemies behaviour: it gives one spawned enemy the scenario's item, so nothing in `src/` had to change for the debuff row to be reachable.
 - `src/Systems/Enemy.tscn`, `src/Systems/stats/stats.gd` — what the sandbox spawns, and the `Stats` node it writes the typed numbers into. No `src/` change.
+- `src/Systems/EnemyBoss.tscn` and the rest of `ENEMY_ROSTER` — the roster preview instances those scenes unmodified, so what it shows is what a wave fields.
 
 ## Known limitations / TODOs
 
@@ -119,4 +134,5 @@ A scenario is the scene, not a set of globals set somewhere earlier:
 - **The slider is linear, so the low end is cramped.** 0.1x to 1.0x is 5% of the travel. Worth a log scale if anyone actually works at the bottom of the range.
 - **A scenario is not a save.** It builds a starting state; it does not reproduce a specific run, so balance numbers read off it are indicative, not a replay.
 - **Sandbox enemies are not stage-scaled.** Deliberate, but it means a sandbox number is not what the same loop would field: the panel is for one enemy, not for a wave.
+- **The roster preview crowds.** The enemies chase, so a few seconds after the run starts they clump around the player instead of standing in a readable ring. Walk away to spread them out again; the separation force is what keeps the sprites from overlapping outright.
 - No scenario covers the win screen directly, and none reaches the loop-choice portals. The loop-3 scenario clears its boss into the shop; **Go next** there spawns the choice. To reach it from a test without playing the shop, `StageManager.go_to_stage(STAGE_SHOP)` followed by `_on_shop_next_pressed()` is the seam (`test/Systems/test_loop_choice.gd` uses it).

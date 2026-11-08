@@ -60,7 +60,6 @@ const ALLOWED_BARE := {
 	"snake_case.png": "template used by the asset naming rule",
 	"snake_case_modifier.gd": "template used by the modifier naming rule",
 	"armormodifier.png": "visual_style.md names this as the icon a typo'd file should have",
-	"poisonmodifier.png": "visual_style.md names this as the icon a scene still lacks",
 }
 
 ## Project paths a doc names as "to be written". Delete an entry once the file

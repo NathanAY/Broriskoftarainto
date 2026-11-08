@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" uid="uid://cs2dub84x6wjd" path="res://src/Scripts/Enemy.gd" id="1_enemy"]
-[ext_resource type="Texture2D" uid="uid://dbviainil2yci" path="res://src/Assets/enemies/spitter.png" id="2_sprite"]
+[ext_resource type="Texture2D" uid="uid://dem1lyc5gn306" path="res://src/Assets/enemies/lancer.png" id="2_sprite"]
 [ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://src/Systems/LocalEventManager.tscn" id="3_bus"]
 [ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://src/ui/HealthBar.tscn" id="4_bar"]
 [ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://src/Systems/stats/Stats.tscn" id="5_stats"]

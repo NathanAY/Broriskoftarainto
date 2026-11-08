@@ -66,7 +66,12 @@ func configure(sprite: Sprite2D, direction: Vector2, strength: float, speed_mult
     var power: float = clampf(strength, 0.8, 2.2)
     var flip_h: bool = sprite.flip_h
     var base_modulate: Color = sprite.modulate
-    var shard_scale: Vector2 = sprite.scale if sprite.scale.length_squared() > 0.0 else Vector2.ONE
+    # The drawn scale, not just the sprite's own: the fit for source-size art
+    # lives on the parent container, and a shard has to match the creature on
+    # screen. `global_transform` folds both in.
+    var shard_scale: Vector2 = sprite.global_transform.get_scale()
+    if shard_scale.length_squared() <= 0.0:
+        shard_scale = Vector2.ONE
     var sprite_offset: Vector2 = sprite.offset
     for index in range(PIECE_COUNT):
         var tx: int = index % GRID_SIZE
@@ -84,7 +89,9 @@ func configure(sprite: Sprite2D, direction: Vector2, strength: float, speed_mult
         piece.modulate = base_modulate
         piece.scale = shard_scale
         # Local offset from sprite center (mirrors WW canvas_offset math, 2D top-down).
-        var local := (Vector2(center.x - 0.5, center.y - 0.5)) * frame_size + sprite_offset
+        # In texture pixels until the shard scale is applied, because the pieces
+        # are parented to the burst node, not to the sprite.
+        var local := ((Vector2(center.x - 0.5, center.y - 0.5)) * frame_size + sprite_offset) * shard_scale
         if flip_h:
             local.x = -local.x
         piece.position = local

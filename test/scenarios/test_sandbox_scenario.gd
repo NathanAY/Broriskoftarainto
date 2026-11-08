@@ -54,6 +54,42 @@ func test_pause_menu_grows_a_sandbox_button() -> void:
     assert_object(pause_menu.get_node_or_null("Control/VBoxContainer/SandboxButton")).is_not_null()
 
 
+## The button is the only way into the panel, so its label has to say what the
+## panel does rather than name the dev feature behind it.
+func test_pause_menu_button_is_labelled_spawn_enemy() -> void:
+    var scenario := await _run_scenario()
+    var button := scenario.get_node("UI/PauseMenu/Control/VBoxContainer/SandboxButton") as Button
+
+    assert_str(button.text).is_equal("Spawn enemy")
+
+
+## The picker is built from `ENEMY_TYPES` rather than from its own copy of the
+## list, so adding a type there cannot leave it out of the panel. One type ships
+## today; this pins the wiring that makes the second one free.
+func test_the_picker_offers_every_listed_enemy_type() -> void:
+    var scenario := await _run_scenario()
+    var menu: SandboxMenu = scenario.get_node("ScenarioSetup/SandboxMenu")
+    var picker := menu.get_node("Center/Panel/Rows/EnemyRow/Picker") as OptionButton
+
+    assert_int(picker.item_count).is_equal(SandboxMenu.ENEMY_TYPES.size())
+    for index in SandboxMenu.ENEMY_TYPES.size():
+        assert_str(picker.get_item_text(index)).is_equal(
+            str(SandboxMenu.ENEMY_TYPES[index]["name"]))
+
+
+## What the picker shows is what gets instantiated - the panel is not still
+## spawning the one hardcoded scene it used to.
+func test_spawned_enemy_is_the_selected_type() -> void:
+    var scenario := await _run_scenario()
+    var menu: SandboxMenu = scenario.get_node("ScenarioSetup/SandboxMenu")
+    _set_spawn_values(menu, 10.0, 0.0, 1)
+
+    var spawned := menu.spawn_configured()
+
+    assert_int(spawned.size()).is_equal(1)
+    assert_str(spawned[0].scene_file_path).is_equal(menu.selected_enemy_scene())
+
+
 ## The panel is opened from the pause screen, where the tree is paused. A panel
 ## that stops processing there cannot be typed into, so it must run regardless.
 func test_sandbox_panel_runs_while_the_game_is_paused() -> void:

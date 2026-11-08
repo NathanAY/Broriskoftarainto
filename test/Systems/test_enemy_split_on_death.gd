@@ -123,8 +123,11 @@ func test_the_children_are_scaled_down() -> void:
 	# already read the scaled value.
 	assert_float(child_health.max_health).is_equal_approx(parent_health * split_scale, 0.001)
 	assert_float(_body_radius(child)).is_equal_approx(parent_radius * split_scale, 0.001)
-	var sprite := child.get_node("Node2D/Sprite2D") as Sprite2D
-	assert_vector(sprite.scale).is_equal_approx(Vector2.ONE * split_scale, Vector2(0.001, 0.001))
+	# The draw scale lives on the container, because `idle`/`move` own
+	# `Sprite2D:scale`. The split shrinks the container, so the animation still
+	# gets to squash the sprite on top of it.
+	var visual := child.get_node("Node2D") as Node2D
+	assert_vector(visual.scale).is_equal_approx(Vector2.ONE * split_scale, Vector2(0.001, 0.001))
 
 
 func test_scaling_a_child_does_not_shrink_any_other_instance() -> void:

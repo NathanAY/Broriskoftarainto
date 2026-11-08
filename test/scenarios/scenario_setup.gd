@@ -16,6 +16,26 @@ const ITEMS_DIR := "res://src/Resources/items"
 const WEAPONS_DIR := "res://src/Resources/weapons"
 const MODIFIERS_DIR := "res://src/Systems/Items/modifiers"
 
+## The cast of the `spawn_enemy_roster` gallery: one scene per shipped roster
+## row, boss included. Written out rather than read off `EnemySpawner.spawn_table`
+## because the table is sampled by weight and no single run fields every type.
+const ENEMY_ROSTER := [
+	"res://src/Systems/Enemy.tscn",
+	"res://src/Systems/EnemyBulwark.tscn",
+	"res://src/Systems/EnemyGunner.tscn",
+	"res://src/Systems/EnemySlimeling.tscn",
+	"res://src/Systems/EnemyLancer.tscn",
+	"res://src/Systems/EnemyToadstinker.tscn",
+	"res://src/Systems/EnemyBlink.tscn",
+	"res://src/Systems/EnemyShieldbearer.tscn",
+	"res://src/Systems/EnemySwarmer.tscn",
+	"res://src/Systems/EnemyBoss.tscn",
+]
+
+## Radius of the ring the roster is laid out on, in pixels. Wide enough that the
+## 225px boss sprite does not overlap its neighbour.
+const ROSTER_RADIUS := 420.0
+
 enum StartMode {
 	STAGE_ONE, ## normal run: the enemy stage of `current_loop`.
 	BOSS_STAGE, ## straight to stage 2 - the enemy stage is skipped entirely.
@@ -58,6 +78,10 @@ static var pending_monster_multiplier: float = 1.0
 ## with hand-typed stats can be dropped into the arena mid-run. Dev-only like the
 ## rest of this folder.
 @export var sandbox: bool = false
+## Puts one of every enemy type in a ring around the character, boss included.
+## A gallery rather than a fight: the roster is disarmed and the stage is frozen,
+## because a live wave would kill the player before the whole set could be read.
+@export var spawn_enemy_roster: bool = false
 
 
 ## Runs before *any* child's `_ready`, which is what makes this the right hook:
@@ -80,7 +104,8 @@ func _ready() -> void:
 	_apply_start_mode()
 	_apply_monster_multiplier()
 	_install_sandbox_menu()
-	_hold_stage_one()
+	_freeze_stage()
+	_spawn_enemy_roster()
 	_on_stage_applied()
 
 
@@ -232,14 +257,15 @@ func _install_sandbox_menu() -> void:
 
 	var button := UiMenuButton.new()
 	button.name = "SandboxButton"
-	button.text = "Sandbox"
+	button.text = "Spawn enemy"
 	button.pressed.connect(menu.open)
 	(pause_menu.get_node("Control/VBoxContainer") as VBoxContainer).add_child(button)
 
 
 ## Holds the run at stage 1 with nothing spawning, so the arena holds only what
-## the sandbox panel put there. Sandbox-only, and applied after
-## `_install_sandbox_menu()` because the panel is what replaces the wave.
+## the scenario put there - the sandbox panel or the roster preview. Applied to
+## both, because either way the wave would otherwise fill the arena and move the
+## run on under the thing being looked at.
 ##
 ## Three parts, and the first is the one that matters:
 ##
@@ -253,8 +279,8 @@ func _install_sandbox_menu() -> void:
 ## - `spawn_timer.stop()` puts the timer to sleep, because with the stage frozen
 ##   it would otherwise keep ticking and keep re-reading the empty arena through
 ##   `EnemySpawner._process()`, the refill watchdog.
-func _hold_stage_one() -> void:
-	if not sandbox:
+func _freeze_stage() -> void:
+	if not (sandbox or spawn_enemy_roster):
 		return
 	var stage_manager := get_node_or_null("../StageManager") as StageManager
 	if stage_manager == null:
@@ -265,6 +291,39 @@ func _hold_stage_one() -> void:
 	spawner.spawn_active = false
 	if spawner.spawn_timer != null:
 		spawner.spawn_timer.stop()
+
+
+## Puts one of every enemy type in a ring around the character.
+##
+## Harmless on purpose: this is a gallery, and ten enemies with a boss among them
+## would kill the player before the second row was read. Both halves of an
+## enemy's threat are removed - the contact weapon has to go *before*
+## `add_child()`, because `Enemy._ready()` is what arms it, while the ranged
+## weapon sits in the scene's own `WeaponHolder` and is removed afterwards.
+## They still chase, so the walk, the flip and the sprite's scale read exactly as
+## they do in a wave.
+func _spawn_enemy_roster() -> void:
+	if not spawn_enemy_roster:
+		return
+	var character := _character()
+	var enemies_root := get_node_or_null("../Nodes/Enemies")
+	if character == null or enemies_root == null:
+		push_warning("DebugScenarioSetup: no character or Nodes/Enemies for the roster preview.")
+		return
+	var arena := get_node_or_null("../Arena") as Arena
+	var count := ENEMY_ROSTER.size()
+	for index in count:
+		var enemy := load(ENEMY_ROSTER[index]).instantiate() as Enemy
+		enemy.contact_weapon = null
+		enemies_root.add_child(enemy)
+		var offset := Vector2.RIGHT.rotated(TAU * float(index) / float(count)) * ROSTER_RADIUS
+		var spot: Vector2 = character.global_position + offset
+		if arena != null:
+			spot = arena.clamp_to_arena(spot, 96.0)
+		enemy.global_position = spot
+		enemy.set_target_position(character)
+		for weapon in enemy.weapon_holder.weapons.duplicate():
+			enemy.weapon_holder.remove_weapon(weapon)
 
 
 func _character() -> Character:

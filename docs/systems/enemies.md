@@ -64,12 +64,13 @@ The numbers are `.tscn` data, so they are rebalanced without touching a script. 
 ### The collider has to match the art
 The body collider is a circle around the drawn creature, so it scales with the sprite. A bigger sprite wearing the old collider is a wall the player walks straight through; a collider far larger than the art is a wall the player cannot touch. The roster's enemies share the 100x100 canvas the asset table specifies, so they share the basic enemy's collider.
 
-### The art is a 100x100 canvas
-Every roster sprite is a 100x100 PNG with the creature filling about 85% of its longest side, and the scene draws it at `scale 1`. That is what makes the collider comparison meaningful: the test reads the texture's width, not the drawn width.
+### The art is drawn on a 100x100 canvas
+
+Every roster sprite is **drawn** on a 100x100 square with the creature filling about 85% of its longest side. The file itself may be authored larger — `src/Assets/enemies/lancer.png` is 512x512 — and `Enemy.art_width` (default `AssetSizes.ENEMY_SPRITE`) plus `Enemy._fit_sprite()` scale it onto the canvas. The fit is written on the `Node2D` container, not on the sprite, because the shared `idle` and `move` animations animate `Sprite2D:scale` and would overwrite it; `Enemy.drawn_width()` folds both scales together. That is what makes the collider comparison meaningful: the test compares the collider to the **drawn** width, not to the file's width.
 
 The roster's art was generated as one six-creature sheet and cut up afterwards. `test/tools/extract_enemy_sprites.gd` does the cutting: it flood-fills the white backdrop in from the sheet's border, splits what is left into connected components and writes each one out as a 100x100 PNG. The grid in a generated sheet is never clean, so slicing it into equal rectangles cuts creatures in half.
 
-The Gunner and the Slimeling were delivered as single images instead of being cut from the sheet, so their cells are not listed in the extractor's `CELLS` table — running the tool must not overwrite them. Each is normalised to the same 100x100 / 85%-fill canvas before it is saved into `src/Assets/enemies/`, and the untouched source is kept at `docs/plans/images/enemies/gunner.png` and `docs/plans/images/enemies/jelly-splitter.png`. A sprite left at its delivered resolution would draw at the wrong size against the rest of the roster, because `Sprite2D` draws a texture at its pixel size.
+The Gunner, the Slimeling and the Lancer were delivered as single images instead of being cut from the sheet, so their cells are not listed in the extractor's `CELLS` table — running the tool must not overwrite them. The Gunner and the Slimeling are normalised to the 100x100 / 85%-fill canvas before they are saved into `src/Assets/enemies/`, and the untouched source for those two is kept at `docs/plans/images/enemies/gunner.png` and `docs/plans/images/enemies/jelly-splitter.png`. The Lancer keeps a 512x512 source at the same proportions. `Sprite2D` draws a texture at its pixel size, so a file left at its delivered resolution used to draw at the wrong size against the rest of the roster; `Enemy._fit_sprite()` is what now makes the file resolution irrelevant.
 
 ## Splitting
 `SplitOnDeath` is an optional child on an enemy scene. It subscribes to the owner's `on_death` and spawns smaller copies of the enemy when it dies.
@@ -137,7 +138,7 @@ Both are spawner rows rather than enemy scripts, so they apply to any scene:
 - `Stats` (child), `Health`, `WeaponHolder`, `ItemHolder`, `EventManager`, MovementBehaviour.
 
 ## Known limitations / TODOs
-- The roster's five newer types use the shared default enemy sprite until their own art arrives: `src/Systems/EnemyLancer.tscn`, `src/Systems/EnemyToadstinker.tscn`, `src/Systems/EnemyBlink.tscn`, `src/Systems/EnemyShieldbearer.tscn` and `src/Systems/EnemySwarmer.tscn` all point at `src/Assets/enemies/spitter.png`. Replace the texture on each scene when the art ships.
+- The roster's four newer types use the shared default enemy sprite until their own art arrives: `src/Systems/EnemyToadstinker.tscn`, `src/Systems/EnemyBlink.tscn`, `src/Systems/EnemyShieldbearer.tscn` and `src/Systems/EnemySwarmer.tscn` all point at `src/Assets/enemies/spitter.png`. Replace the texture on each scene when the art ships. The Lancer now has its own `src/Assets/enemies/lancer.png`.
 - The Swarmer is drawn at 0.55 scale with a smaller collider, so the collider test reads the drawn width rather than the texture width.
 - Death handling uses animation_finished connect with a short anonymous callback — works but can be fragile if animations change. `_die` is re-entrancy guarded, so a duplicate `on_death` cannot restart the animation, but the callback still depends on the animation being named `death`.
 - `StageManager` and `EnemySpawner` end a stage on `Nodes/Enemies.get_child_count() == 0`, so a corpse still holds the stage open for the remainder of its death animation.

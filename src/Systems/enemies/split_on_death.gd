@@ -113,9 +113,12 @@ func _scale_child(child: Enemy) -> void:
 		child_stats.set_base_stat("damage", child_stats.get_stat("damage") * split_scale)
 	_scale_circle(child.get_node_or_null("CollisionShape2D"))
 	_scale_circle(child.get_node_or_null("Hitbox/CollisionShape2D"))
-	var child_sprite := child.get_node_or_null("Node2D/Sprite2D") as Sprite2D
-	if child_sprite != null:
-		child_sprite.scale = Vector2.ONE * split_scale
+	var child_visual := child.get_node_or_null("Node2D") as Node2D
+	if child_visual != null:
+		# Multiplied, not assigned: the container carries the draw scale for
+		# source-size art (`Enemy._fit_sprite()`), and the split shrinks that
+		# rather than replacing it with 1.
+		child_visual.scale *= Vector2.ONE * split_scale
 
 
 ## Shrinks one collider to `split_scale` of its authored size.

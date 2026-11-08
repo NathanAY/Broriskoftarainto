@@ -10,6 +10,10 @@ class_name Enemy
 @onready var collisition_shape: CollisionShape2D = $CollisionShape2D
 @onready var anim_player: AnimationPlayer = get_node("AnimationPlayer")
 @onready var sprite: Sprite2D = $Node2D/Sprite2D
+## The container the sprite lives under. `_fit_sprite()` writes the draw scale
+## here rather than on the sprite, because the shared `idle` and `move`
+## animations animate `Sprite2D:scale` and would overwrite it on the next frame.
+@onready var visual: Node2D = $Node2D
 @onready var behaviour: MovementBehaviour = $MovementBehaviour
 
 var target: Node = null
@@ -18,6 +22,11 @@ var _alive: bool = true
 ## Contact damage. Thorns hooks the body's own Hitbox, so an enemy that should
 ## not hurt on touch sets this to null and arms itself some other way.
 @export var contact_weapon: BaseWeapon = preload("res://src/Resources/weapons/Thorns.tres")
+
+## The width the art is drawn at, in pixels. The sprite keeps the file's authored
+## resolution and is fitted to this here, so a 512px source and a 100px one are
+## the same size in the arena. The boss raises it to its own canvas.
+@export var art_width: float = AssetSizes.ENEMY_SPRITE
 
 ## Soft crowd separation: force starts pulling once two enemies get closer
 ## than SEPARATION_FACTOR * body radius (hard body-body collision is disabled
@@ -47,6 +56,35 @@ func _ready():
     $Hitbox.collision_mask = 7
     
     event_manager.subscribe("on_death", Callable(self, "_die"))
+    _fit_sprite()
+
+
+## Draws the art at `art_width` whatever the file's resolution is.
+##
+## Multiplied onto whatever scale the container already carries rather than
+## assigned over it, so nothing a scene authored is lost. The scale goes on the
+## **container**, not the sprite: `idle` and `move` animate `Sprite2D:scale`, and
+## a fit written on the sprite is gone the first time one of them plays.
+func _fit_sprite() -> void:
+    if sprite == null or sprite.texture == null or visual == null:
+        return
+    visual.scale *= Vector2.ONE * AssetSizes.scale_for(sprite.texture, art_width)
+    # A source-resolution texture is minified every frame and the camera zooms, so
+    # it needs the same mipmapped sampling the portal art does. A file already at
+    # the drawn size is left on the default filter.
+    if sprite.texture.get_width() > int(art_width):
+        sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+
+
+## How wide the creature is actually drawn, in pixels, whatever the file's
+## resolution is. Both scales are part of it: the fit on the container and the
+## squash/stretch an animation writes on the sprite.
+func drawn_width() -> float:
+    if sprite == null or sprite.texture == null:
+        return 0.0
+    var holder := visual.scale.x if visual != null else 1.0
+    return float(sprite.texture.get_width()) * holder * sprite.scale.x
+
 
 func set_target_position(new_target: Node):
     target = new_target  

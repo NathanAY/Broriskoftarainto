@@ -3,11 +3,11 @@ class_name SandboxMenu
 
 ## Dev-only sandbox panel, opened from the pause menu of the Sandbox scenario.
 ##
-## The whole of it: three numbers and a Spawn button. `spawn_configured()` puts an
-## enemy into the arena with exactly the health and movement speed that were typed
-## in, which is what a balance or mechanics test needs - a real `Enemy.tscn`, so
-## weapons, damage and death all behave normally, but with stats a designer chose
-## rather than stats the wave scaling picked.
+## The whole of it: an enemy picker, three numbers and a Spawn button.
+## `spawn_configured()` puts an enemy into the arena with exactly the health and
+## movement speed that were typed in, which is what a balance or mechanics test
+## needs - a real enemy scene, so weapons, damage and death all behave normally,
+## but with stats a designer chose rather than stats the wave scaling picked.
 ##
 ## Nothing ships: `ScenarioSetup` builds this node and a pause-menu button for it,
 ## and only when a scenario sets `sandbox = true`.
@@ -15,7 +15,12 @@ class_name SandboxMenu
 ## Built in code rather than as a `.tscn` so a dev panel cannot drift out of sync
 ## with the script that drives it, and so it needs no hand-written scene file.
 
-const ENEMY_SCENE := preload("res://src/Systems/Enemy.tscn")
+## The enemy types the picker offers. One row for now - the roster's basic enemy.
+## Adding a type is one entry here: the picker is built from this list, so a new
+## type cannot be left out of the panel.
+const ENEMY_TYPES := [
+	{"name": "Grunt", "scene": "res://src/Systems/Enemy.tscn"},
+]
 
 ## Distance from the player the spawned enemies appear at. A ring, so a batch of
 ## them lands spread out instead of stacked on one pixel.
@@ -38,6 +43,7 @@ const DEFAULT_AMOUNT := 1
 var enemies_node: Node = null
 var character: Character = null
 
+var _enemy_picker: OptionButton
 var _health_box: SpinBox
 var _speed_box: SpinBox
 var _amount_box: SpinBox
@@ -66,6 +72,7 @@ func _ready() -> void:
 	panel.add_child(rows)
 
 	rows.add_child(_make_header())
+	rows.add_child(_make_enemy_row())
 	_health_box = _add_number_row(rows, "Health", 0.0, MAX_HEALTH, 1000.0, DEFAULT_HEALTH)
 	_speed_box = _add_number_row(rows, "Movement speed", 0.0, MAX_MOVEMENT_SPEED, 0.1, DEFAULT_MOVEMENT_SPEED)
 	_amount_box = _add_number_row(rows, "Amount", 1.0, float(MAX_AMOUNT), 1.0, float(DEFAULT_AMOUNT))
@@ -98,6 +105,33 @@ func _make_header() -> Control:
 	title.text = "Sandbox"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	return title
+
+
+## The enemy-type picker, built from `ENEMY_TYPES` so the panel and the list
+## cannot disagree about what can be spawned.
+func _make_enemy_row() -> Control:
+	var row := VBoxContainer.new()
+	row.name = "EnemyRow"
+
+	var label := Label.new()
+	label.name = "Label"
+	label.text = "Enemy"
+	row.add_child(label)
+
+	_enemy_picker = OptionButton.new()
+	_enemy_picker.name = "Picker"
+	for index in ENEMY_TYPES.size():
+		_enemy_picker.add_item(str(ENEMY_TYPES[index]["name"]), index)
+	row.add_child(_enemy_picker)
+
+	return row
+
+
+## The scene path of the type the picker currently shows, or "" before `_ready()`.
+func selected_enemy_scene() -> String:
+	if _enemy_picker == null or _enemy_picker.selected < 0:
+		return ""
+	return str(ENEMY_TYPES[_enemy_picker.selected]["scene"])
 
 
 ## One `Label` plus one `SpinBox`, returned so the caller keeps a reference. The
@@ -165,10 +199,16 @@ func spawn_configured() -> Array[Enemy]:
 		push_warning("SandboxMenu: no enemies node or character, spawning nothing.")
 		return []
 
+	var scene_path := selected_enemy_scene()
+	if scene_path.is_empty():
+		push_warning("SandboxMenu: no enemy type selected, spawning nothing.")
+		return []
+	var scene := load(scene_path) as PackedScene
+
 	var spawned: Array[Enemy] = []
 	var amount := int(_amount_box.value)
 	for index in range(amount):
-		var enemy: Enemy = ENEMY_SCENE.instantiate()
+		var enemy: Enemy = scene.instantiate()
 		var stats := enemy.get_node("Stats") as Stats
 		stats.set_base_stat("health", _health_box.value)
 		stats.set_base_stat("movement_speed", _speed_box.value)

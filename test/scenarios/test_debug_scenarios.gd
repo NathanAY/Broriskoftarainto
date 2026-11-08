@@ -13,6 +13,7 @@ const LOADED_BUILD := "res://test/scenarios/scenario_loaded_build.tscn"
 const FIRST_BOSS := "res://test/scenarios/scenario_first_boss.tscn"
 const LOOP_THREE := "res://test/scenarios/scenario_loop_three.tscn"
 const CURSED_ENEMIES := "res://test/scenarios/scenario_cursed_enemies.tscn"
+const ENEMY_PREVIEW := "res://test/scenarios/scenario_enemy_preview.tscn"
 
 ## `ScenarioSetup` waits one frame before it equips anything, so the assertions
 ## below have to sit past that frame.
@@ -206,6 +207,52 @@ func test_scenario_uses_the_requested_character() -> void:
     assert_object(GlobalGameState.current_character).is_same(
         _current_character(scenario)
     )
+
+
+## The preview exists to judge the roster side by side, so it has to field every
+## type exactly once. The scenes are read back off the spawned enemies rather than
+## off `ENEMY_ROSTER`, so a constant that names a scene which is not the one the
+## enemy actually instanced still fails.
+func test_enemy_preview_fields_every_roster_type_once() -> void:
+    var scenario := await _run_scenario(ENEMY_PREVIEW)
+    var spawned: Array[String] = []
+    for child in scenario.get_node("Nodes/Enemies").get_children():
+        if child is Enemy:
+            spawned.append(child.scene_file_path)
+
+    for path in DebugScenarioSetup.ENEMY_ROSTER:
+        assert_int(spawned.count(path)).override_failure_message(
+            "%s was not fielded by the preview" % path
+        ).is_equal(1)
+    assert_int(spawned.size()).override_failure_message(
+        "the preview fields more than the roster: %s" % str(spawned)
+    ).is_equal(DebugScenarioSetup.ENEMY_ROSTER.size())
+
+
+## A gallery, not a fight: both halves of an enemy's threat have to be gone, or
+## the run ends before the roster is read. The contact weapon is the half that
+## `Enemy._ready()` arms, which is why it is cleared before the enemy is parented.
+func test_enemy_preview_roster_is_harmless() -> void:
+    var scenario := await _run_scenario(ENEMY_PREVIEW)
+    for child in scenario.get_node("Nodes/Enemies").get_children():
+        if child is not Enemy:
+            continue
+        var enemy := child as Enemy
+        assert_object(enemy.contact_weapon).override_failure_message(
+            "%s still hurts on touch" % enemy.name).is_null()
+        assert_int(enemy.weapon_holder.weapons.size()).override_failure_message(
+            "%s is still armed" % enemy.name).is_equal(0)
+
+
+## The stage clock is what would end stage 1 and spawn a boss twenty seconds into
+## the preview, so it is the one to pin: freeing the spawner alone is not enough.
+func test_enemy_preview_freezes_the_stage() -> void:
+    var scenario := await _run_scenario(ENEMY_PREVIEW)
+    var stage_manager: StageManager = scenario.get_node("StageManager")
+
+    assert_bool(stage_manager.stage_active).is_false()
+    assert_bool(stage_manager.enemy_spawner.spawn_active).is_false()
+    assert_bool(stage_manager.boss_spawner.spawn_active).is_false()
 
 
 ## Instantiates a scenario scene and lets `ScenarioSetup` finish applying it.

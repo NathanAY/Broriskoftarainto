@@ -6,6 +6,12 @@ class_name ItemIconGenerator
 
 const BASE_SIZE: Vector2 = Vector2(48, 48)
 
+## The canvas modifier / effect art is authored on. `AssetSizes` owns the number;
+## this is the vector shape the generator needs. A source larger than this is
+## source-resolution art - the file keeps its authored size and is minified onto
+## whatever plate the caller asks for, never re-exported down to it.
+const SOURCE_CANVAS: Vector2 = Vector2(AssetSizes.MODIFIER_ICON, AssetSizes.MODIFIER_ICON)
+
 ## `icon_size` is the square the composite is laid out in: the small icons the grid
 ## is drawn from scale to fill it, so a caller can render the same item at the
 ## size of its own plate instead of always getting BASE_SIZE.
@@ -51,10 +57,7 @@ static func _create_composite_texture(icons: Array[Texture2D], icon_size: Vector
     
     var count = icons.size()
     if count == 1:
-        var rect = TextureRect.new()
-        rect.texture = icons[0]
-        rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-        rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+        var rect := _make_icon_rect(icons[0])
         rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
         container.add_child(rect)
     else:
@@ -65,12 +68,24 @@ static func _create_composite_texture(icons: Array[Texture2D], icon_size: Vector
         container.add_child(grid)
         
         for icon in icons:
-            var rect = TextureRect.new()
-            rect.texture = icon
-            rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-            rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+            var rect := _make_icon_rect(icon)
             rect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
             rect.size_flags_vertical = Control.SIZE_EXPAND_FILL
             grid.add_child(rect)
             
     return container
+
+
+## One icon, scaled to fill whatever plate it is put in.
+##
+## A source-resolution icon is minified on every plate the UI draws, so it is
+## sampled with mipmaps - without them the downscale aliases and shimmers, which
+## is the same trap the portal art needed fixing for.
+static func _make_icon_rect(icon: Texture2D) -> TextureRect:
+    var rect := TextureRect.new()
+    rect.texture = icon
+    rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+    rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+    if icon != null and icon.get_width() > int(SOURCE_CANVAS.x):
+        rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+    return rect

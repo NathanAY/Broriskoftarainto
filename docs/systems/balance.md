@@ -141,9 +141,11 @@ Full design rules and a worked example in Section 5.
 | Loop 1 start | 1.0× | Starting weapon only |
 | Loop 1 end | 1.8 – 2.2× | ~4-5 items |
 | Loop 2 end | 3.0 – 3.5× | +1 weapon, ~8-10 items |
-| Loop 3 end (win) | 4.5 – 6.0× | ~12-14 items |
+| Loop 3 end (choice point) | 4.5 – 6.0× | ~12-14 items |
 
-Enemy HP grows ×5 across the run (`enemy_spawner.gd:14`, `10 → 30 → 50`). A build at 5× baseline damage clears loop 3 at the same time-to-kill it started with — that is the intended shape of the curve. If the player cannot reach 4.5×, the item budgets in §2.1 are too low; if they reach 20×, they are too high.
+**Enemy HP grows ×5 across the run** (`enemy_spawner.gd:14`, `10 → 30 → 50`). A build at 5× baseline damage clears loop 3 at the same time-to-kill it started with — that is the intended shape of the curve. If the player cannot reach 4.5×, the item budgets in §2.1 are too low; if they reach 20×, they are too high.
+
+**Loop 3 is no longer the end of the run.** Past it the player chooses between the final boss and another loop (`docs/systems/stage_manager.md`), so the band above describes the point where the *decision* is offered, not a hard ceiling. Every extra loop continues the same curve: enemy HP `10 + 20 × (loop − 1)` and the boss `10 + 250 × loop`, with no cap. The final boss is scaled `BossSpawner.final_boss_extra_loops` (2) loops past the loop that reached it, so a player who took no extra loops faces roughly the loop-5 boss — above the curve's top row but a smaller jump than clearing a whole extra loop. The weapon ramp stops at `BossSpawner.LOADOUT_LOOP_CAP` (4), so boss *threat* flattens there even though its health and damage keep climbing.
 
 ---
 

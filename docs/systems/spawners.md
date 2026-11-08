@@ -38,6 +38,10 @@ The table itself lives in the **gameplay scene**, not in `src/Systems/EnemySpawn
 ## Dependencies
 - `StageManager` to control `spawn_active` flags; `Enemy` scenes expect `Stats`, `WeaponHolder`, `ItemHolder` children.
 
+## Boss scaling
+- `spawn_boss()` spawns the loop's boss; `spawn_final_boss()` spawns the same scene scaled `final_boss_extra_loops` (2) loops past `current_loop`. `StageManager` calls the second only from its `STAGE_FINAL_BOSS` stage. Both go through one private `_spawn_boss(loop)`, so the guard against a double spawn and the arena clamp cannot drift between them.
+- `_apply_scaling(loop)` takes the loop to scale as an argument rather than reading `current_loop`, because the final boss is scaled as a *later* loop than the run is on.
+- Health and damage grow `health_growth_per_loop` / `damage_growth_per_loop` per loop value. The weapon ramp (2 boss shotguns per loop, 2 Pistols at iteration 2, a `SpreadShot` at iteration 3) stops at `LOADOUT_LOOP_CAP` (4), so a boss scaled far past a normal run carries a budgeted loadout instead of a pair of shotguns per loop. The shipped ramp is untouched through loop 4; only loops past it are affected.
+
 ## Known limitations / TODOs
-- `BossSpawner._apply_scaling` contains loop-based logic that iterates `for i in current_loop` which is suspicious (iterating an int); likely a bug/placeholder.
 - The spawn table is filled in by `src/Scenes/Game.tscn` only, so a scene that instances `src/Systems/EnemySpawner.tscn` directly gets the fallback enemy rather than the roster.

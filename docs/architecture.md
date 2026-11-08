@@ -24,6 +24,8 @@ Everything else is a reusable piece instanced into that tree:
 | `src/Systems/Enemy.tscn`, `src/Systems/EnemyBoss.tscn`, `src/Systems/EnemyBulwark.tscn`, `src/Systems/EnemyGunner.tscn`, `src/Systems/EnemySlimeling.tscn`, `src/Systems/EnemyLancer.tscn`, `src/Systems/EnemyToadstinker.tscn`, `src/Systems/EnemyBlink.tscn`, `src/Systems/EnemyShieldbearer.tscn`, `src/Systems/EnemySwarmer.tscn` | Enemy scenes. The basic enemy, the boss and the roster types; all of them take `Stats`, `Health`, `WeaponHolder`, `ItemHolder`, `EventManager` as children. An enemy type is a scene, not a class - see `docs/systems/enemies.md` |
 | `src/Systems/enemies/enemy_spawn_entry.gd` | One row of the regular spawner's table: the enemy scene, its weight, the loop it unlocks on, its pack size, and the loop and multipliers at which it turns elite. See `docs/systems/spawners.md` |
 | `src/Systems/ShopPortal.tscn` | The shop entry portal spawned after a boss dies |
+| `src/Systems/LoopChoicePortal.tscn` | The two end-of-run world portals offering the final boss or one more loop. Spawned by `StageManager` after the shop of loop 3 and of every extra loop. See `docs/systems/stage_manager.md` |
+| `src/Systems/PortalVortex.tscn` | The animated gate surface both portal scenes share: a quad with `portal_vortex.gdshader`, drawn *behind* the ring so the stone crops it. See `docs/systems/effects.md` |
 | `src/Systems/SpawnerModifier.tscn` | Death rewards (money, drops, explosion, death mark). Attached to spawners, despite the name — it is not a spawner. |
 | `src/Systems/stats/`, `src/Systems/weapon/`, `src/Systems/Items/` | Reusable subsystems |
 | `src/ui/` | Reusable UI scenes and scripts: cards, panels, tooltips, icon generator |
@@ -47,7 +49,7 @@ There is no separate `MainScene`; `Game.tscn` is the gameplay entry, and the men
 - `src/Systems/Items/*`: the `Item` resource, `ItemHolder`, `item_pickup`, `ItemBuilder`, and `ItemFactory`.
 - `src/Systems/Items/modifiers/*`: **effects** — Node behaviour modules an item attaches to an actor. See `docs/systems/modifiers.md`; this is the one naming inversion in the project.
 - `src/Systems/enemy_spawner.gd`, `src/Systems/boss_spawner.gd`: spawn logic and scaling. Both reach the enemy container with a relative `get_node("../../Nodes/Enemies")`, so their position in the `Game.tscn` tree is part of their contract.
-- `src/Scripts/stage_manager.gd`: stage transitions (enemy → boss → shop) and loop progression. A stage ends when `Nodes/Enemies.get_child_count() == 0`, which is why a corpse mid-death-animation still holds its stage open.
+- `src/Scripts/stage_manager.gd`: stage transitions (enemy → boss → shop → final boss) and loop progression, including the end-of-run final-boss / one-more-loop choice. A stage ends when `Nodes/Enemies.get_child_count() == 0`, which is why a corpse mid-death-animation still holds its stage open.
 
 ## How systems communicate
 

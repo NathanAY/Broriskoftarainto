@@ -22,6 +22,10 @@
 - `src/Systems/Items/item_holder.gd`: holds items; attaches modifier children to stats node
 - Effects live in `src/Systems/Items/modifiers/` (lowercase `modifiers`, lowercase everything else in that path). They are attached via `ItemHolder`, subscribe to events (`on_attack`, `on_hit`, `on_stat_changes`), and manipulate the holder's `Stats`/`Health` nodes
 
+## Run structure
+- `src/Scripts/stage_manager.gd`: `Wave -> Boss -> Shop` per loop. `StageManager.current_loop` has **no ceiling** — after loop 3 (`StageManager.FINAL_BOSS_LOOP`) the shop's **Go next** spawns two `LoopChoicePortal`s (`src/Systems/LoopChoicePortal.tscn`), and the player enters the one for the final boss or another loop. Only the final boss dying wins; the loop-3 boss opens a shop. See `docs/systems/stage_manager.md`
+- `src/Systems/boss_spawner.gd`: `spawn_boss()` for the loop's boss, `spawn_final_boss()` for the same scene scaled `final_boss_extra_loops` past it. The weapon ramp stops at `LOADOUT_LOOP_CAP` so a boss scaled far past the run does not grow without bound
+
 ## Enemies
 - `src/Scripts/Enemy.gd`: the script every enemy runs. An enemy *type* is a **scene**, not a class: `src/Systems/Enemy.tscn` (grunt), `src/Systems/EnemyBulwark.tscn` (roster row). The roster and how a row is added are in `docs/systems/enemies.md`
 - `src/Systems/enemy_spawner.gd`: spawns from a table of `EnemySpawnEntry` rows; the table itself is filled in `src/Scenes/Game.tscn`

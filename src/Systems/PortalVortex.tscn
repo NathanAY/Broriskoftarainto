@@ -1,0 +1,16 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" uid="uid://jin6p1dg3i52" path="res://src/Systems/portal_vortex.gd" id="1_vortex"]
+[ext_resource type="Shader" uid="uid://b4m3a3fds2e3u" path="res://src/Systems/portal_vortex.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vortex"]
+shader = ExtResource("2_shader")
+shader_parameter/hole_radius = 0.34
+
+[sub_resource type="QuadMesh" id="QuadMesh_vortex"]
+size = Vector2(500, 500)
+
+[node name="Vortex" type="MeshInstance2D"]
+material = SubResource("ShaderMaterial_vortex")
+mesh = SubResource("QuadMesh_vortex")
+script = ExtResource("1_vortex")

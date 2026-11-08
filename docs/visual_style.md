@@ -40,9 +40,9 @@ Every generated PNG must satisfy all of these or it will not load, or will rende
 | Constraint | Value |
 | --- | --- |
 | Background | Fully transparent, except menu background layers. Bing usually returns solid white or a fake checkerboard, so cut it out afterwards. |
-| Canvas | Exact size for the asset class (table below). Square for icons and sprites; wide for menu background layers. Export lossless PNG. |
+| Canvas | Exact size for the asset class (table below), **except** a world sprite that keeps its authored source and is scaled in-scene — see "Source-size art, scaled in-scene" below. Square for icons and sprites; wide for menu background layers. Export lossless PNG. |
 | Subject | One object, centered, filling roughly 75-85% of the canvas, with even padding on all four sides. |
-| Mipmaps | Off. No size limit. Fix alpha border on. |
+| Mipmaps | Off, with one exception: `src/Assets/portal.png`. It is authored at 500 and always drawn at 144, so mipmaps are what keep it from aliasing as the camera moves. Its `Sprite2D` sets `texture_filter` to `Linear with Mipmaps`; the default linear filter would not sample them even if present. Fix alpha border on. |
 | Naming | `snake_case.png`, must match the path in the table below exactly. |
 
 ## Asset classes
@@ -54,6 +54,7 @@ Every generated PNG must satisfy all of these or it will not load, or will rende
 | Modifier-published stat icon | `src/Assets/modifiers/<stat_key>.png` | 96x96 | 24x24 in stat lists, 36-64x36 in item cards |
 | Weapon icon | `src/Assets/weapons/<snake_case>.png` | 80x80 | 64x64 card, and in-world as a Sprite2D |
 | Enemy sprite | `src/Assets/enemies/<snake_case>.png` | 100x100 grunt, 225x225 boss | in-world, ~0.4x half-width is the collision radius |
+| Portal | `src/Assets/portal.png` | 500x500 source | in-world at 144: the `Sprite2D` is scaled 0.192 and the `Area2D` 1.5. It is **not** pre-downscaled — a 96px version read as soft, and this art is always minified ~3.5x (more when the camera zooms out), so its texture imports with mipmaps on. Its transparent hole is the mask for the vortex shader, see `docs/systems/effects.md` |
 | Character body | `src/Assets/character/potato.png` | ~100x100 | in-world, shared by every character |
 | Character face | `src/Assets/character/<id>/<id>_eyes.png` / `<id>_mouth.png` | 150x150 | overlaid on the shared body sprite |
 | Character icon | `src/Assets/character/<id>/<id>_icon.png` | 96x96 | 64x88 card |
@@ -92,6 +93,35 @@ The body carries no facial features at all — every character shares one body t
 - A character prompt that asks for a face produces art that cannot be used. If a generated body has eyes painted on it, the overlay eyes land on top of them.
 - A character prompt that asks for a portrait produces art that cannot be used *in-world*. A head-and-shoulders crop is the wrong shape entirely for a top-down arena. Character **bodies** and character **card icons** are different asset classes and need different prompts — the card icon wants the oval portrait frame, matching the existing art, and the body wants no frame and no face.
 - A character prompt that asks for arms or legs produces art that fights the rig. `legs.png` is a separate sprite positioned by the scene.
+
+## Source-size art, scaled in-scene
+
+The asset-class table above bakes the PNG to the canvas it is drawn at, because those classes are UI icons that never scale — a 96px icon in a 24px stat row stays as crisp as the file it was saved at. **Do not do that for a world sprite that renders at a stable on-screen size.** Keep the source resolution and let the scene scale it:
+
+```
+scale = drawn_size / source_size      set on the sprite (or its owning node)
+```
+
+Never re-export the PNG smaller to reach the drawn size.
+
+Worked example — the portal:
+
+| | |
+| --- | --- |
+| Source | `src/Assets/portal.png`, the untouched 500x500 original |
+| Node scale | `Sprite2D.scale = Vector2(0.192, 0.192)` |
+| Drawn at | 144px: 500 x 0.192, then the `Area2D`'s own 1.5 |
+| Why not bake | The first version was resized to 96x96. The sprite still draws it at 144, so the file was then *upscaled* 1.5x and the ring's cracks, rivets and hatching turned to mush. Scaling the 500px original down keeps what was drawn. |
+
+The rules that come with it:
+
+- **A world sprite that is minified needs mipmaps.** Set `mipmaps/generate=true` on the import *and* `texture_filter` to `Linear with Mipmaps` on the `Sprite2D`; the default linear filter does not sample mipmaps even when the texture carries them. Without both, a large source downscaled at runtime aliases and shimmers as the camera moves — the portal's camera follows the player and zooms 0.5-2.0, so it is minified every frame. `src/Assets/portal.png` is the only texture in the project with mipmaps; the icons do not need them because they are never scaled.
+- **Anything derived from the sprite has to read the texture size *and* the scale.** The portal's vortex quad takes both from the sibling `Sprite2D` in `_ready` (`src/Systems/portal_vortex.gd`), so the shader mask cannot drift from the art. A hardcoded 96 there would have been wrong the moment the source changed.
+- **Pin the relationship, not the number.** `test/Systems/test_portal_vortex.gd` asserts the vortex's drawn rect (`quad.size * vortex.scale`) equals the sprite's (`texture size * sprite.scale`), and measures the hole out of the PNG. Nothing in that suite hardcodes 500 or 144.
+- **Keep `fix_alpha_border` on.** It is what stops the transparent margin bleeding dark into the drawn edge once the source is filtered down.
+- **The cost is texture memory.** The source stays at its authored size, so this is cheap for something that exists a handful at a time — the portal is two or three nodes — and worth a second look before applying it to a sprite spawned in hordes.
+
+Keep the baked-canvas approach for anything that is a fixed-size UI graphic (stat, modifier and item icons) or whose filename is derived from a name, since those rows in the asset-class table are what the lookups expect. Every world sprite with a large generated or hand-painted source is a candidate for source-size + in-scene scaling.
 
 ## Palette
 
@@ -422,7 +452,7 @@ The icon templates no longer ask for a **cel-shaded highlight**. That phrase ask
 - **There is no per-character body.** Every character shares `src/Assets/character/potato.png`, hardcoded in `src/Systems/Character.tscn`. Generated bodies exist but are not wired, and adding them means changing the scene to point at a per-id texture. Not started.
 - **No arena props.** `src/Assets/tiles/` is a single tile sheet. A generation run intended for the mid layer ignored the empty-upper-two-thirds instruction and produced a clean prop sheet instead — crates, dry trees, barrels, rocks, fence panels — which is on-style and currently the only arena decoration the project has. Worth promoting to a real asset class.
 - **No custom font.** Everything uses the Godot built-in. Brotato used `Anybody-Medium.ttf` if a font is ever needed.
-- **No shaders anywhere in the project.**
+- **One shader exists: the portal vortex.** `src/Systems/portal_vortex.gdshader` draws the swirling gate surface inside the portal ring. It is a `canvas_item` shader on a `MeshInstance2D` quad, masked to the hole in the ring art and tinted by the portal's `modulate`. Nothing else in the project uses a shader. See `docs/systems/effects.md`.
 - **The main menu title will lose legibility** against the far layer's pale sky, now that the dark full-rect scrim has been deleted. The fix is a scrim behind the `VBoxContainer` only, not a full-rect one.
 - **Mined Brotato art and generated Borderlands art will not match.** The decompile is flat with almost no texture; the direction above is painterly. Every asset in `src/Assets/` today is mined, so the project currently has no art in its own style.
 

@@ -63,7 +63,7 @@ These hold the numbers above. If one changes, re-derive the tables rather than t
 
 - `Stats.DEFAULT_STATS` (`src/Systems/stats/stats.gd:29-44`) is the reference frame for every WB and EHP number in the rulebook. If a base stat changes, rulebook §2.3's targets and §4.6's TTK bands move with it.
 - Enemy and boss scaling numbers come from the `@export` defaults on `src/Systems/enemy_spawner.gd` and `src/Systems/boss_spawner.gd` as currently set in the scene files. Those are exports, so a scene override changes the curve and invalidates rulebook §4.6.
-- `current_loop` on the boss spawner scales from `1` while the enemy spawner scales from `0` (`src/Systems/boss_spawner.gd:58` vs `src/Systems/enemy_spawner.gd:184`). Boss HP is `10 + 250 × loop`, enemy HP is `10 + 20 × (loop − 1)`. That off-by-one is intentional-looking but is worth confirming before anyone tunes against rulebook §4.6.
+- `current_loop` on the boss spawner scales from `1` while the enemy spawner scales from `0` (`src/Systems/boss_spawner.gd` `_apply_scaling()` vs `src/Systems/enemy_spawner.gd` `_apply_stage_scaling()`). Boss HP is `10 + 250 × loop`, enemy HP is `10 + 20 × (loop − 1)`. That off-by-one is **deliberate**: the boss is the loop's set-piece and may sit above its trash. It is now load-bearing for the end-of-run choice as well — `spawn_final_boss()` passes `current_loop + final_boss_extra_loops` to the same `_apply_scaling(loop)`, so the final boss is exactly two loops of growth above the loop that reached it.
 
 ## 4. Keeping this file honest
 

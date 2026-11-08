@@ -16,6 +16,11 @@ var _show_stage_scaleing: bool = false
 func _process(_delta: float) -> void:
     if !stage_manager:
         return
+    # The final boss is the run's last fight and runs on no stage clock, so it
+    # gets a name instead of a countdown that would never move.
+    if stage_manager.current_stage == StageManager.STAGE_FINAL_BOSS:
+        stageTimer.text = "FINAL BOSS"
+        return
     var current_staget = "Loop " + str(stage_manager.current_loop)
     var stage_time_elapsed = stage_manager.stage_time_elapsed
     var stage_duration = str(int(stage_manager.stage_duration - stage_time_elapsed))

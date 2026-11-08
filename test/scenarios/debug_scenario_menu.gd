@@ -26,7 +26,7 @@ const SCENARIOS := [
 	},
 	{
 		"title": "Loop 3",
-		"description": "Endgame scaling: enemies spawn already buffed for loop 3. Clearing the boss wins the run.",
+		"description": "Endgame scaling: enemies spawn already buffed for loop 3. Clearing the boss opens the final boss / one more loop choice.",
 		"scene": "res://test/scenarios/scenario_loop_three.tscn",
 	},
 	{

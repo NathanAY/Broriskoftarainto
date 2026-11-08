@@ -1,7 +1,8 @@
-[gd_scene format=3 uid="uid://ygv8thab1ic1"]
+[gd_scene load_steps=5 format=3 uid="uid://ygv8thab1ic1"]
 
 [ext_resource type="Script" uid="uid://b7fox0cigx6vr" path="res://src/Systems/shop_portal.gd" id="1_whq54"]
-[ext_resource type="Texture2D" uid="uid://cxdgwumfnplbl" path="res://src/Assets/tractor_icon.png" id="2_whq54"]
+[ext_resource type="PackedScene" path="res://src/Systems/PortalVortex.tscn" id="2_vortex"]
+[ext_resource type="Texture2D" uid="uid://b3lkqt1mjh0l7" path="res://src/Assets/portal.png" id="3_sprite"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_qcnxv"]
 radius = 48.0937
@@ -10,8 +11,12 @@ radius = 48.0937
 scale = Vector2(1.5, 1.5)
 script = ExtResource("1_whq54")
 
+[node name="Vortex" parent="." instance=ExtResource("2_vortex")]
+
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_whq54")
+texture = ExtResource("3_sprite")
+scale = Vector2(0.192, 0.192)
+texture_filter = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_qcnxv")

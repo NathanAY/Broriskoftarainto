@@ -4,10 +4,11 @@ Purpose
 - Every visual the game spawns to answer "what just happened" — impact sparks, blast fireballs, damage flashes, death shards — and the shared rules for authoring one.
 
 Key scripts / scenes
-- Two families, and the split is deliberate rather than historical:
+- Three families, and the split is deliberate rather than historical:
   - **Manager-attached** (`src/Scenes/effects/`, `src/Scenes/particles/particle_effect_manager.gd`) — long-lived nodes that live as children of an *actor*, subscribe to that actor's `EventManager`, and spawn something per event. `HitFlashManager`, `TextureBurstManager`, `ParticleEffectManager`.
   - **One-shot emitters** (`src/Scenes/particles/area_damage_burst.tscn`, `src/Scenes/particles/explosion_burst.tscn`) — stateless scenes spawned *by* the gameplay node that caused the event, parented to it, and self-freeing.
-- Nothing in either family contains combat logic. A manager reacts to an event that already happened; it never decides whether something happened.
+  - **Attached surfaces** (`src/Systems/PortalVortex.tscn`) — a long-lived visual that belongs to one world object rather than to an event. The only one so far is the portal vortex, and it is a shader rather than particles; see its own section below.
+- Nothing in any of them contains combat logic. A manager reacts to an event that already happened; it never decides whether something happened.
 
 Data flow
 - Triggering: all three managers subscribe on `EventManager` events (`before_take_damage`, `after_take_damage`, `on_death`), so they are downstream of `Health` and inherit its dead-check for free — a corpse plays no further effects. See `docs/systems/event_manager.md`.
@@ -84,9 +85,28 @@ Tests assert structure, not looks — no suite can tell you a blast reads as fir
 
 The `frames` argument is the third parameter and matters: the shot tool's built-in settle lands on the target's *first* frame, which for a sub-second particle burst is the least representative moment available. `test/tools/explosion_preview.tscn` spawns a fresh row of blasts every few frames at three radii, so any frame count leaves blasts at a spread of ages on screen at once.
 
+## The portal vortex (`portal_vortex.gdshader`, `PortalVortex.tscn`)
+
+The portal is one ring sprite with a **transparent hole** in the middle, and the gate surface inside that hole is the project's only shader.
+
+- **Why a shader rather than particles.** The effect is coherent rotation: a spiral turning as one surface. A `GPUParticles2D` can only produce many independently moving points, which reads as sparks or fireflies rather than a vortex, and it cannot fill the hole evenly. The shader gets the circular mask for free as well.
+- **Why a child drawn first, and why `COLOR *=`.** `LoopChoicePortal` writes `modulate = tint` in `_ready` — red for the final boss, pale blue for one more loop — and a child CanvasItem inherits that multiply. The shader's last line is `COLOR *= vec4(rgb, mask)`, which is what makes the vortex take the portal's colour instead of staying neutral. The vortex is the **first** child so the ring `Sprite2D` draws over it: the quad is square and wider than the gate, and the stone is what crops it.
+- **The gate surface is sized from the sprite, not authored a second time.** The ring art is authored at 500x500 and the scene scales the `Sprite2D` by 0.192, so the quad copies both the sprite's texture size and its scale in `_ready` (`portal_vortex.gd`). The `QuadMesh` is duplicated first: a scene instance shares its sub-resources, so two loop portals would otherwise write the same mesh. Same trap as the shared `ParticleProcessMaterial` under rule 1 above.
+- **The mask radius is tied to the art, and the hole is not centred.** `hole_radius` is 0.34 UV. The shipped hole reaches 0.292 from the canvas centre at its farthest axis — it sits 6.5px above the middle of the 500px source, which is why a mask sized to the hole's own radius left a one-pixel line at the top of the ring. 0.34 tucks it ~0.048 under the stone there and stays inside the ring's silhouette (the stone band is ~86px thick), so the disc's own edge never emerges. `test/Systems/test_portal_vortex.gd` measures the PNG along four axes and fails if the mask stops covering the hole plus a tuck, or starts poking out from behind the stone.
+- **Both portals share the art and the shader.** `ShopPortal.tscn` and `LoopChoicePortal.tscn` each instance `PortalVortex.tscn`; only the loop portals carry a tint.
+- **`src/Assets/portal.png` is not pre-downscaled, and it is the one texture in the project with mipmaps.** A 96px bake looked soft because the sprite is then upscaled 1.5x by the `Area2D`; the 500px source scaled in-scene keeps the crafted detail. It is minified every frame (more when the camera zooms out), so mipmaps + `texture_filter = Linear with Mipmaps` on the `Sprite2D` are what stop it aliasing.
+
+Visual check — the vortex animates, so pass extra frames:
+
+```
+.\run_scene_shot.bat res://test/tools/portal_preview.tscn res://portal_shot.png 30
+```
+
+`test/tools/portal_preview.tscn` shows the final-boss (red), extra-loop (blue) and shop (untinted) portals side by side on arena-floor tan.
+
 ## Known limitations / TODOs
 
 - No pooling. `Explosion` holds a five-layer burst for ~0.9s and `AreaDamageBurst` runs per weapon tick, so every spawn is a fresh node plus its materials. Fine at current rates; this is the first thing to pool if effects ever stack up.
-- The explosion's sprites break from the project's art style on purpose (rule 3). A Borderlands-inked explosion needs a shader or a re-think of the art direction, not a different gradient.
+- The explosion's sprites break from the project's art style on purpose (rule 3). A Borderlands-inked explosion needs a shader or a re-think of the art direction, not a different gradient. The portal vortex is the project's only shader so far, so that route is now open.
 - `HitFlashManager` and `ParticleEffectManager` scale their effect off damage taken; there is no screen shake, hit-stop, or camera punch anywhere in the project, and no impact variety — every hit on a given weapon looks the same.
 - `particle_effect_manager.gd` uses `@onready` to reach its parent's `EventManager`, so it reads as `null` while detached. It is only ever used as a scene child, so this has not been fixed.

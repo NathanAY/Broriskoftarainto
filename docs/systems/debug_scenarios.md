@@ -119,4 +119,4 @@ A scenario is the scene, not a set of globals set somewhere earlier:
 - **The slider is linear, so the low end is cramped.** 0.1x to 1.0x is 5% of the travel. Worth a log scale if anyone actually works at the bottom of the range.
 - **A scenario is not a save.** It builds a starting state; it does not reproduce a specific run, so balance numbers read off it are indicative, not a replay.
 - **Sandbox enemies are not stage-scaled.** Deliberate, but it means a sandbox number is not what the same loop would field: the panel is for one enemy, not for a wave.
-- No scenario covers the shop phase (stage 3) or the win screen directly - loop 3 reaches the win screen by beating its boss.
+- No scenario covers the win screen directly, and none reaches the loop-choice portals. The loop-3 scenario clears its boss into the shop; **Go next** there spawns the choice. To reach it from a test without playing the shop, `StageManager.go_to_stage(STAGE_SHOP)` followed by `_on_shop_next_pressed()` is the seam (`test/Systems/test_loop_choice.gd` uses it).

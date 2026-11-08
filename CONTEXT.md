@@ -55,13 +55,20 @@ One Stage-1 enemy period: timed spawning then kill-all mop-up.
 _Avoid_: stage (when you mean this period), round
 
 **Stage**:
-The Wave → Boss → Shop triple orchestrated by `StageManager`.
+The Wave → Boss → Shop triple orchestrated by `StageManager`. Plus a fourth, `STAGE_FINAL_BOSS`, reached only through the end-of-run choice.
 _Avoid_: wave, loop
 
 **Loop**:
 One full difficulty round, incremented on shop-exit (`StageManager.current_loop`).
-Higher loops raise `target_enemy_count` and scale enemy/boss stats.
+Higher loops raise `target_enemy_count` and scale enemy/boss stats. Past
+`FINAL_BOSS_LOOP` (3) the player chooses between the final boss and one more loop,
+so the loop count has no ceiling.
 _Avoid_: stage, wave
+
+**Final boss**:
+The run's win condition: an ordinary boss scaled `final_boss_extra_loops` past the
+loop that reached it. The loop-3 boss is *not* it — clearing that opens a shop.
+_Avoid_: last boss, loop-3 boss
 
 **Spawn pacing**:
 How fast `EnemySpawner` refills the arena: base interval, empty-arena refill

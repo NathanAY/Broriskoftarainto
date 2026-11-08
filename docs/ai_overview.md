@@ -2,7 +2,7 @@
 
 ## What this is
 - Genre: Top-down arena roguelite (wave-based shooter with boss and shop loops).
-- Core loop: Clear enemy waves → defeat boss → enter shop/upgrade phase → repeat with increased difficulty.
+- Core loop: Clear enemy waves → defeat boss → enter shop/upgrade phase → repeat with increased difficulty → after loop 3, choose the final boss (win) or another loop.
 - Inspiration: Brotato-style item/weapon stacking and fast-paced wave combat.
 - Engine: Godot 4.6. Stage: early prototype — the loop is playable, balance is not (see `docs/systems/balance_audit.md`).
 
@@ -39,7 +39,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | `options.md` | The options panel: window mode, volumes, show-stats, and why the values live in an autoload rather than on the menu |
 | `player.md` | The runtime player entity and its scene |
 | `spawners.md` | `enemy_spawner.gd`, `boss_spawner.gd`, spawn pacing |
-| `stage_manager.md` | Wave → boss → shop orchestration and loop progression |
+| `stage_manager.md` | Wave → boss → shop orchestration, loop progression, and the end-of-run final-boss / one-more-loop choice |
 | `stats.md` | Stat storage, modifiers, conditions, modifier-owned (provided) stats |
 | `ui_shop_portal.md` | Shop, item cards, tooltips, the tone/colour system, the HUD's buff/debuff tiles |
 | `weapons.md` | `BaseWeapon`, weapon scripts, built-in weapon effects, weapon resources |

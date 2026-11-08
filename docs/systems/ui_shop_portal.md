@@ -50,7 +50,7 @@ Data flow
   2. **`fade_out_and_free()` is asynchronous** (0.15s tween before `queue_free()`), so a taken/sold/bought card can still be a live child when `_check_phase_progression()` runs. `ShopItemCard.is_resolving()` marks it, and `ShopMenu._active_item_count()` skips resolving cards, queued-for-deletion children and empty slots. Counting raw children leaves the shop permanently stuck in phase 1 with no offers and no reroll button.
 - Inputs: `StageManager` spawns portal and possibly connects shop menu signals.
 - Processing: UI selection in starter menu writes `GlobalGameState.starting_weapons` and `starting_items` and starts the game scene; shop menu connects back to `StageManager` via signal to continue.
-- Outputs: triggers `StageManager.start_new_loop()` when player accepts the shop choices.
+- Outputs: triggers `StageManager.start_new_loop()` when player accepts the shop choices. Past `StageManager.FINAL_BOSS_LOOP` the same signal spawns the two `LoopChoicePortal`s instead, so the shop reports the exit and the run decides what it means — see `docs/systems/stage_manager.md`.
 
 Dependencies
 - `GlobalGameState` autoload (assumed), `ShopMenu` scene, `StageManager` connections.

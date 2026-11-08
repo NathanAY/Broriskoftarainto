@@ -271,7 +271,8 @@ constants — see "Numbers are data" below.
 - Sprite: grey goblin, top right of the sheet.
 - Movement behaviour: the existing orphan,
   `src/Systems/movement/bahaviour/ChaseDistanceMovementBehaviour.tscn`, with
-  `stop_distance` set to roughly a third of the pistol's range.
+  `stop_distance` set to most of the pistol's range, so it shoots from a distance
+  instead of closing to touch range.
 - Weapon: `src/Resources/weapons/Pistol.tres` equipped from the scene, with a
   `contact_weapon` of null so it does not also body-check.
 - **Placement trap:** do **not** drop the enemy weapon `.tres` directly into
@@ -296,11 +297,15 @@ constants — see "Numbers are data" below.
 >
 > The row is config on top of 0.1 and 0.2, as planned: `contact_weapon` is null,
 > the shared `src/Resources/weapons/Pistol.tres` sits in the `WeaponHolder`, and
-> `ChaseDistanceMovementBehaviour` walks it in to `stop_distance` 140 - about a
-> third of the pistol's 1.33 m reach. Because it reuses the existing pistol
+> `ChaseDistanceMovementBehaviour` walks it in to `stop_distance` 280 - about two
+> thirds of the pistol's 1.33 m reach. Because it reuses the existing pistol
 > instead of adding a file to `src/Resources/weapons/`, the shop-placement trap
 > did not come up; an enemy weapon that needs its own numbers would still go in
 > a subdirectory beside `boss/`.
+>
+> **Rebalanced:** the shipped value was 140, which put the Gunner nearly in touch
+> range before it fired. It is now 280, which doubles the range it shoots from and
+> still leaves the firing distance inside the pistol's reach.
 >
 > **Three things the row turned up.**
 >

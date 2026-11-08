@@ -83,4 +83,4 @@ libraries/ = ExtResource("11_r1xls")
 autoplay = &""
 
 [node name="MovementBehaviour" parent="." instance=ExtResource("12_pdagp")]
-stop_distance = 140.0
+stop_distance = 280.0

@@ -129,8 +129,9 @@ const CHASE_DISTANCE := 400.0
 const GUNNER_FRAMES := 80
 
 ## Where the Gunner's target starts, in pixels: far outside its firing distance,
-## so it has to walk before it can hold the line.
-const GUNNER_START_DISTANCE := 320.0
+## so it has to walk before it can hold the line. It is outside the pistol's
+## reach as well, so the walk-in is not a one-frame nudge.
+const GUNNER_START_DISTANCE := 480.0
 
 ## Physics frames a shot needs to leave the Gunner and reach a target standing
 ## in its reach. The pistol fires at 0.8 attacks a second and its projectile

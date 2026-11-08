@@ -10,6 +10,7 @@ This document explains the new character system (data, UI, and integration point
 
 ## Files of interest
 - `src/Systems/characters/CharacterData.gd` — Resource class for characters.
+- `src/Systems/characters/CharacterSprites.gd` — composes a character from its art parts for both the in-world rig and the UI portrait (see "Character art" below).
 - `src/Assets/character/<id>/<Id>.tres` — character definitions.
 - `src/Scenes/menu/CharacterSelect.tscn` + `src/Scenes/menu/character_select.gd` — character selection UI: a top `DetailPanel` showing the selected character, above a compact card grid with a `ScrollContainer` for extra rows, so a roster well past the current five still fits. A shared `TooltipUi` node shows the same stats on card hover, so details are visible without selecting.
 - `src/ui/CharacterDetailPanel.tscn` + `src/ui/character_detail_panel.gd` (`class_name CharacterDetailPanel`) — the top panel. It inherits the shared `src/ui/ItemDisplayPanel.tscn` scene (the same base as `ShopItemCard` and `TooltipUi`) at a larger scale, so the character screen and the shop cannot drift apart visually. It adds nothing of its own beyond content: `set_character_display(CharacterData)` is an alias for `set_resource()`.
@@ -30,6 +31,7 @@ This document explains the new character system (data, UI, and integration point
   - **PackedScene** — a behavior: a modifier scene from `Systems/Items/modifiers/*.tscn`, instantiated and wired to the character by `BaseModifier.attach` (e.g. `ArmorModifier.tscn`).
 - `starting_items` (Array[Item]): `Item` resources equipped at spawn via the `ItemHolder`.
 - `starting_weapons` (Array[BaseWeapon]): `BaseWeapon` resources (e.g. `res://src/Resources/weapons/Fist.tres`) equipped at spawn via the `WeaponHolder`.
+- `body`, `eyes`, `mouth` (Texture2D): the layered art parts, drawn bottom to top. See "Character art" below.
 
 Example (pseudo):
 ```
@@ -37,6 +39,24 @@ display_name = "Brawler"
 base_stats = {"health": 35.0, "movement_speed": 0.35, "damage": 0.8}
 modifiers = [{"armor": {"flat": 4}}, <ArmorModifier.tscn>, {"attack_speed": {"percent": 0.2}}]
 ```
+
+## Character art
+
+A character is **not one image**. It is a blank body plus face overlays, all authored on the same 150x150 canvas, so a face from one character can be dropped onto another character's body:
+
+```
+body   src/Assets/character/potato.png          (shared default body, no face)
+eyes   src/Assets/character/<id>/<id>_eyes.png
+mouth  src/Assets/character/<id>/<id>_mouth.png
+```
+
+`CharacterSprites` is the one implementation of the order and fallback:
+
+- `layers(CharacterData)` returns `[slot, texture]` bottom to top, skipping a missing overlay. A character with no `body` falls back to `CharacterSprites.DEFAULT_BODY` (`src/Assets/character/potato.png`), never to a baked icon.
+- `apply_to_rig()` puts the body on `Node2D/Sprite2D` and adds one child `Sprite2D` per overlay, named after its slot. The overlays inherit `flip_h`, the idle/move scale animation and the hit-flash `modulate` from the parent.
+- `make_icon()` builds the UI portrait from the same stack, one `TextureRect` per layer. Every layer shares one crop: the square union of their opaque pixels, so the face stays on the body while the transparent margins around the art are removed. Without that crop the body fills under half its 150x150 canvas and the card portrait reads tiny. `CharacterDetailPanel` also asks for its full 88px plate via `_icon_size()`.
+
+Reuse is just pointing two `.tres` files at the same texture. `src/Assets/character/<id>/<id>_icon.png` is no longer drawn by either path; a character with no parts still renders the shared body.
 
 ## How selection and application works
 1. Player picks a card in `CharacterSelect` (first character is pre-selected so the detail panel is never empty); the detail panel shows the full `CharacterTooltip` stats. On confirm the script sets `GlobalGameState.starting_character = "res://src/Assets/character/ranger/Ranger.tres"` (string path).

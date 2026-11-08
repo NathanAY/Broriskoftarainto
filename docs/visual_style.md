@@ -95,9 +95,9 @@ Every generated PNG must satisfy all of these or it will not load, or will rende
 | Weapon icon | `src/Assets/weapons/<snake_case>.png` | 80x80 | 64x64 card, and in-world as a Sprite2D |
 | Enemy sprite | `src/Assets/enemies/<snake_case>.png` | 100x100 grunt, 225x225 boss, **source-size** (`src/Assets/enemies/lancer.png` is 512) | in-world at `AssetSizes.ENEMY_SPRITE` / `AssetSizes.BOSS_SPRITE`; ~0.4x half-width is the collision radius |
 | Portal | `src/Assets/portal.png` | 500x500 source | in-world at 144: the `Sprite2D` is scaled 0.192 and the `Area2D` 1.5. It is **not** pre-downscaled — a 96px version read as soft, and this art is always minified ~3.5x (more when the camera zooms out), so its texture imports with mipmaps on. Its transparent hole is the mask for the vortex shader, see `docs/systems/effects.md` |
-| Character body | `src/Assets/character/potato.png` | ~100x100 | in-world, shared by every character |
-| Character face | `src/Assets/character/<id>/<id>_eyes.png` / `<id>_mouth.png` | 150x150 | overlaid on the shared body sprite |
-| Character icon | `src/Assets/character/<id>/<id>_icon.png` | 96x96 | 64x88 card |
+| Character body | `src/Assets/character/potato.png` | 150x150 | in-world and in UI, the shared default body |
+| Character face | `src/Assets/character/<id>/<id>_eyes.png` / `<id>_mouth.png` | 150x150 | overlaid on the body; each `.tres` names its own parts |
+| Character portrait | composed from the body + face parts | same canvas as the body | 64x64 card, larger detail panel |
 | Menu background | `src/Assets/menu/parallax_far.png` | 1564x1042 | full-bleed, cover-fitted, static |
 
 **There is no buff or debuff art, and none is needed.** `BuffTile` has no PNG of its own: it shows the *stat's* icon, from the same `src/Assets/stats/<stat_key>.png` a stat row uses, composited through `ItemIconGenerator.make_composite_icon()` when the effect touches two or more stats. A buff is identified by which stat it moves, not by a picture of the buff, so a buff.png / debuffsource.png pair would duplicate what the stat icon already says. (Neither name is backticked on purpose: they do not exist, and `test/test_doc_links.gd` checks every backticked bare filename against the project.)
@@ -113,20 +113,28 @@ The two binding rules:
 
 Fallbacks when a lookup fails: `src/Assets/stats/_default.png` and `src/Assets/modifiers/_default.png`. A missing `.import` sidecar reads as exactly the same failure as a missing file, so run `godot --headless --path . --import` after adding art by script rather than from the editor.
 
-Weapons and characters use an explicit `sprite` / `small_icon` field on the `.tres`, so the filename only needs to be `snake_case` and readable. An empty weapon `sprite` falls back to `src/Assets/weapons/_default.png`.
+Weapons use an explicit `sprite` field on the `.tres`, so the filename only needs to be `snake_case` and readable. An empty weapon `sprite` falls back to `src/Assets/weapons/_default.png`. Characters use `body` / `eyes` / `mouth` instead of a single image — see the rig below.
 
 ### The character rig, and why character art must have no face
 
-The playable character is **not one sprite**. `src/Systems/Character.tscn` composes it:
+The playable character is **not one sprite**. `CharacterData` names the layers, and `src/Systems/characters/CharacterSprites.gd` composes them for both the in-world rig and the UI portrait:
 
 ```
-Node2D/Sprite2D          src/Assets/character/potato.png   (blank body, heavy outline)
-  +-- eyes               src/Assets/character/<id>/<id>_eyes.png
-  +-- mouth              src/Assets/character/<id>/<id>_mouth.png
+CharacterData.body       src/Assets/character/potato.png   (blank body, heavy outline)
+CharacterData.eyes       src/Assets/character/<id>/<id>_eyes.png
+CharacterData.mouth      src/Assets/character/<id>/<id>_mouth.png
+```
+
+`CharacterInitializer` calls `CharacterSprites.apply_to_rig()`, which puts the body on `Node2D/Sprite2D` and adds one child `Sprite2D` per overlay, so the rig is:
+
+```
+Node2D/Sprite2D          body texture
+  +-- eyes               eyes texture
+  +-- mouth              mouth texture
 Node2D/Legs/LegL, LegR   src/Assets/character/legs.png     (hframes = 2, behind the body)
 ```
 
-The body carries no facial features at all — every character shares one body texture and all identity comes from the two overlays. This is deliberate: it means one body can carry many expressions, and a new expression is a 150x150 sprite rather than a new character.
+The body carries no facial features at all. Identity comes from the overlays, and the same texture can be named by several characters: pointing two `.tres` files at one body (or one face) is the reuse mechanism. A new expression is a 150x150 sprite, not a new character. `src/Assets/character/<id>/<id>_icon.png` is **not** drawn — an empty body falls back to the shared potato body, not to a baked icon.
 
 **Consequences for prompts, all of them learned the hard way:**
 
@@ -494,7 +502,7 @@ The icon templates no longer ask for a **cel-shaded highlight**. That phrase ask
 3. Run the `generate-image` skill. It saves to `~/Downloads` as `<prompt-slug>.jpg`.
 4. Post-process outside the repo: cut out the background, resize to the exact canvas, export lossless PNG. For a **menu background** this is a simple resize to 1564x1042 (no keying or overscan needed since it's a single static layer). For a **sprite sheet** this step is not scripted yet. It needs per-cell bounding-box detection rather than a fixed slice, per "Sprite sheets" above.
 5. Move into the repo at the exact path from the asset-class table. Godot generates the `.import` on next open.
-6. Wire the asset up: stat and modifier icons are found by filename, weapons and characters need the `sprite` / `small_icon` field set on the `.tres`.
+6. Wire the asset up: stat and modifier icons are found by filename; weapons need the `sprite` field on the `.tres`; characters need `body` / `eyes` / `mouth`.
 7. Verify visually. Item icons only appear in `res://test/tools/shop_ui_preview.tscn`:
 
    ```
@@ -519,7 +527,7 @@ The icon templates no longer ask for a **cel-shaded highlight**. That phrase ask
 - **9 icons in `src/Assets/modifiers/` are orphaned**, because their names do not match any scene basename: `armormode` (a typo for `armormodifier`), `coil_icon`, `dynamite_icon`, `fairy_icon`, `glass_cannon_icon`, `rocket`, `shuriken`, `torch`. Either rename them to the lowercase scene basename or delete them. "Orphaned" means only that `ItemIconGenerator` will not find them; note that a stat-key icon in this folder is deliberately *not* scene-named, so `flat_regen_per_second.png` belongs to the rule above and is not one of these.
 - `Thorns.tres` has no `sprite` at all.
 - `DeathAura.tres` borrows `circular_saw.png`, which suits the aura behaviour but is not a Death Aura icon of its own.
-- **There is no per-character body.** Every character shares `src/Assets/character/potato.png`, hardcoded in `src/Systems/Character.tscn`. Generated bodies exist but are not wired, and adding them means changing the scene to point at a per-id texture. Not started.
+- **There is no per-character body yet.** Every character names `src/Assets/character/potato.png` in its own `.tres` (`CharacterData.body`), so a generated body only needs to be assigned there — the rig and the UI portrait pick it up with no code change. The generated body sheets are not cut yet.
 - **No arena props.** `src/Assets/tiles/` is a single tile sheet. A generation run intended for the mid layer ignored the empty-upper-two-thirds instruction and produced a clean prop sheet instead — crates, dry trees, barrels, rocks, fence panels — which is on-style and currently the only arena decoration the project has. Worth promoting to a real asset class.
 - **No custom font.** Everything uses the Godot built-in. Brotato used `Anybody-Medium.ttf` if a font is ever needed.
 - **One shader exists: the portal vortex.** `src/Systems/portal_vortex.gdshader` draws the swirling gate surface inside the portal ring. It is a `canvas_item` shader on a `MeshInstance2D` quad, masked to the hole in the ring art and tinted by the portal's `modulate`. Nothing else in the project uses a shader. See `docs/systems/effects.md`.

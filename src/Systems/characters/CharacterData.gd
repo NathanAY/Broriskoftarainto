@@ -40,5 +40,17 @@ class_name CharacterData
 # Starting weapons equipped on spawn (e.g. Fist for the Brawler)
 @export var starting_weapons: Array[BaseWeapon] = []
 
-@export var small_icon: Texture2D    # assign in .tres
-@export var sprite: Texture2D    # assign in .tres
+# The character is a stack of layered sprites, not one baked image. All parts
+# share the body canvas (150x150 today) and are drawn bottom to top:
+#
+#   body (a blank body with no face)
+#   +-- eyes
+#   +-- mouth
+#
+# A character that leaves `body` empty gets the shared
+# `src/Assets/character/potato.png`. Pointing two characters at the same texture
+# is how a part is reused; the face overlays are what make them look different.
+# `CharacterSprites` is the one place the order and fallback are implemented.
+@export var body: Texture2D
+@export var eyes: Texture2D
+@export var mouth: Texture2D

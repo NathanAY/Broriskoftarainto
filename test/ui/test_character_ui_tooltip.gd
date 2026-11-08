@@ -15,7 +15,7 @@ const EFFECT_SCENE := "res://src/Systems/Items/modifiers/ProjectileBounceModifie
 const TOOLTIP_SCENE := "res://src/ui/TooltipUi.tscn"
 const DETAIL_SCENE := "res://src/ui/CharacterDetailPanel.tscn"
 const SOLDIER := "res://src/Assets/character/soldier/Soldier.tres"
-const SOLDIER_ICON := "res://src/Assets/character/soldier/soldier_icon.png"
+const SOLDIER_EYES := "res://src/Assets/character/soldier/soldier_eyes.png"
 
 
 func _build_character() -> Character:
@@ -246,26 +246,54 @@ func test_character_icon_is_built_and_name_is_human_readable() -> void:
     assert_str(ItemDisplayPanel.display_name(character)).is_equal("Soldier")
     assert_bool(ItemDisplayPanel.display_name(character).contains("res://")).is_false()
 
-    # ...and the generic path built an empty Control, so the icon plate was blank.
+    # ...and the portrait is the same layered stack the in-world rig draws:
+    # body first, then the face overlays - never one baked `_icon.png`.
     var icon := ItemDisplayPanel.make_icon(character)
     assert_that(icon).is_not_null()
-    var found := _find_texture(icon)
-    assert_that(found).is_not_null()
-    assert_that(found.texture).is_equal(character.small_icon)
+    var textures := _find_textures(icon)
+    assert_int(textures.size()).is_equal(CharacterSprites.layers(character).size())
+    assert_that(_atlas(textures[0]).atlas).is_equal(character.body)
+    assert_that(_atlas(textures[1]).atlas).is_equal(character.eyes)
+    assert_that(_atlas(textures[2]).atlas).is_equal(character.mouth)
+    # One shared crop keeps the face on the body while removing the empty
+    # margins that made the portrait tiny in the plate.
+    var region := _atlas(textures[0]).region
+    assert_that(_atlas(textures[1]).region).is_equal(region)
+    assert_that(_atlas(textures[2]).region).is_equal(region)
     icon.free()
 
 
-func test_character_falls_back_to_sprite_then_placeholder() -> void:
-    var sprite_only := CharacterData.new()
-    sprite_only.sprite = load(SOLDIER_ICON)
-    var from_sprite := ItemDisplayPanel.make_icon(sprite_only)
-    assert_that(_find_texture(from_sprite).texture).is_equal(sprite_only.sprite)
-    from_sprite.free()
+func test_character_portrait_crops_the_canvas_margins() -> void:
+    var character: CharacterData = load(SOLDIER)
+    var icon := ItemDisplayPanel.make_icon(character, Vector2(88, 88))
+    var textures := _find_textures(icon)
+    var region := _atlas(textures[0]).region
+    var body_size: Vector2 = character.body.get_size()
+    # The body fills less than half of its canvas; the crop has to be smaller
+    # than the canvas for the portrait to fill the plate.
+    assert_float(region.size.x).is_less(body_size.x)
+    assert_float(region.size.y).is_less(body_size.y)
+    # A square crop, so the plate's aspect does not distort the art.
+    assert_float(region.size.x).is_equal_approx(region.size.y, 0.01)
+    icon.free()
 
-    # Nothing assigned at all: still an icon, never an empty plate.
+
+func test_character_without_a_body_falls_back_to_the_shared_body() -> void:
+    # A face with no body still draws: the shared potato body is underneath it.
+    var face_only := CharacterData.new()
+    face_only.eyes = load(SOLDIER_EYES)
+    var layers := CharacterSprites.layers(face_only)
+    assert_int(layers.size()).is_equal(2)
+    assert_str(String(layers[0][0])).is_equal("body")
+    assert_that(layers[0][1]).is_equal(load(CharacterSprites.DEFAULT_BODY))
+    assert_str(String(layers[1][0])).is_equal("eyes")
+
+    # Nothing assigned at all: still a body, never an empty plate.
     var bare := CharacterData.new()
     var placeholder := ItemDisplayPanel.make_icon(bare)
-    assert_that(_find_texture(placeholder)).is_not_null()
+    var textures := _find_textures(placeholder)
+    assert_int(textures.size()).is_equal(1)
+    assert_that(_atlas(textures[0]).atlas).is_equal(load(CharacterSprites.DEFAULT_BODY))
     placeholder.free()
 
 
@@ -308,6 +336,21 @@ func test_tooltip_and_detail_panel_share_the_same_skeleton() -> void:
 
     tooltip_ui.free()
     detail.free()
+
+
+## Every TextureRect found under `node`, in tree order (the draw order).
+func _find_textures(node: Node) -> Array[TextureRect]:
+    var found: Array[TextureRect] = []
+    if node is TextureRect:
+        found.append(node)
+    for child in node.get_children():
+        found.append_array(_find_textures(child))
+    return found
+
+
+## The cropped drawing behind a portrait layer.
+func _atlas(rect: TextureRect) -> AtlasTexture:
+    return rect.texture as AtlasTexture
 
 
 ## First TextureRect found anywhere under `node`, or null.

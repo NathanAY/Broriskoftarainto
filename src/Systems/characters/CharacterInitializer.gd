@@ -24,11 +24,12 @@ func _ready():
     if not char_res:
         return
 
+    var character_data := char_res as CharacterData
+    if character_data == null:
+        return
+
     var sprite: Sprite2D = owner.get_node("Node2D/Sprite2D")
-    for child in sprite.get_children():
-        child.queue_free()
-        
-    load_custom_sprites(char_res, sprite)
+    CharacterSprites.apply_to_rig(character_data, sprite)
 
     # Apply base stats (overwrite base values)
     for stat_name in char_res.base_stats.keys():
@@ -94,28 +95,3 @@ func _apply_modifier(character: Node, stats_node: Node, mod: Variant) -> void:
 func _modifier_host(character: Node) -> Node:
     var holder: Node = character.get_node_or_null("ItemHolder")
     return holder if holder != null else character
-
-
-func load_custom_sprites(char_res: Resource, owner_sprite: Sprite2D):
-    # 1. Get the directory path from the resource path
-    var dir_path = char_res.resource_path.get_base_dir()
-    
-    # 2. Open the directory
-    var dir = DirAccess.open(dir_path)
-    if dir:
-        dir.list_dir_begin()
-        var file_name = dir.get_next()
-        
-        while file_name != "":
-            # 3. Check if it's a file, ends in .png, and doesn't contain "icon"
-            if not dir.current_is_dir() and file_name.ends_with(".png") and not "icon" in file_name:
-                var full_path = dir_path.path_join(file_name)
-                
-                # 4. Create the Sprite2D
-                var sprite: Sprite2D = Sprite2D.new()
-                sprite.texture = load(full_path)
-                owner_sprite.add_child(sprite)
-                print("Loaded sprite: ", full_path)
-            
-            file_name = dir.get_next()
-        dir.list_dir_end()

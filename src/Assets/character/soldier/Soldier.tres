@@ -1,7 +1,9 @@
 [gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://ccyqacgb0trif"]
 
 [ext_resource type="Script" uid="uid://b174fx02jtd8q" path="res://src/Systems/characters/CharacterData.gd" id="1_soldier"]
-[ext_resource type="Texture2D" uid="uid://du0bd5b64uami" path="res://src/Assets/character/soldier/soldier_icon.png" id="2_soldier"]
+[ext_resource type="Texture2D" uid="uid://co8tav7tulvwb" path="res://src/Assets/character/potato.png" id="2_soldier"]
+[ext_resource type="Texture2D" uid="uid://drs5gp8a0svqg" path="res://src/Assets/character/soldier/soldier_eyes.png" id="6_soldier"]
+[ext_resource type="Texture2D" uid="uid://mbosqo7n71jx" path="res://src/Assets/character/soldier/soldier_mouth.png" id="7_soldier"]
 [ext_resource type="Script" uid="uid://2vl1rp4agc1u" path="res://src/Systems/weapon/BaseWeapon.gd" id="3_soldier"]
 [ext_resource type="Resource" uid="uid://fov62q3eb6q7" path="res://src/Resources/weapons/Shotgun.tres" id="4_soldier"]
 [ext_resource type="PackedScene" uid="uid://cdfucojif8qe6" path="res://src/Systems/Items/modifiers/ArmorModifier.tscn" id="5_soldier"]
@@ -22,5 +24,7 @@ modifiers = [{
 }
 }, ExtResource("5_soldier")]
 starting_weapons = Array[ExtResource("3_soldier")]([ExtResource("4_soldier")])
-small_icon = ExtResource("2_soldier")
+body = ExtResource("2_soldier")
+eyes = ExtResource("6_soldier")
+mouth = ExtResource("7_soldier")
 metadata/_custom_type_script = "uid://b174fx02jtd8q"

@@ -68,7 +68,7 @@ func set_resource(resource: Resource) -> void:
     name_label.text = display_name(resource)
     icon_plate.visible = true
     separator.visible = true
-    _add_icon(make_icon(resource))
+    _add_icon(make_icon(resource, _icon_size()))
     info_label.text = build_bbcode(ItemTooltip.card_rows(resource), resource)
     _on_resource_changed()
 
@@ -77,6 +77,13 @@ func set_resource(resource: Resource) -> void:
 ## Called at the end of set_resource(), including for `null`.
 func _on_resource_changed() -> void:
     pass
+
+
+## The square the icon is built for. The base size matches the shop card's
+## 64px plate; a subclass with a larger plate overrides this so its art is not
+## stranded in the corner.
+func _icon_size() -> Vector2:
+    return ItemIconGenerator.BASE_SIZE
 
 
 # --- static helpers ---------------------------------------------------------
@@ -95,24 +102,6 @@ static func display_name(resource: Resource) -> String:
     return str(resource)
 
 
-## Placeholder used when a character resource has no art assigned at all, so
-## the icon plate is never empty.
-const CHARACTER_PLACEHOLDER := "res://src/Assets/character/potato.png"
-
-
-## The portrait to show for a character: its own small icon, else its sprite,
-## else the shared placeholder.
-static func character_icon_texture(character: CharacterData) -> Texture2D:
-    if character != null:
-        if character.small_icon:
-            return character.small_icon
-        if character.sprite:
-            return character.sprite
-    if ResourceLoader.exists(CHARACTER_PLACEHOLDER):
-        return load(CHARACTER_PLACEHOLDER)
-    return null
-
-
 ## Builds the icon Control for an Item, a BaseWeapon or a CharacterData.
 ## Falls back to the default weapon sprite / default modifier icon.
 ## `icon_size` is the square the art fills: a caller whose plate is a different
@@ -120,7 +109,9 @@ static func character_icon_texture(character: CharacterData) -> Texture2D:
 ## in the corner of a larger box.
 static func make_icon(resource: Resource, icon_size: Vector2 = ItemIconGenerator.BASE_SIZE) -> Control:
     if resource is CharacterData:
-        return make_texture_icon(character_icon_texture(resource as CharacterData), icon_size)
+        # The character's portrait is the same layered body + face stack the
+        # in-world rig draws, never one baked `_icon.png`.
+        return CharacterSprites.make_icon(resource as CharacterData, icon_size)
     if resource is BaseWeapon:
         return _make_weapon_icon(resource as BaseWeapon, icon_size)
     if resource is Item:

@@ -51,3 +51,9 @@ func clear() -> void:
 ## Character-specific alias so the select screen keeps its vocabulary.
 func set_character_display(character: CharacterData) -> void:
 	set_resource(character)
+
+
+## The detail panel's portrait fills its own 88px holder; the base panel's 48px
+## default is the shop card's plate, which leaves this art visibly tiny.
+func _icon_size() -> Vector2:
+	return icon_holder.custom_minimum_size

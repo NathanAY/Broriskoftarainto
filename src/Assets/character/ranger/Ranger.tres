@@ -1,7 +1,9 @@
 [gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://bsbofljty6lo1"]
 
 [ext_resource type="Script" uid="uid://b174fx02jtd8q" path="res://src/Systems/characters/CharacterData.gd" id="1_ranger"]
-[ext_resource type="Texture2D" uid="uid://ct4wx8tej3qxc" path="res://src/Assets/character/ranger/ranger_icon.png" id="2_ranger"]
+[ext_resource type="Texture2D" uid="uid://co8tav7tulvwb" path="res://src/Assets/character/potato.png" id="2_ranger"]
+[ext_resource type="Texture2D" uid="uid://d2tsnu8r6kxlc" path="res://src/Assets/character/ranger/ranger_eyes.png" id="7_ranger"]
+[ext_resource type="Texture2D" uid="uid://c2fhww7eysnv3" path="res://src/Assets/character/ranger/ranger_mouth.png" id="8_ranger"]
 [ext_resource type="Script" uid="uid://2vl1rp4agc1u" path="res://src/Systems/weapon/BaseWeapon.gd" id="3_ranger"]
 [ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="4_ranger"]
 [ext_resource type="Resource" uid="uid://0kk7tflomdcg" path="res://src/Resources/weapons/Pistol.tres" id="5_ranger"]
@@ -19,5 +21,7 @@ base_stats = {
 }
 starting_weapons = Array[ExtResource("3_ranger")]([ExtResource("5_ranger")])
 starting_items = Array[ExtResource("4_ranger")]([ExtResource("6_ranger")])
-small_icon = ExtResource("2_ranger")
+body = ExtResource("2_ranger")
+eyes = ExtResource("7_ranger")
+mouth = ExtResource("8_ranger")
 metadata/_custom_type_script = "uid://b174fx02jtd8q"

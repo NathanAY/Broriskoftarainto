@@ -1,0 +1,82 @@
+[gd_scene format=3 uid="uid://bwsdmhk87uhcw"]
+
+[ext_resource type="Script" uid="uid://cs2dub84x6wjd" path="res://src/Scripts/Enemy.gd" id="1_enemy"]
+[ext_resource type="Texture2D" uid="uid://btwjumwi12a1b" path="res://src/Assets/enemies/swarmer.png" id="2_k7kss"]
+[ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://src/Systems/LocalEventManager.tscn" id="3_bus"]
+[ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://src/ui/HealthBar.tscn" id="4_bar"]
+[ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://src/Systems/stats/Stats.tscn" id="5_stats"]
+[ext_resource type="PackedScene" uid="uid://bymf3sqpkbdcr" path="res://src/Systems/Items/ItemHolder.tscn" id="6_items"]
+[ext_resource type="PackedScene" uid="uid://cskdgn6s7qlfo" path="res://src/Systems/weapon/WeaponHolder.tscn" id="7_weapons"]
+[ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://src/Systems/damage/Health.tscn" id="8_health"]
+[ext_resource type="PackedScene" uid="uid://jsw2vxmrn6yc" path="res://src/Scenes/particles/ParticleEffectManager.tscn" id="9_particles"]
+[ext_resource type="PackedScene" uid="uid://cx3p26icyy5wu" path="res://src/animations/animation_player.tscn" id="10_anim"]
+[ext_resource type="AnimationLibrary" uid="uid://cwclbp73qaped" path="res://src/animations/enemy_animations.res" id="11_anims"]
+[ext_resource type="PackedScene" uid="uid://c0miaq2nbp3m6" path="res://src/Systems/movement/bahaviour/ChaseMovementBehaviour.tscn" id="12_move"]
+[ext_resource type="PackedScene" uid="uid://cmvgx8sqctngm" path="res://src/Scenes/effects/TextureBurstManager.tscn" id="13_burst"]
+[ext_resource type="PackedScene" uid="uid://brgr2yeaajlxi" path="res://src/Scenes/effects/HitFlashManager.tscn" id="14_flash"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 22.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hitbox"]
+radius = 25.0
+
+[node name="Enemy" type="CharacterBody2D" unique_id=1951999479]
+script = ExtResource("1_enemy")
+
+[node name="Node2D" type="Node2D" parent="." unique_id=1561068006]
+
+[node name="Sprite2D" type="Sprite2D" parent="Node2D" unique_id=1225964608]
+texture = ExtResource("2_k7kss")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1520201581]
+shape = SubResource("CircleShape2D_body")
+one_way_collision_margin = 1.2
+
+[node name="Hitbox" type="Area2D" parent="." unique_id=1523126768]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=1649314579]
+shape = SubResource("CircleShape2D_hitbox")
+
+[node name="EventManager" parent="." unique_id=243447745 instance=ExtResource("3_bus")]
+
+[node name="HealthBar" parent="." unique_id=5930440 node_paths=PackedStringArray("event_manager") instance=ExtResource("4_bar")]
+event_manager = NodePath("../EventManager")
+
+[node name="Stats" parent="." unique_id=751358481 node_paths=PackedStringArray("event_manager") instance=ExtResource("5_stats")]
+event_manager = NodePath("../EventManager")
+stats = {
+"area_radius": 1.0,
+"area_size_multiplier": 1.0,
+"attack_range": 1.67,
+"attack_speed": 1.0,
+"critical_chance": 0.0,
+"critical_multiplier": 1.5,
+"damage": 1.0,
+"energy_shield": 0.0,
+"flat_weapon_damage": 0.0,
+"health": 1.0,
+"item_base_damage": 5.0,
+"movement_speed": 1.4,
+"projectile_pierce": 0.0,
+"projectile_speed_multiplier": 1.0
+}
+
+[node name="ItemHolder" parent="." unique_id=768912251 instance=ExtResource("6_items")]
+
+[node name="WeaponHolder" parent="." unique_id=1104112095 instance=ExtResource("7_weapons")]
+
+[node name="Health" parent="." unique_id=1833211540 node_paths=PackedStringArray("event_manager") instance=ExtResource("8_health")]
+event_manager = NodePath("../EventManager")
+
+[node name="ParticleEffectManager" parent="." unique_id=518787525 instance=ExtResource("9_particles")]
+
+[node name="TextureBurstManager" parent="." unique_id=119681397 instance=ExtResource("13_burst")]
+
+[node name="HitFlashManager" parent="." unique_id=882773333 instance=ExtResource("14_flash")]
+
+[node name="AnimationPlayer" parent="." unique_id=637910554 instance=ExtResource("10_anim")]
+libraries/ = ExtResource("11_anims")
+autoplay = &""
+
+[node name="MovementBehaviour" parent="." unique_id=571472171 instance=ExtResource("12_move")]

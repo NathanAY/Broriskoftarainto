@@ -6,7 +6,7 @@ class_name WeaponTestSupport
 extends RefCounted
 
 const TEST_SCENE := "res://test/TestScene.tscn"
-const ENEMY_SCENE := "res://src/Systems/Enemy.tscn"
+const ENEMY_SCENE := "res://src/Systems/enemies/Enemy.tscn"
 
 ## Enemies carry no character data, so they run on the default `Stats` health of
 ## 10: one strong hit kills one. A dead enemy plays its death animation and then

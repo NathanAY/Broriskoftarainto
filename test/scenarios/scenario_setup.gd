@@ -20,16 +20,16 @@ const MODIFIERS_DIR := "res://src/Systems/Items/modifiers"
 ## row, boss included. Written out rather than read off `EnemySpawner.spawn_table`
 ## because the table is sampled by weight and no single run fields every type.
 const ENEMY_ROSTER := [
-	"res://src/Systems/Enemy.tscn",
-	"res://src/Systems/EnemyBulwark.tscn",
-	"res://src/Systems/EnemyGunner.tscn",
-	"res://src/Systems/EnemySlimeling.tscn",
-	"res://src/Systems/EnemyLancer.tscn",
-	"res://src/Systems/EnemyToadstinker.tscn",
-	"res://src/Systems/EnemyBlink.tscn",
-	"res://src/Systems/EnemyShieldbearer.tscn",
-	"res://src/Systems/EnemySwarmer.tscn",
-	"res://src/Systems/EnemyBoss.tscn",
+	"res://src/Systems/enemies/Enemy.tscn",
+	"res://src/Systems/enemies/EnemyBulwark.tscn",
+	"res://src/Systems/enemies/EnemyGunner.tscn",
+	"res://src/Systems/enemies/EnemySlimeling.tscn",
+	"res://src/Systems/enemies/EnemyLancer.tscn",
+	"res://src/Systems/enemies/EnemyToadstinker.tscn",
+	"res://src/Systems/enemies/EnemyBlink.tscn",
+	"res://src/Systems/enemies/EnemyShieldbearer.tscn",
+	"res://src/Systems/enemies/EnemySwarmer.tscn",
+	"res://src/Systems/enemies/EnemyBoss.tscn",
 ]
 
 ## Radius of the ring the roster is laid out on, in pixels. Wide enough that the

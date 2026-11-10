@@ -5,7 +5,7 @@
 
 ## Key scripts / scenes
 - `src/Scripts/Enemy.gd` (`Enemy` class)
-- `src/Systems/Enemy.tscn`, `src/Systems/EnemyBoss.tscn` (boss variant), `src/Systems/EnemyBulwark.tscn`, `src/Systems/EnemyGunner.tscn`, `src/Systems/EnemySlimeling.tscn`, `src/Systems/EnemyLancer.tscn`, `src/Systems/EnemyToadstinker.tscn`, `src/Systems/EnemyBlink.tscn`, `src/Systems/EnemyShieldbearer.tscn` and `src/Systems/EnemySwarmer.tscn` (roster variants) — see "The roster" below
+- `src/Systems/enemies/Enemy.tscn`, `src/Systems/enemies/EnemyBoss.tscn` (boss variant), `src/Systems/enemies/EnemyBulwark.tscn`, `src/Systems/enemies/EnemyGunner.tscn`, `src/Systems/enemies/EnemySlimeling.tscn`, `src/Systems/enemies/EnemyLancer.tscn`, `src/Systems/enemies/EnemyToadstinker.tscn`, `src/Systems/enemies/EnemyBlink.tscn`, `src/Systems/enemies/EnemyShieldbearer.tscn` and `src/Systems/enemies/EnemySwarmer.tscn` (roster variants) — see "The roster" below
 - Movement behaviours under `Scenes/` or `Systems/` (referenced as `MovementBehaviour`).
 - `src/Systems/movement/bahaviour/charge_movement_behaviour.gd` (`ChargeMovementBehaviour`) — the charger: walk in, telegraph, then charge along a locked direction. See "Charging" below.
 - `src/Systems/movement/bahaviour/blink_movement_behaviour.gd` (`BlinkMovementBehaviour`) — chases, then teleports to a ring around its target. See "Blinking" below.
@@ -41,18 +41,18 @@ An enemy type is a **scene**, not a class. `Enemy.gd` is the script every enemy 
 
 | Type | Scene | Threat shape |
 |---|---|---|
-| Grunt | `src/Systems/Enemy.tscn` | The baseline. Walks at you and hurts on touch. |
-| Bulwark | `src/Systems/EnemyBulwark.tscn` | A slow wall. Three times the grunt's health at a third of its speed, and it still hurts on touch. |
-| Gunner | `src/Systems/EnemyGunner.tscn` | Shoots from a fixed distance. No contact damage: its threat arrives as projectiles, so it asks you to break line of sight or close the gap. |
-| Slimeling | `src/Systems/EnemySlimeling.tscn` | Dies into three smaller copies of itself. Frailer than the grunt and just as fast, so the fight is the second and third wave of bodies rather than the first one. |
-| Lancer | `src/Systems/EnemyLancer.tscn` | Walks in, telegraphs, then charges along the direction it locked. Hurts on touch, so the charge is what connects. |
-| Toadstinker | `src/Systems/EnemyToadstinker.tscn` | Arms no weapon and detonates when it dies. Frailer and a little faster than the grunt: it wants to die next to you, and killing it at range is how you decline. |
-| Blink | `src/Systems/EnemyBlink.tscn` | Chases, then reappears in a ring around you every few seconds. It keeps the contact weapon, so the repositioning is the threat. |
-| Shieldbearer | `src/Systems/EnemyShieldbearer.tscn` | Turns away every hit that lands on its front arc. Tougher and slower than the grunt; you have to get behind it. |
-| Swarmer | `src/Systems/EnemySwarmer.tscn` | Tiny, one hit point, faster than the grunt, and arrives in packs of eight. The pack is the threat, not any one body. |
-| Boss | `src/Systems/EnemyBoss.tscn` | The loop's boss, with a weapon loadout of its own. See `docs/systems/spawners.md`. |
+| Grunt | `src/Systems/enemies/Enemy.tscn` | The baseline. Walks at you and hurts on touch. |
+| Bulwark | `src/Systems/enemies/EnemyBulwark.tscn` | A slow wall. Three times the grunt's health at a third of its speed, and it still hurts on touch. |
+| Gunner | `src/Systems/enemies/EnemyGunner.tscn` | Shoots from a fixed distance. No contact damage: its threat arrives as projectiles, so it asks you to break line of sight or close the gap. |
+| Slimeling | `src/Systems/enemies/EnemySlimeling.tscn` | Dies into three smaller copies of itself. Frailer than the grunt and just as fast, so the fight is the second and third wave of bodies rather than the first one. |
+| Lancer | `src/Systems/enemies/EnemyLancer.tscn` | Walks in, telegraphs, then charges along the direction it locked. Hurts on touch, so the charge is what connects. |
+| Toadstinker | `src/Systems/enemies/EnemyToadstinker.tscn` | Arms no weapon and detonates when it dies. Frailer and a little faster than the grunt: it wants to die next to you, and killing it at range is how you decline. |
+| Blink | `src/Systems/enemies/EnemyBlink.tscn` | Chases, then reappears in a ring around you every few seconds. It keeps the contact weapon, so the repositioning is the threat. |
+| Shieldbearer | `src/Systems/enemies/EnemyShieldbearer.tscn` | Turns away every hit that lands on its front arc. Tougher and slower than the grunt; you have to get behind it. |
+| Swarmer | `src/Systems/enemies/EnemySwarmer.tscn` | Tiny, one hit point, faster than the grunt, and arrives in packs of eight. The pack is the threat, not any one body. |
+| Boss | `src/Systems/enemies/EnemyBoss.tscn` | The loop's boss, with a weapon loadout of its own. See `docs/systems/spawners.md`. |
 
-Adding a type is therefore: copy `src/Systems/Enemy.tscn`, point the sprite at new art, change the stats, and add a row to the spawn table in `src/Scenes/Game.tscn`. No script changes, because the behaviour is duck-typed against the enemy.
+Adding a type is therefore: copy `src/Systems/enemies/Enemy.tscn`, point the sprite at new art, change the stats, and add a row to the spawn table in `src/Scenes/Game.tscn`. No script changes, because the behaviour is duck-typed against the enemy.
 
 The Gunner is the row that proves an enemy can be a *ranged* threat: it is the basic enemy with `contact_weapon` cleared, the shared `Pistol.tres` placed in its `WeaponHolder`, and `ChaseDistanceMovementBehaviour` walking it in to a firing distance instead of onto the player. Its pistol targets whatever is in the `damageable` group that its holder is not grouped with, which is the player: the `enemies` group is what keeps an enemy from shooting its own kind.
 
@@ -138,7 +138,7 @@ Both are spawner rows rather than enemy scripts, so they apply to any scene:
 - `Stats` (child), `Health`, `WeaponHolder`, `ItemHolder`, `EventManager`, MovementBehaviour.
 
 ## Known limitations / TODOs
-- The roster's four newer types use the shared default enemy sprite until their own art arrives: `src/Systems/EnemyToadstinker.tscn`, `src/Systems/EnemyBlink.tscn`, `src/Systems/EnemyShieldbearer.tscn` and `src/Systems/EnemySwarmer.tscn` all point at `src/Assets/enemies/spitter.png`. Replace the texture on each scene when the art ships. The Lancer now has its own `src/Assets/enemies/lancer.png`.
+- The roster's four newer types use the shared default enemy sprite until their own art arrives: `src/Systems/enemies/EnemyToadstinker.tscn`, `src/Systems/enemies/EnemyBlink.tscn`, `src/Systems/enemies/EnemyShieldbearer.tscn` and `src/Systems/enemies/EnemySwarmer.tscn` all point at `src/Assets/enemies/spitter.png`. Replace the texture on each scene when the art ships. The Lancer now has its own `src/Assets/enemies/lancer.png`.
 - The Swarmer is drawn at 0.55 scale with a smaller collider, so the collider test reads the drawn width rather than the texture width.
 - Death handling uses animation_finished connect with a short anonymous callback — works but can be fragile if animations change. `_die` is re-entrancy guarded, so a duplicate `on_death` cannot restart the animation, but the callback still depends on the animation being named `death`.
 - `StageManager` and `EnemySpawner` end a stage on `Nodes/Enemies.get_child_count() == 0`, so a corpse still holds the stage open for the remainder of its death animation.

@@ -42,7 +42,7 @@ func after_test() -> void:
 func _spawn_entities() -> void:
     player = auto_free(load("res://src/Systems/Character.tscn").instantiate() as Character)
     add_child(player)
-    enemy = auto_free(load("res://src/Systems/Enemy.tscn").instantiate() as Enemy)
+    enemy = auto_free(load("res://src/Systems/enemies/Enemy.tscn").instantiate() as Enemy)
     add_child(enemy)
 
 

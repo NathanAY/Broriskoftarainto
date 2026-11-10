@@ -9,7 +9,7 @@
 class_name EnemyContactWeaponTest
 extends GdUnitTestSuite
 
-const ENEMY_SCENE := "res://src/Systems/Enemy.tscn"
+const ENEMY_SCENE := "res://src/Systems/enemies/Enemy.tscn"
 
 ## Physics frames the contact weapon needs to land a hit. Thorns fires at 1.6
 ## attacks a second, so this covers its first swing with room to spare.

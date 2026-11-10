@@ -5,7 +5,7 @@ extends Node
 ## screen and a live enemy, which a one-shot render cannot reach.
 
 func _ready() -> void:
-	var enemy: Enemy = load("res://src/Systems/Enemy.tscn").instantiate()
+	var enemy: Enemy = load("res://src/Systems/enemies/Enemy.tscn").instantiate()
 	add_child(enemy)
 	var panel: CanvasLayer = load("res://src/Scenes/menu/ConfigureMenu.tscn").instantiate()
 	# Target before tree entry, the order the pause menu uses.

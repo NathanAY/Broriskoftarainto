@@ -198,7 +198,7 @@ func test_character_body_collides_with_walls() -> void:
 
 
 func test_enemy_body_collides_with_walls() -> void:
-	var enemy: CharacterBody2D = auto_free(load("res://src/Systems/Enemy.tscn").instantiate())
+	var enemy: CharacterBody2D = auto_free(load("res://src/Systems/enemies/Enemy.tscn").instantiate())
 	add_child(enemy)
 	assert_int(enemy.collision_layer).is_equal(2)
 	# Enemies only collide with walls; crowding uses soft separation so packed

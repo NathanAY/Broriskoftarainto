@@ -9,6 +9,7 @@ const DEBUG_SCENARIOS_SCENE := "res://test/scenarios/debug_scenario_menu.tscn"
 
 @onready var new_game_button: Button = $Control/VBoxContainer/NewGameButton
 @onready var debug_scenarios_button: Button = $Control/VBoxContainer/DebugScenariosButton
+@onready var gamepedia_button: Button = $Control/VBoxContainer/GamepediaButton
 @onready var options_button: Button = $Control/VBoxContainer/OptionsButton
 @onready var exit_button: Button = $Control/VBoxContainer/ExitButton
 
@@ -19,6 +20,7 @@ const DEBUG_SCENARIOS_SCENE := "res://test/scenarios/debug_scenario_menu.tscn"
 func _ready() -> void:
     new_game_button.pressed.connect(_on_new_game_pressed)
     debug_scenarios_button.pressed.connect(_on_debug_scenarios_pressed)
+    gamepedia_button.pressed.connect(_on_gamepedia_pressed)
     options_button.pressed.connect(_on_options_pressed)
     exit_button.pressed.connect(_on_exit_pressed)
     options_menu.visible = false
@@ -36,6 +38,15 @@ func _on_debug_scenarios_pressed() -> void:
         push_warning("MainMenu: debug scenarios are not in this build (%s missing)" % DEBUG_SCENARIOS_SCENE)
         return
     get_tree().change_scene_to_file(DEBUG_SCENARIOS_SCENE)
+
+
+func _on_gamepedia_pressed() -> void:
+    var gamepedia := Gamepedia.new()
+    add_child(gamepedia)
+    main_control.visible = false
+    gamepedia.closed.connect(func() -> void:
+        main_control.visible = true
+        gamepedia.queue_free())
 
 
 func _on_options_pressed() -> void:

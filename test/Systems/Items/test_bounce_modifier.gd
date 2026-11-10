@@ -9,7 +9,7 @@ func test_bouncing_modifier() -> void:
     get_tree().current_scene = test_scene
 
     var enemy: Enemy = test_scene.get_node("Enemy")
-    var enemy2 = preload("res://src/Systems/Enemy.tscn").instantiate()
+    var enemy2 = preload("res://src/Systems/enemies/Enemy.tscn").instantiate()
     # Off the +X firing line (Character at 100,100 shoots east toward Enemy at
     # 300,100): a straight projectile can never reach enemy2, only a bounced one.
     enemy2.global_position = enemy.global_position + Vector2(100, 300)

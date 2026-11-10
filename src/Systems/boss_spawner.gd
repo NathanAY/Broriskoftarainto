@@ -8,7 +8,7 @@ class_name BossSpawner
 ## Keep spawn points this far from the arena edge (boss body radius ~41px).
 @export var arena_spawn_margin: float = 64.0
 @export var spawn_active: bool = false
-@export var boss_scene: PackedScene = preload("res://src/Systems/EnemyBoss.tscn")
+@export var boss_scene: PackedScene = preload("res://src/Systems/enemies/EnemyBoss.tscn")
 @export var current_loop: int = 1
 @export var health_growth_per_loop: float = 250
 @export var damage_growth_per_loop: float = 1

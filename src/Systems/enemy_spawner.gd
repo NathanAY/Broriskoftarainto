@@ -36,7 +36,7 @@ class_name EnemySpawner
 ## `fallback_enemy_scene`, so a scene that forgot to fill it still spawns.
 @export var spawn_table: Array[EnemySpawnEntry] = []
 ## Spawned when the table is empty or every row is still locked behind its loop.
-@export var fallback_enemy_scene: PackedScene = preload("res://src/Systems/Enemy.tscn")
+@export var fallback_enemy_scene: PackedScene = preload("res://src/Systems/enemies/Enemy.tscn")
 ## Keep spawned enemies at least this far apart from each other (any two alive
 ## enemies at spawn time). Enemy body diameter is ~82 (radius 41), so 90 leaves
 ## a small gap instead of spawning buddies that immediately shove each other.

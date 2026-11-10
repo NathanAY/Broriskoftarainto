@@ -33,6 +33,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | `enemies.md` | `Enemy` behaviour, health, boss variant |
 | `effects.md` | Every VFX the game spawns — impact sparks, blast fireballs, damage flashes, death shards — and the three authoring traps that decide whether one works |
 | `event_manager.md` | The `LocalEventManager` event bus and the `event_contract.gd` schema checker |
+| `gamepedia.md` | The Gamepedia opened from the main and pause menus: characters, weapons, enemies and modifiers read straight from the shipped data |
 | `items.md` | The `Item` resource, `ItemHolder`, `ItemBuilder`, pricing |
 | `item_factory.md` | Procedural item generation, the gift/curse roll, `drop_pool` |
 | `modifiers.md` | Effects (the Node behaviours items attach), the `BaseModifier` contract, the full catalog |
@@ -59,7 +60,7 @@ Implementation logs for shipped work. Kept for provenance, not current truth, an
 | Event bus | `src/Scripts/LocalEventManager.gd` (`EventManager`) |
 | Player | `src/Scripts/character.gd` (`Character`) — the runtime entity, see ADR-0001 |
 | Character data & select | `src/Systems/characters/CharacterData.gd`, `src/Scenes/menu/CharacterSelect.tscn` |
-| Enemies | `src/Scripts/Enemy.gd`, `src/Systems/Enemy.tscn` |
+| Enemies | `src/Scripts/Enemy.gd`, `src/Systems/enemies/Enemy.tscn` |
 | Stats | `src/Systems/stats/stats.gd` (`Stats`) |
 | Weapons | `src/Systems/weapon/*`, `WeaponHolder` |
 | Items | `src/Systems/Items/*` (`Item`, `ItemHolder`, `item_holder.gd`) |

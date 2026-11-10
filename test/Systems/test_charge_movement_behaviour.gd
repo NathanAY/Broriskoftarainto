@@ -9,7 +9,7 @@
 class_name ChargeMovementBehaviourTest
 extends GdUnitTestSuite
 
-const ENEMY_SCENE := "res://src/Systems/Enemy.tscn"
+const ENEMY_SCENE := "res://src/Systems/enemies/Enemy.tscn"
 const CHARGE_SCENE := "res://src/Systems/movement/bahaviour/ChargeMovementBehaviour.tscn"
 
 var _root: Node2D = null

@@ -13,15 +13,15 @@ extends Node2D
 ## The roster, in the order it is meant to be read: the basic enemy the others
 ## are compared against, then the roster types.
 const ROSTER := [
-	{"name": "Grunt", "scene": "res://src/Systems/Enemy.tscn"},
-	{"name": "Bulwark", "scene": "res://src/Systems/EnemyBulwark.tscn"},
-	{"name": "Gunner", "scene": "res://src/Systems/EnemyGunner.tscn"},
-	{"name": "Slimeling", "scene": "res://src/Systems/EnemySlimeling.tscn"},
-	{"name": "Lancer", "scene": "res://src/Systems/EnemyLancer.tscn"},
-	{"name": "Toadstinker", "scene": "res://src/Systems/EnemyToadstinker.tscn"},
-	{"name": "Blink", "scene": "res://src/Systems/EnemyBlink.tscn"},
-	{"name": "Shieldbearer", "scene": "res://src/Systems/EnemyShieldbearer.tscn"},
-	{"name": "Swarmer", "scene": "res://src/Systems/EnemySwarmer.tscn"},
+	{"name": "Grunt", "scene": "res://src/Systems/enemies/Enemy.tscn"},
+	{"name": "Bulwark", "scene": "res://src/Systems/enemies/EnemyBulwark.tscn"},
+	{"name": "Gunner", "scene": "res://src/Systems/enemies/EnemyGunner.tscn"},
+	{"name": "Slimeling", "scene": "res://src/Systems/enemies/EnemySlimeling.tscn"},
+	{"name": "Lancer", "scene": "res://src/Systems/enemies/EnemyLancer.tscn"},
+	{"name": "Toadstinker", "scene": "res://src/Systems/enemies/EnemyToadstinker.tscn"},
+	{"name": "Blink", "scene": "res://src/Systems/enemies/EnemyBlink.tscn"},
+	{"name": "Shieldbearer", "scene": "res://src/Systems/enemies/EnemyShieldbearer.tscn"},
+	{"name": "Swarmer", "scene": "res://src/Systems/enemies/EnemySwarmer.tscn"},
 ]
 
 ## How far apart two enemies stand, in pixels. Comfortably more than the

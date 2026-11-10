@@ -8,7 +8,7 @@
 class_name AreaBurstOnEnterTest
 extends GdUnitTestSuite
 
-const ENEMY_SCENE := "res://src/Systems/Enemy.tscn"
+const ENEMY_SCENE := "res://src/Systems/enemies/Enemy.tscn"
 const BURST_SCENE := "res://src/Systems/damage/AreaBurstOnEnter.tscn"
 
 ## Blast damage the burst deals.

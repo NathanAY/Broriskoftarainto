@@ -9,7 +9,7 @@ func test_chain_lightnin_modifier() -> void:
     get_tree().current_scene = test_scene
 
     var enemy: Enemy = test_scene.get_node("Enemy")
-    var enemy2 = preload("res://src/Systems/Enemy.tscn").instantiate()
+    var enemy2 = preload("res://src/Systems/enemies/Enemy.tscn").instantiate()
     enemy2.global_position = enemy.global_position + Vector2(100, 300)
     test_scene.add_child(enemy2)
     

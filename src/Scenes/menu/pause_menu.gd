@@ -4,6 +4,7 @@ extends CanvasLayer
 @onready var restart_button: Button = $Control/VBoxContainer/RestartButton
 @onready var new_run_button: Button = $Control/VBoxContainer/NewRunButton
 @onready var character_button: Button = $Control/VBoxContainer/CharacterButton
+@onready var gamepedia_button: Button = $Control/VBoxContainer/GamepediaButton
 @onready var options_button: Button = $Control/VBoxContainer/OptionsButton
 @onready var main_menu_button: Button = $Control/VBoxContainer/MainMenuButton
 @onready var exit_button: Button = $Control/VBoxContainer/ExitButton
@@ -23,6 +24,7 @@ func _ready():
     restart_button.pressed.connect(_on_restart_pressed)
     new_run_button.pressed.connect(_on_new_run_pressed)
     character_button.pressed.connect(_on_character_pressed)
+    gamepedia_button.pressed.connect(_on_gamepedia_pressed)
     options_button.pressed.connect(_on_options_pressed)
     # Add Configure button dynamically so the scene file doesn't need editing
     var cfg_btn = UiMenuButton.new()
@@ -70,6 +72,14 @@ func _on_restart_pressed():
 func _on_character_pressed():
     $Control.visible = false
     character_menu.visible = true
+
+func _on_gamepedia_pressed():
+    var gamepedia := Gamepedia.new()
+    add_child(gamepedia)
+    $Control.visible = false
+    gamepedia.closed.connect(func():
+        $Control.visible = true
+        gamepedia.queue_free())
 
 func _on_options_pressed():
     $Control.visible = false

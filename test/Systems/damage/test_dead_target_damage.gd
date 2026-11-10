@@ -19,7 +19,7 @@
 class_name DeadTargetDamageTest
 extends GdUnitTestSuite
 
-const ENEMY_SCENE := "res://src/Systems/Enemy.tscn"
+const ENEMY_SCENE := "res://src/Systems/enemies/Enemy.tscn"
 
 ## Enemies carry no character data, so they start on the default `Stats` health
 ## of 10 - small enough that one hit kills, but the ratios stay awkward. This is

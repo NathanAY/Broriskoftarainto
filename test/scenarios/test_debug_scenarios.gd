@@ -173,7 +173,7 @@ func test_cursed_enemies_gives_every_enemy_a_debuff_item() -> void:
     # And the hook it hangs off really does fire: `attach_to_enemy()` is called
     # once per enemy, before the enemy joins the tree, so an off-tree enemy with
     # an `ItemHolder` is the shape it has to cope with.
-    var enemy: Enemy = load("res://src/Systems/Enemy.tscn").instantiate()
+    var enemy: Enemy = load("res://src/Systems/enemies/Enemy.tscn").instantiate()
     (modifiers[0] as EnemyDebuffModifier).attach_to_enemy(enemy, _current_character(scenario))
     var item_holder: ItemHolder = enemy.get_node("ItemHolder")
     assert_int(item_holder.items.size()).override_failure_message(

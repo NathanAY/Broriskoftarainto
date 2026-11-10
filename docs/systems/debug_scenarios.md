@@ -21,7 +21,7 @@ Every other scenario answers "what does the game look like at loop 3" by moving 
 
 `ScenarioSetup.sandbox = true` builds a `SandboxMenu` (`test/scenarios/sandbox_menu.gd`) as a child of itself, and adds a **Spawn enemy** button to the pause menu's `Control/VBoxContainer`. The panel has an enemy picker, three spinboxes - health (0 - 1,000,000, default 100000), movement speed (0 - 20 m/s, default 0) and amount (1 - 100) - and a **Spawn** button, laid out in code rather than as a `.tscn` so a dev panel cannot drift from the script that drives it.
 
-The picker is built from `SandboxMenu.ENEMY_TYPES`, which holds one row today: the roster's basic enemy, `src/Systems/Enemy.tscn`. Adding a type is one entry in that list - the panel builds its items from it, so a new type cannot be left out of the UI, and `spawn_configured()` instantiates whatever the picker shows.
+The picker is built from `SandboxMenu.ENEMY_TYPES`, which lists the whole enemy roster, boss included (the same scenes as `DebugScenarioSetup.ENEMY_ROSTER`). Adding a type is one entry in that list - the panel builds its items from it, so a new type cannot be left out of the UI, and `spawn_configured()` instantiates whatever the picker shows.
 
 Three things it has to get right, and each is pinned by `test/scenarios/test_sandbox_scenario.gd`:
 
@@ -122,8 +122,8 @@ A scenario is the scene, not a set of globals set somewhere earlier:
 - `src/Assets/character/<id>/<Id>.tres` — `character_path` must be a real resource, because `CharacterInitializer` derives the sprite folder from its path.
 - `src/Systems/enemy_spawner.gd` — `modifiers` and the `attach_to_enemy()` hook the `Cursed enemies` scenario plugs into.
 - `test/scenarios/enemy_debuff_modifier.gd` (`EnemyDebuffModifier`) — the whole of the cursed-enemies behaviour: it gives one spawned enemy the scenario's item, so nothing in `src/` had to change for the debuff row to be reachable.
-- `src/Systems/Enemy.tscn`, `src/Systems/stats/stats.gd` — what the sandbox spawns, and the `Stats` node it writes the typed numbers into. No `src/` change.
-- `src/Systems/EnemyBoss.tscn` and the rest of `ENEMY_ROSTER` — the roster preview instances those scenes unmodified, so what it shows is what a wave fields.
+- `src/Systems/enemies/Enemy.tscn`, `src/Systems/stats/stats.gd` — what the sandbox spawns, and the `Stats` node it writes the typed numbers into. No `src/` change.
+- `src/Systems/enemies/EnemyBoss.tscn` and the rest of `ENEMY_ROSTER` — the roster preview instances those scenes unmodified, so what it shows is what a wave fields.
 
 ## Known limitations / TODOs
 

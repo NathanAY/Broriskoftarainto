@@ -9,7 +9,7 @@ class_name PierceStatTest
 extends GdUnitTestSuite
 
 const PISTOL := "res://src/Resources/weapons/Pistol.tres"
-const ENEMY_SCENE := "res://src/Systems/Enemy.tscn"
+const ENEMY_SCENE := "res://src/Systems/enemies/Enemy.tscn"
 
 ## Enemies have no character data, so they run on the default `Stats` health of
 ## 10 - two pistol shots kill one. A dead enemy plays its death animation and

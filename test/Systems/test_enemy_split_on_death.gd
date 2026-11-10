@@ -10,8 +10,8 @@
 class_name EnemySplitOnDeathTest
 extends GdUnitTestSuite
 
-const ENEMY_SCENE := "res://src/Systems/Enemy.tscn"
-const BOSS_SCENE := "res://src/Systems/EnemyBoss.tscn"
+const ENEMY_SCENE := "res://src/Systems/enemies/Enemy.tscn"
+const BOSS_SCENE := "res://src/Systems/enemies/EnemyBoss.tscn"
 const SPLITTER_SCENE := "res://src/Systems/enemies/SplitOnDeath.tscn"
 
 var _root: Node2D = null

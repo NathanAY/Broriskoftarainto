@@ -77,6 +77,28 @@ func test_the_picker_offers_every_listed_enemy_type() -> void:
             str(SandboxMenu.ENEMY_TYPES[index]["name"]))
 
 
+## Every roster scene can be picked, and each one really spawns as itself.
+func test_every_roster_enemy_can_be_picked_and_spawned() -> void:
+    var scenario := await _run_scenario()
+    var menu: SandboxMenu = scenario.get_node("ScenarioSetup/SandboxMenu")
+    var picker := menu.get_node("Center/Panel/Rows/EnemyRow/Picker") as OptionButton
+    _set_spawn_values(menu, 10.0, 0.0, 1)
+
+    for scene_path in DebugScenarioSetup.ENEMY_ROSTER:
+        var index := -1
+        for i in SandboxMenu.ENEMY_TYPES.size():
+            if SandboxMenu.ENEMY_TYPES[i]["scene"] == scene_path:
+                index = i
+        assert_int(index).override_failure_message(
+            "%s is in the roster but not in the sandbox picker" % scene_path).is_greater_equal(0)
+        picker.select(index)
+
+        var spawned := menu.spawn_configured()
+
+        assert_int(spawned.size()).is_equal(1)
+        assert_str(spawned[0].scene_file_path).is_equal(scene_path)
+
+
 ## What the picker shows is what gets instantiated - the panel is not still
 ## spawning the one hardcoded scene it used to.
 func test_spawned_enemy_is_the_selected_type() -> void:

@@ -1,12 +1,12 @@
-# The spawner used to spawn one hardcoded scene - `src/Systems/Enemy.tscn` -
+# The spawner used to spawn one hardcoded scene - `src/Systems/enemies/Enemy.tscn` -
 # for every wave of every run. The spawn table replaces that with a list of
 # enemy types, each with a weight and the loop it unlocks on, so a roster can
 # be mixed in from the inspector.
 class_name EnemySpawnTableTest
 extends GdUnitTestSuite
 
-const ENEMY_SCENE := "res://src/Systems/Enemy.tscn"
-const BOSS_SCENE := "res://src/Systems/EnemyBoss.tscn"
+const ENEMY_SCENE := "res://src/Systems/enemies/Enemy.tscn"
+const BOSS_SCENE := "res://src/Systems/enemies/EnemyBoss.tscn"
 
 
 func _entry(scene_path: String, weight: float = 1.0, min_loop: int = 1) -> EnemySpawnEntry:

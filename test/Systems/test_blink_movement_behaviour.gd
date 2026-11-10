@@ -8,7 +8,7 @@
 class_name BlinkMovementBehaviourTest
 extends GdUnitTestSuite
 
-const ENEMY_SCENE := "res://src/Systems/Enemy.tscn"
+const ENEMY_SCENE := "res://src/Systems/enemies/Enemy.tscn"
 const BLINK_SCENE := "res://src/Systems/movement/bahaviour/BlinkMovementBehaviour.tscn"
 
 var _root: Node2D = null

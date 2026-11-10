@@ -16,7 +16,7 @@ and is left as the record of why the enabling work was needed.
 ## What exists today (and why this plan is not just "add 6 scenes")
 
 - There are exactly two enemy scenes: the grunt and the boss. Every wave spawns
-  `src/Systems/Enemy.tscn`, always — `src/Systems/enemy_spawner.gd` hardcodes it as a
+  `src/Systems/enemies/Enemy.tscn`, always — `src/Systems/enemy_spawner.gd` hardcodes it as a
   plain `var`, not even an export.
 - `src/Scripts/Enemy.gd` has **zero exports**. An enemy is entirely its `.tscn`. That is
   fine for one enemy type and unworkable for eight.
@@ -118,7 +118,7 @@ On the spawner:
 ```gdscript
 @export var spawn_table: Array[EnemySpawnEntry] = []
 ## Used when the table is empty, so a scene that forgot to fill it still spawns.
-@export var fallback_enemy_scene: PackedScene = preload("res://src/Systems/Enemy.tscn")
+@export var fallback_enemy_scene: PackedScene = preload("res://src/Systems/enemies/Enemy.tscn")
 ```
 
 plus one helper, and both call sites swap `enemy_scene.instantiate()` for
@@ -247,7 +247,7 @@ with a short fade so the jump is not a pop-in. This is the cheapest "unfair-feel
 fair" enemy in the set and is worth doing after the five core rows ship.
 
 > **Shipped** as `src/Systems/movement/bahaviour/blink_movement_behaviour.gd`,
-> `BlinkMovementBehaviour.tscn` and `src/Systems/EnemyBlink.tscn`. It teleports into a
+> `BlinkMovementBehaviour.tscn` and `src/Systems/enemies/EnemyBlink.tscn`. It teleports into a
 > ring around its target every `blink_interval`, clears its velocity on the blink
 > frame, and fades back in on the `Node2D` container so the hit flash cannot wipe the
 > fade. The sprite is the shared default until the slug art arrives.
@@ -285,7 +285,7 @@ constants — see "Numbers are data" below.
   the retreat half of the behaviour is a small follow-up (`back away when closer than
   `retreat_distance`); do not add it before the stand-and-shoot version has been played.
 
-> **Shipped** as `src/Systems/EnemyGunner.tscn`, with the art at
+> **Shipped** as `src/Systems/enemies/EnemyGunner.tscn`, with the art at
 > `src/Assets/enemies/gunner.png`. The sheet's top-right cell was the
 > placeholder; the shipped art is a hand-delivered high-resolution image
 > (source kept at `docs/plans/images/enemies/gunner.png`) normalised to the
@@ -345,11 +345,11 @@ constants — see "Numbers are data" below.
 - Existing sprite and animation are enough; this row needs **no new code at all** beyond
   0.1. It is the row that proves the enabling work.
 
-> **Shipped** as `src/Systems/EnemyBulwark.tscn`, with the art at
+> **Shipped** as `src/Systems/enemies/EnemyBulwark.tscn`, with the art at
 > `src/Assets/enemies/bulwark.png`.
 >
 > The row is data all the way down, exactly as planned: the scene is a copy of
-> `src/Systems/Enemy.tscn` with the sprite swapped and the stats written out, and
+> `src/Systems/enemies/Enemy.tscn` with the sprite swapped and the stats written out, and
 > nothing else changed. It uses `ChaseMovementBehaviour`, keeps the default
 > contact weapon, and carries `health 30` at `movement_speed 0.4` — three times
 > the grunt's health at a third of its speed.
@@ -383,7 +383,7 @@ constants — see "Numbers are data" below.
   Either regenerate this one opaque or use the turtle for the splitter. Do not ship the
   translucent cell as-is.
 
-> **Shipped** as `src/Systems/EnemySlimeling.tscn`, with the delivered opaque jelly at
+> **Shipped** as `src/Systems/enemies/EnemySlimeling.tscn`, with the delivered opaque jelly at
 > `src/Assets/enemies/slimeling.png`, normalised to the roster's 100x100 / 85%-fill
 > canvas. The source is kept at `docs/plans/images/enemies/jelly-splitter.png`. It
 > replaces the placeholder the row first shipped with — a green-tinted copy of the basic
@@ -421,7 +421,7 @@ constants — see "Numbers are data" below.
   `docs/visual_style.md` already records that as a shape rule. Either regenerate as a
   shallow S or accept that the collider circle and the sprite disagree.
 
-> **Shipped** as `src/Systems/EnemyLancer.tscn`. It uses `ChargeMovementBehaviour`
+> **Shipped** as `src/Systems/enemies/EnemyLancer.tscn`. It uses `ChargeMovementBehaviour`
 > (0.5), keeps the default contact weapon so the charge connects, and telegraphs with
 > the shared `idle` clip - the windup animation library is still the documented
 > limitation. The sprite is the shared default until the crimson-worm art arrives.
@@ -434,7 +434,7 @@ constants — see "Numbers are data" below.
 - Optional `AreaBurstOnEnter` child from 0.4. `contact_weapon` null.
 - `src/Scenes/effects/` already has the blast visuals, so this is mostly wiring.
 
-> **Shipped** as `src/Systems/EnemyToadstinker.tscn`: `contact_weapon` null, a
+> **Shipped** as `src/Systems/enemies/EnemyToadstinker.tscn`: `contact_weapon` null, a
 > `ChaseMovementBehaviour`, health below the grunt's, and an `AreaBurstOnEnter` child
 > at 8 damage inside 1.0 m. The sprite is the shared default until the toad art
 > arrives.
@@ -585,7 +585,7 @@ isolated single creature.
 ```
 
 > **Shipped** as `src/Systems/damage/front_shield.gd`, `FrontShield.tscn` and
-> `src/Systems/EnemyShieldbearer.tscn`. It zeroes `final_amount` for a source inside
+> `src/Systems/enemies/EnemyShieldbearer.tscn`. It zeroes `final_amount` for a source inside
 > `half_arc_degrees` of the sprite's `flip_h` facing, which leaves the sides and rear
 > open. The sprite is the shared default until the shield art arrives.
 
@@ -599,7 +599,7 @@ centered, filling the frame. Plain pure white background, no text, no frame, no 
 drop shadow, square 1:1, isolated single creature.
 ```
 
-> **Shipped** as `src/Systems/EnemySwarmer.tscn`: 1 health, 0.55 drawn scale, a smaller
+> **Shipped** as `src/Systems/enemies/EnemySwarmer.tscn`: 1 health, 0.55 drawn scale, a smaller
 > collider, and `pack_size = 8` on its spawn row. The sprite is the shared default until
 > the insect art arrives.
 >

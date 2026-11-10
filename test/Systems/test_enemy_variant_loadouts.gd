@@ -11,22 +11,22 @@
 class_name EnemyVariantLoadoutsTest
 extends GdUnitTestSuite
 
-const GRUNT_SCENE := "res://src/Systems/Enemy.tscn"
-const BULWARK_SCENE := "res://src/Systems/EnemyBulwark.tscn"
-const GUNNER_SCENE := "res://src/Systems/EnemyGunner.tscn"
-const SLIMELING_SCENE := "res://src/Systems/EnemySlimeling.tscn"
-const LANCER_SCENE := "res://src/Systems/EnemyLancer.tscn"
-const TOADSTINKER_SCENE := "res://src/Systems/EnemyToadstinker.tscn"
-const BLINK_SCENE := "res://src/Systems/EnemyBlink.tscn"
-const SHIELDBEARER_SCENE := "res://src/Systems/EnemyShieldbearer.tscn"
-const SWARMER_SCENE := "res://src/Systems/EnemySwarmer.tscn"
+const GRUNT_SCENE := "res://src/Systems/enemies/Enemy.tscn"
+const BULWARK_SCENE := "res://src/Systems/enemies/EnemyBulwark.tscn"
+const GUNNER_SCENE := "res://src/Systems/enemies/EnemyGunner.tscn"
+const SLIMELING_SCENE := "res://src/Systems/enemies/EnemySlimeling.tscn"
+const LANCER_SCENE := "res://src/Systems/enemies/EnemyLancer.tscn"
+const TOADSTINKER_SCENE := "res://src/Systems/enemies/EnemyToadstinker.tscn"
+const BLINK_SCENE := "res://src/Systems/enemies/EnemyBlink.tscn"
+const SHIELDBEARER_SCENE := "res://src/Systems/enemies/EnemyShieldbearer.tscn"
+const SWARMER_SCENE := "res://src/Systems/enemies/EnemySwarmer.tscn"
 
 ## The roster, by row. What each row arms and how it differs from the basic
 ## enemy is its role, so it belongs here rather than in the assertions.
 const VARIANTS := [
 	{
 		"name": "Bulwark",
-		"scene": "res://src/Systems/EnemyBulwark.tscn",
+		"scene": "res://src/Systems/enemies/EnemyBulwark.tscn",
 		# It is the contact-damage wall, so it keeps Thorns.
 		"weapon": "contact",
 		# It trades its speed for its health. That is the whole row.
@@ -35,7 +35,7 @@ const VARIANTS := [
 	},
 	{
 		"name": "Gunner",
-		"scene": "res://src/Systems/EnemyGunner.tscn",
+		"scene": "res://src/Systems/enemies/EnemyGunner.tscn",
 		# It shoots, so it arms a projectile weapon and no contact weapon.
 		"weapon": "ranged",
 		# It is not a wall and not a sprinter: it trades speed for range.
@@ -43,7 +43,7 @@ const VARIANTS := [
 	},
 	{
 		"name": "Slimeling",
-		"scene": "res://src/Systems/EnemySlimeling.tscn",
+		"scene": "res://src/Systems/enemies/EnemySlimeling.tscn",
 		# It dies into copies of itself, so it keeps the contact weapon: each
 		# mini is a body you still have to deal with.
 		"weapon": "contact",
@@ -52,7 +52,7 @@ const VARIANTS := [
 	},
 	{
 		"name": "Lancer",
-		"scene": "res://src/Systems/EnemyLancer.tscn",
+		"scene": "res://src/Systems/enemies/EnemyLancer.tscn",
 		# The charge is a body check, so it still hurts on touch.
 		"weapon": "contact",
 		# Its threat is the locked charge, not a bigger health pool.
@@ -61,7 +61,7 @@ const VARIANTS := [
 	},
 	{
 		"name": "Toadstinker",
-		"scene": "res://src/Systems/EnemyToadstinker.tscn",
+		"scene": "res://src/Systems/enemies/EnemyToadstinker.tscn",
 		# It arms no weapon: the threat is the blast it leaves when it dies.
 		"weapon": "none",
 		"fragile_than_grunt": true,
@@ -69,7 +69,7 @@ const VARIANTS := [
 	},
 	{
 		"name": "Blink",
-		"scene": "res://src/Systems/EnemyBlink.tscn",
+		"scene": "res://src/Systems/enemies/EnemyBlink.tscn",
 		# It reappears next to you and then touches you like the basic enemy.
 		"weapon": "contact",
 		"fragile_than_grunt": true,
@@ -77,7 +77,7 @@ const VARIANTS := [
 	},
 	{
 		"name": "Shieldbearer",
-		"scene": "res://src/Systems/EnemyShieldbearer.tscn",
+		"scene": "res://src/Systems/enemies/EnemyShieldbearer.tscn",
 		# It still hurts on touch; the shield is what makes you approach it.
 		"weapon": "contact",
 		# It pays for the shield with speed and gets a little health back.
@@ -87,7 +87,7 @@ const VARIANTS := [
 	},
 	{
 		"name": "Swarmer",
-		"scene": "res://src/Systems/EnemySwarmer.tscn",
+		"scene": "res://src/Systems/enemies/EnemySwarmer.tscn",
 		# A pack of tiny bodies, each of which still hurts on touch.
 		"weapon": "contact",
 		# It is the opposite trade: one hit kills it, but it closes fast.

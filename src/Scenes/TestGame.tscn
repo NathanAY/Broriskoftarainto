@@ -16,7 +16,7 @@
 [ext_resource type="Resource" uid="uid://da17oo3ywqp6d" path="res://src/Resources/items/SpreadShot.tres" id="14_t2ewv"]
 [ext_resource type="Resource" uid="uid://d28aq4yyk8v4l" path="res://src/Resources/items/SpreadShotIfStill.tres" id="15_hurhe"]
 [ext_resource type="PackedScene" uid="uid://ba47mswx3itwk" path="res://src/Systems/altars/ItemSacrificeAltar.tscn" id="16_5cdai"]
-[ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://src/Systems/Enemy.tscn" id="17_x8a8r"]
+[ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://src/Systems/enemies/Enemy.tscn" id="17_x8a8r"]
 [ext_resource type="Script" uid="uid://dw5xjss8pypdi" path="res://src/ui/interractable/interaction_manager.gd" id="18_bkxv3"]
 [ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://src/ui/PlayerUI.tscn" id="19_h5b8s"]
 [ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://src/Scenes/menu/ShopMenu.tscn" id="20_a6fui"]

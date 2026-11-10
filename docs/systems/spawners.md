@@ -15,12 +15,12 @@
 - Outputs: instantiated enemy/boss nodes added to runtime `Nodes/Enemies` container.
 
 ## The spawn table
-The regular spawner used to spawn one hardcoded scene — `src/Systems/Enemy.tscn` — for every wave of every run. It now spawns from a table:
+The regular spawner used to spawn one hardcoded scene — `src/Systems/enemies/Enemy.tscn` — for every wave of every run. It now spawns from a table:
 
 - **`spawn_table`** — an array of `EnemySpawnEntry` rows. A row names the enemy scene, how likely it is to come up (`weight`), and the loop it unlocks on (`min_loop`). A row with no weight never comes up.
 - **`pack_size`** — how many bodies one draw of a row spawns. A pack enemy arrives as a group; an ordinary row is a pack of one. The Swarmer row uses 8.
 - **`elite_min_loop`** — from that loop on the row spawns the same scene as an elite: `elite_health_multiplier` and `elite_damage_multiplier` scale its base stats and `elite_tint` multiplies its `Node2D` container. `0` means the row never turns elite. Every shipped row uses 3.
-- **`fallback_enemy_scene`** — what is spawned when the table is empty, or when every row is still locked behind its loop. It defaults to `src/Systems/Enemy.tscn`, so a scene that forgot to fill the table still spawns.
+- **`fallback_enemy_scene`** — what is spawned when the table is empty, or when every row is still locked behind its loop. It defaults to `src/Systems/enemies/Enemy.tscn`, so a scene that forgot to fill the table still spawns.
 - **`pick_spawn_entry()`** — the draw. Rows whose `min_loop` the current loop has not reached are closed; the open rows are drawn by weight. `pick_enemy_scene()` is the scene-only wrapper for callers that do not need the pack or elite fields.
 
 A row is a `Resource` rather than one of two parallel exported arrays, because the inspector cannot check that two arrays are the same length, and hand-synchronised parallel arrays rot the first time someone adds a row.

@@ -27,7 +27,7 @@
 - `src/Systems/boss_spawner.gd`: `spawn_boss()` for the loop's boss, `spawn_final_boss()` for the same scene scaled `final_boss_extra_loops` past it. The weapon ramp stops at `LOADOUT_LOOP_CAP` so a boss scaled far past the run does not grow without bound
 
 ## Enemies
-- `src/Scripts/Enemy.gd`: the script every enemy runs. An enemy *type* is a **scene**, not a class: `src/Systems/Enemy.tscn` (grunt), `src/Systems/EnemyBulwark.tscn` (roster row). The roster and how a row is added are in `docs/systems/enemies.md`
+- `src/Scripts/Enemy.gd`: the script every enemy runs. An enemy *type* is a **scene**, not a class: `src/Systems/enemies/Enemy.tscn` (grunt), `src/Systems/enemies/EnemyBulwark.tscn` (roster row). The roster and how a row is added are in `docs/systems/enemies.md`
 - `src/Systems/enemy_spawner.gd`: spawns from a table of `EnemySpawnEntry` rows; the table itself is filled in `src/Scenes/Game.tscn`
 
 # Testing

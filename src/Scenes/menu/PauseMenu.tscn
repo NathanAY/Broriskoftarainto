@@ -61,7 +61,12 @@ layout_mode = 2
 text = "Character"
 script = ExtResource("menu_button")
 
-[node name="OptionsButton" type="Button" parent="Control/VBoxContainer" unique_id=1487591074]
+[node name="GamepediaButton" type="Button" parent="Control/VBoxContainer" unique_id=1450112244]
+layout_mode = 2
+text = "Gamepedia"
+script = ExtResource("menu_button")
+
+[node name="OptionsButton"type="Button" parent="Control/VBoxContainer" unique_id=1487591074]
 layout_mode = 2
 text = "Options"
 script = ExtResource("menu_button")

@@ -15,11 +15,20 @@ class_name SandboxMenu
 ## Built in code rather than as a `.tscn` so a dev panel cannot drift out of sync
 ## with the script that drives it, and so it needs no hand-written scene file.
 
-## The enemy types the picker offers. One row for now - the roster's basic enemy.
+## The enemy types the picker offers: the whole roster, boss included.
 ## Adding a type is one entry here: the picker is built from this list, so a new
 ## type cannot be left out of the panel.
 const ENEMY_TYPES := [
-	{"name": "Grunt", "scene": "res://src/Systems/Enemy.tscn"},
+	{"name": "Grunt", "scene": "res://src/Systems/enemies/Enemy.tscn"},
+	{"name": "Bulwark", "scene": "res://src/Systems/enemies/EnemyBulwark.tscn"},
+	{"name": "Gunner", "scene": "res://src/Systems/enemies/EnemyGunner.tscn"},
+	{"name": "Slimeling", "scene": "res://src/Systems/enemies/EnemySlimeling.tscn"},
+	{"name": "Lancer", "scene": "res://src/Systems/enemies/EnemyLancer.tscn"},
+	{"name": "Toadstinker", "scene": "res://src/Systems/enemies/EnemyToadstinker.tscn"},
+	{"name": "Blink", "scene": "res://src/Systems/enemies/EnemyBlink.tscn"},
+	{"name": "Shieldbearer", "scene": "res://src/Systems/enemies/EnemyShieldbearer.tscn"},
+	{"name": "Swarmer", "scene": "res://src/Systems/enemies/EnemySwarmer.tscn"},
+	{"name": "Boss", "scene": "res://src/Systems/enemies/EnemyBoss.tscn"},
 ]
 
 ## Distance from the player the spawned enemies appear at. A ring, so a batch of

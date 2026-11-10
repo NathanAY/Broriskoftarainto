@@ -7,7 +7,7 @@
 class_name FrontShieldTest
 extends GdUnitTestSuite
 
-const ENEMY_SCENE := "res://src/Systems/Enemy.tscn"
+const ENEMY_SCENE := "res://src/Systems/enemies/Enemy.tscn"
 const SHIELD_SCENE := "res://src/Systems/damage/FrontShield.tscn"
 
 var _root: Node2D = null

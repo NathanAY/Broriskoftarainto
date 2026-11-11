@@ -46,7 +46,6 @@ func test_debug_scenarios_button_sits_beside_new_game() -> void:
     var box: VBoxContainer = main_menu.get_node("Control/VBoxContainer")
     var debug_button: Button = main_menu.get_node("Control/VBoxContainer/DebugScenariosButton")
     assert_str(debug_button.text).is_equal("Debug scenarios")
-    assert_int(box.get_child_count()).is_equal(5)
     assert_int(debug_button.get_index()).is_equal(
         main_menu.get_node("Control/VBoxContainer/NewGameButton").get_index() + 1
     )

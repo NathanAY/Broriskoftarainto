@@ -7,7 +7,7 @@ func find_targets(weapon: Node, find_range: float, holder: Node) -> Array[Node]:
     for node in holder.get_tree().get_nodes_in_group("damageable"):
         if node == holder:
             continue
-        var dist = weapon.global_position.distance_to(node.global_position)
+        var dist = reach_distance(weapon.global_position, node)
         if dist <= find_range:
             targets.append(node)
     return targets

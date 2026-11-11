@@ -309,15 +309,17 @@ func test_every_variant_collider_matches_its_art() -> void:
 ## authored far above the roster canvas and `Enemy._fit_sprite()` is what puts it
 ## back on it; without that fit it would draw at 512px in a 100px arena. The bound
 ## is an upper limit rather than an equality because the Swarmer is deliberately
-## authored smaller than the canvas.
-func test_no_variant_draws_larger_than_the_roster_canvas() -> void:
+## authored smaller than the canvas. The limit is each enemy's own `art_width`, so
+## an enemy that is deliberately drawn bigger (the Toadstinker) is still held to
+## the width its scene asks for.
+func test_no_variant_draws_larger_than_its_art_width() -> void:
 	for variant in VARIANTS:
 		var enemy := _spawn_enemy(variant["scene"])
 		var drawn := enemy.drawn_width()
 		assert_float(drawn).override_failure_message(
-			"%s draws %.0fpx wide, past the %.0fpx canvas: its source-size art was never fitted"
-			% [variant["name"], drawn, AssetSizes.ENEMY_SPRITE]
-		).is_less_equal(AssetSizes.ENEMY_SPRITE + 0.5)
+			"%s draws %.0fpx wide, past its %.0fpx art_width: its source-size art was never fitted"
+			% [variant["name"], drawn, enemy.art_width]
+		).is_less_equal(enemy.art_width + 0.5)
 
 
 ## The other half of the fit: an enemy whose art is authored above the canvas is

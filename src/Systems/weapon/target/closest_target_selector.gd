@@ -9,12 +9,12 @@ func find_targets(origin: Node, fin_range: float, ignore_node: Node) -> Array[No
             continue
         if _should_skip(ignore_node, node):
             continue
-        var dist = origin.global_position.distance_to(node.global_position)
+        var dist = reach_distance(origin.global_position, node)
         if dist <= fin_range:
             results.append(node)
 
     results.sort_custom(func(a, b):
-        return origin.global_position.distance_to(a.global_position) < origin.global_position.distance_to(b.global_position)
+        return reach_distance(origin.global_position, a) < reach_distance(origin.global_position, b)
     )
     return results
 

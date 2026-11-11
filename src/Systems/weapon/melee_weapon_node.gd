@@ -1,5 +1,9 @@
 #melee_weapon_node
 extends Node2D
+## How many stretches the forward flight is split into. The swing hits the fist's
+## own footprint when it starts (stretch 0), then, each time the fist arrives at the
+## end of a stretch, the rectangle that stretch has just covered (stretches 1..SEGMENTS).
+const SEGMENTS: int = 4
 
 var weapon_data: MeleeWeapon
 var holder: Node
@@ -8,29 +12,14 @@ var attacking: bool = false
 var origin_pos: Vector2
 var direction: Vector2 = Vector2.RIGHT
 var ignore_groups: Array = []
-var forward_swing = true
-# --- optional: store original hitbox/sprite scale for restoration
-var _original_scale_x: float = 1.0
 var _damaged_bodies: Array = []
-var _last_sweep_pos = null
-var attack_angle_deg: float = 6.0
 var _attack_origin_global: Vector2
 
-func _get_hitbox_perp_width() -> float:
-    var width = 1.0
-    var cs = hitbox.get_node_or_null("CollisionShape2D")
-    if cs and cs.shape:
-        var s = cs.shape
-        if s is CircleShape2D:
-            width = s.radius * 2.0 * abs(hitbox.scale.y)
-        elif s is RectangleShape2D:
-            width = s.extents.y * 2.0 * abs(hitbox.scale.y)
-        elif s is CapsuleShape2D:
-            width = s.radius * 2.0 * abs(hitbox.scale.y)
-    return clamp(width, 4.0, 200.0)
-
 @onready var sprite_node: Sprite2D = $Sprite2D
+## Only its shape is used: the fist's length and width. Damage comes from the
+## segment rectangles, not from this area overlapping anything.
 @onready var hitbox: Area2D = $Area2D
+
 
 func setup(data: MeleeWeapon, h: Node, em: Node) -> void:
     weapon_data = data
@@ -38,22 +27,20 @@ func setup(data: MeleeWeapon, h: Node, em: Node) -> void:
     event_manager = em
     ignore_groups = data.ignore_groups
     sprite_node.texture = data.sprite
-    hitbox.body_entered.connect(_on_body_entered)
+    hitbox.monitoring = false
+    hitbox.monitorable = false
     origin_pos = sprite_node.global_position
-    _original_scale_x = hitbox.scale.x
+
 
 func attack(dir: Vector2) -> void:
     if attacking:
-        print("Skip")
         return
     if event_manager:
         event_manager.emit_event("on_attack", {"weapon": weapon_data})
     attacking = true
-    forward_swing = true  # reset for this attack
     origin_pos = position
     direction = dir.normalized()
     _damaged_bodies.clear()
-    _last_sweep_pos = global_position
     _attack_origin_global = global_position
 
     if weapon_data.sprite_node and is_instance_valid(weapon_data.sprite_node):
@@ -66,168 +53,103 @@ func attack(dir: Vector2) -> void:
     var tween = get_tree().create_tween()
     SoundManager.play(weapon_data.attack_sound.pick_random(), 0, 0)
 
-    # Forward movement. `weapon_range` is meters and a `Vector2` is pixels, so
-    # every measurement below goes through `get_range_px()` - once here, then
-    # `reach` carries the pixel distance through the swing. Reading
-    # `weapon_range` directly would shrink the swing by PIXELS_PER_METER.
+    # `weapon_range` is meters and a `Vector2` is pixels, so every measurement
+    # below goes through `get_range_px()`. Reading `weapon_range` directly would
+    # shrink the swing by PIXELS_PER_METER.
     var reach = weapon_data.get_range_px()
     var speed = reach * weapon_data._current_attack_speed
     var duration = reach / speed
 
-    # Stretch hitbox proportionally to swing speed
-    _adjust_hitbox_stretch(speed)
-
-    # detect overlaps immediately on attack start
-    _check_existing_overlaps()
-
-    # Split forward swing into segments and check overlaps after each step
-    var segments: int = 6
-    var forward_total_time = duration / 3.0
-    var seg_time = forward_total_time / segments
-    for i in range(segments):
-        var t = float(i + 1) / segments
-        var target_pos = origin_pos + direction * reach * t
-        tween.tween_property(self, "position", target_pos, seg_time).set_trans(Tween.TRANS_LINEAR)
-        tween.tween_callback(Callable(self, "_check_existing_overlaps"))
-    # Mark forward as finished after the last segment
-    tween.tween_callback(Callable(self, "_on_forward_finished"))
+    # What the fist itself covers is hit the moment the swing starts. The fist then
+    # flies one stretch at a time and, on arriving at the end of each, hits the
+    # ground that stretch just covered - never ground it has not reached yet.
+    hit_segment(0)
+    var seg_time = (duration / 3.0) / SEGMENTS
+    for i in range(SEGMENTS):
+        var t = float(i + 1) / SEGMENTS
+        tween.tween_property(self, "position", origin_pos + direction * reach * t, seg_time).set_trans(Tween.TRANS_LINEAR)
+        tween.tween_callback(hit_segment.bind(i + 1))
     # Backward
     tween.tween_property(self, "position", origin_pos, duration / 2).set_trans(Tween.TRANS_LINEAR)
     tween.finished.connect(func():
         attacking = false
-        _reset_hitbox_scale()  # Restore hitbox scale
-        #_last_sweep_pos = null
         if weapon_data.sprite_node and is_instance_valid(weapon_data.sprite_node):
             weapon_data.sprite_node.visible = true
         sprite_node.visible = false
     )
 
-func _on_forward_finished():
-    forward_swing = false
 
-func _check_existing_overlaps() -> void:
-    if not forward_swing:
-        return
-    var from_pos = _last_sweep_pos if _last_sweep_pos else global_position
-    var to_pos = global_position
-    _sweep_between(from_pos, to_pos)
-    _last_sweep_pos = to_pos
+## Half the fist's length: the front of the fist is this far ahead of its centre,
+## and it is the front that has to get to a target.
+func tip_offset() -> float:
+    var cs := hitbox.get_node_or_null("CollisionShape2D") as CollisionShape2D
+    if cs and cs.shape is RectangleShape2D:
+        return (cs.shape as RectangleShape2D).size.x * 0.5 * absf(hitbox.scale.x)
+    return 0.0
 
-func _sweep_between(from_pos: Vector2, to_pos: Vector2) -> void:
-    var motion = to_pos - from_pos
-    var dist = motion.length()
-    if dist <= 0.001:
-        # fallback to overlap check
-        var overlapping := hitbox.get_overlapping_bodies()
-        for body in overlapping:
-            if _damaged_bodies.has(body):
-                continue
-            _on_body_entered(body)
-        return
 
-    var dir = motion.normalized()
-    var perp = Vector2(-dir.y, dir.x)
+## Distance along the path, from where the swing started, at which stretch `index`
+## ends: where the fist's tip is once the fist has arrived there. Stretch 0 is the
+## fist's own footprint and ends at its tip; stretch k is the k-th part of the flight.
+func segment_end(index: int) -> float:
+    return tip_offset() + weapon_data.get_range_px() * float(index) / SEGMENTS
 
-    # estimate hitbox width (perpendicular size) from child CollisionShape2D when available
-    var width = 8.0
-    var cs = hitbox.get_node_or_null("CollisionShape2D")
-    if cs and cs.shape:
-        var s = cs.shape
-        if s is CircleShape2D:
-            width = s.radius * 2.0 * abs(hitbox.scale.y)
-        elif s is RectangleShape2D:
-            width = s.extents.y * 2.0 * abs(hitbox.scale.y)
-        elif s is CapsuleShape2D:
-            width = s.radius * 2.0 * abs(hitbox.scale.y)
 
-    # clamp width to a reasonable range to avoid huge offsets from stretched X-scale
-    width = clamp(width, 4.0, 200.0)
+## Where stretch `index` starts: the end of the one before it (the fist's centre
+## for stretch 0, which has none).
+func segment_start(index: int) -> float:
+    return 0.0 if index <= 0 else segment_end(index - 1)
 
-    var rays = 3
-    for i in range(rays):
-        var t = 0.0
-        if rays > 1:
-            t = float(i) / float(rays - 1)
-        var offset = perp * ((t - 0.5) * width)
-        var fromp = from_pos + offset
-        var top = to_pos + offset
-        var exclude = [holder, self]
-        var ps: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(fromp, top)
-        ps.exclude = exclude
-        ps.collide_with_areas = true
-        ps.collide_with_bodies = true
-        ps.collision_mask = 0x7fffffff
-        var res = get_world_2d().direct_space_state.intersect_ray(ps)
-        if res and res.collider:
-            _process_sweep_collider(res.collider)
 
-func _process_sweep_collider(collider: Object) -> void:
-    if not collider: return
+func first_segment_end() -> float:
+    return segment_end(0)
+
+
+## The fist's width across its path.
+func _perp_width() -> float:
+    var cs := hitbox.get_node_or_null("CollisionShape2D") as CollisionShape2D
+    var width := 8.0
+    if cs and cs.shape is RectangleShape2D:
+        width = (cs.shape as RectangleShape2D).size.y * absf(hitbox.scale.y)
+    elif cs and cs.shape is CircleShape2D:
+        width = (cs.shape as CircleShape2D).radius * 2.0 * absf(hitbox.scale.y)
+    return clampf(width, 4.0, 200.0)
+
+
+## Hits everything inside the rectangle that covers stretch `index` of the path:
+## from the end of the previous stretch to the end of this one, as wide as the
+## fist. Called when the fist arrives at the end of the stretch, so the rectangle
+## is ground the fist's tip has just covered. A target already hit this swing is
+## not hit again.
+func hit_segment(index: int) -> void:
+    var start := segment_start(index)
+    var end := segment_end(index)
+    var shape := RectangleShape2D.new()
+    shape.size = Vector2(end - start, _perp_width())
+    var query := PhysicsShapeQueryParameters2D.new()
+    query.shape = shape
+    query.transform = Transform2D(direction.angle(), _attack_origin_global + direction * (start + end) * 0.5)
+    query.collide_with_areas = true
+    query.collide_with_bodies = true
+    query.collision_mask = 0x7fffffff
+    query.exclude = [hitbox.get_rid()]
+    for hit in get_world_2d().direct_space_state.intersect_shape(query, 64):
+        _try_damage(hit.collider)
+
+
+func _try_damage(collider: Object) -> void:
     var target: Node = _resolve_damageable_target(collider)
-    if not target: return
-    if not _is_on_movement_line(target):
+    if not target or target == holder:
         return
-    if holder and target.is_in_group(holder.name): return
-    if ignore_groups.any(func(g): return target.is_in_group(g)): return
+    if holder and target.is_in_group(holder.name):
+        return
+    if ignore_groups.any(func(g): return target.is_in_group(g)):
+        return
     if _damaged_bodies.has(target):
         return
-    do_damage(target)
     _damaged_bodies.append(target)
+    do_damage(target)
 
-func _is_in_attack_cone(_target: Node) -> bool:
-    return false
-
-func _get_target_hitbox_radius(target: Node) -> float:
-    # Try to find a `Hitbox` Area2D child and read its CollisionShape2D
-    var hb = null
-    if target.has_node("Hitbox"):
-        hb = target.get_node("Hitbox")
-    else:
-        # try to find an Area2D child
-        for c in target.get_children():
-            if c is Area2D:
-                hb = c
-                break
-    if not hb:
-        return 8.0
-    var cs = hb.get_node_or_null("CollisionShape2D")
-    if not cs or not cs.shape:
-        return 8.0
-    var s = cs.shape
-    if s is CircleShape2D:
-        return s.radius * max(abs(hb.global_scale.x), abs(hb.global_scale.y))
-    elif s is RectangleShape2D:
-        return max(s.extents.x * abs(hb.global_scale.x), s.extents.y * abs(hb.global_scale.y))
-    elif s is CapsuleShape2D:
-        return s.radius * max(abs(hb.global_scale.x), abs(hb.global_scale.y))
-    return 8.0
-
-func _is_on_movement_line(target: Node) -> bool:
-    if not target: return false
-    var target_pos = Vector2()
-    if target.has_method("global_position"):
-        target_pos = target.global_position
-    elif target is Node2D:
-        target_pos = (target as Node2D).global_position
-    else:
-        return false
-
-    var start = _attack_origin_global if _attack_origin_global else global_position
-    var forward = direction.normalized()
-    var to_target = target_pos - start
-    var proj = to_target.dot(forward)
-    if proj < 0.0:
-        return false
-    var max_range = weapon_data.get_range_px() if weapon_data and weapon_data.weapon_range else 0.0
-    if max_range > 0 and proj > max_range * 1.1:
-        return false
-
-    var perp = Vector2(-forward.y, forward.x)
-    var perp_dist = abs(to_target.dot(perp))
-    var target_radius = _get_target_hitbox_radius(target)
-    var weapon_half_width = _get_hitbox_perp_width() * 0.5
-    # movement line intersects target hitbox if perp distance <= target_radius + weapon_half_width
-    return perp_dist <= (target_radius + weapon_half_width + 0.5)
 
 func _resolve_damageable_target(collider: Object) -> Node:
     # If the collider itself is the damageable body, return it.
@@ -242,19 +164,6 @@ func _resolve_damageable_target(collider: Object) -> Node:
             p = p.get_parent()
     return null
 
-func _on_body_entered(body: Node) -> void:
-    if not attacking: return
-    if not forward_swing: return
-    if not body.is_in_group("damageable"): return
-    if holder and body.is_in_group(holder.name): return
-    if ignore_groups.any(func(g): return body.is_in_group(g)): return
-    # Only apply damage if the target overlaps the weapon movement line
-    if not _is_on_movement_line(body):
-        return
-    if _damaged_bodies.has(body):
-        return
-    do_damage(body)
-    _damaged_bodies.append(body)
 
 func do_damage(body):
     var ctx = DamageContext.new()
@@ -265,7 +174,7 @@ func do_damage(body):
     ctx.tags.append("melee")
     if event_manager: 
         event_manager.emit_event("before_deal_damage", {"damage_context": ctx})
-    var bodyHealth: Health = body.get_node("Health")
+    var bodyHealth = body.get_node("Health")
     if not bodyHealth.apply_damage(ctx):
         return  # already dead: the swing does not land, so no hit/kill events either
     if event_manager:
@@ -274,9 +183,3 @@ func do_damage(body):
         event_manager.emit_event("on_hit", {"melee": self, "body": body, "damage_context": ctx, "weapon": weapon_data})
     if event_manager and bodyHealth.current_health <= 0:
         event_manager.emit_event("on_kill", {"melee": self, "body": body, "damage_context": ctx, "weapon": weapon_data})
-
-func _adjust_hitbox_stretch(speed: float) -> void:
-    hitbox.scale.x = _original_scale_x * speed
-
-func _reset_hitbox_scale() -> void:
-    hitbox.scale.x = _original_scale_x

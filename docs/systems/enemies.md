@@ -138,7 +138,7 @@ Both are spawner rows rather than enemy scripts, so they apply to any scene:
 - `Stats` (child), `Health`, `WeaponHolder`, `ItemHolder`, `EventManager`, MovementBehaviour.
 
 ## Known limitations / TODOs
-- The roster's four newer types use the shared default enemy sprite until their own art arrives: `src/Systems/enemies/EnemyToadstinker.tscn`, `src/Systems/enemies/EnemyBlink.tscn`, `src/Systems/enemies/EnemyShieldbearer.tscn` and `src/Systems/enemies/EnemySwarmer.tscn` all point at `src/Assets/enemies/spitter.png`. Replace the texture on each scene when the art ships. The Lancer now has its own `src/Assets/enemies/lancer.png`.
+- The roster's newer types use the shared default enemy sprite until their own art arrives: `src/Systems/enemies/EnemyToadstinker.tscn`, `src/Systems/enemies/EnemyShieldbearer.tscn` and `src/Systems/enemies/EnemySwarmer.tscn` all point at `src/Assets/enemies/spitter.png`. Replace the texture on each scene when the art ships. The Lancer now has its own `src/Assets/enemies/lancer.png`, and the Blink its own `src/Assets/enemies/blink.png` (512px source-size art, generated per `docs/visual_style.md`).
 - The Swarmer is drawn at 0.55 scale with a smaller collider, so the collider test reads the drawn width rather than the texture width.
 - Death handling uses animation_finished connect with a short anonymous callback — works but can be fragile if animations change. `_die` is re-entrancy guarded, so a duplicate `on_death` cannot restart the animation, but the callback still depends on the animation being named `death`.
 - `StageManager` and `EnemySpawner` end a stage on `Nodes/Enemies.get_child_count() == 0`, so a corpse still holds the stage open for the remainder of its death animation.

@@ -331,7 +331,9 @@ func test_source_size_art_is_drawn_on_the_roster_canvas() -> void:
 	assert_int(sprite.texture.get_width()).override_failure_message(
 		"the Lancer no longer uses source-size art, so the fit is untested here"
 	).is_greater(int(AssetSizes.ENEMY_SPRITE))
-	assert_float(enemy.drawn_width()).is_equal_approx(AssetSizes.ENEMY_SPRITE, 0.5)
+	# The art is trimmed to the creature, so the drawn width is the scene's own
+	# art_width rather than the file's width.
+	assert_float(enemy.drawn_width()).is_equal_approx(enemy.art_width, 0.5)
 
 
 ## The fit has to survive the animations, which is the whole reason it is written

@@ -1,4 +1,4 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cwsneg8qbp427"]
 
 [ext_resource type="Script" uid="uid://cs2dub84x6wjd" path="res://src/Scripts/Enemy.gd" id="1_enemy"]
 [ext_resource type="Texture2D" uid="uid://de84hh4dfbs0s" path="res://src/Assets/enemies/shieldbearer.png" id="2_sprite"]
@@ -16,42 +16,59 @@
 [ext_resource type="PackedScene" uid="uid://brgr2yeaajlxi" path="res://src/Scenes/effects/HitFlashManager.tscn" id="14_flash"]
 [ext_resource type="PackedScene" path="res://src/Systems/damage/FrontShield.tscn" id="15_shield"]
 
+[sub_resource type="Gradient" id="Gradient_shadow"]
+offsets = PackedFloat32Array(0.6935484, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_shadow"]
+gradient = SubResource("Gradient_shadow")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 53.3
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hitbox"]
 radius = 58.86
 
-[node name="Enemy" type="CharacterBody2D"]
+[node name="Enemy" type="CharacterBody2D" unique_id=59727081]
 script = ExtResource("1_enemy")
-art_width = 130.0
+art_width = 119.583
 
-[node name="Node2D" type="Node2D" parent="."]
+[node name="Node2D" type="Node2D" parent="." unique_id=168910526]
 
-[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
+[node name="Sprite2D" type="Sprite2D" parent="Node2D" unique_id=1788081184]
 texture = ExtResource("2_sprite")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="Shadow" type="Sprite2D" parent="Node2D/Sprite2D" unique_id=1768089190]
+modulate = Color(0, 0, 0, 0.35)
+show_behind_parent = true
+position = Vector2(0, 317.643)
+scale = Vector2(17.938, 5.74)
+texture = SubResource("GradientTexture2D_shadow")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=409916709]
 shape = SubResource("CircleShape2D_body")
 one_way_collision_margin = 1.2
 
-[node name="Hitbox" type="Area2D" parent="."]
+[node name="Hitbox" type="Area2D" parent="." unique_id=1317397943]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=1629304204]
 shape = SubResource("CircleShape2D_hitbox")
 
-[node name="EventManager" parent="." instance=ExtResource("3_bus")]
+[node name="EventManager" parent="." unique_id=1753470814 instance=ExtResource("3_bus")]
 
-[node name="HealthBar" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("4_bar")]
+[node name="HealthBar" parent="." unique_id=1541311889 node_paths=PackedStringArray("event_manager") instance=ExtResource("4_bar")]
 event_manager = NodePath("../EventManager")
 
-[node name="Stats" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("5_stats")]
+[node name="Stats" parent="." unique_id=476215279 node_paths=PackedStringArray("event_manager") instance=ExtResource("5_stats")]
 event_manager = NodePath("../EventManager")
 stats = {
-"attack_range": 1.67,
-"attack_speed": 1.0,
 "area_radius": 1.0,
 "area_size_multiplier": 1.0,
+"attack_range": 1.67,
+"attack_speed": 1.0,
 "critical_chance": 0.0,
 "critical_multiplier": 1.5,
 "damage": 1.0,
@@ -64,24 +81,23 @@ stats = {
 "projectile_speed_multiplier": 1.0
 }
 
-[node name="ItemHolder" parent="." instance=ExtResource("6_items")]
+[node name="ItemHolder" parent="." unique_id=1921133846 instance=ExtResource("6_items")]
 
-[node name="WeaponHolder" parent="." instance=ExtResource("7_weapons")]
+[node name="WeaponHolder" parent="." unique_id=1323889258 instance=ExtResource("7_weapons")]
 
-[node name="Health" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_health")]
+[node name="Health" parent="." unique_id=465439459 node_paths=PackedStringArray("event_manager") instance=ExtResource("8_health")]
 event_manager = NodePath("../EventManager")
 
-[node name="ParticleEffectManager" parent="." instance=ExtResource("9_particles")]
+[node name="ParticleEffectManager" parent="." unique_id=1110098555 instance=ExtResource("9_particles")]
 
-[node name="TextureBurstManager" parent="." instance=ExtResource("13_burst")]
+[node name="TextureBurstManager" parent="." unique_id=2067407045 instance=ExtResource("13_burst")]
 
-[node name="HitFlashManager" parent="." instance=ExtResource("14_flash")]
+[node name="HitFlashManager" parent="." unique_id=1990837375 instance=ExtResource("14_flash")]
 
-[node name="AnimationPlayer" parent="." instance=ExtResource("10_anim")]
+[node name="AnimationPlayer" parent="." unique_id=1809944152 instance=ExtResource("10_anim")]
 libraries/ = ExtResource("11_anims")
 autoplay = &""
 
-[node name="MovementBehaviour" parent="." instance=ExtResource("12_move")]
+[node name="MovementBehaviour" parent="." unique_id=772572299 instance=ExtResource("12_move")]
 
-[node name="FrontShield" parent="." instance=ExtResource("15_shield")]
-half_arc_degrees = 70.0
+[node name="FrontShield" parent="." unique_id=1502048734 instance=ExtResource("15_shield")]

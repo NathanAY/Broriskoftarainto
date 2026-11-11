@@ -16,6 +16,16 @@
 [ext_resource type="PackedScene" uid="uid://brgr2yeaajlxi" path="res://src/Scenes/effects/HitFlashManager.tscn" id="14_flash"]
 [ext_resource type="PackedScene" uid="uid://c5mkhi6kbs6kl" path="res://src/Systems/damage/AreaBurstOnEnter.tscn" id="15_burst_damage"]
 
+[sub_resource type="Gradient" id="Gradient_shadow"]
+offsets = PackedFloat32Array(0.6935484, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_shadow"]
+gradient = SubResource("Gradient_shadow")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 55.2
 
@@ -25,12 +35,20 @@ radius = 61.6
 [node name="Enemy" type="CharacterBody2D" unique_id=1262615031]
 script = ExtResource("1_enemy")
 contact_weapon = null
-art_width = 138.0
+art_width = 127.893
 
 [node name="Node2D" type="Node2D" parent="." unique_id=526697769]
 
 [node name="Sprite2D" type="Sprite2D" parent="Node2D" unique_id=1093975192]
+texture_filter = 4
 texture = ExtResource("2_sprite")
+
+[node name="Shadow" type="Sprite2D" parent="Node2D/Sprite2D" unique_id=1550956659]
+modulate = Color(0, 0, 0, 0.35)
+show_behind_parent = true
+position = Vector2(0, 279.154)
+scale = Vector2(14.828, 4.745)
+texture = SubResource("GradientTexture2D_shadow")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=750831672]
 shape = SubResource("CircleShape2D_body")

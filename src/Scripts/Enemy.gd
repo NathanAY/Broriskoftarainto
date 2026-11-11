@@ -1,3 +1,4 @@
+@tool
 #Enemy
 extends CharacterBody2D
 class_name Enemy
@@ -18,6 +19,8 @@ class_name Enemy
 
 var target: Node = null
 var _alive: bool = true
+## The fit currently written into `visual.scale`, so `_fit_sprite()` can replace it.
+var _applied_fit: float = 1.0
 
 ## Contact damage. Thorns hooks the body's own Hitbox, so an enemy that should
 ## not hurt on touch sets this to null and arms itself some other way.
@@ -26,7 +29,12 @@ var _alive: bool = true
 ## The width the art is drawn at, in pixels. The sprite keeps the file's authored
 ## resolution and is fitted to this here, so a 512px source and a 100px one are
 ## the same size in the arena. The boss raises it to its own canvas.
-@export var art_width: float = AssetSizes.ENEMY_SPRITE
+## Setting it re-fits the art, so the editor shows the enemy at its in-game size.
+@export var art_width: float = AssetSizes.ENEMY_SPRITE:
+    set(value):
+        art_width = value
+        if is_node_ready():
+            _fit_sprite()
 
 ## Soft crowd separation: force starts pulling once two enemies get closer
 ## than SEPARATION_FACTOR * body radius (hard body-body collision is disabled
@@ -38,6 +46,11 @@ const SEPARATION_FACTOR: float = 2.0
 const SEPARATION_FORCE_SCALE: float = 2.5
 
 func _ready():
+    # In the editor the script only fits the art, so the scene shows the same size
+    # as in game. Everything below needs a running arena.
+    if Engine.is_editor_hint():
+        _fit_sprite()
+        return
     add_to_group("enemies")  # Add enemy to a group
     add_to_group("damageable")
     # Contact damage is optional: an enemy that should not hurt on touch arms
@@ -65,10 +78,28 @@ func _ready():
 ## assigned over it, so nothing a scene authored is lost. The scale goes on the
 ## **container**, not the sprite: `idle` and `move` animate `Sprite2D:scale`, and
 ## a fit written on the sprite is gone the first time one of them plays.
+## The editor saves whatever scale the fit left on the container. Take the fit off
+## before a save so the scene file keeps the authored scale, then put it back, so
+## the fit is never saved and then applied a second time in game.
+func _notification(what: int) -> void:
+    if not Engine.is_editor_hint() or visual == null:
+        return
+    if what == NOTIFICATION_EDITOR_PRE_SAVE:
+        visual.scale = visual.scale / _applied_fit
+        _applied_fit = 1.0
+    elif what == NOTIFICATION_EDITOR_POST_SAVE:
+        _fit_sprite()
+
+
 func _fit_sprite() -> void:
     if sprite == null or sprite.texture == null or visual == null:
         return
-    visual.scale *= Vector2.ONE * AssetSizes.scale_for(sprite.texture, art_width)
+    # Swap the fit we last applied for the new one, so a scale something else put
+    # on the container (a split child's `split_scale`) survives, and running the fit
+    # again (editor, then `_ready`, then an `art_width` change) does not compound.
+    var fit := AssetSizes.scale_for(sprite.texture, art_width)
+    visual.scale = visual.scale / _applied_fit * fit
+    _applied_fit = fit
     # A source-resolution texture is minified every frame and the camera zooms, so
     # it needs the same mipmapped sampling the portal art does. A file already at
     # the drawn size is left on the default filter.
@@ -90,7 +121,7 @@ func set_target_position(new_target: Node):
     target = new_target  
 
 func _physics_process(_delta):
-    if !_alive:
+    if Engine.is_editor_hint() or !_alive:
         return
     behaviour.process_movement(self, _delta)
     velocity += _separation_force()

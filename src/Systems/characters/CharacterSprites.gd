@@ -30,8 +30,11 @@ static func layers(character: CharacterData) -> Array:
 ## The body is the rig's own texture so `flip_h`, the damage flash `modulate` and
 ## the scale animation all reach the face layers through the parent.
 static func apply_to_rig(character: CharacterData, rig: Sprite2D) -> void:
+	# The shadow is authored under the rig so the idle/move scale reaches it; it is
+	# not a face layer, so the rebuild must leave it in place.
 	for child in rig.get_children():
-		child.free()
+		if child.name != &"Shadow":
+			child.free()
 	rig.texture = null
 	var stack := layers(character)
 	for i in range(stack.size()):

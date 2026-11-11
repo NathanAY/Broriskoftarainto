@@ -64,13 +64,24 @@ The numbers are `.tscn` data, so they are rebalanced without touching a script. 
 ### The collider has to match the art
 The body collider is a circle around the drawn creature, so it scales with the sprite. A bigger sprite wearing the old collider is a wall the player walks straight through; a collider far larger than the art is a wall the player cannot touch. The roster's enemies share the 100x100 canvas the asset table specifies, so they share the basic enemy's collider.
 
-### The art is drawn on a 100x100 canvas
+### The art is trimmed to the creature
+Each roster PNG is cropped to its visible pixels (alpha > 16), so the texture edge is the creature's edge. `Enemy.art_width` is the width the **creature** is drawn at, not the width of a canvas around it, and `Enemy._fit_sprite()` scales the texture so its width equals `art_width`. `Enemy.gd` is a `@tool` script, so the fit also runs in the editor: the scene shows the enemy at its in-game size and the blue collider lines up with the art. Setting `art_width` in the inspector re-fits it live. The fit is written on the `Node2D` container, not on the sprite, because the shared `idle` and `move` animations animate `Sprite2D:scale` and would overwrite it; `Enemy.drawn_width()` folds both scales together. The collider test compares the collider to that drawn width.
 
-Every roster sprite is **drawn** on a 100x100 square with the creature filling about 85% of its longest side. The file itself may be authored larger — `src/Assets/enemies/lancer.png` is 512x512 — and `Enemy.art_width` (default `AssetSizes.ENEMY_SPRITE`) plus `Enemy._fit_sprite()` scale it onto the canvas. The fit is written on the `Node2D` container, not on the sprite, because the shared `idle` and `move` animations animate `Sprite2D:scale` and would overwrite it; `Enemy.drawn_width()` folds both scales together. That is what makes the collider comparison meaningful: the test compares the collider to the **drawn** width, not to the file's width.
+The art was padded before, so one creature's size was not comparable to another's. Trimming makes the sprite's visible size match its scene's `art_width` and lets the shadows below use the creature's own bounds.
+
+### The shadow
+Every roster enemy has a ground **`Shadow`** (a radial-gradient `Sprite2D` squashed into an oval) as a child of the rig `Node2D/Sprite2D`, so the idle/move scale animation grows it with the body. `show_behind_parent` keeps it under the sprite. Because the shadow sits under the fitted rig, its values are in texture pixels of the trimmed PNG, and they are derived from that texture's size `W × H`:
+
+- `scale` x = `W / 64`, so the shadow is exactly the sprite's width.
+- `scale` y = `0.32 ×` scale x, a flat oval.
+- `position` y = `H / 2 − 0.0576 × H`, so the centre sits slightly above the sprite's bottom edge.
+- The gradient's second stop is at `1` (not `0.956`), so the oval's fade reaches the edge of the shadow.
+
+These values come from the EnemyGunner's hand-tuned shadow (`scale` (16, 5.12), `position` y 348.16 on a 1024x787 texture). `test/Systems/test_enemy_shadow.gd` checks every `Enemy*.tscn`.
 
 The roster's art was generated as one six-creature sheet and cut up afterwards. `test/tools/extract_enemy_sprites.gd` does the cutting: it flood-fills the white backdrop in from the sheet's border, splits what is left into connected components and writes each one out as a 100x100 PNG. The grid in a generated sheet is never clean, so slicing it into equal rectangles cuts creatures in half.
 
-The Gunner, the Slimeling and the Lancer were delivered as single images instead of being cut from the sheet, so their cells are not listed in the extractor's `CELLS` table — running the tool must not overwrite them. The Gunner and the Slimeling are normalised to the 100x100 / 85%-fill canvas before they are saved into `src/Assets/enemies/`, and the untouched source for those two is kept at `docs/plans/images/enemies/gunner.png` and `docs/plans/images/enemies/jelly-splitter.png`. The Lancer keeps a 512x512 source at the same proportions. `Sprite2D` draws a texture at its pixel size, so a file left at its delivered resolution used to draw at the wrong size against the rest of the roster; `Enemy._fit_sprite()` is what now makes the file resolution irrelevant.
+The Gunner, the Slimeling and the Lancer were delivered as single images instead of being cut from the sheet, so their cells are not listed in the extractor's `CELLS` table. Running `extract_enemy_sprites.gd` would write padded 100x100 cut-outs over the trimmed art, so do not run it on the roster files without re-trimming them afterwards. The untouched source for the Gunner and the Slimeling is kept at `docs/plans/images/enemies/gunner.png` and `docs/plans/images/enemies/jelly-splitter.png`.
 
 ## Splitting
 `SplitOnDeath` is an optional child on an enemy scene. It subscribes to the owner's `on_death` and spawns smaller copies of the enemy when it dies.

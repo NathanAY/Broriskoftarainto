@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bts65hpt63es1"
-path="res://.godot/imported/A_sprite_sheet_of_six_enemies.jpg-a8a9a517f0590b0a1b025070e22c9311.ctex"
+uid="uid://de84hh4dfbs0s"
+path="res://.godot/imported/shieldbearer.png-056654219af04abc77e82e77c22ead88.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/plans/images/enemies/A_sprite_sheet_of_six_enemies.jpg"
-dest_files=["res://.godot/imported/A_sprite_sheet_of_six_enemies.jpg-a8a9a517f0590b0a1b025070e22c9311.ctex"]
+source_file="res://src/Assets/enemies/shieldbearer.png"
+dest_files=["res://.godot/imported/shieldbearer.png-056654219af04abc77e82e77c22ead88.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

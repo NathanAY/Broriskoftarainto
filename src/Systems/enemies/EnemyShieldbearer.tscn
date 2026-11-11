@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" uid="uid://cs2dub84x6wjd" path="res://src/Scripts/Enemy.gd" id="1_enemy"]
-[ext_resource type="Texture2D" uid="uid://dbviainil2yci" path="res://src/Assets/enemies/spitter.png" id="2_sprite"]
+[ext_resource type="Texture2D" uid="uid://de84hh4dfbs0s" path="res://src/Assets/enemies/shieldbearer.png" id="2_sprite"]
 [ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://src/Systems/LocalEventManager.tscn" id="3_bus"]
 [ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://src/ui/HealthBar.tscn" id="4_bar"]
 [ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://src/Systems/stats/Stats.tscn" id="5_stats"]
@@ -17,13 +17,14 @@
 [ext_resource type="PackedScene" path="res://src/Systems/damage/FrontShield.tscn" id="15_shield"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
-radius = 41.0
+radius = 53.3
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hitbox"]
-radius = 45.2769
+radius = 58.86
 
 [node name="Enemy" type="CharacterBody2D"]
 script = ExtResource("1_enemy")
+art_width = 130.0
 
 [node name="Node2D" type="Node2D" parent="."]
 

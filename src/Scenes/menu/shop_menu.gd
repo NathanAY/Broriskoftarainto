@@ -303,7 +303,8 @@ func _update_stats() -> void:
     if not stats_node.stats:
         return
 
-    for stat_name in stats_node.stats.keys():
+    # Base stats plus modifier-only ones (armor), which are not in the base keys.
+    for stat_name in stats_node.display_stat_names():
         var hbox = HBoxContainer.new()
 
         # Add Icon

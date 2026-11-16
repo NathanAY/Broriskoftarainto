@@ -143,8 +143,9 @@ Rules that keep this the only correct way:
 
 ## Where armor shows up during a run
 Because `armor` is not in `Stats.DEFAULT_STATS`, a list built from the base stat
-keys alone hid it entirely. `Stats.display_stat_names()` is the one list both
-in-game stat panels read (`src/ui/character_ui.gd` and `src/ui/player_ui.gd`):
+keys alone hid it entirely. `Stats.display_stat_names()` is the one list every
+stat panel reads (`src/ui/character_ui.gd`, `src/ui/player_ui.gd` and the shop's
+`src/Scenes/menu/shop_menu.gd`):
 every base stat, plus any stat that only a modifier provides, and those extra
 names only while their value is non-zero. So Brawler shows `Armor: 4.00`, and
 the row appears and disappears as armor items are picked up and sold.

@@ -9,6 +9,7 @@ extends GdUnitTestSuite
 
 const CHARACTER_UI_SCENE := "res://src/ui/CharacterUI.tscn"
 const PLAYER_UI_SCENE := "res://src/ui/PlayerUI.tscn"
+const SHOP_SCENE := "res://src/Scenes/menu/ShopMenu.tscn"
 const ARMOR_ITEM := "res://src/Resources/items/ArmorPlate.tres"
 
 
@@ -51,7 +52,7 @@ func _lone_stats() -> Stats:
 ## `value_labels` map, which is what holds a row per displayed stat, rather
 ## than from the row widgets - the two lists build different row shapes (an
 ## HBox per stat vs a bare Label), the map is the part they share.
-func _listed_stats(ui: Control) -> Array[String]:
+func _listed_stats(ui: Node) -> Array[String]:
 	var names: Array[String] = []
 	for stat_name in ui.value_labels.keys():
 		names.append(str(stat_name))
@@ -217,6 +218,31 @@ func test_player_ui_lists_armor() -> void:
 
 	GlobalGameState.current_character = prev_character if is_instance_valid(prev_character) else null
 	ui.free()
+	character.free()
+
+
+## The shop's stats panel is a third list, rebuilt after every buy. It used to
+## iterate the base stat keys, so a bought armor item showed no armor there.
+func test_shop_menu_lists_armor_after_an_armor_item_is_bought() -> void:
+	var character := _build_character()
+	var shop = load(SHOP_SCENE).instantiate()
+	add_child(shop)
+	shop.character = character
+	shop._update_stats()
+	assert_that(_listed_stats(shop)).not_contains("armor")
+
+	character.get_node("ItemHolder").add_item(load(ARMOR_ITEM))
+	shop._update_stats()
+
+	var stats: Stats = character.get_node("Stats")
+	assert_float(stats.get_stat("armor")).is_not_zero()
+	assert_that(_listed_stats(shop)).contains("armor")
+	var label: Label = shop.value_labels["armor"]
+	assert_str(label.text).is_equal("Armor: %.2f" % stats.get_stat("armor"))
+
+	# Let the rows the rebuild queued for deletion go before the shop does.
+	await get_tree().process_frame
+	shop.free()
 	character.free()
 
 

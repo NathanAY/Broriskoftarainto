@@ -27,11 +27,14 @@ func _populate_menu(menu: Control):
     var go_button: Button = menu.get_node("Button")
     go_button.text = "'Enter' Enter"
 
+    # The answer is forced: no "Leave" option, so the second button stays hidden.
     var cancel_button: Button = menu.get_node("Button2")
-    cancel_button.text = "'Tab' Leave"
+    cancel_button.visible = false
 
 func default_action():
     chosen.emit(choice)
 
+## Tab (`ui_focus_next`) routes here. It must not free the portal: the run is
+## waiting on this answer, and the portals only go away once one is picked.
 func cancel_action():
     pass

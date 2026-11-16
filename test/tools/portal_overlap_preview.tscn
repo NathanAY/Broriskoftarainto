@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://test/tools/portal_overlap_preview.gd" id="1_prev"]
+
+[node name="PortalOverlapPreview" type="Node2D"]
+script = ExtResource("1_prev")

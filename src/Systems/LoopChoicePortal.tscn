@@ -1,22 +1,22 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://dmq47sjwfqs6y"]
 
-[ext_resource type="Script" uid="uid://btwmcal2f71f0" path="res://src/Systems/loop_choice_portal.gd" id="1_portal"]
+[ext_resource type="Script" path="res://src/Systems/loop_choice_portal.gd" id="1_portal"]
 [ext_resource type="PackedScene" path="res://src/Systems/PortalVortex.tscn" id="2_vortex"]
 [ext_resource type="Texture2D" uid="uid://b3lkqt1mjh0l7" path="res://src/Assets/portal.png" id="3_sprite"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_portal"]
 radius = 48.0937
 
-[node name="LoopChoicePortal" type="Area2D"]
+[node name="LoopChoicePortal" type="Area2D" unique_id=145604992]
 scale = Vector2(1.5, 1.5)
 script = ExtResource("1_portal")
 
-[node name="Vortex" parent="." instance=ExtResource("2_vortex")]
+[node name="Vortex" parent="." unique_id=1568065124 instance=ExtResource("2_vortex")]
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("3_sprite")
-scale = Vector2(0.192, 0.192)
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=468243892]
 texture_filter = 4
+scale = Vector2(0.192, 0.192)
+texture = ExtResource("3_sprite")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1344299989]
 shape = SubResource("CircleShape2D_portal")

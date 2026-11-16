@@ -65,6 +65,13 @@ Two details in that generator are load-bearing, not taste:
 - `AreaDamageBurst.START_FRACTION` (0.55) is where along the outward leg the shards start. Below 1 so they travel outward as they fade; at 1 they would sit on the damage edge from the first frame and read as a static ring.
 - Speed is derived from radius as well as position — a longer aura has to take longer to cross, or its shards reach the edge at full brightness and keep going, drawing damage past what was hit.
 
+## The poison bubbles (`poison_particles.tscn`)
+
+- A looping `GPUParticles2D` of small green motes rising off a poisoned actor. It is a status visual, not an event visual, so it is neither a manager nor a one-shot: `src/Systems/Items/Buffs/poison_effect.gd` adds one to the entity that owns the poisoned `Health` node, feeds it the stack count, and tells it to fade when the poison expires. Nothing is wired in any actor scene, so every enemy and character gets it; it can also be dropped under any `Node2D` by hand and driven with `set_stacks()`.
+- **Density follows stacks through `amount_ratio`, not `amount`.** Writing `amount` restarts the emitter and wipes the live particles, so the effect would pop on every new stack. `PoisonParticles.FULL_STACKS` is where the density tops out — a fixed number rather than the modifier's `max_stacks`, which can be in the hundreds and would leave one stack invisible.
+- The emission area is sized from the body sprite at `Node2D/Sprite2D` (rule 1), through a duplicated material (same shared-sub-resource trap as above). `local_coords` is left `false` on purpose here: the bubbles trail behind a moving actor instead of riding along with it.
+- Visual check: `.\run_scene_shot.bat res://test/tools/poison_preview.tscn res://poison_shot.png 120` — four bodies at 1, 3, 6 and 10 stacks.
+
 ## Actor-attached managers
 
 | Manager | Subscribes to | Spawns | Notes |

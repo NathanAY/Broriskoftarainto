@@ -15,55 +15,48 @@
 [ext_resource type="PackedScene" uid="uid://xn354lgrh8jk" path="res://src/Systems/Arena.tscn" id="20_arena"]
 [ext_resource type="Script" uid="uid://cr7xbkandgpbl" path="res://src/Systems/enemies/enemy_spawn_entry.gd" id="21_entry"]
 [ext_resource type="PackedScene" uid="uid://nss5i2h1avqj" path="res://src/Systems/enemies/Enemy.tscn" id="22_grunt"]
-[ext_resource type="PackedScene" uid="uid://bbldlamw7jps2" path="res://src/Systems/enemies/EnemyBulwark.tscn" id="23_bulwark"]
-[ext_resource type="PackedScene" path="res://src/Systems/enemies/EnemyGunner.tscn" id="24_gunner"]
+[ext_resource type="PackedScene" uid="uid://b81aelb7y05ed" path="res://src/Systems/enemies/EnemyBulwark.tscn" id="23_bulwark"]
+[ext_resource type="PackedScene" uid="uid://bcqijsitnrk5x" path="res://src/Systems/enemies/EnemyGunner.tscn" id="24_gunner"]
 [ext_resource type="PackedScene" path="res://src/Systems/enemies/EnemySlimeling.tscn" id="25_slimeling"]
 [ext_resource type="PackedScene" path="res://src/Systems/enemies/EnemyLancer.tscn" id="26_lancer"]
-[ext_resource type="PackedScene" path="res://src/Systems/enemies/EnemyToadstinker.tscn" id="27_toadstinker"]
-[ext_resource type="PackedScene" path="res://src/Systems/enemies/EnemyBlink.tscn" id="28_blink"]
-[ext_resource type="PackedScene" path="res://src/Systems/enemies/EnemyShieldbearer.tscn" id="29_shieldbearer"]
+[ext_resource type="PackedScene" uid="uid://d3kvx2hu0bnt2" path="res://src/Systems/enemies/EnemyToadstinker.tscn" id="27_toadstinker"]
+[ext_resource type="PackedScene" uid="uid://cs78w6io6i7lk" path="res://src/Systems/enemies/EnemyBlink.tscn" id="28_blink"]
+[ext_resource type="PackedScene" uid="uid://cwsneg8qbp427" path="res://src/Systems/enemies/EnemyShieldbearer.tscn" id="29_shieldbearer"]
 [ext_resource type="PackedScene" path="res://src/Systems/enemies/EnemySwarmer.tscn" id="30_swarmer"]
 
 [sub_resource type="Resource" id="Resource_grunt"]
 script = ExtResource("21_entry")
 scene = ExtResource("22_grunt")
-weight = 1.0
-min_loop = 1
 elite_min_loop = 3
 
 [sub_resource type="Resource" id="Resource_bulwark"]
 script = ExtResource("21_entry")
 scene = ExtResource("23_bulwark")
 weight = 0.4
-min_loop = 1
 elite_min_loop = 3
 
 [sub_resource type="Resource" id="Resource_gunner"]
 script = ExtResource("21_entry")
 scene = ExtResource("24_gunner")
 weight = 0.4
-min_loop = 1
 elite_min_loop = 3
 
 [sub_resource type="Resource" id="Resource_slimeling"]
 script = ExtResource("21_entry")
 scene = ExtResource("25_slimeling")
 weight = 0.4
-min_loop = 1
 elite_min_loop = 3
 
 [sub_resource type="Resource" id="Resource_lancer"]
 script = ExtResource("21_entry")
 scene = ExtResource("26_lancer")
 weight = 0.4
-min_loop = 1
 elite_min_loop = 3
 
 [sub_resource type="Resource" id="Resource_toadstinker"]
 script = ExtResource("21_entry")
 scene = ExtResource("27_toadstinker")
 weight = 0.4
-min_loop = 1
 elite_min_loop = 3
 
 [sub_resource type="Resource" id="Resource_blink"]

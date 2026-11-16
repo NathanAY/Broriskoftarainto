@@ -136,6 +136,7 @@ The per-system docs live in `docs/systems/` and are indexed, with one-line descr
   ```
   .\run_scene_shot.bat res://test/tools/explosion_preview.tscn res://explosion_shot.png 12
   ```
+- `test/tools/poison_preview.tscn` + `.gd` — the poison bubbles on four bodies at 1, 3, 6 and 10 stacks. It loops, so pass frames: `.\run_scene_shot.bat res://test/tools/poison_preview.tscn res://poison_shot.png 120`.
 - `test/tools/make_soft_particles.gd` — regenerates the four ink-free particle sprites (`particle_glow`, `particle_smoke`, `particle_spark`, `particle_shard`) into `src/Assets/particles/`. Run it rather than hand-editing those PNGs: `godot --headless --path . -s res://test/tools/make_soft_particles.gd`. The shipped `particle_1.png`..`particle_27.png` **cannot** be used for fire — they are 53-72% near-black ink outline, and a particle tint multiplies the ink along with the fill, so they render as black blobs. See the explosion section of `docs/systems/weapons.md`.
 - `test/tools/character_ui_preview.tscn`, `test/tools/shop_ui_preview.tscn` — the character menu and the shop with a stub character wearing sample items/weapons, so they render standalone for a visual check.
 - `test/tools/enemy_gallery_preview.tscn` + `.gd` — the enemy roster in a row on a plain backdrop, so the whole set can be judged in one shot: `.\run_scene_shot.bat res://test/tools/enemy_gallery_preview.tscn res://enemies.png`. Add a roster row to the `ROSTER` list when its enemy ships.

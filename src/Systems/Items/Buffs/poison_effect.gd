@@ -3,6 +3,8 @@ class_name PoisonEffect
 
 # Poison effect lives on the target's Health node and handles stacking + ticking.
 
+const _PARTICLES: PackedScene = preload("res://src/Scenes/particles/poison_particles.tscn")
+
 var stacks: int = 0
 var damage_per_tick: float = 0.0
 var tick_interval: float = 1.0
@@ -13,6 +15,7 @@ var target_health: Node = null
 
 var _tick_timer: Timer = null
 var _lifetime_timer: Timer = null
+var _particles: PoisonParticles = null
 
 func start_effect(target: Node, damage: float, dur: float, interval: float, max_s: int, src: Node) -> void:
     # target is the Health node (the node that has apply_damage())
@@ -26,6 +29,7 @@ func start_effect(target: Node, damage: float, dur: float, interval: float, max_
 
 func add_poison() -> void:
     stacks = min(stacks + 1, max_stacks)
+    _show_stacks()
     # ensure tick timer exists
     if not _tick_timer:
         _tick_timer = Timer.new()
@@ -80,7 +84,20 @@ func _on_tick() -> void:
         if target_health.current_health <= 0:
             sorce_em.emit_event("on_kill", {"damage_context": ctx, "body": ctx.target})
 
+## Puts the bubble visual on the poisoned entity (the Health node's owner) and
+## keeps its density in step with `stacks`.
+func _show_stacks() -> void:
+    if _particles == null:
+        var body := target_health.get_parent() as Node2D if target_health else null
+        if body == null:
+            return
+        _particles = _PARTICLES.instantiate()
+        body.add_child(_particles)
+    _particles.set_stacks(stacks)
+
 func _on_expire() -> void:
+    if _particles != null:
+        _particles.fade_out()
     _tick_timer.queue_free()
     _lifetime_timer.queue_free()
     queue_free()

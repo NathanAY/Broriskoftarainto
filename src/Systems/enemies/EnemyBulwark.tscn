@@ -33,11 +33,12 @@ radius = 58.86
 
 [node name="Enemy2" type="CharacterBody2D" unique_id=182675359]
 script = ExtResource("1_r5v6p")
-art_width = 110
+art_width = 110.0
 
 [node name="Node2D" type="Node2D" parent="." unique_id=923781237]
 
 [node name="Sprite2D" type="Sprite2D" parent="Node2D" unique_id=1095427806]
+texture_filter = 4
 texture = ExtResource("2_twham")
 
 [node name="Shadow" type="Sprite2D" parent="Node2D/Sprite2D" unique_id=1690994547]

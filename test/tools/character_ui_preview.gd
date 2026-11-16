@@ -24,8 +24,13 @@ func _ready() -> void:
 		item_holder.add_item(load("res://src/Resources/items/%s.tres" % item))
 
 	var weapon_holder: WeaponHolder = character.get_node("WeaponHolder")
-	for weapon in SAMPLE_WEAPONS:
-		weapon_holder.weapons.append(load("res://src/Resources/weapons/%s.tres" % weapon))
+	# The player's limit, so the shot shows the count and an empty slot.
+	weapon_holder.max_weapons = 6
+	# One weapon per rarity, in order, so the shot shows every tile border.
+	for i in SAMPLE_WEAPONS.size():
+		var weapon: BaseWeapon = load("res://src/Resources/weapons/%s.tres" % SAMPLE_WEAPONS[i]).duplicate(true)
+		weapon.rarity = i as BaseWeapon.Rarity
+		weapon_holder.weapons.append(weapon)
 
 	# `CharacterUi._ready()` reads the character off the global, so it has to be
 	# published before the UI is added.

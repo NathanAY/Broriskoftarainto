@@ -51,6 +51,18 @@ var scale_factor: float = 1.0
 var _resource: Resource = null
 
 
+## A dim, inert rectangle the size of a tile, marking a free slot in a grid
+## that has a fixed capacity (the weapons lists).
+static func make_empty_slot(factor: float) -> Panel:
+	var slot := Panel.new()
+	slot.custom_minimum_size = CARD_SIZE * factor
+	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.modulate.a = 0.4
+	slot.add_theme_stylebox_override("panel",
+		ItemDisplayPanel.make_panel_stylebox(ItemDisplayPanel.PANEL_BORDER))
+	return slot
+
+
 func _ready() -> void:
 	_apply_scale()
 	set_border_color(ItemDisplayPanel.PANEL_BORDER)
@@ -93,6 +105,9 @@ func set_display(resource: Resource) -> void:
 	if resource == null:
 		name_label.text = ""
 		return
+	# A weapon above common wears its rarity as the tile border.
+	if resource is BaseWeapon and resource.rarity != BaseWeapon.Rarity.COMMON:
+		set_border_color(BaseWeapon.RARITY_COLORS[resource.rarity])
 	set_icon(ItemDisplayPanel.make_icon(resource, ICON_SIZE * scale_factor))
 	set_card_name(ItemDisplayPanel.display_name(resource))
 

@@ -8,6 +8,7 @@ class_name ShopMenu
 @onready var stats_container: VBoxContainer = $Control/VBoxContainer/MidContainer/StatsPanel/StatsScroll/StatsList
 @onready var collected_items_container: GridContainer = $Control/VBoxContainer/BottomContainer/ItemsContainer/ItemsScroll/ItemsMargin/List
 @onready var weapons_container: GridContainer = $Control/VBoxContainer/BottomContainer/WeaponsContainer/WeaponsScroll/WeaponsMargin/List
+@onready var weapons_label: Label = $Control/VBoxContainer/BottomContainer/WeaponsContainer/Label
 @onready var tooltip: TooltipUi = $Tooltip
 @onready var price_analyzer: ItemPriceAnalyzer = $PriceAnalyzer
 
@@ -67,6 +68,9 @@ func _update_character_info() -> void:
     var weapon_holder = character.get_node_or_null("WeaponHolder")
     if weapon_holder:
         _fill_gear_cards(weapons_container, weapon_holder.weapons)
+        weapons_label.text = weapon_holder.slots_title()
+        for i in weapon_holder.free_slots():
+            weapons_container.add_child(IconCard.make_empty_slot(IconCard.COMPACT_SCALE))
 
 
 ## One `IconCard` per resource, each wired to the shared tooltip. The character
@@ -82,6 +86,52 @@ func _fill_gear_cards(container: GridContainer, resources: Array) -> void:
         container.add_child(card)
         card.set_display(resource)
         tooltip.bind_to_row(card, resource)
+        if resource is BaseWeapon:
+            _bind_combine(card, resource)
+
+
+## A weapon tile with a duplicate of the same rarity gets a "Combine" button
+## over its name. Tiles that cannot combine get nothing, so the button showing
+## up is what tells the player the feature exists.
+func _bind_combine(card: IconCard, weapon: BaseWeapon) -> void:
+    var weapon_holder: WeaponHolder = character.get_node_or_null("WeaponHolder")
+    if weapon_holder == null or weapon_holder.find_combinable(weapon) == null:
+        return
+    var button := Button.new()
+    button.name = "CombineButton"
+    button.text = "Combine"
+    button.tooltip_text = "Merge two identical weapons into one of the next rarity.\nIt deals more damage and frees a weapon slot."
+    button.size_flags_vertical = Control.SIZE_SHRINK_END
+    button.add_theme_font_size_override("font_size", IconCard.MIN_NAME_FONT_SIZE)
+    # Coloured as the rarity the merge produces. The button sits where the name
+    # was, so the name is cleared; the hover tooltip still carries it.
+    button.add_theme_color_override("font_color", BaseWeapon.RARITY_COLORS[weapon.rarity + 1])
+    card.set_card_name("")
+    button.pressed.connect(func() -> void:
+        if weapon_holder.combine(weapon):
+            tooltip.hide_tooltip()
+            _update_character_info()
+            _refresh_affordability())
+    card.add_child(button)
+
+
+## Whether the offer can be taken at all, money aside: a weapon needs a free
+## slot or an equipped duplicate to combine into.
+func _has_room_for(offer: Resource) -> bool:
+    if not (offer is BaseWeapon) or character == null:
+        return true
+    var weapon_holder: WeaponHolder = character.get_node_or_null("WeaponHolder")
+    return weapon_holder == null or weapon_holder.can_add_weapon(offer)
+
+
+## Enables or disables an offer's Buy button. A weapon with nowhere to go says
+## so on the button, since the price hint would otherwise blame the money.
+func _apply_buyable(card: ShopItemCard) -> void:
+    var room := _has_room_for(card.get_meta("item"))
+    card.set_affordable(_current_money() >= card.price and room)
+    card.primary_button.text = ("Buy (%d)" % card.price) if room else "No free slot"
+    if not room:
+        card.price_label.tooltip_text = "All weapon slots are full."
 
 func hide_menu():
     get_tree().paused = false
@@ -220,12 +270,11 @@ func _add_shop_item_entry(offer: Resource, existing_id: String = ""):
 
     # Buy button
     var price: int = price_analyzer.get_price(offer)
-    card.primary_button.text = "Buy (%d)" % price
     card.set_price(price)
-    card.set_affordable(_current_money() >= price)
+    _apply_buyable(card)
     card.primary_button.pressed.connect(func():
         var money = _current_money()
-        if money >= price:
+        if money >= price and _has_room_for(offer):
             character.stats.set_base_stat("money", money - price)
             if offer is BaseWeapon:
                 var weapon_holder: WeaponHolder = character.get_node_or_null("WeaponHolder")
@@ -271,7 +320,7 @@ func _refresh_affordability() -> void:
         var card := child as ShopItemCard
         if card:
             card.set_money(money)
-            card.set_affordable(money >= card.price)
+            _apply_buyable(card)
 
 
 func _current_money() -> float:

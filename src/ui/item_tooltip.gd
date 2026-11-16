@@ -47,7 +47,7 @@ static func tooltip_lines(resource: Resource) -> PackedStringArray:
         return CharacterTooltip.tooltip_lines(resource)
     if resource is BaseWeapon:
         lines.append("name: " + str(resource.name))
-        lines.append("damage: " + str(resource.base_damage))
+        lines.append("damage: " + str(resource.rarity_damage()))
         lines.append("range: " + str(resource.weapon_range) + " m")
         lines.append("attack speed: " + str(resource.base_attack_speed))
         var desc := str(resource.description).strip_edges()
@@ -108,7 +108,7 @@ static func weapon_card_rows(weapon: BaseWeapon) -> Array:
     # gains, so they are never signed (contrast `stat_rows`, where a "+" means
     # a gain to the player's stats). Attack speed shows the rate it actually
     # means, "0.8 attack/sec", instead of a bare multiplier-like number.
-    _append_weapon_row(rows, "Damage", format_value(weapon.base_damage))
+    _append_weapon_row(rows, "Damage", format_value(weapon.rarity_damage()))
     if weapon.has_tooltip_range():
         _append_weapon_row(rows, "Range", format_value(weapon.weapon_range) + " m")
     _append_weapon_row(rows, "Attack Speed", format_value(weapon.base_attack_speed) + " attack/sec")

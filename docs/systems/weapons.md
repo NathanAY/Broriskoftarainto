@@ -50,6 +50,16 @@ Built-in modifiers (`BaseWeapon.modifiers`)
 - Lifecycle: `BaseWeapon.apply_to` attaches bound nodes; `WeaponHolder.remove_weapon` → `BaseWeapon.remove_from` detaches them (unsubscribing + freeing) via `WeaponBuiltinEffects.detach`. `WeaponHolder.add_weapon` duplicates each template, giving every holder an independent weapon instance and per-holder isolation.
 - Tooltips: `ItemTooltip.tooltip_lines` appends one human-readable line per declared effect (`WeaponBuiltinEffects.builtin_tooltip_lines`), e.g. `pierce: 1`, `knockback: 0.4 m/s`, `poison: 50% chance, 3.0s`, `explosive shot: 20% of hit damage`.
 
+Weapon slots, combining and rarity
+- `WeaponHolder.max_weapons` caps how many weapons a holder carries; `0` is no limit. Only the player's holder sets it (`6`, in `src/Systems/Character.tscn`). Enemies keep `0` because the boss carries up to ten.
+- `BaseWeapon.rarity` goes common → uncommon → rare → epic → legendary and multiplies `base_damage` by `RARITY_DAMAGE_MULTIPLIERS` (1 / 1.3 / 1.6 / 1.9 / 2.5). Read the scaled number through `rarity_damage()`; `current_damage` and the weapon card both do. `flat_weapon_damage` is added after the multiplier, so it is not scaled.
+- Two weapons combine when they share a `name` and a rarity (`BaseWeapon.can_combine_with`). `WeaponHolder.combine(weapon)` removes the duplicate and raises `weapon` one rarity. Legendary does not combine.
+- `add_weapon` returns `false` when the holder is full and nothing combines. When it is full and a duplicate is equipped, it raises that duplicate's rarity instead of equipping. Below the limit it never combines on its own, so the player may hold two copies.
+- In the shop (`src/Scenes/menu/shop_menu.gd`) a weapon tile that has a duplicate carries a **Combine** button in place of its name, coloured as the rarity the merge produces. Clicking the tile itself does nothing. A weapon offer with no free slot and no duplicate has its Buy button disabled and reads "No free slot".
+- `IconCard.set_display` paints a non-common weapon's tile border with `BaseWeapon.RARITY_COLORS` (green, blue, violet, gold). Common keeps the plain border.
+- The shop and the character menu both head the list with `WeaponHolder.slots_title()` ("Weapons 2/6") and pad it with one `IconCard.make_empty_slot()` rectangle per `free_slots()`. A holder with no limit gets the plain "Weapons" and no padding.
+- Pinned by `test/Systems/weapon/test_weapon_rarity_combine.gd`.
+
 Known limitations / TODOs
 - Weapons are resource-duplicated at runtime which is fine but requires careful `duplicate(true)` behavior for deep-copy correctness.
 - No explicit pooling for projectiles shown; potential performance work if many projectiles spawn.

@@ -2,8 +2,26 @@
 extends Resource
 class_name BaseWeapon
 
+## Raised one step each time two identical weapons are combined
+## (`WeaponHolder.combine`). Indexes both tables below.
+enum Rarity { COMMON, UNCOMMON, RARE, EPIC, LEGENDARY }
+
+## What `base_damage` is multiplied by at each rarity.
+const RARITY_DAMAGE_MULTIPLIERS: Array[float] = [1.0, 1.3, 1.6, 1.9, 2.5]
+
+## Border a weapon's icon tile gets per rarity: green, blue, violet, golden.
+## Common is transparent, which `IconCard` reads as "leave the plain border".
+const RARITY_COLORS: Array[Color] = [
+    Color(0, 0, 0, 0),
+    Color(0.35, 0.8, 0.35),
+    Color(0.3, 0.55, 1.0),
+    Color(0.66, 0.38, 0.95),
+    Color(1.0, 0.8, 0.2),
+]
+
 @export var name: String
 @export var description: String
+@export var rarity: Rarity = Rarity.COMMON
 @export var base_attack_speed: float = 1.0
 @export var base_damage: float = 5.0
 @export var modifiers: Dictionary = {}
@@ -42,7 +60,19 @@ func tooltip_details() -> Array:
 func has_tooltip_range() -> bool:
     return true
 
-## Damage one swing deals: (base_damage + flat_weapon_damage) * damage.
+## `base_damage` scaled by rarity - the weapon's own damage, and the number the
+## card prints.
+func rarity_damage() -> float:
+    return base_damage * RARITY_DAMAGE_MULTIPLIERS[rarity]
+
+## Two weapons combine when they are the same weapon at the same rarity and
+## there is a rarity left to climb to. Identity is the name: an equipped weapon
+## is a duplicate of its `.tres`, so it has no resource path to compare.
+func can_combine_with(other: BaseWeapon) -> bool:
+    return other != null and other != self and other.name == name \
+            and other.rarity == rarity and rarity < Rarity.LEGENDARY
+
+## Damage one swing deals: (rarity_damage() + flat_weapon_damage) * damage.
 ##
 ## This is a getter rather than a cached field on purpose. `BaseWeapon` is a
 ## Resource, so a member initializer runs while the object is still bare -
@@ -62,8 +92,8 @@ func has_tooltip_range() -> bool:
 var current_damage: float:
     get:
         if not is_instance_valid(stats):
-            return base_damage
-        return (base_damage + stats.get_stat("flat_weapon_damage")) * stats.get_stat("damage")
+            return rarity_damage()
+        return (rarity_damage() + stats.get_stat("flat_weapon_damage")) * stats.get_stat("damage")
 
 var _current_attack_speed
 

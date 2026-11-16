@@ -8,7 +8,7 @@ const SAMPLE_ITEMS := [
 	"ArmorPlate", "CritGlass", "Knockback", "LifeDrain", "PlusDamageItem",
 	"PoisonHit", "ProjSpeed", "RegenPassive",
 ]
-const SAMPLE_WEAPONS := ["Fist", "Pistol", "Shotgun", "DeathAura", "Thorns"]
+const SAMPLE_WEAPONS := ["Fist", "Pistol", "Shotgun", "Pistol"]
 
 ## The offer row is only 4 cards wide, so the pool has to be small enough that
 ## the two hand-built polarity items are guaranteed to appear alongside a plain
@@ -81,8 +81,11 @@ func _ready() -> void:
 		item_holder.add_item(load("res://src/Resources/items/%s.tres" % item))
 
 	var weapon_holder: WeaponHolder = character.get_node("WeaponHolder")
+	# The player's limit, so the shot shows the count and the empty slots. Two
+	# pistols, so one pair of tiles carries the Combine button.
+	weapon_holder.max_weapons = 6
 	for weapon in SAMPLE_WEAPONS:
-		weapon_holder.weapons.append(load("res://src/Resources/weapons/%s.tres" % weapon))
+		weapon_holder.weapons.append(load("res://src/Resources/weapons/%s.tres" % weapon).duplicate(true))
 
 	character.stats.set_base_stat("money", 78)
 	GlobalGameState.current_character = character

@@ -49,7 +49,7 @@ func _extract_damage(event: Dictionary) -> float:
         damage = max(damage_ctx.base_amount, damage_ctx.final_amount)
     elif event.has("weapon"):
         var weapon: BaseWeapon = event["weapon"]
-        damage = weapon.base_damage
+        damage = weapon.rarity_damage()
     if damage == 0:
         damage = stats.get_stat("damage")
     return damage

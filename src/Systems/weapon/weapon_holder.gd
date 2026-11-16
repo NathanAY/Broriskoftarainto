@@ -21,6 +21,9 @@ var event_manager: EventManager:
             return null
         return owner_node.get_node_or_null("EventManager") as EventManager
 @export var weapons: Array[BaseWeapon] = []   # list of Weapon .tres resources (templates)
+## How many weapons this holder may carry; 0 is no limit. The player's holder
+## sets 6 in `Character.tscn`. Enemies keep 0 - the boss carries more than six.
+@export var max_weapons: int = 0
 # visual placement config
 ## How far from the holder each weapon sprite orbits, in **meters**. Converted
 ## to pixels in `_get_weapon_position`, the only place a `Vector2` is built.
@@ -81,9 +84,64 @@ func _process(_delta: float) -> void:
         if weapon:
             weapon.aim()
 
-func add_weapon(weapon_resource: BaseWeapon) -> void:
+func is_full() -> bool:
+    return max_weapons > 0 and weapons.size() >= max_weapons
+
+## Slots still open; always 0 for a holder with no limit.
+func free_slots() -> int:
+    return maxi(max_weapons - weapons.size(), 0)
+
+## Heading for a weapons list: "Weapons 2/6", or plain "Weapons" with no limit.
+func slots_title() -> String:
+    if max_weapons <= 0:
+        return "Weapons"
+    return "Weapons %d/%d" % [weapons.size(), max_weapons]
+
+## An equipped weapon `weapon` could be combined with, or null. `weapon` may be
+## an equipped instance (its partner is another one) or a template on offer.
+func find_combinable(weapon: BaseWeapon) -> BaseWeapon:
+    if weapon == null:
+        return null
+    for equipped_weapon in weapons:
+        if equipped_weapon and equipped_weapon.can_combine_with(weapon):
+            return equipped_weapon
+    return null
+
+## Whether `add_weapon` would take this weapon: there is a free slot, or it can
+## be combined into a weapon already held.
+func can_add_weapon(weapon_resource: BaseWeapon) -> bool:
+    return weapon_resource != null \
+            and (not is_full() or find_combinable(weapon_resource) != null)
+
+## Merges an equipped weapon with its equipped duplicate: the duplicate is
+## removed and `weapon_inst` climbs one rarity. Returns false when it has no
+## duplicate of the same rarity (or is already legendary).
+func combine(weapon_inst: BaseWeapon) -> bool:
+    if not (weapon_inst in weapons):
+        return false
+    var partner := find_combinable(weapon_inst)
+    if partner == null:
+        return false
+    remove_weapon(partner)
+    _raise_rarity(weapon_inst)
+    return true
+
+func _raise_rarity(weapon_inst: BaseWeapon) -> void:
+    weapon_inst.rarity = (weapon_inst.rarity + 1) as BaseWeapon.Rarity
+    if event_manager:
+        event_manager.emit_event("on_weapon_changes", {"weapon_inst": weapon_inst, "hold_owner": hold_owner})
+
+## Equips a copy of `weapon_resource`. With every slot taken it is combined into
+## an equipped duplicate instead, and refused (false) when there is none.
+func add_weapon(weapon_resource: BaseWeapon) -> bool:
     if weapon_resource == null:
-        return
+        return false
+    if is_full():
+        var partner := find_combinable(weapon_resource)
+        if partner == null:
+            return false
+        _raise_rarity(partner)
+        return true
     # Duplicate the resource so we have an independent instance per holder
     var weapon_inst: BaseWeapon = weapon_resource.duplicate(true)
     # Keep the duplicate in our weapons list (so remove_weapon can match it)
@@ -95,6 +153,7 @@ func add_weapon(weapon_resource: BaseWeapon) -> void:
     _equip_weapon(weapon_inst)
     if event_manager:
         event_manager.emit_event("on_weapon_changes", {"weapon_inst": weapon_inst, "hold_owner": hold_owner})
+    return true
 
 func remove_weapon(weapon_inst: BaseWeapon) -> void:
     if not weapon_inst:

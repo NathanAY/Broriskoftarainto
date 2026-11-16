@@ -99,6 +99,7 @@ event_manager = NodePath("../EventManager")
 [node name="ItemHolder" parent="." unique_id=2080691411 instance=ExtResource("9_wjmpa")]
 
 [node name="WeaponHolder" parent="." unique_id=1258269645 instance=ExtResource("10_b611v")]
+max_weapons = 6
 
 [node name="DamageNumberSpawner" parent="." unique_id=1413608033 node_paths=PackedStringArray("event_manager") instance=ExtResource("11_khphl")]
 event_manager = NodePath("../EventManager")

@@ -4,6 +4,7 @@ extends Control
 @onready var items_container: GridContainer = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/ItemsScroll/ItemsMargin/ItemsList
 @onready var stats_container: VBoxContainer = $VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsHBox/StatsScroll/StatsList
 @onready var weapons_container: GridContainer = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/WeaponsScroll/WeaponsMargin/WeaponsList
+@onready var weapons_label: Label = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/WeaponsLabel
 @onready var back_button: Button = $VBoxContainer/Footer/Close
 @onready var tooltip: TooltipUi = $Tooltip
 
@@ -118,6 +119,10 @@ func _on_stat_changed_event(event) -> void:
 
 func _update_weapons() -> void:
     _fill_cards(weapons_container, weapon_holder.weapons if weapon_holder else [])
+    if weapon_holder:
+        weapons_label.text = weapon_holder.slots_title()
+        for i in weapon_holder.free_slots():
+            weapons_container.add_child(IconCard.make_empty_slot(IconCard.COMPACT_SCALE))
 
 # Called when weapons emits its signal (weapon_changed(weapon_name, new_value))
 func _on_weapon_changed(event) -> void:

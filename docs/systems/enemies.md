@@ -52,7 +52,7 @@ An enemy type is a **scene**, not a class. `Enemy.gd` is the script every enemy 
 | Swarmer | `src/Systems/enemies/EnemySwarmer.tscn` | Tiny, one hit point, faster than the grunt, and arrives in packs of eight. The pack is the threat, not any one body. |
 | Boss | `src/Systems/enemies/EnemyBoss.tscn` | The loop's boss, with a weapon loadout of its own. See `docs/systems/spawners.md`. |
 
-Adding a type is therefore: copy `src/Systems/enemies/Enemy.tscn`, point the sprite at new art, change the stats, and add a row to the spawn table in `src/Scenes/Game.tscn`. No script changes, because the behaviour is duck-typed against the enemy.
+Adding a type is therefore: copy `src/Systems/enemies/Enemy.tscn`, point the sprite at new art, change the stats, set its `description` (the Gamepedia's text for it), and add a row to the spawn table in `src/Scenes/Game.tscn`. No script changes, because the behaviour is duck-typed against the enemy.
 
 The Gunner is the row that proves an enemy can be a *ranged* threat: it is the basic enemy with `contact_weapon` cleared, the shared `Pistol.tres` placed in its `WeaponHolder`, and `ChaseDistanceMovementBehaviour` walking it in to a firing distance instead of onto the player. Its pistol targets whatever is in the `damageable` group that its holder is not grouped with, which is the player: the `enemies` group is what keeps an enemy from shooting its own kind.
 

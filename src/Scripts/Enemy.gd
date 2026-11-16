@@ -26,6 +26,9 @@ var _applied_fit: float = 1.0
 ## not hurt on touch sets this to null and arms itself some other way.
 @export var contact_weapon: BaseWeapon = preload("res://src/Resources/weapons/Thorns.tres")
 
+## One or two sentences shown in the Gamepedia's Enemies tab, above its stats.
+@export_multiline var description: String = ""
+
 ## The width the art is drawn at, in pixels. The sprite keeps the file's authored
 ## resolution and is fitted to this here, so a 512px source and a 100px one are
 ## the same size in the arena. The boss raises it to its own canvas.

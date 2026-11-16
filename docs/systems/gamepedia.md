@@ -15,7 +15,7 @@ Every entry is an `IconCard` (`src/ui/icon_card.gd`) — the same tile the chara
 |---|---|---|
 | Characters | every `CharacterData` `.tres` under `src/Assets/character/` (recursive, like character select) | `ItemTooltip.card_rows`: description, base stats, effects, starting gear |
 | Weapons | every `.tres` in `src/Resources/weapons/` and `src/Resources/weapons/boss/` (not the `aim/` selectors) | the same rows as the shop's weapon card (`ItemTooltip.weapon_card_rows`): damage, range, attack speed, subclass extras, built-in effects |
-| Enemies | every `Enemy*.tscn` in `src/Systems/enemies/`, instantiated and freed (never added to the tree); art is its `Node2D/Sprite2D` texture | health and movement speed from the scene's `Stats` over `Stats.DEFAULT_STATS`, plus each weapon it attacks with (`contact_weapon` and the `WeaponHolder` list) |
+| Enemies | every `Enemy*.tscn` in `src/Systems/enemies/`, instantiated and freed (never added to the tree); art is its `Node2D/Sprite2D` texture | its `description` export (the paragraph above the stats), health and movement speed from the scene's `Stats` over `Stats.DEFAULT_STATS`, plus each weapon it attacks with (`contact_weapon` and the `WeaponHolder` list) |
 | Modifiers | every `.tscn` in `src/Systems/Items/modifiers/`; art is `src/Assets/modifiers/<scene name lowercased>.png`, else `_default.png` — the lookup `ItemIconGenerator` does | `ItemTooltip.resolve_effect_display`: name, description, live stats fragment, trigger. A `COST` modifier's name is red |
 
 Adding a character, weapon, enemy scene or modifier scene to its folder adds it to the Gamepedia with no code change. An enemy's name is its scene name without the `Enemy` prefix; the bare `Enemy.tscn` is shown as the Grunt.

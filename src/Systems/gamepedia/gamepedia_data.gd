@@ -29,8 +29,8 @@ static func weapon_entries() -> Array[Dictionary]:
 	return entries
 
 
-## `{name, rows, weapons}` per enemy scene. `rows` is the base stats, `weapons`
-## is one weapon entry per weapon the enemy attacks with.
+## `{name, description, rows, weapons, texture}` per enemy scene. `rows` is the
+## base stats, `weapons` is one weapon entry per weapon the enemy attacks with.
 static func enemy_entries() -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
 	for path in _files(ENEMY_DIR, ".tscn"):
@@ -113,6 +113,7 @@ static func _enemy_entry(path: String, enemy: Enemy) -> Dictionary:
 			weapons.append(_weapon_entry(weapon))
 	return {
 		"name": _enemy_name(path),
+		"description": enemy.description.strip_edges(),
 		"rows": [
 			["Health", ItemTooltip.format_value(float(stats["health"]))],
 			["Movement Speed", ItemTooltip.format_value(float(stats["movement_speed"])) + " m/s"],

@@ -38,6 +38,11 @@ var character: Character = null
 @export var item_factory: ItemFactory = null
 var phase: int = 1  # 1 = collected pickups, 2 = generated shop items
 var value_labels: Dictionary = {}  # stat_name -> Label
+var rerolls_done: int = 0  # rerolls made in the current shop visit
+
+const REROLL_BASE_COST: int = 1   # loop 1, first reroll
+const REROLL_LOOP_STEP: int = 2   # added to the base for every loop past the first
+const REROLL_STEP: int = 1        # added for every reroll already made this visit
 
 func _ready():
     visible = false
@@ -53,6 +58,8 @@ func show_menu():
     next_stage_button.visible = false
     reroll_button.visible = false
     phase = 1
+    rerolls_done = 0
+    _update_reroll_button()
     _update_money_label()
     _update_stats() # Update stats when opening the shop
     _update_character_info() # Update items and weapons
@@ -454,13 +461,32 @@ func _generate_entry_id() -> String:
     _shop_entry_id_counter += 1
     return str(Time.get_unix_time_from_system()) + "_" + str(_shop_entry_id_counter)
 
+## Reroll price: a base that grows with every loop, plus a surcharge for each
+## reroll already made in this shop visit (reset by `show_menu()`).
+func reroll_cost() -> int:
+    return REROLL_BASE_COST + REROLL_LOOP_STEP * (_current_loop() - 1) + REROLL_STEP * rerolls_done
+
+
+func _current_loop() -> int:
+    var scene := get_tree().current_scene
+    var stage_manager: StageManager = scene.get_node_or_null("StageManager") if scene else null
+    return stage_manager.current_loop if stage_manager else 1
+
+
+func _update_reroll_button() -> void:
+    reroll_button.text = "Reroll (%d)" % reroll_cost()
+
+
 func _on_reroll_pressed():
     if phase != 2:
         return
     var money = character.stats.stats.get("money", 0)
-    if money < 1:
+    var cost := reroll_cost()
+    if money < cost:
         return
-    character.stats.set_base_stat("money", money - 1)
+    character.stats.set_base_stat("money", money - cost)
+    rerolls_done += 1
+    _update_reroll_button()
 
     # remove all non-locked items by comparing IDs
     for child in items_container.get_children():

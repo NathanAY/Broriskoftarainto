@@ -91,7 +91,7 @@ func _fill_enemies(list: Container) -> void:
 			lines.append(["Attacks with", weapon["name"]])
 			for row in weapon["rows"]:
 				lines.append(["    " + row[0], row[1]])
-		var card := _add_entry(list, "", lines)
+		var card := _add_entry(list, entry["description"], lines)
 		_set_texture_display(card, entry["texture"], entry["name"])
 
 

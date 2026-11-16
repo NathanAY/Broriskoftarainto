@@ -45,6 +45,12 @@ func test_enemy_roster_includes_the_basic_enemy_and_every_scene() -> void:
     assert_array(_names(entries)).contains([GamepediaData.BASE_ENEMY_NAME])
 
 
+func test_every_enemy_has_a_description() -> void:
+    for entry in GamepediaData.enemy_entries():
+        assert_str(entry["description"]).override_failure_message(
+            "%s has no description" % entry["name"]).is_not_empty()
+
+
 func test_modifiers_list_every_modifier_scene() -> void:
     var scene_count := 0
     for file_name in DirAccess.get_files_at(GamepediaData.MODIFIER_DIR):

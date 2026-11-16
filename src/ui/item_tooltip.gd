@@ -32,7 +32,7 @@ const STAT_HINTS: Dictionary = {
     "area_size_multiplier": "Multiplier for the size of explosions and area effects.",
     "projectile_pierce": "Number of enemies a projectile can pass through before disappearing.",
     "projectile_speed_multiplier": "Multiplier for projectile travel speed.",
-    "lifeleach": "Heals for amount of dealt damage.",
+    "lifeleach": "Life leech: heals you for a share of the damage you deal, on every hit.\nEach life leech item heals 5% of the final damage of each hit.\nThe stat multiplies that heal: 1 = 100% (no change), 1.5 = 150%.\nFormula: damage dealt x 5% x items x lifeleach.\nExample: 1 item, lifeleach 1, a 40 damage hit heals 2 HP.",
     "money": "Currency used to buy and reroll items in the shop.",
 }
 

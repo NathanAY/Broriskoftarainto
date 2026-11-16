@@ -90,6 +90,46 @@ func test_resolving_all_pickups_starts_shop_phase() -> void:
     collect_orphan_node_details()
 
 
+## Each reroll costs more than the last, the button shows the next price, and
+## entering a shop again starts back at the base price.
+func test_reroll_cost_grows_and_resets_on_new_shop() -> void:
+    var shop: ShopMenu = load("res://src/Scenes/menu/ShopMenu.tscn").instantiate()
+    add_child(shop)
+    var factory: ItemFactory = load("res://src/Systems/Items/ItemFactory.tscn").instantiate()
+    add_child(factory)
+    shop.item_factory = factory
+
+    var character := _build_character()
+    character.get_node("Stats").set_base_stat("money", 1000)
+    shop.character = character
+    GlobalGameState.current_character = character
+
+    shop.show_menu()
+    shop.load_items([])
+    var base_cost: int = shop.reroll_cost()
+    assert_str(shop.reroll_button.text).contains(str(base_cost))
+
+    var money_before: float = character.get_node("Stats").stats.get("money", 0.0)
+    shop._on_reroll_pressed()
+    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(money_before - base_cost)
+    var second_cost: int = shop.reroll_cost()
+    assert_int(second_cost).is_greater(base_cost)
+    assert_str(shop.reroll_button.text).contains(str(second_cost))
+
+    # A reroll the player cannot afford does nothing.
+    character.get_node("Stats").set_base_stat("money", second_cost - 1)
+    shop._on_reroll_pressed()
+    assert_int(shop.reroll_cost()).is_equal(second_cost)
+
+    # A new shop visit resets the surcharge.
+    shop.show_menu()
+    assert_int(shop.reroll_cost()).is_equal(base_cost)
+
+    get_tree().paused = false
+    character.free()
+    collect_orphan_node_details()
+
+
 ## Buying an offer must leave its slot empty -- the shop does not backfill
 ## mid-stage. Reroll is the only thing that refills the row.
 func test_buying_leaves_empty_slot_until_reroll() -> void:

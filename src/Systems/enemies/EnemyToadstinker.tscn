@@ -34,6 +34,7 @@ radius = 61.6
 
 [node name="Enemy" type="CharacterBody2D" unique_id=1262615031]
 script = ExtResource("1_enemy")
+description = "Arms no weapon and bursts when it dies. Kill it at range, or let it reach you and take the blast."
 contact_weapon = null
 art_width = 127.893
 

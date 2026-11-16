@@ -33,6 +33,7 @@ radius = 45.2769
 
 [node name="Enemy" type="CharacterBody2D" unique_id=805227136]
 script = ExtResource("1_enemy")
+description = "Chases you, then reappears in a ring around you every few seconds. The repositioning is the threat."
 art_width = 89.648
 
 [node name="Node2D" type="Node2D" parent="." unique_id=1824104869]

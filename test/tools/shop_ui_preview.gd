@@ -13,7 +13,7 @@ const SAMPLE_WEAPONS := ["Fist", "Pistol", "Shotgun", "DeathAura", "Thorns"]
 ## The offer row is only 4 cards wide, so the pool has to be small enough that
 ## the two hand-built polarity items are guaranteed to appear alongside a plain
 ## one. Built rather than generated because an item whose curse is a modifier
-## needs `NEGATIVE_MODIFIER_CHANCE` to go our way.
+## needs `negative_modifier_chance` to go our way.
 static func _offer_items() -> Array[Item]:
 	var out: Array[Item] = []
 	var regen := load("res://src/Systems/Items/modifiers/FlatRegenModifier.tscn")
@@ -102,6 +102,8 @@ func _ready() -> void:
 	add_child(factory)
 	shop.item_factory = factory
 	factory.rng.seed = 20260930
+	# The game re-offers pooled items rarely; this row must be the pinned pool.
+	factory.repeat_item_chance_scale = 1.0
 	factory.drop_pool = _offer_items()
 	# `show_menu()` pauses the tree and reads the character off the global, which
 	# is exactly what the real portal does; a screenshot of a paused tree is

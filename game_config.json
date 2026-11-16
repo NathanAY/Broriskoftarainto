@@ -1,0 +1,32 @@
+{
+	"item_generation": {
+		"negative_modifier_chance": 0.22,
+		"repeat_item_chance_scale": 0.25,
+		"modifier_weights": {
+			"ArmorModifier": 1.0,
+			"ChainModifier": 1.0,
+			"CritModifier": 1.0,
+			"EmergencyHealModifier": 1.0,
+			"EnergyShieldModifier": 1.0,
+			"ExplosiveShotModifier": 1.0,
+			"FlatLifeDrainModifier": 1.0,
+			"FlatRegenModifier": 1.0,
+			"HealOnEventModifier": 1.0,
+			"HomingModifier": 1.0,
+			"HomingRocketFromTargetModifier": 1.0,
+			"HomingRocketModifier": 1.0,
+			"KnockbackModifier": 1.0,
+			"LifeLeachModifier": 1.0,
+			"PercentLifeDrainModifier": 0.25,
+			"PercentRegenModifier": 1.0,
+			"PlusDamageToHealthyTargetModifier": 1.0,
+			"PoisonModifier": 1.0,
+			"ProjectileBounceModifier": 1.0,
+			"ReflectProjectilesModifier": 1.0,
+			"SpinningOrbsModifier": 1.0,
+			"SpreadModifier": 1.0,
+			"StatOnKillModifier": 1.0,
+			"bombOnHitModifier": 1.0
+		}
+	}
+}

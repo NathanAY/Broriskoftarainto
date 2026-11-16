@@ -7,7 +7,7 @@ Purpose
 - Rules marked **[PROPOSED]** elsewhere in the rulebook are not enforced by code. This file is a backlog, not a test suite.
 
 Related reading
-- `docs/systems/item_factory.md` — the generator, its current roll, and the degenerate `drop_pool`.
+- `docs/systems/item_factory.md` — the generator, its current roll, and `drop_pool`.
 - `docs/systems/modifiers.md` — what each existing modifier actually does, per stack.
 - `docs/systems/characters.md` — the `CharacterData` format behind §6 of the rulebook.
 
@@ -36,7 +36,6 @@ Ordered by how much they break the game.
 | 16 | **`highest_hp.tres` and `lowest_hp.tres` are cross-wired** to the wrong scripts | `src/Resources/weapons/aim/highest_hp.tres` runs `LowestHealthTargetSelector`; `src/Resources/weapons/aim/lowest_hp.tres` runs `RandomTargetSelector` | Shotgun aims at the *lowest*-HP target | rulebook §4.8 checklist |
 | 18 | ~~**Shotgun pellets over-deliver into a single target**~~ — **FIXED, and the old row was wrong about the mechanism.** It previously claimed `p.damage = current_damage / pellet_count * 2` (Σ 200%); that line no longer exists. `shotgun_weapon.gd` sets `p.damage = current_damage`, so every pellet deals the **full** `base_damage` — Σ 500%, not 200%. Per-pellet damage is now the intended design (the cone is what separates it from a single-shot weapon), so the fix was to budget `base_damage` against the sum rather than divide it down. See `balance.md` §4.2. | was Σ 500% at `base_damage 5.0`; now Σ 17.5 at 3.5, in budget | rulebook §4.2 |
 | 19 | **~35% of stat items triple in price** (1 → 3) purely from the curse roll, with identical positive power | `src/Systems/Items/item_price_analyzer.gd:14-24`; `src/Systems/Items/item_factory.gd:206-208` | the price-band-as-budget mapping (rulebook §2.1) breaks for 35% of offers | rulebook §2.1 |
-| 21 | **`drop_pool` converges to ~100% reuse** and never resets | `src/Systems/Items/item_factory.gd:117-130` | `(N+1)/(N+2)` pool hit rate | `item_factory.md`, "`drop_pool` is degenerate" |
 | 22 | **No player-side scaling at all.** Enemy HP ×5, player power unconstrained | `src/Systems/enemy_spawner.gd:14` | nothing on the item side moves | rulebook §2.3 |
 | 23 | **A price-1 `lifeleach` item doubles life leech** — `lifeleach` is not in `DEFAULT_STATS`, so it rolls the constant `1.0` on a stat whose base is 1.0 | `src/Systems/Items/item_factory.gd:459`; `src/Systems/Items/modifiers/life_leach_modifier.gd:6,26` | 5% → 10% lifesteal | rulebook §3.1 |
 

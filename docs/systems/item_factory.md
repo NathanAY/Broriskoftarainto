@@ -15,7 +15,8 @@ Dependencies
 - `Stats` node reference (onready `$Stats`), PackedScenes under `src/Systems/Items/modifiers` and `src/Systems/Items/Buffs`.
 
 Entry points
-- `get_item_from_pool_or_generate()` (`:117`) — what the shop and enemy drops call. Pulls from `drop_pool`, generating with probability `1 / (pool_size + 2)`.
+- `get_item_from_pool_or_generate()` (`:117`) — what the shop and enemy drops call. Re-offers a `drop_pool` item with probability `repeat_item_chance_scale * N / (N + 1)`, otherwise generates a new one.
+- Three knobs come from `game_config.json` — `negative_modifier_chance`, `repeat_item_chance_scale`, `modifier_weights`. See `docs/systems/game_config.md`.
 - `get_item_by_type(type, index)` (`:154`) — deterministic, used by the debug/configure panel.
 
 ## Generation roll
@@ -69,17 +70,16 @@ Three structural problems, all fixable without new systems:
 2. **The `base_value == 1` branch (`:460`) is dead code** — identical body to the `else`.
 3. **Dead stats are in the pool.** `attack_range` and `area_radius` appear in `DEFAULT_STATS` (`stats.gd:36-37`) and have tooltip text (`item_tooltip.gd:24-25`) but nothing reads them. A generated "Attack Range Plus" costs a full price-1 slot and does literally nothing. Remove them from `_candidate_stat_names()`.
 
-## `drop_pool` is degenerate
+## `drop_pool` and repeat offers
 
 ```gdscript
-# item_factory.gd:117-130
-if rng.randi_range(0, pool_size) < pool_size:   # inclusive on both ends
+if rng.randf() < repeat_item_chance_scale * pool_size / (pool_size + 1.0):
     return drop_pool.pick_random()
 ```
 
-`randi_range` is inclusive, so the pool branch fires with probability `(N+1)/(N+2)` — **at least 50%, asymptotically 100%**. Every generated item is appended, nothing is ever evicted, and the pool is never reset per loop. A run converges to re-offering the same handful of items.
+The raw pool hit rate `N / (N + 1)` climbs towards 100%, which used to make a run converge on re-offering the same handful of items. `repeat_item_chance_scale` (0.25 in `game_config.json`) multiplies it, so a repeat is at most a 25% outcome and a new item is always the likelier one.
 
-**Fix**: cap generation probability at a constant (say 30%) instead of deriving it from pool size, cap `drop_pool` at ~20 entries with LRU eviction, and clear it on loop change. Note the shop fixture in `test/tools/shop_ui_preview.gd:104` pins `rng.seed` for exactly this reason — any change here needs that fixture re-tuned.
+Still true: every generated item is appended, nothing is evicted, and the pool is never reset per loop. The shop fixture `test/tools/shop_ui_preview.gd` sets the scale back to 1.0 so its row is drawn from the pool it pinned.
 
 ## Gift and curse (the negative half)
 
@@ -87,7 +87,7 @@ Every generated item is a positive half plus a curse, and the curse is one of tw
 - a **negated stat** (`{stat: {"flat": -x}}` in `Item.modifiers`) - always been the case; or
 - a **harmful modifier** (`effect_kind = COST`, e.g. a life drain) appended as a second `Item.effect_scene` entry.
 
-- `const NEGATIVE_MODIFIER_CHANCE := 0.35` decides which, once per item, via `_roll_negative_modifier()`. The two are **alternatives, never both** - an item never gets a double penalty from one roll.
+- `negative_modifier_chance` (from `game_config.json`) decides which, once per item, via `_roll_negative_modifier()`. Which COST or BENEFIT scene is then picked is a weighted draw over `modifier_weights` (`_pick_weighted_scene()`). The two are **alternatives, never both** - an item never gets a double penalty from one roll.
 - All four generators (`_generate_stat_item`, `_generate_effect_item`, `_generate_buff_item`, `_generate_debuff_item`) roll it.
 - **The positive half may only roll a BENEFIT and the curse only a COST.** `_benefit_effect_scenes()` / `_cost_effect_scenes()` partition `effect_scenes` by `BaseModifier.effect_kind` (built once by `_rebuild_scene_pools()`). Without the split the shop can offer "Grants special effect: Life Drain" as an upside. Adding a harmful modifier to the folder and tagging it `COST` is all it takes to widen the pool.
 - A harmful scene is appended **after** the positive one, so `effect_scene[0]` still reads as the gift and `effect_scene_condition` stays aligned.
@@ -96,11 +96,11 @@ Every generated item is a positive half plus a curse, and the curse is one of tw
 - Buff/debuff items render their payload from scene 0 and any appended curse from scene 1 onwards, on both the card and the flat tooltip.
 - `ItemPriceAnalyzer.get_price` only checks whether `effect_scene` is non-empty, so a stat item that rolled a curse is priced as a modifier (3) rather than a stat item (1).
 - **[PROPOSED]** the curse's *magnitude* is currently re-rolled independently of the gift, so a 0.5-HP gift can carry a 1.0-HP curse. `balance.md` §3.2 specifies it as a fixed 1.0-1.2× of the gift.
-- Covered by `test/Systems/Items/test_item_factory_polarity.gd`. The chance is a const, so its tests pin `rng.seed` and draw a batch: a fixed seed makes "both branches appear" deterministic rather than flaky. `test_item_pickup.gd` pins its seed for the same reason.
+- Covered by `test/Systems/Items/test_item_factory_polarity.gd`. The chance is a roll, so its tests pin `rng.seed` and draw a batch: a fixed seed makes "both branches appear" deterministic rather than flaky. `test_item_pickup.gd` pins its seed for the same reason.
 
 ## Known limitations / TODOs
 - The value roll is the big one, and it is described above rather than here: one formula for 14 stats, six of which get a constant. See "The value roll".
-- `drop_pool` asymptotically re-offers the same items and never resets. See above.
+- `drop_pool` never evicts or resets. See above.
 - `_load_scenes_from_dir` uses DirAccess and assumes folder layout; missing/misnamed folders will produce warnings.
 - Anything you drop in `src/Systems/Items/modifiers/` is offerable, including a base class that was only ever meant to be `extends`-ed. The abstract `regen_modifier.gd` base used to ship as a scene in that folder and sold as a do-nothing card, because its `_health_delta_per_tick` returns 0.0; that scene is deleted, and `test/Systems/Items/test_offerable_modifier_scenes.gd` sweeps the folder so the next one fails.
 - Random generation has some dead/experimental code paths (e.g., `return _generate_debuff_item()` placed before other roll checks) — indicates deliberate temporary behavior or debugging.

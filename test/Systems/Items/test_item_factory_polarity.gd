@@ -9,7 +9,7 @@
 # - the two pools are derived from `BaseModifier.effect_kind`, so adding a
 #   harmful modifier to the folder is all it takes to widen the pool.
 #
-# The chance is a hardcoded const, so every test pins `rng.seed` and draws a
+# The chance comes from game_config.json, so every test pins `rng.seed` and draws a
 # batch: a fixed seed makes the batch reproducible, so "both branches appear" is
 # a deterministic assertion rather than a flaky one.
 class_name ItemFactoryPolarityTest
@@ -17,7 +17,7 @@ extends GdUnitTestSuite
 
 const FACTORY_SCENE := "res://src/Systems/Items/ItemFactory.tscn"
 const SEED: int = 20260930
-## How many items to draw per batch. Sized so the 0.35 chance fires many times
+## How many items to draw per batch. Sized so the modifier chance fires many times
 ## while the seed keeps the exact count fixed.
 const BATCH: int = 200
 

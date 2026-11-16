@@ -33,6 +33,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | `enemies.md` | `Enemy` behaviour, health, boss variant |
 | `effects.md` | Every VFX the game spawns — impact sparks, blast fireballs, damage flashes, death shards — and the three authoring traps that decide whether one works |
 | `event_manager.md` | The `LocalEventManager` event bus and the `event_contract.gd` schema checker |
+| `game_config.md` | `game_config.json`: the one hand-edited file for item drop weights and other tunable numbers |
 | `gamepedia.md` | The Gamepedia opened from the main and pause menus: characters, weapons, enemies and modifiers read straight from the shipped data |
 | `items.md` | The `Item` resource, `ItemHolder`, `ItemBuilder`, pricing |
 | `item_factory.md` | Procedural item generation, the gift/curse roll, `drop_pool` |

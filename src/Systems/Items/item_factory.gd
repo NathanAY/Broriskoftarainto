@@ -12,10 +12,22 @@ var weapon_resources: Array[BaseWeapon] = []
 ## How often a generated item's curse is a real harmful **modifier** rather than
 ## a negated stat. Both are legitimate downsides; the modifier version is the one
 ## that actually costs you something every tick, so it stays well below half.
-## Hardcoded rather than exported so the whole game shares one number; the pool
-## it draws from is `_cost_effect_scenes()`, so widening it is a matter of
-## tagging another modifier `effect_kind = COST`.
-const NEGATIVE_MODIFIER_CHANCE: float = 0.35
+## The pool it draws from is `_cost_effect_scenes()`, so widening it is a matter
+## of tagging another modifier `effect_kind = COST`.
+##
+## This and the two knobs below are read from `res://game_config.json`
+## (`item_generation` block); the literals here are only the fallback for a
+## missing key. See `docs/systems/game_config.md`.
+var negative_modifier_chance: float = float(GameConfig.section("item_generation").get("negative_modifier_chance", 0.35))
+
+## Scales how often `get_item_from_pool_or_generate()` re-offers an item it has
+## already generated. 1.0 is the raw `N / (N + 1)` pool hit rate, 0.25 a quarter
+## of it, 0.0 a brand new item every time.
+var repeat_item_chance_scale: float = float(GameConfig.section("item_generation").get("repeat_item_chance_scale", 0.25))
+
+## Drop weight per modifier scene, keyed by the scene's file name without
+## `.tscn`. A scene that is not listed weighs 1.0.
+var modifier_weights: Dictionary = GameConfig.section("item_generation").get("modifier_weights", {})
 
 @onready var stats: Stats = $Stats
 
@@ -88,7 +100,28 @@ func _scene_effect_kind(scene: PackedScene) -> int:
 func _roll_negative_modifier() -> bool:
     if _cost_effect_scenes().is_empty():
         return false
-    return rng.randf() < NEGATIVE_MODIFIER_CHANCE
+    return rng.randf() < negative_modifier_chance
+
+
+## One scene from `scenes`, drawn by `modifier_weights`. Weights are relative
+## within the list handed in, so lowering one cost only shifts the roll towards
+## the other costs - how often a cost appears at all is
+## `negative_modifier_chance`. If every weight is zero the pick is uniform.
+func _pick_weighted_scene(scenes: Array[PackedScene]) -> PackedScene:
+    var weights: Array[float] = []
+    var total := 0.0
+    for scene in scenes:
+        var weight := maxf(0.0, float(modifier_weights.get(scene.resource_path.get_file().get_basename(), 1.0)))
+        weights.append(weight)
+        total += weight
+    if total <= 0.0:
+        return scenes[rng.randi_range(0, scenes.size() - 1)]
+    var roll := rng.randf() * total
+    for i in range(scenes.size()):
+        roll -= weights[i]
+        if roll < 0.0:
+            return scenes[i]
+    return scenes[scenes.size() - 1]
 
 
 # -------------------
@@ -139,19 +172,13 @@ func _gratable_stat_names() -> Array:
     return names
 
 func get_item_from_pool_or_generate() -> Item:
-    var pool_size = drop_pool.size()
-
-    if pool_size == 0:
-        var new_item = generate_random_item()
-        drop_pool.append(new_item)
-        return new_item
-
-    if rng.randi_range(0, pool_size) < pool_size:
+    var pool_size := drop_pool.size()
+    # An empty pool gives a chance of 0, so the first call always generates.
+    if rng.randf() < repeat_item_chance_scale * pool_size / (pool_size + 1.0):
         return drop_pool.pick_random()
-    else:
-        var new_item = generate_random_item()
-        drop_pool.append(new_item)
-        return new_item
+    var new_item = generate_random_item()
+    drop_pool.append(new_item)
+    return new_item
 
 func get_random_weapon() -> BaseWeapon:
     if weapon_resources.is_empty():
@@ -228,7 +255,7 @@ func _generate_stat_item(index: int = -1) -> Item:
     # keep rendering that as a gain - `ItemTooltip._append_modifier_rows` decides
     # this from the fact that no scene is a BENEFIT.
     if _roll_negative_modifier():
-        var cost_scene: PackedScene = _cost_effect_scenes().pick_random()
+        var cost_scene: PackedScene = _pick_weighted_scene(_cost_effect_scenes())
         item.effect_scene = [cost_scene]
         item.description = "Enhances %s, but bleeds you dry." % [chosen_stat]
     else:
@@ -241,7 +268,7 @@ func _generate_effect_item(index: int = -1) -> Item:
     if index != -1:
         chosen_scene = effect_scenes[index]
     else:
-        chosen_scene = benefit_scenes.pick_random()
+        chosen_scene = _pick_weighted_scene(benefit_scenes)
 
     var item_name = _generate_effect_name(chosen_scene.resource_path)
     var description := "Grants special effect: %s" % [item_name]
@@ -269,7 +296,7 @@ func _generate_effect_item(index: int = -1) -> Item:
     if _roll_negative_modifier():
         # Appended AFTER the positive half so index 0 still reads as the gift and
         # `effect_scene_condition` stays aligned with a gift-first ordering.
-        var cost_scene: PackedScene = _cost_effect_scenes().pick_random()
+        var cost_scene: PackedScene = _pick_weighted_scene(_cost_effect_scenes())
         item_scenes.append(_configure_dynamic_modifier(cost_scene))
     else:
         extra_modifiers = _roll_negative_stat("", _candidate_stat_names(), 2.0)
@@ -337,7 +364,7 @@ func _attach_roll_negative_half(item: Item, exclude: String, stat_names: Array, 
         var item_scenes: Array[PackedScene] = []
         for scene in item.effect_scene:
             item_scenes.append(scene)
-        var cost_scene: PackedScene = _cost_effect_scenes().pick_random()
+        var cost_scene: PackedScene = _pick_weighted_scene(_cost_effect_scenes())
         item_scenes.append(_configure_dynamic_modifier(cost_scene))
         item.effect_scene = item_scenes
         _store_effect_display(item, item_scenes)

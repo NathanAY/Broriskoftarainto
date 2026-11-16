@@ -151,7 +151,7 @@ Full design rules and a worked example in Section 5.
 
 ## 3. Item generation budgets
 
-**[PROPOSED] throughout.** This section is the target state for the generator. What the generator does today — the single `5-10% of base` roll and the degenerate `drop_pool` — is described in `docs/systems/item_factory.md`, and the specific numbers it produces wrong are rows 6, 7, 8, 19 and 23 of `docs/systems/balance_audit.md`.
+**[PROPOSED] throughout.** This section is the target state for the generator. What the generator does today — the single `5-10% of base` roll and the never-reset `drop_pool` — is described in `docs/systems/item_factory.md`, and the specific numbers it produces wrong are rows 6, 7, 8, 19 and 23 of `docs/systems/balance_audit.md`.
 
 ### 3.1 Per-stat budget table
 

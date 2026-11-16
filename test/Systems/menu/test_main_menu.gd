@@ -43,7 +43,6 @@ func test_main_menu_has_basic_buttons() -> void:
 ## The debug shortcut is an extra button beside "New game", not a replacement:
 ## the character select -> StarterMenu route stays the default way to play.
 func test_debug_scenarios_button_sits_beside_new_game() -> void:
-    var box: VBoxContainer = main_menu.get_node("Control/VBoxContainer")
     var debug_button: Button = main_menu.get_node("Control/VBoxContainer/DebugScenariosButton")
     assert_str(debug_button.text).is_equal("Debug scenarios")
     assert_int(debug_button.get_index()).is_equal(

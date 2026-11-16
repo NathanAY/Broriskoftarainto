@@ -32,7 +32,7 @@ class_name DocLinksTest
 extends GdUnitTestSuite
 
 ## Root-relative docs that live outside `docs/`.
-const ROOT_DOCS := ["res://AGENTS.md", "res://CONTEXT.md", "res://README.md"]
+const ROOT_DOCS := ["res://AGENTS.md", "res://README.md"]
 ## Every `.md` under here is checked, except `docs/archive/`.
 const DOCS_DIR := "res://docs"
 const ARCHIVE_DIR := "res://docs/archive"
@@ -71,6 +71,8 @@ const ALLOWED_MISSING := {
 		"runtime output of run_scene_shot.bat, written on demand, never committed",
 	"res://enemies.png":
 		"runtime output of run_scene_shot.bat for the enemy gallery, written on demand, never committed",
+	"res://poison_shot.png":
+		"runtime output of run_scene_shot.bat for the poison preview, written on demand, never committed",
 }
 
 var _basenames := {}

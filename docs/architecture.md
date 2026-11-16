@@ -1,6 +1,6 @@
 # Architecture
 
-Paths are repo-root-relative and checked by `test/test_doc_links.gd`. Terms follow `CONTEXT.md`.
+Paths are repo-root-relative and checked by `test/test_doc_links.gd`.
 
 ## Scene structure
 

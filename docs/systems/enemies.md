@@ -81,7 +81,7 @@ These values come from the EnemyGunner's hand-tuned shadow (`scale` (16, 5.12), 
 
 The roster's art was generated as one six-creature sheet and cut up afterwards. `test/tools/extract_enemy_sprites.gd` does the cutting: it flood-fills the white backdrop in from the sheet's border, splits what is left into connected components and writes each one out as a 100x100 PNG. The grid in a generated sheet is never clean, so slicing it into equal rectangles cuts creatures in half.
 
-The Gunner, the Slimeling and the Lancer were delivered as single images instead of being cut from the sheet, so their cells are not listed in the extractor's `CELLS` table. Running `extract_enemy_sprites.gd` would write padded 100x100 cut-outs over the trimmed art, so do not run it on the roster files without re-trimming them afterwards. The untouched source for the Gunner and the Slimeling is kept at `docs/plans/images/enemies/gunner.png` and `docs/plans/images/enemies/jelly-splitter.png`.
+The Gunner, the Slimeling and the Lancer were delivered as single images instead of being cut from the sheet, so their cells are not listed in the extractor's `CELLS` table. Running `extract_enemy_sprites.gd` would write padded 100x100 cut-outs over the trimmed art, so do not run it on the roster files without re-trimming them afterwards.
 
 ## Splitting
 `SplitOnDeath` is an optional child on an enemy scene. It subscribes to the owner's `on_death` and spawns smaller copies of the enemy when it dies.
@@ -99,7 +99,7 @@ Two ordering rules the split path depends on:
 
 The children are added with `call_deferred`, into the same container the spawner uses (`Nodes/Enemies`), because the death event fires from inside `Health.apply_damage` and touching the tree from a physics callback is a flushing error. `StageManager` ends a stage on `Nodes/Enemies.get_child_count() == 0`, so the children hold the stage open until they are dead too.
 
-The shipped splitter is the Slimeling: three children at `split_scale` 0.6, with no `split_scene`, so every mini is another Slimeling. Its art at `src/Assets/enemies/slimeling.png` is a fully opaque green jelly, normalised to the roster's 100x100 / 85%-fill canvas from the delivered source at `docs/plans/images/enemies/jelly-splitter.png`. The sheet's jelly cell is not used because it is translucent, and a see-through enemy reads as a hole in the arena (`docs/visual_style.md`).
+The shipped splitter is the Slimeling: three children at `split_scale` 0.6, with no `split_scene`, so every mini is another Slimeling. The sheet's jelly cell is not used because it is translucent, and a see-through enemy reads as a hole in the arena (`docs/visual_style.md`).
 
 ## Death burst
 `AreaBurstOnEnter` is an optional child on an enemy scene. It subscribes to the owner's `on_death` and, when the enemy dies, damages everything in the `damageable` group inside its radius, then detaches itself.

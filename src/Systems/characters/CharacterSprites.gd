@@ -88,8 +88,8 @@ static func _portrait_region(stack: Array) -> Rect2i:
 	if not found:
 		return canvas
 	var side := maxi(used.size.x, used.size.y)
-	var center := used.position + used.size / 2
-	var square := Rect2i(center - Vector2i(side, side) / 2, Vector2i(side, side))
+	var center := used.position + Vector2i(int(used.size.x / 2.0), int(used.size.y / 2.0))
+	var square := Rect2i(center - Vector2i(int(side / 2.0), int(side / 2.0)), Vector2i(side, side))
 	square.position.x = clampi(square.position.x, 0, maxi(0, canvas.size.x - square.size.x))
 	square.position.y = clampi(square.position.y, 0, maxi(0, canvas.size.y - square.size.y))
 	return square

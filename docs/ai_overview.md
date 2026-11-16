@@ -20,7 +20,6 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | Doc | What it answers |
 |---|---|
 | `docs/architecture.md` | Which scene is which, which script owns what, how systems talk to each other |
-| `CONTEXT.md` | What a word means. *Character* vs *Player*, *effect* vs *stat modifier*, *wave* vs *stage* |
 | `docs/visual_style.md` | Icon naming, sizes, the Borderlands art direction, the two style blocks and two palettes (UI vs art), menu background layers, sprite sheets, the character rig |
 | `docs/systems/balance.md` | How much power a new weapon, item, modifier or character may give — **read before designing one** |
 | `docs/systems/balance_audit.md` | Where the game currently breaks those balance rules |
@@ -79,7 +78,7 @@ The one thing worth reading before the code: this project uses **effect** and **
 - An **effect** is a `Node` behaviour — a scene from `src/Systems/Items/modifiers/` that an item attaches to an actor. It subscribes to `EventManager` events and reacts (spawn a projectile, heal, apply poison).
 - A **stat modifier** is a plain `Dictionary` in `Stats.add_modifier` format. No behaviour.
 
-`CONTEXT.md` is the glossary; `docs/systems/modifiers.md` is the full contract.
+`docs/systems/modifiers.md` is the full contract.
 
 ## Working on this project
 Rules for agents and contributors live in `AGENTS.md`: test-first, how to run the suites, how to render a scene to a PNG for a visual check, and which doc to read before which kind of change.

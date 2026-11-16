@@ -1,6 +1,6 @@
 # TextureBurst.gd
 # 2D port of Wild West `enemy_texture_burst` (Node3D + GPUParticles3D + spatial shaders).
-# Same technique: slice the death-frame texture into an 4x4 grid (32 pieces) and
+# Same technique: slice the death-frame texture into an 4x4 grid (16 pieces) and
 # burst them along `direction` with `strength` (clamped 0.8-2.2 like the original).
 # Differences are only 2D adaptations: Sprite2D instead of AnimatedSprite3D,
 # Vector2 instead of Vector3, Node2D shards instead of GPUParticles3D, top-down
@@ -10,14 +10,14 @@ extends Node2D
 class_name TextureBurst
 
 const GRID_SIZE := 4
-const PIECE_COUNT := 32
+const PIECE_COUNT := GRID_SIZE * GRID_SIZE
 
-@export var lifetime := 1.0
-@export var outward_speed := 220.0
-@export var impact_push_min := 90.0
-@export var impact_push_max := 260.0
-@export var damping := 2.4
-@export var spin_max := 10.0
+@export var lifetime := 1.2
+@export var outward_speed := 70.0
+@export var impact_push_min := 30.0
+@export var impact_push_max := 90.0
+@export var damping := 2.0
+@export var spin_max := 5.0
 
 var _shards: Array[Dictionary] = []
 var _age := 0.0
@@ -105,7 +105,7 @@ func configure(sprite: Sprite2D, direction: Vector2, strength: float, speed_mult
         var jitter: float = randf_range(0.6, 1.4)
         var push: float = randf_range(impact_push_min, impact_push_max) * power
         var vel: Vector2 = outward * outward_speed * jitter + dir * push
-        vel += Vector2(randf_range(-40.0, 40.0), randf_range(-40.0, 40.0))
+        vel += Vector2(randf_range(-15.0, 15.0), randf_range(-15.0, 15.0))
         vel *= _speed_multiplier
         _shards.append({
             "node": piece,

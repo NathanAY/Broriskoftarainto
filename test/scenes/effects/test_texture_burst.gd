@@ -13,14 +13,14 @@ func _make_sprite() -> Sprite2D:
 	return sprite
 
 
-func test_burst_spawns_32_pieces() -> void:
+func test_burst_spawns_one_piece_per_grid_cell() -> void:
 	var burst = BURST_SCENE.instantiate()
 	add_child(burst)
 	var sprite := _make_sprite()
 	add_child(sprite)
 	burst.configure(sprite, Vector2.RIGHT, 1.0)
-	assert_int(burst.get_piece_count()).is_equal(32)
-	assert_int(burst.get_child_count()).is_equal(32)
+	assert_int(burst.get_piece_count()).is_equal(TextureBurst.PIECE_COUNT)
+	assert_int(burst.get_child_count()).is_equal(TextureBurst.PIECE_COUNT)
 	sprite.queue_free()
 	burst.queue_free()
 
@@ -57,7 +57,7 @@ func test_burst_zero_direction_falls_back() -> void:
 	var sprite := _make_sprite()
 	add_child(sprite)
 	burst.configure(sprite, Vector2.ZERO, 1.0)
-	assert_int(burst.get_piece_count()).is_equal(32)
+	assert_int(burst.get_piece_count()).is_equal(TextureBurst.PIECE_COUNT)
 	burst.queue_free()
 	sprite.queue_free()
 
@@ -113,7 +113,7 @@ func test_manager_spawns_burst_as_sibling_on_death() -> void:
 		if child != holder and child.has_method("get_piece_count"):
 			found_burst = child
 	assert_object(found_burst).is_not_null()
-	assert_int(found_burst.get_piece_count()).is_equal(32)
+	assert_int(found_burst.get_piece_count()).is_equal(TextureBurst.PIECE_COUNT)
 	container.queue_free()
 
 
@@ -161,3 +161,30 @@ func _spawn_death_burst(percent: float) -> Node:
 			found_burst = child
 	container.queue_free()
 	return found_burst
+
+
+func test_manager_hides_ground_shadow_on_death() -> void:
+	var container := Node2D.new()
+	add_child(container)
+	var holder := Node2D.new()
+	holder.name = "Holder"
+	container.add_child(holder)
+	var event_manager := EventManager.new()
+	event_manager.name = "EventManager"
+	holder.add_child(event_manager)
+	var inner := Node2D.new()
+	inner.name = "Node2D"
+	holder.add_child(inner)
+	var sprite := _make_sprite()
+	sprite.name = "Sprite2D"
+	inner.add_child(sprite)
+	var shadow := Sprite2D.new()
+	shadow.name = "Shadow"
+	sprite.add_child(shadow)
+	holder.add_child(MANAGER_SCENE.instantiate())
+	var ctx := DamageContext.new()
+	ctx.target = holder
+	ctx.target_take_persent_damage = 0.5
+	event_manager.emit_event("on_death", {"self": holder, "damage_context": ctx})
+	assert_bool(shadow.visible).is_false()
+	container.queue_free()

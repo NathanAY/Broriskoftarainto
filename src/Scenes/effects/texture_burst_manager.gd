@@ -19,6 +19,11 @@ func _emit_burst(event: Dictionary):
     var sprite := holder.get_node_or_null(sprite_path) as Sprite2D
     if sprite == null or sprite.texture == null:
         return
+    # The ground shadow is a child of the body sprite and would linger under the
+    # flying shards for the whole death animation.
+    var shadow := sprite.get_node_or_null("Shadow") as CanvasItem
+    if shadow != null:
+        shadow.hide()
     var target_parent: Node = holder.get_parent()
     if target_parent == null:
         return

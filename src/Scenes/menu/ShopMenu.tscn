@@ -76,11 +76,27 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="StatsScroll" type="ScrollContainer" parent="Control/VBoxContainer/MidContainer/StatsPanel" unique_id=171772239]
+[node name="StatsTabs" type="TabContainer" parent="Control/VBoxContainer/MidContainer/StatsPanel" unique_id=171772240]
+layout_mode = 2
+current_tab = 0
+
+[node name="Stats" type="ScrollContainer" parent="Control/VBoxContainer/MidContainer/StatsPanel/StatsTabs" unique_id=171772239]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="StatsList" type="VBoxContainer" parent="Control/VBoxContainer/MidContainer/StatsPanel/StatsTabs/Stats" unique_id=102135037]
 layout_mode = 2
 
-[node name="StatsList" type="VBoxContainer" parent="Control/VBoxContainer/MidContainer/StatsPanel/StatsScroll" unique_id=102135037]
+[node name="Modifiers" type="ScrollContainer" parent="Control/VBoxContainer/MidContainer/StatsPanel/StatsTabs" unique_id=171772241]
+visible = false
 layout_mode = 2
+horizontal_scroll_mode = 0
+metadata/_tab_index = 1
+
+[node name="ModifiersList" type="VBoxContainer" parent="Control/VBoxContainer/MidContainer/StatsPanel/StatsTabs/Modifiers" unique_id=171772242]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
 
 [node name="BottomContainer" type="HBoxContainer" parent="Control/VBoxContainer" unique_id=1510416218]
 layout_mode = 2

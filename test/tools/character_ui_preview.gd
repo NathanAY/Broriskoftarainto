@@ -12,7 +12,9 @@ const SAMPLE_ITEMS := [
 	"ArmorPlate", "AttackSpeedItem", "BootsOfSpeed", "CritGlass", "Knockback",
 	"LifeDrain", "PlusDamageItem", "PoisonHit", "RegenPassive", "ProjSpeed",
 ]
-const SAMPLE_WEAPONS := ["Fist", "Pistol", "Shotgun", "DeathAura", "Thorns"]
+## Which tab of the right-hand panel the shot shows: 0 Stats, 1 Modifiers.
+const STATS_TAB := 0
+const SAMPLE_WEAPONS :=["Fist", "Pistol", "Shotgun", "DeathAura", "Thorns"]
 
 
 func _ready() -> void:
@@ -39,6 +41,7 @@ func _ready() -> void:
 	var ui: Control = load("res://src/ui/CharacterUI.tscn").instantiate()
 	add_child(ui)
 	ui.visible = true
+	ui.stats_tabs.current_tab = STATS_TAB
 
 
 ## A bare Character with the children `CharacterUi._ready()` looks up. It is

@@ -216,10 +216,17 @@ static func _append_effect_rows(rows: Array, item: Item, start_index: int = 0) -
 
 
 static func _append_effect_row(rows: Array, item: Item, index: int) -> void:
-    var display: Dictionary = resolve_effect_display_for_item(item, index)
+    var row := effect_row(resolve_effect_display_for_item(item, index))
+    if row != null:
+        rows.append(row)
+
+
+## The EFFECT row for one effect display dictionary, or null when it has no name.
+## Shared by item cards and the character menu's Modifiers tab so both read alike.
+static func effect_row(display: Dictionary) -> ItemCardRow:
     var effect_name := humanize_effect_name(str(display.get("name", "")))
     if effect_name.is_empty():
-        return
+        return null
     var body_parts := PackedStringArray()
     var text := str(display.get("text", ""))
     if not text.is_empty():
@@ -234,7 +241,7 @@ static func _append_effect_row(rows: Array, item: Item, index: int) -> void:
     var trigger := str(display.get("trigger", ""))
     if not trigger.is_empty():
         row.text += " (on %s)" % humanize_trigger(trigger)
-    rows.append(row)
+    return row
 
 
 ## An item's positive half lives either in its effect scenes (an "effect item")
@@ -506,10 +513,18 @@ static func _empty_effect_display() -> Dictionary:
 
 
 static func _read_display_from_scene(scene: PackedScene) -> Dictionary:
-    var display := _empty_effect_display()
     var instance: Node = scene.instantiate()
     if instance == null:
-        return display
+        return _empty_effect_display()
+    var display := display_from_node(instance, str(scene.resource_path.get_file().get_basename()))
+    instance.free()
+    return display
+
+
+## The same display contract read off an effect node, live or freshly
+## instantiated. `fallback_name` names it when the node declares no `display_name`.
+static func display_from_node(instance: Node, fallback_name: String) -> Dictionary:
+    var display := _empty_effect_display()
     var props := {}
     for p in instance.get_property_list():
         props[p.name] = true
@@ -533,8 +548,7 @@ static func _read_display_from_scene(scene: PackedScene) -> Dictionary:
     if props.has("effect_kind"):
         display["effect_kind"] = int(instance.get("effect_kind"))
     if str(display["name"]).is_empty():
-        display["name"] = humanize_effect_name(str(scene.resource_path.get_file().get_basename()))
-    instance.free()
+        display["name"] = humanize_effect_name(fallback_name)
     return display
 
 

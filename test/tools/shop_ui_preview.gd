@@ -4,6 +4,8 @@ extends Control
 ## weapons, so `ShopMenu` can be rendered on its own for a visual check (see
 ## `run_scene_shot.bat`). Not part of the game.
 
+## Which tab of the stats panel the shot shows: 0 Stats, 1 Modifiers.
+const STATS_TAB := 0
 const SAMPLE_ITEMS := [
 	"ArmorPlate", "CritGlass", "Knockback", "LifeDrain", "PlusDamageItem",
 	"PoisonHit", "ProjSpeed", "RegenPassive",
@@ -112,6 +114,7 @@ func _ready() -> void:
 	# is exactly what the real portal does; a screenshot of a paused tree is
 	# still drawn, so the pause is undone again right after.
 	shop.show_menu()
+	shop.get_node("Control/VBoxContainer/MidContainer/StatsPanel/StatsTabs").current_tab = STATS_TAB
 	# Simulates the portal cleanup: phase 1 lists collected pickups as icon
 	# tiles, phase 2 is the shop row whose cards carry the tone-coloured stat
 	# body - the part worth screenshotting.

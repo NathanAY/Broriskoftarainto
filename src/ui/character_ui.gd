@@ -2,7 +2,9 @@
 extends Control
 
 @onready var items_container: GridContainer = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/ItemsScroll/ItemsMargin/ItemsList
-@onready var stats_container: VBoxContainer = $VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsHBox/StatsScroll/StatsList
+@onready var stats_tabs: TabContainer = $VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsTabs
+@onready var stats_container: VBoxContainer = $VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsTabs/Stats/StatsList
+@onready var modifiers_container: VBoxContainer = $VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsTabs/Modifiers/ModifiersList
 @onready var weapons_container: GridContainer = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/WeaponsScroll/WeaponsMargin/WeaponsList
 @onready var weapons_label: Label = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/WeaponsLabel
 @onready var back_button: Button = $VBoxContainer/Footer/Close
@@ -26,6 +28,9 @@ func _ready() -> void:
         return
 
     back_button.pressed.connect(_on_back_pressed)
+    # Item and weapon events fire before every effect node is wired in some paths,
+    # so the list is also rebuilt whenever the tab is opened.
+    stats_tabs.tab_changed.connect(func(_tab: int): _update_modifiers())
     stats_node = character.get_node_or_null("Stats")
     item_holder = character.get_node_or_null("ItemHolder")
     weapon_holder = character.get_node_or_null("WeaponHolder")
@@ -46,6 +51,7 @@ func _ready() -> void:
         if em:
             em.subscribe("on_item_added", Callable(self, "_on_item_added"))
             em.subscribe("on_item_removed", Callable(self, "_on_item_removed"))
+    _update_modifiers()
     if weapon_holder:
         _update_weapons()
         em.subscribe("on_weapon_changes", Callable(self, "_on_weapon_changed"))
@@ -128,6 +134,7 @@ func _update_weapons() -> void:
 func _on_weapon_changed(event) -> void:
     print("Character_ui, _on_weapon_changed", event)
     _update_weapons()
+    _update_modifiers()
 
 
 # --- items UI ---------------------------------------------------------------
@@ -164,6 +171,7 @@ func _on_item_added(event: Dictionary) -> void:
     if entity != character:
         return
     _add_card(items_container, item)
+    _update_modifiers()
 
 func _on_item_removed(event: Dictionary) -> void:
     var entity = event.get("hold_owner")
@@ -171,6 +179,13 @@ func _on_item_removed(event: Dictionary) -> void:
     if entity != character:
         return
     _update_items()
+    _update_modifiers()
+
+# --- modifiers tab ----------------------------------------------------------
+
+func _update_modifiers() -> void:
+    ModifierSummary.populate(modifiers_container, character)
+
 
 func _on_back_pressed():
     visible = false

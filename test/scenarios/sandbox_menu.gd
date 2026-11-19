@@ -82,7 +82,10 @@ func _ready() -> void:
 
 	rows.add_child(_make_header())
 	rows.add_child(_make_enemy_row())
-	_health_box = _add_number_row(rows, "Health", 0.0, MAX_HEALTH, 1000.0, DEFAULT_HEALTH)
+	# Step 1, not 1000: a SpinBox rounds a typed value to its step, so a step of
+	# 1000 turned "10" into 0 health, and a 0-health enemy divides by zero when
+	# it dies. The floor of 1 keeps the same case out.
+	_health_box = _add_number_row(rows, "Health", 1.0, MAX_HEALTH, 1.0, DEFAULT_HEALTH)
 	_speed_box = _add_number_row(rows, "Movement speed", 0.0, MAX_MOVEMENT_SPEED, 0.1, DEFAULT_MOVEMENT_SPEED)
 	_amount_box = _add_number_row(rows, "Amount", 1.0, float(MAX_AMOUNT), 1.0, float(DEFAULT_AMOUNT))
 	rows.add_child(_make_buttons())

@@ -38,6 +38,10 @@ func _emit_burst(event: Dictionary):
                 direction = to_self.normalized()
         # Scale burst push by killing blow size (mirrors WW power 0.8-2.2 clamp).
         var percent: float = float(ctx.target_take_persent_damage)
+        # A 0-max-health target makes this damage / 0 = inf, and an infinite speed
+        # turns every shard position into NaN, so nothing draws at all.
+        if not is_finite(percent):
+            percent = 1.0
         if percent > 0.0:
             strength = clampf(0.8 + percent * 1.5, 0.8, 2.2)
         # Scale shard speed by overkill: 3x the holder's max health => 10x speed,

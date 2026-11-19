@@ -577,7 +577,18 @@ func test_the_toadstinker_detonates_when_it_dies() -> void:
 		_world_root(), toadstinker.global_position + Vector2(30.0, 0.0))
 	var health_before := body_health.current_health
 
+	var delay := (toadstinker.get_node("AreaBurstOnEnter") as AreaBurstOnEnter).detonation_delay
+
 	_kill(toadstinker)
+
+	assert_float(delay).override_failure_message(
+		"the Toadstinker detonates the instant it dies instead of after a delay"
+	).is_greater(0.0)
+	assert_float(WeaponTestSupport.health_left(body_health)).override_failure_message(
+		"the Toadstinker blasted before its delay elapsed"
+	).is_equal(health_before)
+
+	await get_tree().create_timer(delay + 0.2).timeout
 
 	assert_float(WeaponTestSupport.health_left(body_health)).override_failure_message(
 		"the Toadstinker died without damaging the body standing next to it"

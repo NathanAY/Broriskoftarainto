@@ -49,6 +49,7 @@ Other behavior:
 ## Running tests from PowerShell
 Call the batch file directly — PowerShell runs `.bat` files through `cmd.exe` on its own, and no wrapper is needed:
 - `.\run_tests_gdunit_custom.bat pistol`
+- **Agents: use the PowerShell tool, not Bash.** Wrapping it as `powershell -Command "..."` from the Bash tool hung with no output and had to be killed. In the PowerShell tool run `.\run_tests_gdunit_custom.bat <name> | Select-String "FAILED|ALL TESTS"; "EXIT=$LASTEXITCODE"`; a suite takes about 3 seconds.
 - `$LASTEXITCODE` carries the runner's exit code (0 pass, 101 pass-with-orphan-warnings, 124 timeout, 125 stall, or the Godot exit code).
 - Run it from the repository root (`F:\programs\Godot projects\BRT\Broriskoftarainto`). `--path .`, `.gdunit.log` and the `test\` target lookup are all resolved against the current directory, so from anywhere else the runner finds no suites and writes its log to the wrong place.
 

@@ -97,3 +97,27 @@ func test_the_burst_fires_only_once() -> void:
         "on_death", {"self": enemy, "damage_context": ctx})
 
     assert_float(health.current_health).is_equal(after_first)
+
+
+func test_a_delayed_burst_waits_then_hits_and_draws_the_blast() -> void:
+    var enemy := _spawn_bursting_enemy()
+    var burst := enemy.get_node("AreaBurstOnEnter") as AreaBurstOnEnter
+    burst.detonation_delay = 0.2
+    var expected_radius := burst.get_radius_px()
+    var health := DamageableBody.spawn(_root, Vector2(50, 0))
+
+    _kill(enemy)
+    await get_tree().process_frame
+
+    assert_float(health.current_health).override_failure_message(
+        "the delayed burst hit before its delay elapsed"
+    ).is_equal(100.0)
+
+    await get_tree().create_timer(0.4).timeout
+
+    assert_float(health.current_health).override_failure_message(
+        "the delayed burst never hit after its delay"
+    ).is_equal(100.0 - BLAST_DAMAGE)
+    var visuals := _root.get_children().filter(func(n): return n is ExplosionBurst)
+    assert_int(visuals.size()).override_failure_message("no blast visual was drawn").is_equal(1)
+    assert_float((visuals[0] as ExplosionBurst).radius).is_equal(expected_radius)

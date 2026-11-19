@@ -104,6 +104,8 @@ The shipped splitter is the Slimeling: three children at `split_scale` 0.6, with
 ## Death burst
 `AreaBurstOnEnter` is an optional child on an enemy scene. It subscribes to the owner's `on_death` and, when the enemy dies, damages everything in the `damageable` group inside its radius, then detaches itself.
 
+`detonation_delay` (seconds, default 0) postpones the blast and its visual (`ExplosionBurst`, sized to `blast_radius`); the burst reparents to the corpse's parent so it outlives the death animation. The Toadstinker uses 1.0.
+
 It is a group scan rather than a physics overlap: the enemy that died has just left the `damageable` group, so the corpse is not a target and everything else standing in the radius is. That includes other enemies.
 
 ## Charging

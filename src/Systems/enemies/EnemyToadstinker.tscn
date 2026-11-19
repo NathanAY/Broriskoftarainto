@@ -106,3 +106,4 @@ autoplay = &""
 [node name="AreaBurstOnEnter" parent="." unique_id=1768375853 instance=ExtResource("15_burst_damage")]
 blast_damage = 8.0
 blast_radius = 1.0
+detonation_delay = 1.0

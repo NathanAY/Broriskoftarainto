@@ -9,10 +9,10 @@ extends GdUnitTestSuite
 const BURST_SCENE: PackedScene = preload("res://src/Scenes/particles/explosion_burst.tscn")
 const EXPLOSION_SCENE: PackedScene = preload("res://src/Scenes/Explosion.tscn")
 
-## Names of the five layers the blast is built from. Asserted as a set rather
+## Names of the six layers the blast is built from. Asserted as a set rather
 ## than a count: a layer being renamed or dropped is the change worth catching,
 ## and a hardcoded `amount` total would not notice a swap.
-const EXPECTED_LAYERS := ["Fireball", "Flash", "Shockwave", "Smoke", "Sparks"]
+const EXPECTED_LAYERS := ["Debris", "Fireball", "Flash", "Shockwave", "Smoke", "Sparks"]
 
 
 func _make_burst(radius_px: float) -> ExplosionBurst:
@@ -39,7 +39,7 @@ func test_burst_is_built_from_every_layer() -> void:
 		assert_bool(emitter.one_shot).override_failure_message(
 			"%s is not a one-shot emitter" % emitter.name).is_true()
 	# Sorted, because `contains_exactly` compares order too and the draw order
-	# here is an art decision - what matters is that all five exist.
+	# here is an art decision - what matters is that all six exist.
 	layers.sort()
 	burst.queue_free()
 	assert_array(layers).override_failure_message(

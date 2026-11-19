@@ -6,6 +6,33 @@
 [ext_resource type="Texture2D" path="res://src/Assets/particles/particle_smoke.png" id="4_smoke"]
 [ext_resource type="Texture2D" path="res://src/Assets/particles/particle_spark.png" id="5_spark"]
 [ext_resource type="Texture2D" path="res://src/Assets/particles/particle_glow.png" id="6_flash"]
+[ext_resource type="Texture2D" path="res://src/Assets/particles/particle_3.png" id="7_debris"]
+
+[sub_resource type="Gradient" id="Gradient_debris"]
+offsets = PackedFloat32Array(0, 0.6, 1)
+colors = PackedColorArray(0.62, 0.62, 0.62, 1, 0.5, 0.5, 0.5, 0.9, 0.4, 0.4, 0.4, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_debris"]
+gradient = SubResource("Gradient_debris")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_debris"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 10.0
+angle_min = -180.0
+angle_max = 180.0
+direction = Vector3(0, 0, 0)
+spread = 180.0
+initial_velocity_min = 120.0
+initial_velocity_max = 300.0
+angular_velocity_min = -240.0
+angular_velocity_max = 240.0
+gravity = Vector3(0, 0, 0)
+damping_min = 120.0
+damping_max = 200.0
+scale_min = 0.15
+scale_max = 0.4
+color_ramp = SubResource("GradientTexture1D_debris")
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
 blend_mode = 1
@@ -37,8 +64,8 @@ angle_min = 1.07288e-05
 angle_max = 180.0
 direction = Vector3(0, 0, 0)
 spread = 180.0
-initial_velocity_min = 170.0
-initial_velocity_max = 230.0
+initial_velocity_min = 290.0
+initial_velocity_max = 310.0
 gravity = Vector3(0, 0, 0)
 scale_min = 0.16
 scale_max = 0.4
@@ -73,8 +100,8 @@ initial_velocity_max = 70.0
 gravity = Vector3(0, 0, 0)
 damping_min = 25.0
 damping_max = 60.0
-scale_min = 0.55
-scale_max = 1.35
+scale_min = 1.0
+scale_max = 2.2
 scale_curve = SubResource("CurveTexture_fire")
 color_ramp = SubResource("GradientTexture1D_fire")
 
@@ -195,6 +222,17 @@ one_shot = true
 explosiveness = 1.0
 visibility_rect = Rect2(-400, -400, 800, 800)
 process_material = SubResource("ParticleProcessMaterial_shockwave")
+
+[node name="Debris" type="GPUParticles2D" parent="."]
+emitting = false
+local_coords = true
+amount = 12
+texture = ExtResource("7_debris")
+lifetime = 0.8
+one_shot = true
+explosiveness = 1.0
+visibility_rect = Rect2(-400, -400, 800, 800)
+process_material = SubResource("ParticleProcessMaterial_debris")
 
 [node name="Smoke" type="GPUParticles2D" parent="."]
 emitting = false

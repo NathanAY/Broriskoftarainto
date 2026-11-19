@@ -55,8 +55,10 @@ Two details in that generator are load-bearing, not taste:
 ## The explosion blast (`explosion.gd`, `explosion_burst.tscn`)
 
 - `Explosion` used to draw its own visual: a `_draw()` painting one flat, half-transparent white circle at the blast radius, fading over the damage window. It read as a placeholder rather than as a blast — no shape, no direction, no aftermath. The `_draw()` is gone.
-- Five layers, in draw order: `Shockwave` (debris thrown out to the blast edge — the layer that tells the player how far it reached), `Smoke`, `Fireball`, `Sparks`, `Flash`. The four hot layers share a `CanvasItemMaterial` with `blend_mode = 1` (add); `Smoke` blends normally because it is meant to be dark, and it is drawn *under* `Fireball` for that reason — on top, it punches a flat grey hole through the middle of the fire. Note `GPUParticles2D` has no `blend_mode` property of its own; additive is a material.
+- Six layers, in draw order: `Debris` (gray chunks from `particle_3.png`, normal blend — deliberately inked, unlike the fire layers), `Shockwave` (debris thrown out to the blast edge — the layer that tells the player how far it reached), `Smoke`, `Fireball`, `Sparks`, `Flash`. The four hot layers share a `CanvasItemMaterial` with `blend_mode = 1` (add); `Smoke` blends normally because it is meant to be dark, and it is drawn *under* `Fireball` for that reason — on top, it punches a flat grey hole through the middle of the fire. Note `GPUParticles2D` has no `blend_mode` property of its own; additive is a material.
 - **The node outlives its damage window.** `duration` (0.15s) is when the `CollisionShape2D` is switched **off**; `visual_duration` is when the node frees itself, and it exists only because it is the burst's parent. Splitting the two is what stops a blast from hurting things that walk into the smoke afterwards. `visual_duration` is floored by `ExplosionBurst.get_longest_lifetime()`, so retuning a layer's lifetime in the editor cannot leave the tail truncated.
+- The shockwave's travel (speed × lifetime) is tuned to `ExplosionBurst.BASE_RADIUS`, so the ring lands on the blast edge once the node is scaled. The burst frees itself after its longest layer, so it can be parented anywhere.
+- Also spawned by `AreaBurstOnEnter` (enemy death burst) at its own radius; the Toadstinker sets `detonation_delay = 1.0`, so the blast and damage land a second after it dies. See `docs/systems/enemies.md`.
 - Spawned by `explosive_shot_modifier.gd`, `bomb_on_hit_modifier.gd`, and `spawner_modifier.gd`.
 
 ## The `AreaWeapon` aura ring (`area_damage_burst.tscn`)
@@ -77,8 +79,8 @@ Two details in that generator are load-bearing, not taste:
 | Manager | Subscribes to | Spawns | Notes |
 | --- | --- | --- | --- |
 | `HitFlashManager` | `before_take_damage` | a sprite `modulate` tween | Colour keyed to damage type/tags: poison=green, melee=red, explosion=yellow, ranged=white. |
-| `ParticleEffectManager` | `after_take_damage` | `directional_hit_particles.tscn` | Amount scales with `target_take_persent_damage`, so a bigger hit throws more sparks. Rotated to point away from `ctx.source`. |
-| `TextureBurstManager` | `on_death` | `TextureBurst.tscn` | Slices the death frame into 4x4 `Sprite2D` shards; strength from the killing blow, speed from overkill. |
+| `ParticleEffectManager` | `after_take_damage` | `hit_particles.tscn` (full circle) + `directional_hit_particles.tscn` (35° cone) | Amount scales with `target_take_persent_damage`, capped at `MAX_PARTICLES`; 30% goes omni, 70% is aimed away from `ctx.source`, so a huge hit still reads as a splash, biased toward the hit direction. |
+| `TextureBurstManager` | `on_death` | `TextureBurst.tscn` | Breaks the death frame like cracked glass: 9-13 random radial cracks from a jittered impact point, joined by ragged rings (`TextureBurst.crack_pieces()`), clipped to the frame. That gives ~35 textured `Polygon2D` pieces, small splinters near the impact and big slabs at the edge; splinters fly faster. UVs are absolute pixels, so flips and atlas frames just work. Strength from the killing blow, speed from overkill; the base outward speed is high enough that a tiny hit (sandbox enemies have 100k health) still visibly spreads. Damping grows with `sqrt(speed_multiplier)`: speed is uncapped, so without it a 1-health enemy one-shot by a fist (~40x boost) threw every piece thousands of pixels off-screen before it faded. |
 
 Each reads `get_parent().get_node_or_null("EventManager")`, so all three are only as reliable as that child existing on the owner.
 

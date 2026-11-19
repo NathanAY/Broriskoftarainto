@@ -1,4 +1,4 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://dg2p0vj4p5g0d"]
 
 [ext_resource type="Script" uid="uid://cs2dub84x6wjd" path="res://src/Scripts/Enemy.gd" id="1_enemy"]
 [ext_resource type="Texture2D" uid="uid://dem1lyc5gn306" path="res://src/Assets/enemies/lancer.png" id="2_sprite"]
@@ -31,44 +31,45 @@ radius = 41.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_hitbox"]
 radius = 45.2769
 
-[node name="Enemy" type="CharacterBody2D"]
+[node name="Enemy" type="CharacterBody2D" unique_id=1692952096]
 script = ExtResource("1_enemy")
 description = "Walks in, telegraphs its attack, then charges along the direction it locked. The charge is what connects."
 art_width = 97.239
 
-[node name="Node2D" type="Node2D" parent="."]
+[node name="Node2D" type="Node2D" parent="." unique_id=638902507]
 
-[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
+[node name="Sprite2D" type="Sprite2D" parent="Node2D" unique_id=1406684603]
+texture_filter = 4
 texture = ExtResource("2_sprite")
 
-[node name="Shadow" type="Sprite2D" parent="Node2D/Sprite2D"]
-show_behind_parent = true
+[node name="Shadow" type="Sprite2D" parent="Node2D/Sprite2D" unique_id=1547842854]
 modulate = Color(0, 0, 0, 0.35)
+show_behind_parent = true
 position = Vector2(0, 289.33)
 scale = Vector2(14.859, 4.755)
 texture = SubResource("GradientTexture2D_shadow")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1317454465]
 shape = SubResource("CircleShape2D_body")
 one_way_collision_margin = 1.2
 
-[node name="Hitbox" type="Area2D" parent="."]
+[node name="Hitbox" type="Area2D" parent="." unique_id=757240828]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=1323017646]
 shape = SubResource("CircleShape2D_hitbox")
 
-[node name="EventManager" parent="." instance=ExtResource("3_bus")]
+[node name="EventManager" parent="." unique_id=575073755 instance=ExtResource("3_bus")]
 
-[node name="HealthBar" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("4_bar")]
+[node name="HealthBar" parent="." unique_id=1017407852 node_paths=PackedStringArray("event_manager") instance=ExtResource("4_bar")]
 event_manager = NodePath("../EventManager")
 
-[node name="Stats" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("5_stats")]
+[node name="Stats" parent="." unique_id=1112223308 node_paths=PackedStringArray("event_manager") instance=ExtResource("5_stats")]
 event_manager = NodePath("../EventManager")
 stats = {
-"attack_range": 1.67,
-"attack_speed": 1.0,
 "area_radius": 1.0,
 "area_size_multiplier": 1.0,
+"attack_range": 1.67,
+"attack_speed": 1.0,
 "critical_chance": 0.0,
 "critical_multiplier": 1.5,
 "damage": 1.0,
@@ -81,26 +82,25 @@ stats = {
 "projectile_speed_multiplier": 1.0
 }
 
-[node name="ItemHolder" parent="." instance=ExtResource("6_items")]
+[node name="ItemHolder" parent="." unique_id=1458678003 instance=ExtResource("6_items")]
 
-[node name="WeaponHolder" parent="." instance=ExtResource("7_weapons")]
+[node name="WeaponHolder" parent="." unique_id=1979623269 instance=ExtResource("7_weapons")]
 
-[node name="Health" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_health")]
+[node name="Health" parent="." unique_id=1813783865 node_paths=PackedStringArray("event_manager") instance=ExtResource("8_health")]
 event_manager = NodePath("../EventManager")
 
-[node name="ParticleEffectManager" parent="." instance=ExtResource("9_particles")]
+[node name="ParticleEffectManager" parent="." unique_id=2075265640 instance=ExtResource("9_particles")]
 
-[node name="TextureBurstManager" parent="." instance=ExtResource("13_burst")]
+[node name="TextureBurstManager" parent="." unique_id=1246715299 instance=ExtResource("13_burst")]
 
-[node name="HitFlashManager" parent="." instance=ExtResource("14_flash")]
+[node name="HitFlashManager" parent="." unique_id=612002763 instance=ExtResource("14_flash")]
 
-[node name="AnimationPlayer" parent="." instance=ExtResource("10_anim")]
+[node name="AnimationPlayer" parent="." unique_id=61751792 instance=ExtResource("10_anim")]
 libraries/ = ExtResource("11_anims")
 autoplay = &""
 
-[node name="MovementBehaviour" parent="." instance=ExtResource("12_move")]
+[node name="MovementBehaviour" parent="." unique_id=549195188 instance=ExtResource("12_move")]
 stop_distance = 180.0
 windup_time = 0.55
-charge_duration = 0.45
 recover_time = 0.5
 charge_speed_scale = 2.8

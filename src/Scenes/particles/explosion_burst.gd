@@ -56,6 +56,10 @@ func _ready() -> void:
 		var emitter := child as GPUParticles2D
 		if emitter != null:
 			_emit(emitter)
+	# Frees itself, so a caller that parents it somewhere long-lived (the enemy
+	# death burst) does not leak a burst per detonation. `Explosion` frees it
+	# earlier through its own parent; a second queue_free is harmless.
+	get_tree().create_timer(get_longest_lifetime() + 0.1).timeout.connect(queue_free)
 
 
 ## Restarts a one-shot emitter, so two explosions spawned in the same frame both

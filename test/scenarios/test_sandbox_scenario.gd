@@ -262,6 +262,76 @@ func test_opening_the_panel_hides_the_pause_buttons_and_closing_restores_them() 
     assert_bool(pause_control.visible).is_true()
 
 
+## A sandbox enemy has to shatter on death like any wave enemy.
+func test_spawned_enemy_shatters_on_death() -> void:
+    var scenario := await _run_scenario()
+    var menu: SandboxMenu = scenario.get_node("ScenarioSetup/SandboxMenu")
+    _set_spawn_values(menu, 100000.0, 0.0, 1)
+    var enemy: Enemy = menu.spawn_configured()[0]
+    var enemies_node: Node = scenario.get_node("Nodes/Enemies")
+
+    var ctx := DamageContext.new()
+    ctx.target = enemy
+    ctx.base_amount = 100000.0
+    ctx.final_amount = 100000.0
+    enemy.health_node.apply_damage(ctx)
+
+    var bursts := 0
+    for child in enemies_node.get_children():
+        if child is TextureBurst:
+            bursts += 1
+    assert_int(bursts).override_failure_message("no TextureBurst after the kill").is_equal(1)
+    var burst: TextureBurst = null
+    for child in enemies_node.get_children():
+        if child is TextureBurst:
+            burst = child
+    var piece := burst.get_child(0) as Polygon2D
+    var start := piece.global_position
+    for _frame in 10:
+        await get_tree().process_frame
+    assert_bool(burst.is_visible_in_tree()).is_true()
+    assert_float(piece.global_position.distance_to(start)).is_greater(0.0)
+
+
+## Typing a small health must keep that health. The box used to step by 1000, so
+## "10" rounded to 0 and the enemy then died with an infinite damage percent.
+func test_typed_small_health_is_not_rounded_away() -> void:
+    var scenario := await _run_scenario()
+    var menu: SandboxMenu = scenario.get_node("ScenarioSetup/SandboxMenu")
+    menu._health_box.value = 10.0
+    assert_float(menu._health_box.value).is_equal(10.0)
+
+    var enemy: Enemy = menu.spawn_configured()[0]
+    assert_float(enemy.health_node.max_health).is_equal_approx(10.0, 0.001)
+
+
+## The reported case: a 10-health enemy one-shot by a weapon must burst, with
+## every shard at a finite position.
+func test_low_health_enemy_burst_has_finite_pieces() -> void:
+    var scenario := await _run_scenario()
+    var menu: SandboxMenu = scenario.get_node("ScenarioSetup/SandboxMenu")
+    menu._health_box.value = 10.0
+    var enemy: Enemy = menu.spawn_configured()[0]
+    var enemies_node: Node = scenario.get_node("Nodes/Enemies")
+
+    var ctx := DamageContext.new()
+    ctx.target = enemy
+    ctx.base_amount = 30.0
+    ctx.final_amount = 30.0
+    enemy.health_node.apply_damage(ctx)
+    for _frame in 5:
+        await get_tree().process_frame
+
+    var burst: TextureBurst = null
+    for child in enemies_node.get_children():
+        if child is TextureBurst:
+            burst = child
+    assert_object(burst).is_not_null()
+    for piece in burst.get_children():
+        assert_bool(is_finite((piece as Node2D).position.x)).is_true()
+        assert_bool(is_finite((piece as Node2D).position.y)).is_true()
+
+
 func _set_spawn_values(menu: SandboxMenu, health: float, speed: float, amount: int) -> void:
     menu._health_box.value = health
     menu._speed_box.value = speed

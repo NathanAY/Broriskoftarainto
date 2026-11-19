@@ -16,8 +16,28 @@ class_name AreaBurstOnEnter
 ## at the only place that needs them.
 @export var blast_radius: float = 0.9
 
+## Seconds between the owner dying and the blast going off. 0 detonates on death.
+@export var detonation_delay: float = 0.0
+
+## The blast visual, sized to the same radius the damage scan uses.
+@export var burst_scene: PackedScene = preload("res://src/Scenes/particles/explosion_burst.tscn")
+
 var _shape: CollisionShape2D = null
 var _fired: bool = false
+var _corpse: Node = null
+var _bus: EventManager = null
+
+
+## Plays the blast at this node's position, parented beside it so it outlives it.
+func _spawn_visual(radius: float) -> void:
+    if burst_scene == null or get_parent() == null:
+        return
+    var burst := burst_scene.instantiate() as ExplosionBurst
+    if burst == null:
+        return
+    burst.radius = radius
+    get_parent().add_child(burst)
+    burst.global_position = global_position
 
 
 func _ready() -> void:
@@ -53,9 +73,29 @@ func _on_owner_died(_event: Dictionary) -> void:
     if _fired:
         return
     _fired = true
-    var owner_node := get_parent()
-    var bus := _owner_bus()
+    _corpse = get_parent()
+    _bus = _owner_bus()
+    if detonation_delay <= 0.0:
+        _detonate()
+        return
+    # The corpse is freed when its death animation ends, which is sooner than the
+    # delay, so the burst moves to the corpse's parent and waits there. Deferred:
+    # the death event fires inside Health.apply_damage, a physics callback.
+    var home := _corpse.get_parent()
+    if home == null:
+        _detonate()
+        return
+    reparent.call_deferred(home, true)
+    get_tree().create_timer(detonation_delay).timeout.connect(_detonate)
+
+
+func _detonate() -> void:
+    if not is_inside_tree():
+        return
+    var owner_node := _corpse if is_instance_valid(_corpse) else null
+    var bus := _bus if is_instance_valid(_bus) else null
     var radius := get_radius_px()
+    _spawn_visual(radius)
     for target in get_tree().get_nodes_in_group("damageable"):
         if target == owner_node or not (target is Node2D):
             continue
@@ -72,7 +112,7 @@ func _on_owner_died(_event: Dictionary) -> void:
 
 func _damage(health: Health, target: Node, bus: EventManager) -> void:
     var ctx := DamageContext.new()
-    ctx.source = get_parent()
+    ctx.source = _corpse if is_instance_valid(_corpse) else null
     ctx.target = target
     ctx.base_amount = blast_damage
     ctx.final_amount = blast_damage

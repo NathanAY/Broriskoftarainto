@@ -199,6 +199,7 @@ func _create_visual(weapon_inst: BaseWeapon) -> WeaponVisual:
     var visual := WeaponVisual.new()
     visual.name = _unique_visual_name(weapon_inst.name)
     visual.texture = weapon_inst.sprite
+    visual.scale = Vector2.ONE * minf(1.0, AssetSizes.scale_for(visual.texture, AssetSizes.WEAPON_SPRITE))
     visual.weapon = weapon_inst
     # The visual used to be appended as the last child of the holder, so it drew
     # on top of the holder's other visuals (body, legs, hit particles). Nesting

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="SmgWeapon" format=3]
+
+[ext_resource type="PackedScene" uid="uid://bbj577efimtbf" path="res://src/Systems/weapon/Projectile.tscn" id="1_proj"]
+[ext_resource type="Script" path="res://src/Systems/weapon/smg_weapon.gd" id="2_smg"]
+[ext_resource type="Resource" uid="uid://hye6t5sxe2yg" path="res://src/Resources/weapons/aim/closest.tres" id="3_aim"]
+[ext_resource type="Texture2D" path="res://src/Assets/weapons/smg.png" id="4_tex"]
+[ext_resource type="AudioStream" uid="uid://654dl1dnsap3" path="res://src/Assets/sounds/pistol/gun_pistol_shot_01.wav" id="5_a"]
+[ext_resource type="AudioStream" uid="uid://s2rx8mp7wb2v" path="res://src/Assets/sounds/pistol/gun_pistol_shot_02.wav" id="6_b"]
+[ext_resource type="AudioStream" uid="uid://dlv3pv0il07y4" path="res://src/Assets/sounds/pistol/gun_pistol_shot_03.wav" id="7_c"]
+
+[resource]
+script = ExtResource("2_smg")
+projectile_scene = ExtResource("1_proj")
+name = "SMG"
+description = "SMG"
+base_attack_speed = 5
+base_damage = 2.0
+modifiers = {
+"knockback": {
+"duration": 0.1,
+"strength": 0.05
+}
+}
+target_selector = ExtResource("3_aim")
+sprite = ExtResource("4_tex")
+attack_sound = Array[Resource]([ExtResource("5_a"), ExtResource("6_b"), ExtResource("7_c")])

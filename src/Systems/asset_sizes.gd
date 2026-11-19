@@ -18,6 +18,12 @@ const ENEMY_SPRITE := 100.0
 ## The boss is a larger canvas and is drawn at its own size.
 const BOSS_SPRITE := 225.0
 
+## The widest a weapon sprite is drawn while orbiting its holder. A wider source
+## is scaled down to this; a narrower one keeps its own size (the 80px pistol
+## predates this constant and is unchanged), so a high-resolution weapon needs no
+## per-weapon scale. Matches the pistol's canvas.
+const WEAPON_SPRITE := 80.0
+
 ## The canvas a modifier / effect icon is authored on. The UI draws the same art
 ## smaller (36 tooltip, 48 item panel, 64 card), so a source at or above this is
 ## only ever minified.

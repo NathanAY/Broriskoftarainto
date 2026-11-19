@@ -1,0 +1,10 @@
+{
+	"options": {
+		"music_volume": 100.0,
+		"sfx_volume": 100.0,
+		"show_stats": false,
+		"sound_volume": 12.0,
+		"window_mode_index": 1
+	},
+	"version": 1
+}

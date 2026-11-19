@@ -14,28 +14,29 @@ const OPTIONS_MENU_SCENE_PATH := "res://src/Scenes/menu/OptionsMenu.tscn"
 const SETTINGS_SCRIPT := preload("res://src/Scripts/autoload/game_settings.gd")
 
 ## Scratch file, so a test run neither reads nor writes the player's real
-## `user://settings.cfg`.
-const SCRATCH_PATH := "user://test_game_settings.cfg"
+## save file.
+const SCRATCH_PATH := "res://saves/test_game_settings.json"
 
-var _saved_settings_path := ""
+var _saved_save_path := ""
 var _saved_bus_volumes := {}
 var _saved_window_mode_index := 0
 
 
 func before_test() -> void:
-    _saved_settings_path = GameSettings.settings_path
+    _saved_save_path = SaveManager.save_path
     _saved_window_mode_index = GameSettings.window_mode_index
     for bus_name in ["Master", "Music", "SFX"]:
         var bus_index := AudioServer.get_bus_index(bus_name)
         if bus_index >= 0:
             _saved_bus_volumes[bus_name] = AudioServer.get_bus_volume_db(bus_index)
-    GameSettings.settings_path = SCRATCH_PATH
+    SaveManager.save_path = ProjectSettings.globalize_path(SCRATCH_PATH)
     _remove_scratch()
     GameSettings.reset_to_defaults()
 
 
 func after_test() -> void:
-    GameSettings.settings_path = _saved_settings_path
+    SaveManager.save_path = _saved_save_path
+    SaveManager.load_from_disk()
     GameSettings.window_mode_index = _saved_window_mode_index
     GameSettings.apply_volumes()
     for bus_name in _saved_bus_volumes:
@@ -135,10 +136,10 @@ func test_settings_are_written_to_the_file_immediately() -> void:
     GameSettings.set_window_mode_index(2)
     GameSettings.set_music_volume(55.0)
 
-    var config := ConfigFile.new()
-    assert_int(config.load(SCRATCH_PATH)).is_equal(OK)
-    assert_int(config.get_value("options", "window_mode_index")).is_equal(2)
-    assert_float(config.get_value("options", "music_volume")).is_equal(55.0)
+    var written: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SCRATCH_PATH))
+    var options: Dictionary = written["options"]
+    assert_int(int(options["window_mode_index"])).is_equal(2)
+    assert_float(options["music_volume"]).is_equal(55.0)
 
 
 ## A fresh store pointed at the same file has to come up with the same values,
@@ -150,8 +151,9 @@ func test_settings_are_read_back_by_a_fresh_store() -> void:
     GameSettings.set_sfx_volume(50.0)
     GameSettings.set_show_stats(true)
 
+    # Drop the in-memory copy first, so the values can only come from the file.
+    SaveManager.load_from_disk()
     var store := SETTINGS_SCRIPT.new()
-    store.settings_path = SCRATCH_PATH
     store.load_settings()
 
     assert_int(store.window_mode_index).is_equal(1)
@@ -164,8 +166,8 @@ func test_settings_are_read_back_by_a_fresh_store() -> void:
 
 ## A first run has no file at all, and that is not a failure.
 func test_missing_file_leaves_the_defaults_alone() -> void:
+    SaveManager.load_from_disk()
     var store := SETTINGS_SCRIPT.new()
-    store.settings_path = SCRATCH_PATH
 
     store.load_settings()
 
@@ -180,9 +182,7 @@ func test_missing_file_leaves_the_defaults_alone() -> void:
 ## A hand-edited or truncated file can hold an index past the end of
 ## WINDOW_MODES, and reading it must not leave the menu one past the last mode.
 func test_out_of_range_window_mode_index_from_the_file_is_clamped() -> void:
-    var config := ConfigFile.new()
-    config.set_value("options", "window_mode_index", 99)
-    config.save(SCRATCH_PATH)
+    SaveManager.set_section("options", {"window_mode_index": 99})
 
     GameSettings.load_settings()
 

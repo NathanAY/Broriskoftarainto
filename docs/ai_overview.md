@@ -39,6 +39,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | `modifiers.md` | Effects (the Node behaviours items attach), the `BaseModifier` contract, the full catalog |
 | `options.md` | The options panel: window mode, volumes, show-stats, and why the values live in an autoload rather than on the menu |
 | `player.md` | The runtime player entity and its scene |
+| `save_system.md` | The `SaveManager` autoload and `<project>/saves/save.json`: file format, location, how to add a section |
 | `spawners.md` | `enemy_spawner.gd`, `boss_spawner.gd`, spawn pacing |
 | `stage_manager.md` | Wave → boss → shop orchestration, loop progression, and the end-of-run final-boss / one-more-loop choice |
 | `stats.md` | Stat storage, modifiers, conditions, modifier-owned (provided) stats |
@@ -69,7 +70,7 @@ Implementation logs for shipped work. Kept for provenance, not current truth, an
 | Effects (VFX) | `src/Scenes/effects/`, `src/Scenes/particles/` — see `docs/systems/effects.md` |
 | Stage flow | `src/Scripts/stage_manager.gd` |
 | UI & shop | `src/Scenes/menu/`, `src/ui/`, `src/Systems/ShopPortal.tscn` |
-| Autoloads | `src/Scripts/autoload/` — `GlobalGameState`, `SoundManager`, `MusicManager`, `GameSettings` |
+| Autoloads | `src/Scripts/autoload/` — `GlobalGameState`, `SoundManager`, `MusicManager`, `SaveManager`, `GameSettings` |
 
 ## Vocabulary that trips people up
 

@@ -5,9 +5,9 @@ extends GdUnitTestSuite
 const WINDOW_SIZE := Vector2i(1280, 720)
 
 ## Scratch file so a test run never reads or writes the player's real
-## `user://settings.cfg`, and never leaves a mode behind that the next test
+## save file, and never leaves a mode behind that the next test
 ## would inherit.
-const SCRATCH_PATH := "user://test_game_settings_window_placement.cfg"
+const SCRATCH_PATH := "res://saves/test_game_settings_window_placement.json"
 
 ## The window geometry this suite asserts used to live on `OptionsMenu`. It is
 ## on `GameSettings` now because that is where the choice survives a scene
@@ -16,17 +16,18 @@ const SCRATCH_PATH := "user://test_game_settings_window_placement.cfg"
 ## and calling a static function off an instance warns at every call site.
 const SETTINGS_SCRIPT := preload("res://src/Scripts/autoload/game_settings.gd")
 
-var _saved_settings_path := ""
+var _saved_save_path := ""
 
 
 func before_test() -> void:
-    _saved_settings_path = GameSettings.settings_path
-    GameSettings.settings_path = SCRATCH_PATH
+    _saved_save_path = SaveManager.save_path
+    SaveManager.save_path = ProjectSettings.globalize_path(SCRATCH_PATH)
     GameSettings.reset_to_defaults()
 
 
 func after_test() -> void:
-    GameSettings.settings_path = _saved_settings_path
+    SaveManager.save_path = _saved_save_path
+    SaveManager.load_from_disk()
     if FileAccess.file_exists(SCRATCH_PATH):
         DirAccess.remove_absolute(ProjectSettings.globalize_path(SCRATCH_PATH))
     collect_orphan_node_details()

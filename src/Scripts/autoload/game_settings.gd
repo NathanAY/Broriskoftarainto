@@ -6,14 +6,14 @@ extends Node
 ## `PauseMenu.tscn`), so any state kept on that node died with the scene it
 ## lived in: changing the window size or a volume and then changing scene re-ran
 ## `OptionsMenu._ready()`, which reset every control to its defaults. The values
-## live here instead, in an autoload, and are mirrored to `user://settings.cfg`
-## so they also survive a restart.
+## live here instead, in an autoload, and are mirrored to the save file
+## so they also survive a restart (the `options` section of the `SaveManager`
+## file).
 ##
 ## Setters are methods rather than property setters on purpose. A property
 ## setter would fire while `load_settings()` is still reading the file, and
 ## writing back on every line of a load is how a half-written file happens.
 
-const SETTINGS_PATH := "user://settings.cfg"
 const SETTINGS_SECTION := "options"
 
 ## The window modes the options button cycles through, in button order. The
@@ -26,10 +26,6 @@ const DEFAULT_SOUND_VOLUME := 30.0
 const DEFAULT_MUSIC_VOLUME := 100.0
 const DEFAULT_SFX_VOLUME := 100.0
 const DEFAULT_SHOW_STATS := false
-
-## Overridable so a test can point the store at a scratch file instead of the
-## player's real settings. See `test/Systems/menu/test_game_settings.gd`.
-var settings_path: String = SETTINGS_PATH
 
 var window_mode_index: int = DEFAULT_WINDOW_MODE_INDEX
 var sound_volume: float = DEFAULT_SOUND_VOLUME
@@ -182,43 +178,32 @@ func set_show_stats(visible_on_screen: bool) -> void:
 # ------------------ persistence ------------------
 
 
-## Writes the current values to `settings_path`. Every setter calls this, so a
-## setting is on disk the moment it changes rather than at some later flush.
+## Writes the current values into the `options` section of the save file. Every
+## setter calls this, so a setting is on disk the moment it changes rather than
+## at some later flush.
 func save_settings() -> void:
-    var config := ConfigFile.new()
-    config.set_value(SETTINGS_SECTION, "window_mode_index", window_mode_index)
-    config.set_value(SETTINGS_SECTION, "sound_volume", sound_volume)
-    config.set_value(SETTINGS_SECTION, "music_volume", music_volume)
-    config.set_value(SETTINGS_SECTION, "sfx_volume", sfx_volume)
-    config.set_value(SETTINGS_SECTION, "show_stats", show_stats)
-    var error := config.save(settings_path)
-    if error != OK:
-        push_warning("GameSettings: could not save %s (error %d)" % [settings_path, error])
+    SaveManager.set_section(SETTINGS_SECTION, {
+        "window_mode_index": window_mode_index,
+        "sound_volume": sound_volume,
+        "music_volume": music_volume,
+        "sfx_volume": sfx_volume,
+        "show_stats": show_stats,
+    })
 
 
-## Reads `settings_path` back over the current values, keeping the defaults for
-## anything missing. A file that does not exist is the first-run case, not an
-## error, so it is silent; an unreadable one warns.
+## Reads the `options` section back over the current values, keeping the
+## defaults for anything missing. No section is the first-run case, not an
+## error. JSON hands numbers back as floats, hence the casts.
 func load_settings() -> void:
-    if not FileAccess.file_exists(settings_path):
-        return
-    var config := ConfigFile.new()
-    var error := config.load(settings_path)
-    if error != OK:
-        push_warning("GameSettings: could not load %s (error %d)" % [settings_path, error])
+    var options := SaveManager.get_section(SETTINGS_SECTION)
+    if options.is_empty():
         return
     window_mode_index = clampi(
-        int(config.get_value(SETTINGS_SECTION, "window_mode_index", DEFAULT_WINDOW_MODE_INDEX)),
+        int(options.get("window_mode_index", DEFAULT_WINDOW_MODE_INDEX)),
         0,
         WINDOW_MODES.size() - 1
     )
-    sound_volume = _clamp_percent(
-        float(config.get_value(SETTINGS_SECTION, "sound_volume", DEFAULT_SOUND_VOLUME))
-    )
-    music_volume = _clamp_percent(
-        float(config.get_value(SETTINGS_SECTION, "music_volume", DEFAULT_MUSIC_VOLUME))
-    )
-    sfx_volume = _clamp_percent(
-        float(config.get_value(SETTINGS_SECTION, "sfx_volume", DEFAULT_SFX_VOLUME))
-    )
-    show_stats = bool(config.get_value(SETTINGS_SECTION, "show_stats", DEFAULT_SHOW_STATS))
+    sound_volume = _clamp_percent(float(options.get("sound_volume", DEFAULT_SOUND_VOLUME)))
+    music_volume = _clamp_percent(float(options.get("music_volume", DEFAULT_MUSIC_VOLUME)))
+    sfx_volume = _clamp_percent(float(options.get("sfx_volume", DEFAULT_SFX_VOLUME)))
+    show_stats = bool(options.get("show_stats", DEFAULT_SHOW_STATS))

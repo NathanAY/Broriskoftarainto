@@ -30,7 +30,7 @@ Everything else is a reusable piece instanced into that tree:
 | `src/Systems/stats/`, `src/Systems/weapon/`, `src/Systems/Items/` | Reusable subsystems |
 | `src/ui/` | Reusable UI scenes and scripts: cards, panels, tooltips, icon generator |
 | `src/Scenes/effects/`, `src/Scenes/particles/` | Every "what just happened" visual — hit flash, death shards, impact sparks, blast fireballs. See `docs/systems/effects.md` |
-| `src/Scripts/autoload/` | Autoloads: `GlobalGameState`, `SoundManager`, `MusicManager`, `GameSettings` |
+| `src/Scripts/autoload/` | Autoloads: `GlobalGameState`, `SoundManager`, `MusicManager`, `SaveManager`, `GameSettings` |
 | `src/Assets/character/<id>/` | One folder per character: its `CharacterData` `.tres` plus its art |
 
 There is no separate `MainScene`; `Game.tscn` is the gameplay entry, and the menus are separate scenes in `src/Scenes/menu/`.
@@ -57,7 +57,7 @@ There is no separate `MainScene`; `Game.tscn` is the gameplay entry, and the men
 2. **Godot signals** for scene-local flow, e.g. `character_died` in `Character`.
 3. **Direct node references** — exported variables and `@onready` lookups. Many modules reach for a sibling by name, e.g. `holder.get_node("Stats")`.
 4. **`GlobalGameState`** (`src/Scripts/autoload/global_game_state.gd`), an autoload singleton, carries selections across scenes: `starting_character`, `starting_items`, `starting_weapons`.
-5. **`GameSettings`** (`src/Scripts/autoload/game_settings.gd`), an autoload singleton, owns the player options — window mode, the three volumes, show-stats — and mirrors them to a file under `user://`. `OptionsMenu` is instanced once per menu scene, so option state cannot live on it; see `docs/systems/options.md`.
+5. **`GameSettings`** (`src/Scripts/autoload/game_settings.gd`), an autoload singleton, owns the player options — window mode, the three volumes, show-stats — and mirrors them to the `options` section of the save file owned by `SaveManager` (`src/Scripts/autoload/save_manager.gd`, `docs/systems/save_system.md`). `OptionsMenu` is instanced once per menu scene, so option state cannot live on it; see `docs/systems/options.md`.
 
 Every event payload is a single `Dictionary`. That is what makes the contract checker possible, and it is why handlers bail out early on a missing key.
 

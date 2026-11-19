@@ -7,7 +7,7 @@ const LIFESTEAL_PER_STACK := 0.05   # 5% of damage per item
 
 
 func _init():
-	provided_stat = "lifeleach"
+	provided_stat = "life_leach_multiplier"
 	provided_stat_default = 1.0
 	provided_stat_owned = true
 

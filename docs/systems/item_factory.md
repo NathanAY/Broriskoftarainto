@@ -7,7 +7,7 @@ Key scripts / scenes
 - `src/Systems/Items/item_factory.gd` (class_name `ItemFactory`)
 
 Data flow
-- Inputs: reads available stats from `Stats` instance plus the union of `provided_stat` names advertised by every Modifier scene (`_candidate_stat_names()`), and loads PackedScenes from `src/Systems/Items/modifiers` and buff/debuff scenes — so generated stat items / debuffs can target dynamic stats like `lifeleach` even before any owning modifier is attached.
+- Inputs: reads available stats from `Stats` instance plus the union of `provided_stat` names advertised by every Modifier scene (`_candidate_stat_names()`), and loads PackedScenes from `src/Systems/Items/modifiers` and buff/debuff scenes — so generated stat items / debuffs can target dynamic stats like `life_leach_multiplier` even before any owning modifier is attached.
 - Processing: random roll decides between stat/effect/buff/debuff generators; creates `Item` resources with modifiers and optionally pre-configured PackedScenes.
 - Outputs: returns an `Item` instance (or `null` if no sources available); maintains `drop_pool` cache. `get_random_weapon()` lazily loads `BaseWeapon` resources from `res://src/Resources/weapons` and returns a random one (used by the shop).
 
@@ -30,7 +30,7 @@ Entry points
 | Buff item (15%) | `_generate_buff_item` `:263` | 1 stat, injected into `buff.tscn` | ×1.0 |
 | Debuff item (15%) | `_generate_debuff_item` `:288` | 1 stat, **negated**, into `DebuffSource.tscn` | ×2.0 |
 
-The candidate stat pool (`:104-115`) is every key in `Stats.DEFAULT_STATS` plus every `provided_stat` a modifier advertises (`lifeleach`, `armor`). **Uniform pick, no weighting** — the factory has no idea that `attack_range` is worth 0% and `lifeleach` is worth double.
+The candidate stat pool (`:104-115`) is every key in `Stats.DEFAULT_STATS` plus every `provided_stat` a modifier advertises (`life_leach_multiplier`, `armor`). **Uniform pick, no weighting** — the factory has no idea that `attack_range` is worth 0% and `life_leach_multiplier` is worth double.
 
 `armor`, `flat_regen_per_second` and `percent_regen_per_second` are candidates but are never **rolled**: `LISTENER_ONLY_STATS` filters them out of `_gratable_stat_names()`, which is what the stat / buff / debuff generators and `_roll_negative_stat` pick from. Each only does something while its modifier scene listens, so a bare `{"armor": 1}` item would show a benefit in the stat panel and change nothing on a character without the modifier. They reach the player as the modifier item instead (`ArmorModifier`, `FlatRegenModifier`, ...), which publishes its value into the stat — see `docs/systems/stats.md`.
 
@@ -49,7 +49,7 @@ func _generate_stat_modifiers(_chosen_stat, base_value) -> Dictionary:
 
 **One formula for all 14 stats.** "5-10% of base" reads like a percentage budget and is not one.
 
-**The `base_value == 0` branch is the worst of them.** Five stats in the pool have a base of 0 (`energy_shield`, `critical_chance`, `flat_weapon_damage`, `projectile_pierce` are 0.0 in `DEFAULT_STATS`; `lifeleach` is not in the table at all, so `.get` returns 0.0). All five roll a **hard constant `1.0`, with no RNG call and no scaling by the stat's actual scale** — a `1.0` means +1 percentage point on a 0-100 stat and a doubling on a 0-1 multiplier stat.
+**The `base_value == 0` branch is the worst of them.** Five stats in the pool have a base of 0 (`energy_shield`, `critical_chance`, `flat_weapon_damage`, `projectile_pierce` are 0.0 in `DEFAULT_STATS`; `life_leach_multiplier` is not in the table at all, so `.get` returns 0.0). All five roll a **hard constant `1.0`, with no RNG call and no scaling by the stat's actual scale** — a `1.0` means +1 percentage point on a 0-100 stat and a doubling on a 0-1 multiplier stat.
 
 | Stat | Base | Roll | What 5-10% actually buys |
 |---|---|---|---|
@@ -58,7 +58,7 @@ func _generate_stat_modifiers(_chosen_stat, base_value) -> Dictionary:
 | `critical_chance` | 0.0 | **1.0 (constant)** | +1 pp of a 0-100 scale → **+0.5% WB**, and always exactly the same number. |
 | `armor` | not in `DEFAULT_STATS`, and never rolled | — | Filtered out of the rollable pool (see above). Armor comes from the `ArmorModifier` item's own per-stack bonus. |
 | `flat_regen_per_second` / `percent_regen_per_second` | not in `DEFAULT_STATS`, and never rolled | — | Same. The regen items already exist as effect items, and each publishes its per-second rate into the stat. |
-| `lifeleach` | not in `DEFAULT_STATS` | **1.0 (constant)** | Stat goes `1.0 → 2.0`, so `LifeLeachModifier`'s 5% lifesteal (`life_leach_modifier.gd:6,26`) **doubles to 10%**. One price-1 item doubles the build's only stat. |
+| `life_leach_multiplier` | not in `DEFAULT_STATS` | **1.0 (constant)** | Stat goes `1.0 → 2.0`, so `LifeLeachModifier`'s 5% lifesteal (`life_leach_modifier.gd:6,26`) **doubles to 10%**. One price-1 item doubles the build's only stat. |
 | `flat_weapon_damage` | 0.0 | **1.0 (constant)** | +10% WB on a Fist, +20% on a Shotgun. Unbounded vs weapon tier. |
 | `projectile_pierce` | 0.0 | **1.0 (constant)** | +1 target on a Pistol that already pierces 1 → **+100% WB**. |
 | `attack_range`, `area_radius` | 500.0 / 1.0 | 25-50 / 0.05-0.10 | **Nothing. No code reads either stat.** |

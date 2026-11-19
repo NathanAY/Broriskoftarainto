@@ -1,7 +1,6 @@
 #spawner_modifier.gd
 extends Node
 
-@export var explosion_scene = preload("res://src/Scenes/Explosion.tscn")
 @export var pickup_scene: PackedScene = preload("res://src/Systems/Items/ItemPickup.tscn")
 @export var altar_scene: PackedScene = preload("res://src/Systems/altars/ItemSacrificeAltar.tscn")
 @export var death_mark_scene: PackedScene = preload("res://src/Systems/damage/DeathMarkX.tscn")
@@ -23,15 +22,8 @@ func attach_on_death_effects(event: Dictionary):
     if character and character.stats:
         character.stats.set_base_stat("money", character.stats.stats.get("money", 0) + 1)
     # Use deferred spawn to avoid physics flushing error
-    call_deferred("_spawn_explosion", event.get("self").global_position)
     call_deferred("_spawn_item", event.get("self").global_position)
     call_deferred("_spawn_death_mark", event.get("self").global_position)
-
-func _spawn_explosion(position: Vector2):
-    if randf() < 0.05:
-        var explosion = explosion_scene.instantiate()
-        explosion.global_position = position
-        get_tree().current_scene.add_child(explosion)
 
 func _spawn_item(position: Vector2):
     # Generate alter 5%, item drop chance 5%

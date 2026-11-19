@@ -39,8 +39,8 @@ func test_provided_stat_installed_on_attach() -> void:
     var holder := _build_holder()
     var stats: Stats = holder.get_node("Stats")
     _attach_modifier(holder, LIFE_LEACH_SCENE)
-    assert_bool(stats.stats.has("lifeleach")).is_true()
-    assert_float(float(stats.stats.get("lifeleach", 0.0))).is_equal(1.0)
+    assert_bool(stats.stats.has("life_leach_multiplier")).is_true()
+    assert_float(float(stats.stats.get("life_leach_multiplier", 0.0))).is_equal(1.0)
     holder.free()
 
 
@@ -48,22 +48,22 @@ func test_provided_stat_released_on_detach() -> void:
     var holder := _build_holder()
     var stats: Stats = holder.get_node("Stats")
     var modifier := _attach_modifier(holder, LIFE_LEACH_SCENE)
-    assert_bool(stats.stats.has("lifeleach")).is_true()
+    assert_bool(stats.stats.has("life_leach_multiplier")).is_true()
     modifier.remove_latest_stack()
-    assert_bool(stats.stats.has("lifeleach")).is_false()
+    assert_bool(stats.stats.has("life_leach_multiplier")).is_false()
     holder.free()
 
 
 func test_provided_stat_refcounted_across_installations() -> void:
     var holder := _build_holder()
     var stats: Stats = holder.get_node("Stats")
-    stats.claim_provided_stat("lifeleach", 1.0)
-    stats.claim_provided_stat("lifeleach", 1.0)
-    assert_bool(stats.stats.has("lifeleach")).is_true()
-    stats.release_provided_stat("lifeleach")
-    assert_bool(stats.stats.has("lifeleach")).is_true()
-    stats.release_provided_stat("lifeleach")
-    assert_bool(stats.stats.has("lifeleach")).is_false()
+    stats.claim_provided_stat("life_leach_multiplier", 1.0)
+    stats.claim_provided_stat("life_leach_multiplier", 1.0)
+    assert_bool(stats.stats.has("life_leach_multiplier")).is_true()
+    stats.release_provided_stat("life_leach_multiplier")
+    assert_bool(stats.stats.has("life_leach_multiplier")).is_true()
+    stats.release_provided_stat("life_leach_multiplier")
+    assert_bool(stats.stats.has("life_leach_multiplier")).is_false()
     holder.free()
 
 
@@ -73,7 +73,7 @@ func test_multiplier_composes_with_stat_modifiers() -> void:
     var health: Health = holder.get_node("Health")
     var em: EventManager = holder.get_node("EventManager")
     _attach_modifier(holder, LIFE_LEACH_SCENE, 2)
-    stats.add_modifier({"lifeleach": {"flat": 0.5}})
+    stats.add_modifier({"life_leach_multiplier": {"flat": 0.5}})
     var dmg := DamageContext.new()
     dmg.final_amount = 10.0
     health.apply_damage(dmg)
@@ -92,7 +92,7 @@ func test_negative_stat_loses_health() -> void:
     var health: Health = holder.get_node("Health")
     var em: EventManager = holder.get_node("EventManager")
     _attach_modifier(holder, LIFE_LEACH_SCENE)
-    stats.add_modifier({"lifeleach": {"flat": -2.0}})
+    stats.add_modifier({"life_leach_multiplier": {"flat": -2.0}})
     var dmg := DamageContext.new()
     dmg.final_amount = 10.0
     health.apply_damage(dmg)
@@ -144,9 +144,9 @@ func test_remove_item_detaches_stat_and_unsubscribes() -> void:
     var scene: PackedScene = load(LIFE_LEACH_SCENE)
     var life_leach_item := ItemBuilder.make_effect_item("Life Leach", "", scene)
     item_holder.add_item(life_leach_item)
-    assert_bool(stats.stats.has("lifeleach")).is_true()
+    assert_bool(stats.stats.has("life_leach_multiplier")).is_true()
     item_holder.remove_item(life_leach_item)
-    assert_bool(stats.stats.has("lifeleach")).is_false()
+    assert_bool(stats.stats.has("life_leach_multiplier")).is_false()
     # emitting after removal must not error (listener unsubscribed, node gone)
     var hit := DamageContext.new()
     hit.final_amount = 50.0
@@ -172,6 +172,6 @@ func test_factory_candidates_include_dynamic_stats() -> void:
     add_child(test_scene)
     var item_factory: ItemFactory = test_scene.get_node("ItemFactory")
     var candidates: Array = item_factory._candidate_stat_names()
-    assert_bool("lifeleach" in candidates).is_true()
+    assert_bool("life_leach_multiplier" in candidates).is_true()
     assert_bool("armor" in candidates).is_true()
     test_scene.free()

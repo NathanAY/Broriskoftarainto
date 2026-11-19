@@ -26,7 +26,7 @@ Everything else is a reusable piece instanced into that tree:
 | `src/Systems/ShopPortal.tscn` | The shop entry portal spawned after a boss dies |
 | `src/Systems/LoopChoicePortal.tscn` | The two end-of-run world portals offering the final boss or one more loop. Spawned by `StageManager` after the shop of loop 3 and of every extra loop. See `docs/systems/stage_manager.md` |
 | `src/Systems/PortalVortex.tscn` | The animated gate surface both portal scenes share: a quad with `portal_vortex.gdshader`, drawn *behind* the ring so the stone crops it. See `docs/systems/effects.md` |
-| `src/Systems/SpawnerModifier.tscn` | Death rewards (money, drops, explosion, death mark). Attached to spawners, despite the name — it is not a spawner. |
+| `src/Systems/SpawnerModifier.tscn` | Death rewards (money, drops, death mark). Attached to spawners, despite the name — it is not a spawner. |
 | `src/Systems/stats/`, `src/Systems/weapon/`, `src/Systems/Items/` | Reusable subsystems |
 | `src/ui/` | Reusable UI scenes and scripts: cards, panels, tooltips, icon generator |
 | `src/Scenes/effects/`, `src/Scenes/particles/` | Every "what just happened" visual — hit flash, death shards, impact sparks, blast fireballs. See `docs/systems/effects.md` |

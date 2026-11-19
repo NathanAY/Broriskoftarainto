@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" uid="uid://dy7r2pdi4p6n2" path="res://src/ui/numberspawn/floatin_number.gd" id="1_8yysl"]
 
-[node name="FloatingNumber" type="Node2D"]
+[node name="FloatingNumber" type="Node2D" unique_id=1425394848]
 script = ExtResource("1_8yysl")
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="Label" parent="." unique_id=1783418191]
 z_index = 10
 offset_right = 40.0
 offset_bottom = 23.0

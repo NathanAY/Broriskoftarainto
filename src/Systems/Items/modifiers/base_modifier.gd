@@ -50,7 +50,7 @@ var bound_weapon: Object = null
 ## negative. Empty string = this modifier provides nothing.
 @export var provided_stat: String = ""
 
-## Base value installed on first claim of the owned stat (e.g. lifesteal base 1.0
+## Base value installed on first claim of the owned stat (e.g. life_leach_multiplier base 1.0
 ## as a multiplier). Ignored for non-owned stats.
 @export var provided_stat_default: float = 0.0
 

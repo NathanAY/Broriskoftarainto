@@ -82,4 +82,4 @@ func _on_confirm_pressed():
 
 
 func _on_cancel_pressed():
-    get_tree().change_scene_to_file("res://src/Scenes/menu/StarterMenu.tscn")
+    get_tree().change_scene_to_file("res://src/Scenes/menu/Main.tscn")

@@ -21,16 +21,27 @@ func _process(_delta: float) -> void:
     if stage_manager.current_stage == StageManager.STAGE_FINAL_BOSS:
         stageTimer.text = "FINAL BOSS"
         return
-    var current_staget = "Loop " + str(stage_manager.current_loop)
-    var stage_time_elapsed = stage_manager.stage_time_elapsed
-    var stage_duration = str(int(stage_manager.stage_duration - stage_time_elapsed))
-    
-    if _show_stage_scaleing:
+    var objective := objective_text(stage_manager.current_loop, stage_manager.current_stage, stage_manager.stage_duration, stage_manager.stage_time_elapsed)
+    if _show_stage_scaleing and objective.contains("Survive"):
         var health_growth_per_stage = " enemy health +" + str(stage_manager.enemy_spawner.health_growth_per_loop * (stage_manager.enemy_spawner.current_loop))
         var damage_growth_per_stage = " damage +" + str(stage_manager.enemy_spawner.damage_growth_per_loop * (stage_manager.enemy_spawner.current_loop))
-        stageTimer.text = current_staget + " Survive " + stage_duration + " scaling " + health_growth_per_stage + damage_growth_per_stage
-    else:
-        stageTimer.text = current_staget + " Survive " + stage_duration
+        objective += " scaling " + health_growth_per_stage + damage_growth_per_stage
+    stageTimer.text = objective
+
+## The HUD line for the current stage. Pure so the wording can be tested without a
+## running stage. `stage` is a `StageManager.STAGE_*` value.
+static func objective_text(loop: int, stage: int, stage_duration: float, stage_time_elapsed: float) -> String:
+    var prefix := "Loop %d." % loop
+    if stage == StageManager.STAGE_BOSS:
+        return prefix + " Kill the boss"
+    if stage == StageManager.STAGE_SHOP:
+        # The boss is dead and the shop portal is up: the loop is over, go explore.
+        return prefix + " Explore area"
+    var seconds_left := stage_duration - stage_time_elapsed
+    if seconds_left <= 0.0:
+        # The timer has run out: no more spawns, the wave ends once the field is clear.
+        return prefix + " Kill remaining enemies"
+    return prefix + " Survive %d seconds" % int(seconds_left)
 
 func _ready():
     character = GlobalGameState.current_character

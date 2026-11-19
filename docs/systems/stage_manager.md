@@ -53,6 +53,8 @@ The weapon ramp stops at `BossSpawner.LOADOUT_LOOP_CAP` (4). Past the cap the bo
 
 The final-boss stage runs on no stage clock, so the HUD shows `FINAL BOSS` in place of the wave countdown (`src/ui/player_ui.gd`).
 
+The HUD objective line (`PlayerUI.objective_text()`) reads `Loop N. Survive X seconds` during the wave, `Loop N. Kill remaining enemies` once the wave timer has run out, `Loop N. Kill the boss` during a loop's boss stage, and `Loop N. Explore area` from the boss kill until the next loop or the final boss starts.
+
 Dependencies
 - `EnemySpawner`, `BossSpawner`, `ShopPortal.tscn`, `LoopChoicePortal.tscn`, `RunEndScreen` UI, and the `Character` signal `character_died`.
 

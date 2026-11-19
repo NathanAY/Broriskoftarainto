@@ -130,7 +130,7 @@ func _pick_weighted_scene(scenes: Array[PackedScene]) -> PackedScene:
 
 ## Candidate stat names for generated stat/buff/debuff items: the static base
 ## stats plus every `provided_stat` advertised by the modifier scenes. A dynamic
-## stat like `lifesteal` is therefore targetable even when no character owns its
+## stat like `life_leach_multiplier` is therefore targetable even when no character owns its
 ## modifier yet (the flat modifier activates once the modifier is attached).
 var _candidate_stats: Array = []
 

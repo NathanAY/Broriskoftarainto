@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7q1daj3f102r"
-path="res://.godot/imported/lifeleach.png-277849fc8ee8330e028a4183e3f3ba0a.ctex"
+path="res://.godot/imported/life_leach_multiplier.png-768bd097cad572fa9ea742c4b47b3721.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://src/Assets/stats/lifeleach.png"
-dest_files=["res://.godot/imported/lifeleach.png-277849fc8ee8330e028a4183e3f3ba0a.ctex"]
+source_file="res://src/Assets/stats/life_leach_multiplier.png"
+dest_files=["res://.godot/imported/life_leach_multiplier.png-768bd097cad572fa9ea742c4b47b3721.ctex"]
 
 [params]
 

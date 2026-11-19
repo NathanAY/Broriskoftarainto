@@ -21,7 +21,6 @@ curve = SubResource("Curve_hol7w")
 particle_flag_disable_z = true
 angle_min = 1.07288e-05
 angle_max = 180.0
-direction = Vector3(1, 0, 0)
 spread = 180.0
 initial_velocity_min = 120.0
 initial_velocity_max = 420.0
@@ -31,8 +30,7 @@ scale_max = 0.6
 scale_curve = SubResource("CurveTexture_t73xu")
 color_ramp = SubResource("GradientTexture1D_cn234")
 
-[node name="HitParticles" type="GPUParticles2D"]
-z_index = 10
+[node name="HitParticles" type="GPUParticles2D" unique_id=718720122]
 emitting = false
 amount = 5
 texture = ExtResource("1_4psj7")

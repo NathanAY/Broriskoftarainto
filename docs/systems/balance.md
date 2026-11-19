@@ -168,7 +168,7 @@ Every stat gets an explicit **Δ% per price-1 item**, plus a **cap on the total*
 | `movement_speed` | **+2%** | ×2.0 (600 px/s) | Both an offensive (kiting) and defensive tool — costs ~3% |
 | `critical_chance` | **+2 pp** | +60 pp | 0-100 scale (`crit_modifier.gd:27`); at 1.5× mult, 1 pp = +0.5% WB |
 | `critical_multiplier` | **+0.02** | ×3.0 | Only worth anything alongside `critical_chance` |
-| `lifeleach` | **+0.10** (flat) | +1.0 total (stat ≤ 2.0 = 10% lifesteal) | Double-dipping: it is simultaneously +1% OFF and +1% DEF. Scale is 0-1, so a "1.0" item is a 2× not a 1% |
+| `life_leach_multiplier` | **+0.10** (flat) | +1.0 total (stat ≤ 2.0 = 10% life leech) | Double-dipping: it is simultaneously +1% OFF and +1% DEF. Scale is 0-1, so a "1.0" item is a 2× not a 1% |
 | `projectile_pierce` | **+1** | +2 | Only meaningful for projectile weapons; +1 is a doubling on a piercing one |
 | `projectile_speed_multiplier` | **+3%** | ×2.0 | Mostly uptime; low weight in the candidate pool |
 | `area_size_multiplier` | **+2%** | ×2.0 | Area damage scales ~r², so +2% radius = +4% AoE damage |

@@ -7,7 +7,7 @@
 - `src/Systems/enemy_spawner.gd` (`EnemySpawner`)
 - `src/Systems/boss_spawner.gd` (`BossSpawner`)
 - `src/Systems/enemies/enemy_spawn_entry.gd` (`EnemySpawnEntry`) — one row of the spawn table: a scene, a weight, and the loop it unlocks on.
-- `src/Systems/SpawnerModifier.tscn` (+ `src/Scripts/spawner_modifier.gd`) — death rewards (money, drops, explosion, death mark)
+- `src/Systems/SpawnerModifier.tscn` (+ `src/Scripts/spawner_modifier.gd`) — death rewards (money, drops, death mark)
 
 ## Data flow
 - Inputs: `character` reference, spawn timers, `spawn_active` flags, optional death-reward handler children.

@@ -15,7 +15,7 @@ Provided (dynamic) stats
 - A behavior modifier can OWN a stat on the holder via `BaseModifier.provided_stat`. The stat is dynamic: it only exists while at least one such modifier is attached.
 - `claim_provided_stat(stat_name, default_value)` installs the base value on first claim and bumps a reference count; `release_provided_stat(stat_name)` decrements and erases the stat key at zero. Both emit `on_stat_changes`.
 - The modifier READS the stat (never writes it), so stat items/buffs/debuffs compose with its base and can drive the value negative. Two semantics:
-  - Multiplier (e.g. `lifeleach`, base `1.0`): stacks drive the power, the stat scales it.
+  - Multiplier (e.g. `life_leach_multiplier`, base `1.0`): stacks drive the power, the stat scales it.
   - Additive shared (e.g. `armor`, `provided_stat_owned = false`): the stat already exists on the holder; the modifier is a pure consumer.
 
 Stats a modifier PUBLISHES

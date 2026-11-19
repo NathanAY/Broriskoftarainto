@@ -177,6 +177,40 @@ func test_spawned_enemies_land_in_the_arena_enemies_node() -> void:
     ).is_equal(count_before + 3)
 
 
+## The Spawn effect box is on by default, and with it on the enemies only appear
+## once a teleport effect has played at each spot.
+func test_spawn_effect_is_on_by_default_and_delays_the_enemies() -> void:
+    var scenario := await _run_scenario()
+    var menu: SandboxMenu = scenario.get_node("ScenarioSetup/SandboxMenu")
+    var box := menu.get_node("Center/Panel/Rows/SpawnEffectBox") as CheckBox
+    assert_bool(box.button_pressed).is_true()
+    _set_spawn_values(menu, 100000.0, 0.0, 2)
+    var enemies_node: Node = scenario.get_node("Nodes/Enemies")
+    var count_before := enemies_node.get_child_count()
+
+    menu.spawn_with_effect()
+
+    assert_int(enemies_node.get_child_count()).is_equal(count_before)
+    var portals := scenario.get_node("Nodes").get_children().filter(func(n): return n is SpawnPortal)
+    assert_int(portals.size()).is_equal(2)
+
+    await await_millis(int(SpawnPortal.DEFAULT_DURATION * 1000.0) + 400)
+
+    assert_int(enemies_node.get_child_count()).is_equal(count_before + 2)
+
+
+func test_spawn_effect_off_spawns_at_once() -> void:
+    var scenario := await _run_scenario()
+    var menu: SandboxMenu = scenario.get_node("ScenarioSetup/SandboxMenu")
+    (menu.get_node("Center/Panel/Rows/SpawnEffectBox") as CheckBox).button_pressed = false
+    var enemies_node: Node = scenario.get_node("Nodes/Enemies")
+    var count_before := enemies_node.get_child_count()
+
+    menu.spawn_with_effect()
+
+    assert_int(enemies_node.get_child_count()).is_equal(count_before + 1)
+
+
 ## The whole point of the change: an untouched sandbox arena has to stay empty, so
 ## a number read off a spawned enemy is the enemy under test and nothing else.
 ##

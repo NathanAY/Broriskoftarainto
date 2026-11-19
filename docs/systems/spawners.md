@@ -7,7 +7,7 @@
 - `src/Systems/enemy_spawner.gd` (`EnemySpawner`)
 - `src/Systems/boss_spawner.gd` (`BossSpawner`)
 - `src/Systems/enemies/enemy_spawn_entry.gd` (`EnemySpawnEntry`) — one row of the spawn table: a scene, a weight, and the loop it unlocks on.
-- `src/Systems/SpawnerModifier.tscn` (+ `src/Scripts/spawner_modifier.gd`) — death rewards (money, drops, death mark)
+- `src/Systems/SpawnerModifier.tscn` (+ `src/Scripts/spawner_modifier.gd`) — death rewards (money, drops, death mark). The mark is `src/Systems/damage/DeathMark.tscn`: `DeathMark.setup()` picks a decal from the sheets in `src/Assets/death_marks/` (every png there is read; each cell's colour is measured, not listed), taking a coloured one half the time when the enemy sprite's average colour is red, green or purple (`DeathMark.tint_of()`, no per-scene setting). The pixel scans sample a 20x20 grid per area (not every pixel) on `WorkerThreadPool` workers; the texture readback (`get_image()`) stays on the main thread, one sheet per frame, because it is a rendering-server call and deadlocks if a worker does it while the main thread waits. Both are started when an enemy is created (`DeathMark.warm_up()` / `request_tint()` in `Enemy._ready`), so nothing is computed on the frame an enemy dies. `BossSpawner` hooks the boss's `on_death` itself, because the boss skips `SpawnerModifier`; both call `DeathMark.leave_corpse()`. Its size is a fixed fraction of the enemy's `art_width`, and it tilts at most 15 degrees
 
 ## Data flow
 - Inputs: `character` reference, spawn timers, `spawn_active` flags, optional death-reward handler children.
@@ -34,6 +34,13 @@ The table itself lives in the **gameplay scene**, not in `src/Systems/EnemySpawn
 - Dynamic rate: speeds up when below `target_enemy_count`, slows down when above (protects weak builds + perf). Ticks clamped to `[0.4s, 4.0s]`.
 - Empty arena: refill delay `max(0.3, 1.0 - 0.15*(Loop-1))` + `_process` watchdog shortens any long pending wait.
 - Alive cap `max_alive_enemies = 100`: ticks above cap are skipped (wait = max).
+
+## Teleport-in telegraph
+Enemies do not pop in. `_spawn_from_entry()` first plays `src/Scenes/particles/spawn_portal.tscn` (`SpawnPortal`, script `src/Scenes/particles/spawn_portal.gd`: a shrinking ring plus a `GPUParticles2D` swarm pulled inward; start one with `SpawnPortal.play()`) on the chosen spot and adds the enemy `spawn_telegraph_time` seconds later (default 1.0, `0` = instant). The effect is added beside `Nodes/Enemies`, not in it, so it is never counted as an enemy.
+- Because the enemy only exists after the delay, `_spawn_from_entry()` is a coroutine; callers must not read the enemy straight after calling `spawn_enemy()` / `spawn_enemy_group()`. Tests that do set `spawn_telegraph_time = 0`.
+- Spots still waiting are in `_pending_spawns`: `_alive_count()` (used by pacing, the alive cap and the budget) includes them and `_is_too_close_to_any()` treats them as taken, so the delay causes neither overshoot nor overlapping spawns.
+- Preview: `.\run_scene_shot.bat res://test/tools/spawn_portal_preview.tscn res://portal.png 20`.
+- `BossSpawner` has its own `spawn_telegraph_time` (default 1.0) and a larger ring (`SpawnPortal.BOSS_RADIUS`). While it plays, `BossSpawner.is_spawning()` is true and `StageManager._process_boss_stage()` waits on it: the arena is empty then, which would otherwise read as "boss dead" and end the stage at once. A second `spawn_boss()` during the delay is ignored.
 
 ## Dependencies
 - `StageManager` to control `spawn_active` flags; `Enemy` scenes expect `Stats`, `WeaponHolder`, `ItemHolder` children.

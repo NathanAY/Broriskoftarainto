@@ -56,6 +56,7 @@ func before_test() -> void:
     var boss_spawner: BossSpawner = auto_free(load("res://src/Systems/BossSpawner.tscn").instantiate())
     boss_spawner.name = "BossSpawner"
     boss_spawner.character = character
+    boss_spawner.spawn_telegraph_time = 0.0 # these tests read the boss straight after the call
     manager.add_child(boss_spawner)
 
     var enemy_spawner: EnemySpawner = auto_free(load("res://src/Systems/EnemySpawner.tscn").instantiate())

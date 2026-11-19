@@ -70,7 +70,7 @@ func _process_enemy_stage(delta: float) -> void:
 func _process_boss_stage(_delta: float) -> void:
     # Wait until boss (or any enemies) are dead
     # We consider boss cleared when there are no enemies in the Enemies node
-    if enemiesNode.get_child_count() == 0 and boss_spawner.spawn_active:
+    if enemiesNode.get_child_count() == 0 and boss_spawner.spawn_active and not boss_spawner.is_spawning():
         boss_spawner.spawn_active = false
         _end_stage()
 

@@ -54,6 +54,10 @@ func _ready():
     if Engine.is_editor_hint():
         _fit_sprite()
         return
+    # Measure the corpse decals and this enemy's colour on worker threads now, so
+    # nothing is left to compute on the frame it dies.
+    DeathMark.warm_up()
+    DeathMark.request_tint(sprite.texture)
     add_to_group("enemies")  # Add enemy to a group
     add_to_group("damageable")
     # Contact damage is optional: an enemy that should not hurt on touch arms

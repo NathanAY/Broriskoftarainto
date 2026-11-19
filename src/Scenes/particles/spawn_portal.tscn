@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://xpacb5aytbb3"]
+
+[ext_resource type="Script" uid="uid://b3bsb2rgajiwi" path="res://src/Scenes/particles/spawn_portal.gd" id="1_portal"]
+[ext_resource type="Texture2D" uid="uid://uvdr1fc1uowf" path="res://src/Assets/particles/particle_glow.png" id="2_glow"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
+blend_mode = 1
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_swarm"]
+particle_flag_disable_z = true
+emission_shape = 2
+emission_sphere_radius = 56.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.15
+scale_max = 0.3
+color = Color(0.55, 0.8, 1, 1)
+
+[node name="SpawnPortal" type="Node2D" unique_id=722982444]
+script = ExtResource("1_portal")
+
+[node name="Swarm" type="GPUParticles2D" parent="." unique_id=274080625]
+z_index = 1
+material = SubResource("CanvasItemMaterial_add")
+amount = 28
+texture = ExtResource("2_glow")
+lifetime = 0.5
+process_material = SubResource("ParticleProcessMaterial_swarm")

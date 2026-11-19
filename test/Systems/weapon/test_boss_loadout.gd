@@ -29,6 +29,7 @@ func _spawn_boss() -> BossSpawner:
 	root.add_child(character)
 	var spawner: BossSpawner = auto_free(load(BOSS_SPAWNER).instantiate())
 	spawner.character = character
+	spawner.spawn_telegraph_time = 0.0 # the tests read the boss straight after the call
 	stage.add_child(spawner)
 	spawner.spawn_boss()
 	return spawner

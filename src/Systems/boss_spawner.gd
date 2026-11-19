@@ -25,8 +25,19 @@ class_name BossSpawner
 ## the loop-4 `SpreadShot`), so only loops past that are affected.
 const LOADOUT_LOOP_CAP: int = 4
 
+## Seconds the teleport effect plays before the boss appears. 0 = instant.
+@export var spawn_telegraph_time: float = SpawnPortal.DEFAULT_DURATION
+
 var enemiesNode: Node = null
 var boss_instance: Enemy = null
+var _spawning := false
+
+
+## True while the boss's teleport effect plays. The arena is empty then, so
+## `StageManager` must not read that as the boss being dead.
+func is_spawning() -> bool:
+    return _spawning
+
 
 func _ready():
     enemiesNode = get_node("../../Nodes/Enemies")
@@ -46,17 +57,32 @@ func spawn_final_boss():
 ## `loop` is the loop whose scaling this boss gets, which is `current_loop` for
 ## an ordinary boss and a few loops above it for the final one.
 func _spawn_boss(loop: int):
-    if boss_instance and is_instance_valid(boss_instance):
-        return # already spawned
+    if _spawning or (boss_instance and is_instance_valid(boss_instance)):
+        return # already spawned (or teleporting in)
 
-    boss_instance = boss_scene.instantiate()
     var character_position: Vector2 = character.global_position
     var angle = randf_range(0, TAU)
     var radius = 700.0
     var spawn_position = clamp_spawn_position(character_position + Vector2(cos(angle), sin(angle)) * radius)
+
+    if spawn_telegraph_time > 0.0:
+        _spawning = true
+        SpawnPortal.play(enemiesNode.get_parent(), spawn_position, spawn_telegraph_time, SpawnPortal.BOSS_RADIUS)
+        await get_tree().create_timer(spawn_telegraph_time).timeout
+        _spawning = false
+        if not is_instance_valid(enemiesNode) or not enemiesNode.is_inside_tree():
+            return
+
+    boss_instance = boss_scene.instantiate()
     boss_instance.global_position = spawn_position
-    
     enemiesNode.add_child(boss_instance)
+
+    # The boss does not go through `SpawnerModifier` (no money or drops), so it
+    # leaves its corpse decal here.
+    var health: Health = boss_instance.get_node_or_null("Health")
+    if health and health.event_manager:
+        health.event_manager.subscribe("on_death",
+            func(event: Dictionary) -> void: DeathMark.leave_corpse(event.get("self")))
 
     # Apply loop-based scaling
     _apply_scaling(loop)

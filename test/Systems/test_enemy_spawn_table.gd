@@ -38,6 +38,7 @@ func _build_tree() -> Dictionary:
     root.add_child(character)
     var spawner: EnemySpawner = auto_free(load("res://src/Systems/EnemySpawner.tscn").instantiate())
     spawner.set("character", character)
+    spawner.spawn_telegraph_time = 0.0 # these tests read the enemy straight after the call
     stage.add_child(spawner)
     return {"root": root, "enemies": enemies, "character": character, "spawner": spawner}
 

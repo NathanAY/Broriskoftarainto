@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://boqeser38k20p"]
+
+[ext_resource type="Script" path="res://src/Systems/damage/death_mark.gd" id="1_mark"]
+
+[node name="DeathMark" type="Sprite2D"]
+z_index = -1
+modulate = Color(1, 1, 1, 0.85)
+hframes = 4
+vframes = 4
+script = ExtResource("1_mark")

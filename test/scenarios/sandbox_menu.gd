@@ -28,7 +28,7 @@ const ENEMY_TYPES := [
 	{"name": "Blink", "scene": "res://src/Systems/enemies/EnemyBlink.tscn"},
 	{"name": "Shieldbearer", "scene": "res://src/Systems/enemies/EnemyShieldbearer.tscn"},
 	{"name": "Swarmer", "scene": "res://src/Systems/enemies/EnemySwarmer.tscn"},
-	{"name": "Boss", "scene": "res://src/Systems/enemies/EnemyBoss.tscn"},
+	{"name": "Boss", "scene": "res://src/Systems/enemies/EnemyBoss.tscn", "portal_radius": SpawnPortal.BOSS_RADIUS},
 ]
 
 ## Distance from the player the spawned enemies appear at. A ring, so a batch of
@@ -56,6 +56,7 @@ var _enemy_picker: OptionButton
 var _health_box: SpinBox
 var _speed_box: SpinBox
 var _amount_box: SpinBox
+var _effect_box: CheckBox
 
 
 ## Wires the panel to the running game. Called before the node enters the tree, so
@@ -88,6 +89,11 @@ func _ready() -> void:
 	_health_box = _add_number_row(rows, "Health", 1.0, MAX_HEALTH, 1.0, DEFAULT_HEALTH)
 	_speed_box = _add_number_row(rows, "Movement speed", 0.0, MAX_MOVEMENT_SPEED, 0.1, DEFAULT_MOVEMENT_SPEED)
 	_amount_box = _add_number_row(rows, "Amount", 1.0, float(MAX_AMOUNT), 1.0, float(DEFAULT_AMOUNT))
+	_effect_box = CheckBox.new()
+	_effect_box.name = "SpawnEffectBox"
+	_effect_box.text = "Spawn effect"
+	_effect_box.button_pressed = true
+	rows.add_child(_effect_box)
 	rows.add_child(_make_buttons())
 
 	# Hidden until the pause menu opens it, the way `OptionsMenu` is hidden there.
@@ -191,7 +197,31 @@ func _make_buttons() -> Control:
 
 
 func _on_spawn_pressed() -> void:
-	spawn_configured()
+	spawn_with_effect()
+
+
+## What the Spawn button does: with the checkbox on, a teleport effect plays on
+## every spot first and the enemies appear when it ends; off, they appear at once.
+## The spots are fixed up front, so a player who moves meanwhile does not shift them.
+## The wait counts game time (`create_timer`'s `process_always` is false), so it
+## does not run out while the pause menu, where this panel lives, is open.
+func spawn_with_effect() -> void:
+	if enemies_node == null or character == null or not _effect_box.button_pressed:
+		spawn_configured()
+		return
+	var centre := character.global_position
+	var amount := int(_amount_box.value)
+	var radius := float(ENEMY_TYPES[_enemy_picker.selected].get("portal_radius", SpawnPortal.DEFAULT_RADIUS))
+	for index in range(amount):
+		SpawnPortal.play(enemies_node.get_parent(), _ring_position(centre, index, amount), SpawnPortal.DEFAULT_DURATION, radius)
+	await get_tree().create_timer(SpawnPortal.DEFAULT_DURATION, false).timeout
+	if is_instance_valid(enemies_node) and is_instance_valid(character):
+		spawn_configured(centre)
+
+
+## Where enemy `index` of `amount` lands: a ring round `centre`.
+func _ring_position(centre: Vector2, index: int, amount: int) -> Vector2:
+	return centre + Vector2.from_angle(TAU * float(index) / float(maxi(amount, 1))) * SPAWN_RADIUS
 
 
 func _on_close_pressed() -> void:
@@ -206,7 +236,10 @@ func _on_close_pressed() -> void:
 ## `max_health` off `Stats` and copies it into `current_health`, so a value written
 ## after `add_child()` would raise the ceiling and leave the enemy already dead.
 ## No stage scaling is applied either - a sandbox asks for a number and gets it.
-func spawn_configured() -> Array[Enemy]:
+##
+## `centre` is the point the ring is laid round; it defaults to the player's current
+## position, and `spawn_with_effect()` passes the one it showed the portals at.
+func spawn_configured(centre: Vector2 = Vector2.INF) -> Array[Enemy]:
 	if enemies_node == null or character == null:
 		push_warning("SandboxMenu: no enemies node or character, spawning nothing.")
 		return []
@@ -217,6 +250,8 @@ func spawn_configured() -> Array[Enemy]:
 		return []
 	var scene := load(scene_path) as PackedScene
 
+	if centre == Vector2.INF:
+		centre = character.global_position
 	var spawned: Array[Enemy] = []
 	var amount := int(_amount_box.value)
 	for index in range(amount):
@@ -227,9 +262,7 @@ func spawn_configured() -> Array[Enemy]:
 		enemies_node.add_child(enemy)
 		# After `add_child()`, so the arena's own transform is in the way. The ring
 		# spreads a batch instead of stacking it on the player.
-		enemy.global_position = character.global_position + Vector2.from_angle(
-			TAU * float(index) / float(maxi(amount, 1))
-		) * SPAWN_RADIUS
+		enemy.global_position = _ring_position(centre, index, amount)
 		enemy.set_target_position(character)
 		spawned.append(enemy)
 	return spawned

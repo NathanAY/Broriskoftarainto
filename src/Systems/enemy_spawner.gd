@@ -45,7 +45,14 @@ class_name EnemySpawner
 ## so spawning never deadlocks when a packed arena wall forces overlaps.
 @export var max_spawn_attempts: int = 12
 
+## Seconds a teleport effect plays on the spot before the enemy appears there.
+## 0 spawns instantly.
+@export var spawn_telegraph_time: float = SpawnPortal.DEFAULT_DURATION
+
 var enemiesNode: Node = null
+## Spots whose teleport effect is still playing. They count as alive and as
+## taken, so the telegraph delay cannot cause overshoot or overlapping spawns.
+var _pending_spawns: Array[Vector2] = []
 var modifiers: Array = []
 var target_enemy_count: int
 var spawn_timer: Timer = null
@@ -131,7 +138,7 @@ func spawn_budget() -> int:
         return 1
     var unscaled_batch: int = group_size * max_groups_per_spawn
     var scaled_batch := scaled_group_size() * scaled_groups_per_tick()[1]
-    var deficit := maxi(target_enemy_count - enemiesNode.get_child_count(), 0)
+    var deficit := maxi(target_enemy_count - _alive_count(), 0)
     return mini(scaled_batch, unscaled_batch + deficit)
 
 
@@ -153,10 +160,7 @@ func scaled_max_spawn_wait() -> float:
 
 func _on_spawn_timer_timeout():
     if spawn_active:
-        var current_enemies := 0
-        if enemiesNode != null:
-            current_enemies = enemiesNode.get_child_count()
-        if current_enemies >= max_alive_for_multiplier():
+        if _alive_count() >= max_alive_for_multiplier():
             # Over cap: skip this tick to save perf / protect weak builds.
             spawn_timer.wait_time = scaled_max_spawn_wait()
             spawn_timer.start()
@@ -179,7 +183,7 @@ func _process(_delta: float) -> void:
         return
     if spawn_timer.is_stopped():
         return
-    if enemiesNode.get_child_count() == 0:
+    if _alive_count() == 0:
         # Divided like `scaled_spawn_interval()`: a 0.1x wave wants the refill
         # to be *slower*, which is the opposite of what a faster tick would do.
         var refill := get_empty_refill_delay() / spawn_multiplier
@@ -290,11 +294,28 @@ func _pack_size(entry: EnemySpawnEntry) -> int:
     return maxi(entry.pack_size, 1) if entry != null else 1
 
 
+## Enemies in the arena plus those still teleporting in.
+func _alive_count() -> int:
+    var alive := _pending_spawns.size()
+    if enemiesNode != null:
+        alive += enemiesNode.get_child_count()
+    return alive
+
+
 ## Instantiates one enemy from `entry`, applies the spawner's modifiers, the
 ## row's elite scaling and the loop's stage scaling, then adds it to the shared
 ## enemy container and points it at the player. Both spawn paths go through
-## here so a pack member and a lone spawn cannot drift apart.
+## here so a pack member and a lone spawn cannot drift apart. With a telegraph
+## time the enemy only appears after the teleport effect has played, so callers
+## must not rely on it existing when this returns.
 func _spawn_from_entry(entry: EnemySpawnEntry, spawn_position: Vector2) -> Enemy:
+    if spawn_telegraph_time > 0.0:
+        _pending_spawns.append(spawn_position)
+        SpawnPortal.play(enemiesNode.get_parent(), spawn_position, spawn_telegraph_time)
+        await get_tree().create_timer(spawn_telegraph_time).timeout
+        _pending_spawns.erase(spawn_position)
+        if not is_instance_valid(enemiesNode) or not enemiesNode.is_inside_tree():
+            return null
     var scene: PackedScene = entry.scene if entry != null else fallback_enemy_scene
     var enemy := scene.instantiate() as Enemy
     enemy.global_position = spawn_position
@@ -344,7 +365,7 @@ func _pick_spawn_position(candidate: Callable, reserved: Array) -> Vector2:
 
 func _is_too_close_to_any(pos: Vector2, reserved: Array) -> bool:
     var min_dist_sq := min_spawn_separation * min_spawn_separation
-    for other in reserved:
+    for other in reserved + _pending_spawns:
         if pos.distance_squared_to(other) < min_dist_sq:
             return true
     if enemiesNode != null:
@@ -366,7 +387,7 @@ func _apply_stage_scaling(enemy: Node) -> void:
     stats.set_base_stat("damage", stats.stats["damage"] + extra_damage)
 
 func _adjust_spawn_rate():
-    var current_enemies = enemiesNode.get_child_count()
+    var current_enemies = _alive_count()
     if current_enemies == 0:
         # Empty arena: loop-scaled fast refill (later Loops refill faster).
         spawn_timer.wait_time = get_empty_refill_delay()

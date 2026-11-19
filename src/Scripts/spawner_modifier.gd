@@ -3,7 +3,6 @@ extends Node
 
 @export var pickup_scene: PackedScene = preload("res://src/Systems/Items/ItemPickup.tscn")
 @export var altar_scene: PackedScene = preload("res://src/Systems/altars/ItemSacrificeAltar.tscn")
-@export var death_mark_scene: PackedScene = preload("res://src/Systems/damage/DeathMarkX.tscn")
 @export var itemFactory: ItemFactory = null
 
 var randomGenerator = RandomNumberGenerator.new()
@@ -23,7 +22,7 @@ func attach_on_death_effects(event: Dictionary):
         character.stats.set_base_stat("money", character.stats.stats.get("money", 0) + 1)
     # Use deferred spawn to avoid physics flushing error
     call_deferred("_spawn_item", event.get("self").global_position)
-    call_deferred("_spawn_death_mark", event.get("self").global_position)
+    DeathMark.leave_corpse(event.get("self"))
 
 func _spawn_item(position: Vector2):
     # Generate alter 5%, item drop chance 5%
@@ -39,12 +38,3 @@ func _spawn_item(position: Vector2):
         pickup.item = item
         get_tree().current_scene.get_node("Nodes/pickups").add_child(pickup)
 
-func _spawn_death_mark(position: Vector2):
-    if death_mark_scene == null:
-        push_warning("DeathMarkModifier: death_mark_scene not assigned!")
-        return
-    var mark = death_mark_scene.instantiate()
-    mark.global_position = position
-    # Add to a specific node for organization
-    var parent_node = get_tree().current_scene.get_node_or_null("Nodes/death_marks")
-    parent_node.add_child(mark)

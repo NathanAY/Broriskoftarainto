@@ -29,6 +29,7 @@ func _build_tree(with_arena: bool, spawner_scene: String, character_pos: Vector2
 	character.global_position = character_pos
 	var spawner: Node = auto_free(load(spawner_scene).instantiate())
 	spawner.set("character", character)
+	spawner.set("spawn_telegraph_time", 0.0) # these tests read the enemy straight after the call
 	stage.add_child(spawner)
 	return {"root": root, "arena": arena, "enemies": enemies, "character": character, "spawner": spawner}
 

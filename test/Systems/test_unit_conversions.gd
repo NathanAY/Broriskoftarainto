@@ -179,8 +179,8 @@ func test_spinning_orb_and_its_modifier_authored_radius_in_meters() -> void:
 func test_weapon_holder_orbit_radius_is_meters() -> void:
 	var holder := WeaponHolder.new()
 	assert_float(holder.weapon_orbit_radius).is_equal_approx(0.2, METER_TOLERANCE)
-	# angle_offset -PI puts a single weapon due left, 0.2 m = 60 px away.
-	assert_float(holder._get_weapon_position(0, 1).x).is_equal_approx(-60.0, 0.001)
+	# A single weapon sits at the bottom, 0.2 m = 60 px away.
+	assert_float(holder._get_weapon_position(0, 1).y).is_equal_approx(60.0, 0.001)
 	holder.free()
 
 

@@ -28,6 +28,9 @@ const RARITY_COLORS: Array[Color] = [
 @export var target_selector: TargetSelector
 @export var sprite: Texture2D    # assign in .tres
 @export var sprite_offset: Vector2 = Vector2.ZERO  # for fine positioning if needed
+## Per-weapon size multiplier for the drawn sprite, on top of the automatic
+## fit to `AssetSizes.WEAPON_SPRITE`. 1.0 = default, 0.7 = 30% smaller.
+@export_range(0.1, 3.0, 0.05) var sprite_scale: float = 1.0
 @export var attack_sound: Array[Resource] = []
 
 ## How far this weapon reaches, **in meters**. The unit the player is shown, so

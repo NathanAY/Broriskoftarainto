@@ -13,8 +13,8 @@ const SHOTGUN := "res://src/Resources/weapons/Shotgun.tres"
 const PISTOL := "res://src/Resources/weapons/Pistol.tres"
 
 const ORBIT_RADIUS := 60.0
-# a lone weapon sits at the holder's angle_offset (-PI), i.e. due left
-const ORBIT_OFFSET := Vector2(-ORBIT_RADIUS, 0.0)
+# a lone weapon sits at the bottom of the holder
+const ORBIT_OFFSET := Vector2(0.0, ORBIT_RADIUS)
 
 
 func _character_without_weapons() -> Dictionary:
@@ -53,6 +53,24 @@ func test_weapon_visual_keeps_its_position_at_the_holder() -> void:
 	var node: WeaponVisual = weapon.sprite_node
 	# being under the WeaponHolder must not offset the weapon from the holder
 	assert_that(node.global_position).is_equal(character.global_position + ORBIT_OFFSET)
+
+	ctx["test_scene"].free()
+
+
+## `sprite_scale` multiplies the automatic fit, so the drawn size is proportional to it.
+func test_sprite_scale_multiplies_the_drawn_size() -> void:
+	var ctx := _character_without_weapons()
+	var character: Character = ctx["character"]
+	var plain: BaseWeapon = load(PISTOL).duplicate()
+	plain.sprite_scale = 1.0
+	var doubled: BaseWeapon = load(PISTOL).duplicate()
+	doubled.sprite_scale = 2.0
+	character.weapon_holder.add_weapon(plain)
+	character.weapon_holder.add_weapon(doubled)
+
+	var plain_node: WeaponVisual = character.weapon_holder.weapons[0].sprite_node
+	var doubled_node: WeaponVisual = character.weapon_holder.weapons[1].sprite_node
+	assert_float(doubled_node.scale.x).is_equal_approx(plain_node.scale.x * 2.0, 0.0001)
 
 	ctx["test_scene"].free()
 

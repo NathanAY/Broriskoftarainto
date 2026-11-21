@@ -188,14 +188,17 @@ func test_pistol_builtin_pierce_hits_enemy_behind() -> void:
     get_tree().current_scene = test_scene
 
     var enemy: Enemy = test_scene.get_node("Enemy")
-    # second enemy sits on the projectile path, beyond any melee/targeting range
-    var enemy2 := WeaponTestSupport.spawn_enemy_behind(test_scene, enemy, Vector2(350, 0))
-
-    var e2_health := WeaponTestSupport.give_enemy_health(enemy2)
     var character: Character = test_scene.get_node("Character")
 
     # built-in pierce (spawn-time) + knockback (hit-event), left fully intact
     var pistol := WeaponTestSupport.equip_only_weapon(character, PISTOL)
+
+    # second enemy sits on the projectile path (weapon -> first enemy), beyond
+    # any melee/targeting range. The weapon orbits the character, so the path
+    # starts at the weapon sprite, not the character's origin.
+    var shot_dir := (enemy.global_position - pistol.sprite_node.global_position).normalized()
+    var enemy2 := WeaponTestSupport.spawn_enemy_behind(test_scene, enemy, shot_dir * 350.0)
+    var e2_health := WeaponTestSupport.give_enemy_health(enemy2)
 
     @warning_ignore("redundant_await")
     await runner.simulate_frames(WeaponTestSupport.FRAMES)

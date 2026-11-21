@@ -22,4 +22,5 @@ modifiers = {
 }
 target_selector = ExtResource("2_jyyv4")
 sprite = ExtResource("2_57niw")
+sprite_scale = 0.7
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"

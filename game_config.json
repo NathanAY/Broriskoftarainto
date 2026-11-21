@@ -1,7 +1,7 @@
 {
 	"item_generation": {
-		"negative_modifier_chance": 0.22,
-		"repeat_item_chance_scale": 0.25,
+		"negative_modifier_chance": 0.2,
+		"repeat_item_chance_scale": 0.1,
 		"modifier_weights": {
 			"ArmorModifier": 1.0,
 			"ChainModifier": 1.0,

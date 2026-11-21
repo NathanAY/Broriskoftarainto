@@ -25,5 +25,6 @@ modifiers = {
 }
 target_selector = ExtResource("3_6lkm0")
 sprite = ExtResource("7_6n3w5")
+sprite_scale = 1.25
 attack_sound = Array[Resource]([ExtResource("1_4wmwi"), ExtResource("2_22c8m"), ExtResource("3_6aj5i"), ExtResource("4_r5sdm")])
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"

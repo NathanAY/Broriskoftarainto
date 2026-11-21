@@ -28,7 +28,6 @@ var event_manager: EventManager:
 ## How far from the holder each weapon sprite orbits, in **meters**. Converted
 ## to pixels in `_get_weapon_position`, the only place a `Vector2` is built.
 @export var weapon_orbit_radius: float = 0.2
-@export var angle_offset: float = -PI * 1  # start at top; change if you want different start angle
 
 # `weapons` above is the single source of truth: every equipped weapon is one
 # entry, and `BaseWeapon.sprite_node` points at the one WeaponVisual node that
@@ -199,7 +198,7 @@ func _create_visual(weapon_inst: BaseWeapon) -> WeaponVisual:
     var visual := WeaponVisual.new()
     visual.name = _unique_visual_name(weapon_inst.name)
     visual.texture = weapon_inst.sprite
-    visual.scale = Vector2.ONE * minf(1.0, AssetSizes.scale_for(visual.texture, AssetSizes.WEAPON_SPRITE))
+    visual.scale = Vector2.ONE * minf(1.0, AssetSizes.scale_for(visual.texture, AssetSizes.WEAPON_SPRITE)) * weapon_inst.sprite_scale
     visual.weapon = weapon_inst
     # The visual used to be appended as the last child of the holder, so it drew
     # on top of the holder's other visuals (body, legs, hit particles). Nesting
@@ -237,14 +236,22 @@ func _reposition_weapons() -> void:
         _update_weapon_orientation(node, i, count)
 
 
+## Angle of orbit slot `index` of `count`, in radians (+y is down, so PI/2 is the
+## bottom of the character). Odd counts put one weapon at bottom centre; even
+## counts are rotated half a step so none sits there (2 = left/right, 4 = an X).
+static func slot_angle(index: int, count: int) -> float:
+    var half_step := 0.0 if count % 2 == 1 else 0.5
+    return PI / 2.0 + TAU * (float(index) + half_step) / float(count)
+
+
 func _get_weapon_position(index: int, count: int) -> Vector2:
     if count <= 0:
         return Vector2.ZERO
-    var angle := angle_offset + TAU * float(index) / float(count)
+    var angle := slot_angle(index, count)
     return Vector2(cos(angle), sin(angle)) * Stats.meters_to_px(weapon_orbit_radius)
 
 func _update_weapon_orientation(node: Sprite2D, index: int, count: int):
-    var angle := angle_offset + TAU * float(index) / float(count)
+    var angle := slot_angle(index, count)
     node.rotation = angle
 
     # Flip vertically if weapon is on left side (x < 0)

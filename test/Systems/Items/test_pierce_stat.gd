@@ -36,12 +36,12 @@ func test_piercing_stat_hits_enemy_behind() -> void:
 
 	var character := _prepare(test_scene)
 	var near_enemy: Enemy = test_scene.get_node("Enemy")
-	var far_enemy := _spawn_far_enemy(test_scene, near_enemy)
-	var near_health := _make_survivable(near_enemy)
-	var far_health := _make_survivable(far_enemy)
-
 	character.item_holder.add_item(_create_pierce_item(1.0))
 	character.weapon_holder.add_weapon(_pistol_without_builtins())
+	var weapon: BaseWeapon = character.weapon_holder.weapons[-1]
+	var far_enemy := _spawn_far_enemy(test_scene, near_enemy, weapon)
+	var near_health := _make_survivable(near_enemy)
+	var far_health := _make_survivable(far_enemy)
 
 	@warning_ignore("redundant_await")
 	await runner.simulate_frames(FRAMES)
@@ -65,11 +65,11 @@ func test_no_pierce_does_not_hit_enemy_behind() -> void:
 
 	var character := _prepare(test_scene)
 	var near_enemy: Enemy = test_scene.get_node("Enemy")
-	var far_enemy := _spawn_far_enemy(test_scene, near_enemy)
+	character.weapon_holder.add_weapon(_pistol_without_builtins())
+	var weapon: BaseWeapon = character.weapon_holder.weapons[-1]
+	var far_enemy := _spawn_far_enemy(test_scene, near_enemy, weapon)
 	var near_health := _make_survivable(near_enemy)
 	var far_health := _make_survivable(far_enemy)
-
-	character.weapon_holder.add_weapon(_pistol_without_builtins())
 
 	@warning_ignore("redundant_await")
 	await runner.simulate_frames(FRAMES)
@@ -104,9 +104,12 @@ func _prepare(test_scene: Node) -> Character:
 ## near enemy continues +X into this one. 350px behind puts it at 550px from the
 ## character - outside the pistol's 1.33 m (≈399 px) range - so only a piercing
 ## projectile can ever reach it.
-func _spawn_far_enemy(test_scene: Node, near_enemy: Enemy) -> Enemy:
+## On the shot line weapon -> near enemy: the weapon orbits the character, so the
+## line does not start at the character origin.
+func _spawn_far_enemy(test_scene: Node, near_enemy: Enemy, weapon: BaseWeapon) -> Enemy:
+	var shot_dir := (near_enemy.global_position - weapon.sprite_node.global_position).normalized()
 	var far_enemy: Enemy = load(ENEMY_SCENE).instantiate()
-	far_enemy.global_position = near_enemy.global_position + Vector2(350, 0)
+	far_enemy.global_position = near_enemy.global_position + shot_dir * 350.0
 	test_scene.add_child(far_enemy)
 	return far_enemy
 

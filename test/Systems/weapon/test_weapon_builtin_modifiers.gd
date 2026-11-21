@@ -12,7 +12,7 @@ const SHOTGUN := "res://src/Resources/weapons/Shotgun.tres"
 
 const KNOCKBACK_SCRIPT := "res://src/Systems/Items/modifiers/knockback_modifier.gd"
 const POISON_SCRIPT := "res://src/Systems/Items/modifiers/poison_modifier.gd"
-const EXPLOSIVE_SCRIPT := "res://src/Systems/Items/modifiers/explosive_shot_modifier.gd"
+const EXPLOSIVE_SCRIPT := "res://src/Systems/Items/modifiers/projectile_explosion_modifier.gd"
 
 
 func test_bound_poison_only_fires_on_its_weapon() -> void:

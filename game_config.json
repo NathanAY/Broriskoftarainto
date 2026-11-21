@@ -8,7 +8,7 @@
 			"CritModifier": 1.0,
 			"EmergencyHealModifier": 1.0,
 			"EnergyShieldModifier": 1.0,
-			"ExplosiveShotModifier": 1.0,
+			"ProjectileExplosionModifier": 1.0,
 			"FlatLifeDrainModifier": 1.0,
 			"FlatRegenModifier": 1.0,
 			"HealOnEventModifier": 1.0,

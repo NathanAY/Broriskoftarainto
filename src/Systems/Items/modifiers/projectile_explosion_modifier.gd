@@ -1,7 +1,7 @@
 extends BaseModifier
 
 @export var display_name: String = "Explosive Shot"
-@export_multiline var tooltip_text: String = "Hits explode, dealing area damage."
+@export_multiline var tooltip_text: String = "Projectile hits explode, dealing area damage."
 @export var trigger_event: String = "on_hit"
 @export var damage_multiplier_per_stack: float = 0.5 # +50% explosion damage per stack
 

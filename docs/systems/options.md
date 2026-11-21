@@ -13,11 +13,12 @@ They used to live on `OptionsMenu` itself, which is instanced once per menu scen
 | Path | Role |
 |---|---|
 | `src/Scripts/autoload/game_settings.gd` | The store. Owns the values, persists them, applies them to the window and the audio buses. |
-| `src/Scenes/menu/OptionsMenu.tscn` | The panel. Six controls and no state. |
+| `src/Scenes/menu/OptionsMenu.tscn` | The panel. Nine controls and no state; each volume slider has a label above it. |
 | `src/Scenes/menu/options_menu.gd` | Reads the store into the controls on `_ready`, writes back on every user interaction. |
 | `src/default_bus_layout.tres` | Where the `Music` and `SFX` buses come from. |
 | `test/Systems/menu/test_game_settings.gd` | Persistence across a rebuilt menu, the file round-trip, and the clamping. |
 | `test/Systems/menu/test_options_menu_window_placement.gd` | The window-centering arithmetic, which `GameSettings` inherited from `OptionsMenu`. |
+| `test/Systems/menu/test_options_menu_slider_labels.gd` | Each volume slider has a distinct label directly above it. |
 
 ## Data flow
 

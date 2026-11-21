@@ -217,13 +217,20 @@ func aim() -> void:
     if target_selector:
         targets = target_selector.find_targets(sprite_node, get_range_px(), holder)
 
+    var dir: Vector2
     if targets.size() == 0:
-        return
-
-    var target = targets[0]
-    var dir = (target.global_position - sprite_node.global_position).normalized()
+        dir = _idle_direction(holder)
+    else:
+        dir = (targets[0].global_position - sprite_node.global_position).normalized()
     sprite_node.rotation = dir.angle()
     sprite_node.flip_v = dir.x < 0
+
+## Where the weapon points with nothing to shoot at: straight the way the
+## holder's body sprite faces (`flip_h` = left, the direction every movement
+## behaviour writes), straight right when the holder has no such sprite.
+func _idle_direction(holder: Node) -> Vector2:
+    var body := holder.get_node_or_null("Node2D/Sprite2D") as Sprite2D
+    return Vector2.LEFT if body != null and body.flip_h else Vector2.RIGHT
 
 # --- abstract shoot ---
 func try_shoot(_targets: Array[Node]) -> void:

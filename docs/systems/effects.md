@@ -59,7 +59,7 @@ Two details in that generator are load-bearing, not taste:
 - **The node outlives its damage window.** `duration` (0.15s) is when the `CollisionShape2D` is switched **off**; `visual_duration` is when the node frees itself, and it exists only because it is the burst's parent. Splitting the two is what stops a blast from hurting things that walk into the smoke afterwards. `visual_duration` is floored by `ExplosionBurst.get_longest_lifetime()`, so retuning a layer's lifetime in the editor cannot leave the tail truncated.
 - The shockwave's travel (speed × lifetime) is tuned to `ExplosionBurst.BASE_RADIUS`, so the ring lands on the blast edge once the node is scaled. The burst frees itself after its longest layer, so it can be parented anywhere.
 - Also spawned by `AreaBurstOnEnter` (enemy death burst) at its own radius; the Toadstinker sets `detonation_delay = 1.0`, so the blast and damage land a second after it dies. See `docs/systems/enemies.md`.
-- Spawned by `explosive_shot_modifier.gd`, and `bomb_on_hit_modifier.gd`.
+- Spawned by `projectile_explosion_modifier.gd`, and `bomb_on_hit_modifier.gd`.
 
 ## The `AreaWeapon` aura ring (`area_damage_burst.tscn`)
 

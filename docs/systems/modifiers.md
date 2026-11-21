@@ -115,7 +115,7 @@ Catalog
 | CritModifier | `crit_modifier.gd` | `before_deal_damage` | On crit applies crit multiplier; +0.15 crit multiplier per stack. |
 | EmergencyHealModifier | `emergency_heal_modifier.gd` | `after_take_damage` | Heals 75% max HP when below 25% HP; cooldown 60s shortens per stack. |
 | EnergyShieldModifier | `energy_shield_modifier.gd` | `before_take_damage` | Shield absorbs damage, recharges 10/s after 1.5s; +5 max shield per stack. |
-| ExplosiveShotModifier | `explosive_shot_modifier.gd` | `on_hit` | Each connecting hit explodes for a fraction of that hit's damage (`damage_fraction_of_hit`, default 20%); +50% per stack. Works as an item effect or a weapon built-in (the Shotgun declares it). |
+| ProjectileExplosionModifier | `projectile_explosion_modifier.gd` | `on_hit` | Each connecting projectile hit explodes (melee, aura, contact and orb hits carry no `projectile`, so they never trigger it) for a fraction of that hit's damage (`damage_fraction_of_hit`, default 20%); +50% per stack. Works as an item effect or a weapon built-in (the Shotgun declares it). |
 | HealOnEventModifier | `heal_on_event_modifier.gd` | randomized (`on_attack`/`on_hit`/`on_crit`/`after take damage`/... ) | Heals fixed HP per event; heal amount × active stacks. |
 | HomingModifier | `homing_modifier.gd` | `on_attack` | Adds homing steering module to projectiles; one module per stack. |
 | HomingRocketModifier | `homing_rocket_modifier.gd` | `before_take_damage` | Launches a homing rocket dealing 100% of hit damage; +1 rocket per stack. |

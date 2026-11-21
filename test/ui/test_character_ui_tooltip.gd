@@ -465,8 +465,8 @@ func test_energy_shield_tooltip() -> void:
 
 
 func test_explosive_shot_tooltip() -> void:
-    assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/ExplosiveShotModifier.tscn")).is_equal(
-        "effect: Explosive Shot — Hits explode, dealing area damage. Explodes for 20% of hit damage (Triggers on hit)")
+    assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/ProjectileExplosionModifier.tscn")).is_equal(
+        "effect: Explosive Shot — Projectile hits explode, dealing area damage. Explodes for 20% of hit damage (Triggers on hit)")
 
 
 func test_homing_tooltip() -> void:

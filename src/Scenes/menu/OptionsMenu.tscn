@@ -49,11 +49,26 @@ script = ExtResource("menu_button")
 layout_mode = 2
 text = "Show stas"
 
+[node name="SoundLabel" type="Label" parent="Control/VBoxContainer" unique_id=2011458813]
+layout_mode = 2
+text = "Master volume"
+horizontal_alignment = 1
+
 [node name="SoundSlider" type="HSlider" parent="Control/VBoxContainer" unique_id=1219337990]
 layout_mode = 2
 
+[node name="MusicLabel" type="Label" parent="Control/VBoxContainer" unique_id=2011458814]
+layout_mode = 2
+text = "Music volume"
+horizontal_alignment = 1
+
 [node name="MusicSlider" type="HSlider" parent="Control/VBoxContainer" unique_id=1243731778]
 layout_mode = 2
+
+[node name="SfxLabel" type="Label" parent="Control/VBoxContainer" unique_id=2011458815]
+layout_mode = 2
+text = "SFX volume"
+horizontal_alignment = 1
 
 [node name="SfxSlider" type="HSlider" parent="Control/VBoxContainer" unique_id=375940325]
 layout_mode = 2

@@ -7,7 +7,7 @@ Key scripts / scenes
 - Three families, and the split is deliberate rather than historical:
   - **Manager-attached** (`src/Scenes/effects/`, `src/Scenes/particles/particle_effect_manager.gd`) — long-lived nodes that live as children of an *actor*, subscribe to that actor's `EventManager`, and spawn something per event. `HitFlashManager`, `TextureBurstManager`, `ParticleEffectManager`.
   - **One-shot emitters** (`src/Scenes/particles/area_damage_burst.tscn`, `src/Scenes/particles/explosion_burst.tscn`) — stateless scenes spawned *by* the gameplay node that caused the event, parented to it, and self-freeing.
-  - **Attached surfaces** (`src/Systems/PortalVortex.tscn`) — a long-lived visual that belongs to one world object rather than to an event. The only one so far is the portal vortex, and it is a shader rather than particles; see its own section below.
+  - **Attached surfaces** (`src/Systems/PortalVortex.tscn`, `src/Scenes/particles/portal_aura.gd`) — long-lived visuals that belong to one world object rather than to an event: the portal vortex (a shader) and the portal aura (particles + drawn rune rings); see their sections below.
 - Nothing in any of them contains combat logic. A manager reacts to an event that already happened; it never decides whether something happened.
 
 Data flow
@@ -103,7 +103,7 @@ The portal is one ring sprite with a **transparent hole** in the middle, and the
 - **The gate surface is sized from the sprite, not authored a second time.** The ring art is authored at 500x500 and the scene scales the `Sprite2D` by 0.192, so the quad copies both the sprite's texture size and its scale in `_ready` (`portal_vortex.gd`). The `QuadMesh` is duplicated first: a scene instance shares its sub-resources, so two loop portals would otherwise write the same mesh. Same trap as the shared `ParticleProcessMaterial` under rule 1 above.
 - **The mask radius is tied to the art, and the hole is not centred.** `hole_radius` is 0.34 UV. The shipped hole reaches 0.292 from the canvas centre at its farthest axis — it sits 6.5px above the middle of the 500px source, which is why a mask sized to the hole's own radius left a one-pixel line at the top of the ring. 0.34 tucks it ~0.048 under the stone there and stays inside the ring's silhouette (the stone band is ~86px thick), so the disc's own edge never emerges. `test/Systems/test_portal_vortex.gd` measures the PNG along four axes and fails if the mask stops covering the hole plus a tuck, or starts poking out from behind the stone.
 - **Both portals share the art and the shader.** `ShopPortal.tscn` and `LoopChoicePortal.tscn` each instance `PortalVortex.tscn`; only the loop portals carry a tint.
-- **`src/Assets/portal.png` is not pre-downscaled, and it is the one texture in the project with mipmaps.** A 96px bake looked soft because the sprite is then upscaled 1.5x by the `Area2D`; the 500px source scaled in-scene keeps the crafted detail. It is minified every frame (more when the camera zooms out), so mipmaps + `texture_filter = Linear with Mipmaps` on the `Sprite2D` are what stop it aliasing.
+- **`src/Assets/portal.png` is not pre-downscaled, and it is the one texture in the project with mipmaps.** A 96px bake looked soft because the sprite is then upscaled by the `Area2D` (2x since the portals grew by a third); the 500px source scaled in-scene keeps the crafted detail. It is minified every frame (more when the camera zooms out), so mipmaps + `texture_filter = Linear with Mipmaps` on the `Sprite2D` are what stop it aliasing.
 
 Visual check — the vortex animates, so pass extra frames:
 
@@ -111,7 +111,29 @@ Visual check — the vortex animates, so pass extra frames:
 .\run_scene_shot.bat res://test/tools/portal_preview.tscn res://portal_shot.png 30
 ```
 
-`test/tools/portal_preview.tscn` shows the final-boss (red), extra-loop (blue) and shop (untinted) portals side by side on arena-floor tan.
+`test/tools/portal_preview.tscn` shows the final-boss (red), extra-loop (blue) and shop (gold aura) portals side by side on arena-floor tan. Its backdrop sits at `z_index = -10`: the portals are at -1, so a backdrop at the default 0 hides them and the shot comes out blank.
+
+## The portal aura and entry animation (`portal_aura.gd`, `portal.gd`)
+
+Both portal scenes are drawn at `scale = 2` (they were 1.5 — a third bigger) and carry an `Aura` node after the ring sprite, so its motes draw over the stone.
+
+- **`PortalAura` (`src/Scenes/particles/portal_aura.gd`) is the looping cousin of `SpawnPortal`.** Glow motes (`particle_glow.png`, additive, rule 3) are born on a ring outside the stone and pulled into the hole while orbiting, plus a rim glow and two counter-rotating dashed rune rings drawn in `_draw()`. The particle material is built in code per instance, so there is no shared sub-resource to duplicate.
+- **Sized from the sprite (rule 1)** — `radius` is the sibling `Sprite2D`'s texture width × its scale / 2, the same rect the vortex copies. `local_coords = true` (rule 2) so the motes follow the portal's 2x scale.
+- **Colour is `color` × the portal's `modulate`.** The loop portals leave `color` white and get their red / blue from `LoopChoicePortal.tint`; `ShopPortal.tscn` sets a gold `color`, the spawn portal's hue brightened to read on the tan floor.
+- **The pull is doubled over the pure-kinematics value.** `0.5 * accel * lifetime²` would land a mote at `SWIRL_INNER`, but orbit velocity adds tangential speed that fights the pull, and at the kinematic value the motes never left the outside of the stone.
+
+**Entry animation.** `Portal` (`src/Systems/portal.gd`) is the shared base of `ShopPortal` and `LoopChoicePortal`. Pressing Enter runs `default_action()`, which does *not* act at once:
+
+1. Disables its own interaction (a second Enter is ignored via `is_entering`), disables the player's `Movement` node, and calls `aura.surge()` — the motes and rune rings speed up to 3x.
+2. `_on_entry_started()` — the shop portal flies every pickup in here (see `docs/systems/ui_shop_portal.md`).
+3. The player slides to the centre (`PULL_DURATION`), then shrinks, fades and spins two full turns down into the hole (`SINK_DURATION`). Two full turns, so the body ends at its start angle and needs no snap back.
+4. `PortalAura.flash()` — a shockwave ring, a fading core and a spark burst — spawned under the portal's *parent*, because the shop portal frees itself in the next step. It is `PROCESS_MODE_ALWAYS`, since the shop pauses the tree on the same frame.
+5. `_on_entered()` — the portal's real action (open the shop / emit `chosen`).
+6. The player pops back out on a tween owned by the **character**, not the portal: it survives the portal being freed, and for the shop it is paused with the tree, so the pop plays as the shop closes. Movement is re-enabled at its end.
+
+The interaction menu is a child of the portal and would grow with it, so `Portal._ready()` counter-scales it to `MENU_SCALE` (the 1.5x it had before). `interaction_radius` grew in proportion (133).
+
+Pinned by `test/Systems/test_portal_entry.gd`.
 
 ## Known limitations / TODOs
 

@@ -115,9 +115,10 @@ func _portal(choice: LoopChoicePortal.Choice) -> LoopChoicePortal:
     return null
 
 
-## Activates a portal the way `InteractionManager` does on `ui_accept`.
+## Activates a portal the way `InteractionManager` does on `ui_accept`, and waits
+## out its entry animation, after which it has reported its choice.
 func _enter(portal: LoopChoicePortal) -> void:
-    portal.default_action()
+    await portal.default_action()
 
 
 func _run_end_screen() -> RunEndScreen:
@@ -165,7 +166,7 @@ func test_shop_exit_on_the_final_boss_loop_spawns_two_world_portals() -> void:
 ## three loop counters still have to agree afterwards.
 func test_extra_loop_portal_advances_and_offers_the_choice_again() -> void:
     _finish_loop(StageManager.FINAL_BOSS_LOOP)
-    _enter(_portal(LoopChoicePortal.Choice.EXTRA_LOOP))
+    await _enter(_portal(LoopChoicePortal.Choice.EXTRA_LOOP))
 
     var manager := _manager()
     assert_int(manager.current_loop).is_equal(StageManager.FINAL_BOSS_LOOP + 1)
@@ -186,7 +187,7 @@ func test_both_portals_go_away_once_answered() -> void:
     _finish_loop(StageManager.FINAL_BOSS_LOOP)
     var portals := _portals()
     var chosen := _portal(LoopChoicePortal.Choice.EXTRA_LOOP)
-    _enter(chosen)
+    await _enter(chosen)
 
     # `queue_free()` only marks the node; the removal lands at the end of the
     # frame, so one `process_frame` await would resume before it happened.
@@ -207,7 +208,7 @@ func test_both_portals_go_away_once_answered() -> void:
 ## spawns, and the run is still going.
 func test_final_boss_portal_spawns_a_boss_and_does_not_win_yet() -> void:
     _finish_loop(StageManager.FINAL_BOSS_LOOP)
-    _enter(_portal(LoopChoicePortal.Choice.FINAL_BOSS))
+    await _enter(_portal(LoopChoicePortal.Choice.FINAL_BOSS))
 
     var manager := _manager()
     assert_int(manager.current_stage).is_equal(StageManager.STAGE_FINAL_BOSS)
@@ -223,7 +224,7 @@ func test_final_boss_portal_spawns_a_boss_and_does_not_win_yet() -> void:
 ## ...and killing it wins. `_end_stage()` is what the empty arena triggers.
 func test_killing_the_final_boss_wins_the_run() -> void:
     _finish_loop(StageManager.FINAL_BOSS_LOOP)
-    _enter(_portal(LoopChoicePortal.Choice.FINAL_BOSS))
+    await _enter(_portal(LoopChoicePortal.Choice.FINAL_BOSS))
 
     for enemy in _enemies().get_children():
         enemy.free()

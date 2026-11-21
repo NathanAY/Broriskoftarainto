@@ -39,7 +39,7 @@ Taking an extra loop does **not** close the choice off: clearing it returns to t
 
 **The win fires on the final boss dying, not on leaving a shop.** `_end_stage()` in `STAGE_FINAL_BOSS` is the only path to `_show_win_screen()`, and the only way out of that stage is killing the boss or dying.
 
-`LoopChoicePortal` is a dumb reporter extending `Interactable` — it emits `chosen(choice)` when the player interacts with it and knows nothing about loops or bosses, so it can be driven from a test with no `StageManager` present. `StageManager.offer_loop_choice()` spawns one of each, keeps both in `loop_portals`, and frees both through `clear_loop_portals()` as soon as either is entered.
+`LoopChoicePortal` is a dumb reporter extending `Portal` (`src/Systems/portal.gd`) — it emits `chosen(choice)` once the player has entered it and the entry animation has played (about 0.8s after Enter, see `docs/systems/effects.md`) and knows nothing about loops or bosses, so it can be driven from a test with no `StageManager` present. `StageManager.offer_loop_choice()` spawns one of each, keeps both in `loop_portals`, and frees both through `clear_loop_portals()` as soon as either is entered.
 
 Two things the portals have to get right, both pinned by `test/Systems/test_loop_choice.gd`:
 - **Both portals go away on either answer.** Picking one ends the question; the other must not keep offering a fight.

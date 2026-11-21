@@ -433,7 +433,7 @@ func test_shop_portal_opens_shop_with_no_pickups() -> void:
     var portal: ShopPortal = load("res://src/Systems/ShopPortal.tscn").instantiate()
     root.add_child(portal)
 
-    portal.default_action()
+    await portal.default_action()
 
     assert_bool(shop.visible).is_true()
     assert_int(shop.phase).is_equal(2)

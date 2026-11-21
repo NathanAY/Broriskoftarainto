@@ -19,6 +19,8 @@ func _ready() -> void:
 	var backdrop := ColorRect.new()
 	backdrop.color = BACKDROP
 	backdrop.size = view
+	# Portals sit at z -1 so the player draws over them; the floor goes under that.
+	backdrop.z_index = -10
 	add_child(backdrop)
 
 	var y := view.y * 0.55

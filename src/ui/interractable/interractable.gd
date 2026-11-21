@@ -56,6 +56,14 @@ func _exit_tree():
     if manager:
         manager.unregister(self)
 
+## Stops this from being offered or triggered, e.g. while it animates away.
+func disable_interaction() -> void:
+    hide_menu()
+    if _manager and is_instance_valid(_manager):
+        _manager.unregister(self)
+        if _manager.current == self:
+            _manager.current = null
+
 func show_menu():
     if interaction_menu.visible:
         return

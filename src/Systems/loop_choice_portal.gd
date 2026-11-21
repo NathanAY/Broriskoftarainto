@@ -1,8 +1,9 @@
-extends Interactable
+extends Portal
 class_name LoopChoicePortal
 
 ## A world portal standing for one answer to the end-of-run question. It only
-## reports which answer it is; `StageManager` owns what that means for the run.
+## reports which answer it is, once the `Portal` entry animation has played;
+## `StageManager` owns what that means for the run.
 ##
 ## Two of these are spawned past `StageManager.FINAL_BOSS_LOOP`: one for the
 ## final boss, one for another loop. Picking either frees both.
@@ -31,7 +32,7 @@ func _populate_menu(menu: Control):
     var cancel_button: Button = menu.get_node("Button2")
     cancel_button.visible = false
 
-func default_action():
+func _on_entered() -> void:
     chosen.emit(choice)
 
 ## Tab (`ui_focus_next`) routes here. It must not free the portal: the run is

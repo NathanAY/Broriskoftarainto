@@ -3,6 +3,8 @@ extends Node
 
 @export var pickup_scene: PackedScene = preload("res://src/Systems/Items/ItemPickup.tscn")
 @export var altar_scene: PackedScene = preload("res://src/Systems/altars/ItemSacrificeAltar.tscn")
+@export var heal_scene: PackedScene = preload("res://src/Systems/Items/HealPickup.tscn")
+const HEAL_DROP_CHANCE := 0.08
 @export var itemFactory: ItemFactory = null
 
 var randomGenerator = RandomNumberGenerator.new()
@@ -31,10 +33,14 @@ func _spawn_item(position: Vector2):
         altar.add_item(itemFactory.get_item_from_pool_or_generate())
         altar.global_position = position
         get_tree().current_scene.get_node("Nodes/altars").add_child(altar)
-    elif randf() < 0.05:    
+    elif randf() < 0.05:
         var item = itemFactory.get_item_from_pool_or_generate()
         var pickup = pickup_scene.instantiate()
         pickup.global_position = position
         pickup.item = item
         get_tree().current_scene.get_node("Nodes/pickups").add_child(pickup)
+    elif randf() < HEAL_DROP_CHANCE:
+        var heal = heal_scene.instantiate()
+        heal.global_position = position
+        get_tree().current_scene.get_node("Nodes/pickups").add_child(heal)
 

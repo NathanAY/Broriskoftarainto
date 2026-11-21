@@ -62,6 +62,30 @@ func test_buy_weapon_equips_in_weapon_holder() -> void:
     shop.free()
 
 
+func test_sell_equipped_weapon_refunds_half_price() -> void:
+    var shop = load(SHOP_SCENE).instantiate()
+    add_child(shop)
+    var character := _build_character()
+    shop.character = character
+    var weapon_holder: WeaponHolder = character.weapon_holder
+    var weapon: BaseWeapon = load(PISTOL_WEAPON)
+    weapon_holder.add_weapon(weapon)
+    shop._update_character_info()
+
+    var button: Button = shop.weapons_container.get_child(0).get_node_or_null("SellButton")
+    assert_object(button).is_not_null()
+    var price: int = shop.price_analyzer.get_price(weapon)
+    var refund: int = shop.price_analyzer.get_sell_price(weapon)
+    assert_int(refund).is_less(price)
+    button.pressed.emit()
+
+    assert_int(weapon_holder.weapons.size()).is_equal(0)
+    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(float(refund))
+
+    character.free()
+    shop.free()
+
+
 func test_factory_returns_random_weapon() -> void:
     var factory: ItemFactory = load("res://src/Systems/Items/ItemFactory.tscn").instantiate()
     add_child(factory)

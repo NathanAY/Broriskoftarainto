@@ -99,6 +99,32 @@ func _fill_gear_cards(container: GridContainer, resources: Array) -> void:
         tooltip.bind_to_row(card, resource)
         if resource is BaseWeapon:
             _bind_combine(card, resource)
+            _bind_sell(card, resource)
+
+
+## Every equipped weapon tile gets a "Sell" button along its top edge (the
+## Combine button owns the bottom). Weapons sell for the same ratio of their
+## shop price as pickups do, so selling one never beats buying it.
+func _bind_sell(card: IconCard, weapon: BaseWeapon) -> void:
+    var weapon_holder: WeaponHolder = character.get_node_or_null("WeaponHolder")
+    if weapon_holder == null:
+        return
+    var sell_price: int = price_analyzer.get_sell_price(weapon)
+    var button := Button.new()
+    button.name = "SellButton"
+    button.text = "Sell +%d" % sell_price
+    button.tooltip_text = "Sell this weapon for half its shop price."
+    button.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+    button.add_theme_font_size_override("font_size", IconCard.MIN_NAME_FONT_SIZE)
+    button.pressed.connect(func() -> void:
+        weapon_holder.remove_weapon(weapon)
+        character.stats.set_base_stat("money", _current_money() + sell_price)
+        tooltip.hide_tooltip()
+        _update_money_label()
+        _update_stats()
+        _update_character_info()
+        _refresh_affordability())
+    card.add_child(button)
 
 
 ## A weapon tile with a duplicate of the same rarity gets a "Combine" button

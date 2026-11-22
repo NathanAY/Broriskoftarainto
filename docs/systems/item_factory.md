@@ -92,11 +92,23 @@ Every generated item is a positive half plus a curse, and the curse is one of tw
 - **The positive half may only roll a BENEFIT and the curse only a COST.** `_benefit_effect_scenes()` / `_cost_effect_scenes()` partition `effect_scenes` by `BaseModifier.effect_kind` (built once by `_rebuild_scene_pools()`). Without the split the shop can offer "Grants special effect: Life Drain" as an upside. Adding a harmful modifier to the folder and tagging it `COST` is all it takes to widen the pool.
 - A harmful scene is appended **after** the positive one, so `effect_scene[0]` still reads as the gift and `effect_scene_condition` stays aligned.
 - `_roll_negative_stat(exclude, ...)` never picks the stat the positive half already uses. Picking it again collapses both halves onto one key, and since `Dictionary.merge()` does **not** overwrite by default the curse would silently vanish, yielding a free item.
-- A **stat** item's curse scene is its only entry, so its positive stat remains in `modifiers` and the card must keep rendering it as a gain (`ItemTooltip._append_modifier_rows`).
+- A **stat** item's curse scene is its only entry, so its positive stat remains in `modifiers`. The card tones every stat modifier by its own sign on every item type (`ItemTooltip._append_modifier_rows`), because rarity can put gain lines on an effect or buff item too.
 - Buff/debuff items render their payload from scene 0 and any appended curse from scene 1 onwards, on both the card and the flat tooltip.
 - `ItemPriceAnalyzer.get_price` only checks whether `effect_scene` is non-empty, so a stat item that rolled a curse is priced as a modifier (3) rather than a stat item (1).
 - **[PROPOSED]** the curse's *magnitude* is currently re-rolled independently of the gift, so a 0.5-HP gift can carry a 1.0-HP curse. `balance.md` §3.2 specifies it as a fixed 1.0-1.2× of the gift.
 - Covered by `test/Systems/Items/test_item_factory_polarity.gd`. The chance is a roll, so its tests pin `rng.seed` and draw a batch: a fixed seed makes "both branches appear" deterministic rather than flaky. `test_item_pickup.gd` pins its seed for the same reason.
+
+## Rarity
+
+Every item from `generate_random_item()` gets a rarity (`Item.rarity`, the same `BaseWeapon.Rarity` enum and border colours weapons use). Items from `get_item_by_type()` and hand-made `.tres` items stay COMMON. All numbers are in the `item_rarity` block of `game_config.json` (see `docs/systems/game_config.md`); `Item.rarity_value(key, rarity)` reads them.
+
+- **Roll** — `roll_rarity(loop)`: weighted by `weights`, and tier `i`'s weight grows by `loop_weight_growth * (loop - 1) * i`, so later loops roll rarer items. The loop is read from the current scene's `StageManager` like the shop's reroll price, 1 outside a game.
+- **Scale** — `apply_rarity(item, rarity)` multiplies each positive `flat` in `Item.modifiers` by `positive_multipliers` and each negative one by the smaller `negative_multipliers`. A buff/debuff payload (scene 0) is the item's gain even when negative, so it scales by the positive multiplier and is re-packed. Effect scenes' own numbers (poison, homing, ...) and harmful COST scenes are **not** scaled.
+- **Extra lines** — up to `rarity` attempts (common 0, legendary 4) at `extra_positive_chance` each add a gain stat line, and one attempt at `extra_negative_chance` adds a loss line. Both pick a stat the item does not modify yet and roll it with `_generate_stat_modifiers`, times the rarity's multiplier.
+- **Price** — `ItemPriceAnalyzer` multiplies the type price by the positive multiplier.
+- **Look** — above common, the icon tile (`IconCard`) and the shop card (`ShopItemCard`) take `BaseWeapon.RARITY_COLORS` as their border, and the shop card also colours the name. Hover and lock still win the shop card's border, so the name keeps showing the rarity.
+- **Balance** — a rare item breaks `balance.md`'s +15%-per-item rule by design; the rule predates rarity.
+- Covered by `test/Systems/Items/test_item_rarity.gd`.
 
 ## Known limitations / TODOs
 - The value roll is the big one, and it is described above rather than here: one formula for 14 stats, six of which get a constant. See "The value roll".

@@ -219,16 +219,96 @@ func generate_random_item() -> Item:
         return null
 
     var roll := rng.randf()
-
+    var item: Item
     if roll < 0.4:
-        return _generate_stat_item()
+        item = _generate_stat_item()
     elif roll < 0.7:
-        return _generate_effect_item()
+        item = _generate_effect_item()
     elif roll < 0.85:
-        return _generate_buff_item()
-    elif roll < 1:
-        return _generate_debuff_item()
-    return _generate_debuff_item()
+        item = _generate_buff_item()
+    else:
+        item = _generate_debuff_item()
+    apply_rarity(item, roll_rarity(_current_loop()))
+    return item
+
+# -------------------
+# Rarity
+# -------------------
+## How much each loop past the first boosts the higher tiers' weights: tier `i`
+## weighs `weight * (1 + growth * (loop - 1) * i)`. Read from `game_config.json`.
+var rarity_loop_growth: float = float(GameConfig.section("item_rarity").get("loop_weight_growth", 0.5))
+
+func roll_rarity(loop: int) -> BaseWeapon.Rarity:
+    var weights: Array[float] = []
+    var total := 0.0
+    for i in range(BaseWeapon.Rarity.LEGENDARY + 1):
+        var weight := maxf(0.0, Item.rarity_value("weights", i) * (1.0 + rarity_loop_growth * maxi(0, loop - 1) * i))
+        weights.append(weight)
+        total += weight
+    var pick := rng.randf() * total
+    for i in range(weights.size()):
+        pick -= weights[i]
+        if pick < 0.0:
+            return i as BaseWeapon.Rarity
+    return BaseWeapon.Rarity.COMMON
+
+
+## Stamps `rarity` on a freshly generated item: gains scale by the rarity's
+## positive multiplier, losses by its (smaller) negative one, then up to
+## `rarity` extra gain lines and one extra loss line are rolled on stats the
+## item does not touch yet.
+func apply_rarity(item: Item, rarity: BaseWeapon.Rarity) -> void:
+    if item == null:
+        return
+    item.rarity = rarity
+    var gain := Item.rarity_value("positive_multipliers", rarity)
+    var loss := Item.rarity_value("negative_multipliers", rarity)
+    _scale_flats(item.modifiers, gain, loss)
+    # A buff/debuff payload is the item's gain even when it is negative (a
+    # debuff lowers the enemy's stat), so all of it scales by `gain`.
+    if ItemTooltip.is_buff_item(item) or ItemTooltip.is_debuff_item(item):
+        var payload: Node = item.effect_scene[0].instantiate()
+        _scale_flats(payload.modifiers, gain, gain)
+        item.effect_scene[0] = ItemBuilder.pack_instance(payload)
+        payload.free()
+    for i in range(int(rarity)):
+        if rng.randf() < Item.rarity_value("extra_positive_chance", rarity):
+            _add_stat_line(item, gain)
+    if rng.randf() < Item.rarity_value("extra_negative_chance", rarity):
+        _add_stat_line(item, -loss)
+
+
+func _scale_flats(modifiers: Dictionary, gain: float, loss: float) -> void:
+    for stat_name in modifiers:
+        var entry = modifiers[stat_name]
+        if entry is Dictionary and entry.has("flat"):
+            var flat := float(entry["flat"])
+            entry["flat"] = snappedf(flat * (gain if flat > 0.0 else loss), 0.01)
+
+
+## One more stat line on a stat the item does not modify yet, rolled like any
+## other stat value and multiplied by `scale` (negative for a loss).
+func _add_stat_line(item: Item, scale: float) -> void:
+    var candidates := []
+    for stat_name in _gratable_stat_names():
+        if not item.modifiers.has(stat_name):
+            candidates.append(stat_name)
+    if candidates.is_empty():
+        return
+    var chosen = candidates[rng.randi_range(0, candidates.size() - 1)]
+    var value := _generate_stat_modifiers(chosen, stats.stats.get(chosen, 0.0))
+    value["flat"] = snappedf(float(value["flat"]) * scale, 0.01)
+    item.modifiers[chosen] = value
+
+
+## Same lookup as the shop's reroll price: the loop of the running game, 1
+## outside one (tests, previews).
+func _current_loop() -> int:
+    if not is_inside_tree():
+        return 1
+    var scene := get_tree().current_scene
+    var stage_manager: StageManager = scene.get_node_or_null("StageManager") if scene else null
+    return stage_manager.current_loop if stage_manager else 1
 
 func _generate_stat_item(index: int = -1) -> Item:
     var stat_names = _gratable_stat_names()

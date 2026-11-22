@@ -26,10 +26,13 @@ var _locked: bool = false
 var _affordable: bool = true
 var _hovered: bool = false
 var _resolving: bool = false
+## The scene's name colour, restored when a rare offer is replaced by a common one.
+var _default_name_color: Color = Color.WHITE
 
 
 func _ready() -> void:
     super()
+    _default_name_color = name_label.get_theme_color("font_color")
     mouse_entered.connect(func() -> void:
         _hovered = true
         _refresh_border())
@@ -45,6 +48,16 @@ func set_item_display(p_item: Resource) -> void:
 
 func _on_resource_changed() -> void:
     _refresh_border()
+    # Above common, the name wears the rarity colour as well as the border, so
+    # the rarity still reads while the border shows hover or lock.
+    if _is_rare():
+        name_label.add_theme_color_override("font_color", BaseWeapon.RARITY_COLORS[item.rarity])
+    else:
+        name_label.add_theme_color_override("font_color", _default_name_color)
+
+
+func _is_rare() -> bool:
+    return (item is BaseWeapon or item is Item) and item.rarity != BaseWeapon.Rarity.COMMON
 
 
 ## Price shown in the plate above the buttons. Purely visual; the label text
@@ -106,6 +119,8 @@ func _refresh_border() -> void:
         color = LOCKED_BORDER
     elif _hovered:
         color = HOVER_BORDER
+    elif _is_rare():
+        color = BaseWeapon.RARITY_COLORS[item.rarity]
     elif is_weapon:
         color = WEAPON_BORDER
     _apply_panel_style(color)

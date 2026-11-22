@@ -2,7 +2,8 @@ extends Node
 class_name ItemPriceAnalyzer
 
 ## Returns the shop cost of an offer based on its type:
-## stat item = 1, buff/debuff = 2, modifier = 3, weapon = 5.
+## stat item = 1, buff/debuff = 2, modifier = 3, weapon = 5. An item's price is
+## then multiplied by its rarity's positive multiplier and rounded.
 
 const STAT_PRICE: int = 1
 const BUFF_DEBUFF_PRICE: int = 2
@@ -16,11 +17,15 @@ func get_price(resource: Resource) -> int:
         return WEAPON_PRICE
     if resource is Item:
         var item := resource as Item
-        if ItemTooltip.is_buff_item(item) or ItemTooltip.is_debuff_item(item):
-            return BUFF_DEBUFF_PRICE
-        if ItemTooltip.has_effect_scene(item):
-            return MODIFIER_PRICE
-        return STAT_PRICE
+        return roundi(_type_price(item) * Item.rarity_value("positive_multipliers", item.rarity))
+    return STAT_PRICE
+
+## The price by item type alone; `get_price` scales it by rarity.
+func _type_price(item: Item) -> int:
+    if ItemTooltip.is_buff_item(item) or ItemTooltip.is_debuff_item(item):
+        return BUFF_DEBUFF_PRICE
+    if ItemTooltip.has_effect_scene(item):
+        return MODIFIER_PRICE
     return STAT_PRICE
 
 ## Sell value of a collected pickup: a ratio of its shop price (default 50%).

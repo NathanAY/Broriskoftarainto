@@ -454,3 +454,31 @@ func test_selling_pickup_refreshes_other_cards_affordability() -> void:
 
     character.free()
     shop.free()
+
+
+func _border_color(card: ShopItemCard) -> Color:
+    return (card.get_theme_stylebox("panel") as StyleBoxFlat).border_color
+
+
+func test_rare_offer_wears_its_rarity_on_border_and_name() -> void:
+    var card: ShopItemCard = load(CARD_SCENE).instantiate()
+    add_child(card)
+    var common_name_color := card.name_label.get_theme_color("font_color")
+    var rare: Item = (load(PLUS_DAMAGE_ITEM) as Item).duplicate()
+    rare.rarity = BaseWeapon.Rarity.EPIC
+    card.set_item_display(rare)
+    var rarity_color := BaseWeapon.RARITY_COLORS[BaseWeapon.Rarity.EPIC]
+    assert_that(_border_color(card)).is_equal(rarity_color)
+    assert_that(card.name_label.get_theme_color("font_color")).is_equal(rarity_color)
+
+    # Hover and lock still win the border; the name keeps saying the rarity.
+    card.set_locked(true)
+    assert_that(_border_color(card)).is_equal(ShopItemCard.LOCKED_BORDER)
+    assert_that(card.name_label.get_theme_color("font_color")).is_equal(rarity_color)
+
+    # A common offer in the same card goes back to the plain look.
+    card.set_locked(false)
+    card.set_item_display(load(PLUS_DAMAGE_ITEM))
+    assert_that(_border_color(card)).is_equal(ItemDisplayPanel.PANEL_BORDER)
+    assert_that(card.name_label.get_theme_color("font_color")).is_equal(common_name_color)
+    card.free()

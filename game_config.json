@@ -26,5 +26,13 @@
 			"StatOnKillModifier": 1.0,
 			"bombOnHitModifier": 1.0
 		}
+	},
+	"item_rarity": {
+		"weights": [60.0, 25.0, 10.0, 4.0, 1.0],
+		"loop_weight_growth": 0.5,
+		"positive_multipliers": [1.0, 1.25, 1.5, 1.8, 2.2],
+		"negative_multipliers": [1.0, 1.05, 1.1, 1.15, 1.25],
+		"extra_positive_chance": [0.0, 0.35, 0.45, 0.55, 0.65],
+		"extra_negative_chance": [0.2, 0.15, 0.1, 0.05, 0.02]
 	}
 }

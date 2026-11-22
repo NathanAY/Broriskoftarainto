@@ -27,6 +27,7 @@ static func _offer_items() -> Array[Item]:
 	var two_effects := ItemBuilder.make_effect_item(
 		"Regen Charm", "Grants special effect: Regen", regen, {})
 	two_effects.effect_scene = [regen, drain]
+	two_effects.rarity = BaseWeapon.Rarity.EPIC
 	cache._store_effect_display(two_effects, [regen, drain])
 	out.append(two_effects)
 
@@ -36,6 +37,7 @@ static func _offer_items() -> Array[Item]:
 		"Damage Talisman", "Enhances damage at a cost.",
 		{"damage": {"flat": 6.0}, "movement_speed": {"flat": -1.5}})
 	curse_only.effect_scene = [drain]
+	curse_only.rarity = BaseWeapon.Rarity.RARE
 	cache._store_effect_display(curse_only, [drain])
 	out.append(curse_only)
 

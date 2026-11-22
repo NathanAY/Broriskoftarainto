@@ -261,28 +261,11 @@ static func effect_row(display: Dictionary) -> ItemCardRow:
     return row
 
 
-## An item's positive half lives either in its effect scenes (an "effect item")
-## or in its stat modifiers (a plain stat item). When any scene is a BENEFIT the
-## item is an effect item and every stat modifier on it is a cost, so they are
-## forced red; otherwise the item is a stat item that merely carries a drawback,
-## and each modifier keeps the tone its own value implies - otherwise the
-## positive stat would be rendered as a tradeoff.
+## Each stat modifier keeps the tone its own sign implies. An item's modifiers
+## can mix gains and losses on any item type - a rare effect item carries extra
+## gain lines next to its curse - so tone is never forced by the item's type.
 static func _append_modifier_rows(rows: Array, item: Item) -> void:
-    var force_tone := -1
-    if _has_benefit_effect(item):
-        force_tone = ItemCardRow.Tone.NEGATIVE
-    _append_stat_rows(rows, item.modifiers, force_tone)
-
-
-static func _has_benefit_effect(item: Item) -> bool:
-    if not has_effect_scene(item):
-        return false
-    for i in item.effect_scene.size():
-        var kind := int(resolve_effect_display_for_item(item, i).get(
-            "effect_kind", BaseModifier.EffectKind.BENEFIT))
-        if kind != BaseModifier.EffectKind.COST:
-            return true
-    return false
+    _append_stat_rows(rows, item.modifiers)
 
 
 ## A modifier that declares itself a COST (life drain, ...) gets a red effect
@@ -297,17 +280,13 @@ static func _tone_for_effect_kind(effect_kind: int) -> ItemCardRow.Tone:
             return ItemCardRow.Tone.NEUTRAL
 
 
-static func _append_tradeoff_rows(rows: Array, modifiers: Dictionary) -> void:
-    _append_stat_rows(rows, modifiers, ItemCardRow.Tone.NEGATIVE)
-
-
 ## A buff or debuff payload row is a gain **for the player** in both cases: a
 ## buff lifts the holder, a debuff drags the enemy down, and the card is priced
 ## and read from the player's side. The sign on the number still says which way
 ## the stat moved - a debuff shows `-0.12 Critical Multiplier` - but painting it
 ## red made the card read as a penalty the player was paying for, which is the
 ## opposite of what the item does. The item's *own* curse is a real loss and
-## keeps its red through `_append_tradeoff_rows` / `_append_effect_rows`.
+## keeps its red through `_append_modifier_rows` / `_append_effect_rows`.
 static func _append_buff_debuff_rows(rows: Array, item: Item) -> void:
     _append_name_row(rows, item.name)
     var flavor := str(item.description)
@@ -323,7 +302,7 @@ static func _append_buff_debuff_rows(rows: Array, item: Item) -> void:
     # added as this item's curse, so it has to be shown or the item reads as a
     # free upgrade.
     _append_effect_rows(rows, item, 1)
-    _append_tradeoff_rows(rows, item.modifiers)
+    _append_modifier_rows(rows, item)
 
 
 ## The grey sentence introduces the stat line under it, so a trailing full stop
@@ -417,9 +396,13 @@ static func has_effect_scene(item: Item) -> bool:
     return item.effect_scene != null and item.effect_scene.size() > 0
 
 
+## Only a loss is a "tradeoff:"; a rarity's extra gain line stays a plain stat line.
 static func _append_tradeoff_lines(lines: PackedStringArray, modifiers: Dictionary) -> void:
-    for line in modifier_lines(modifiers):
-        lines.append("tradeoff: " + line)
+    for stat_name in modifiers:
+        var mod = modifiers[stat_name]
+        var is_loss: bool = mod is Dictionary and mod.values().any(func(v): return _as_number(v) < 0.0)
+        for line in modifier_lines({stat_name: mod}):
+            lines.append(("tradeoff: " if is_loss else "") + line)
 
 
 static func _append_effect_line(lines: PackedStringArray, item: Item) -> void:

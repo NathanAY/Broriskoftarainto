@@ -31,6 +31,7 @@ Pricing (items.md, catalog `ItemPriceAnalyzer`)
   - buff or debuff (`meta("type")` = `buff`/`debuff`) = 2
   - modifier (has an `effect_scene`) = 3
   - `BaseWeapon` = 5
+  - An item's type price is then multiplied by its rarity's positive multiplier and rounded (`Item.rarity`, see "Rarity" in `docs/systems/item_factory.md`). Common stays at the type price.
 - `get_sell_price(resource, ratio = 0.5)` sells a collected pickup at `round(price * ratio)` (min 1). The `ratio` is an optional callable parameter; shop default is 50% of the buy price.
 - The shop (`ShopMenu`) holds a `PriceAnalyzer` node and uses it for both buy and sell buttons.
 - **A stat item that rolled a harmful modifier is priced as a modifier (3), not as a stat item (1).** `get_price` only looks at whether `effect_scene` is non-empty, so the ~35% of generated stat items that carry a drain cross a price band. Intentional - the item really does run a behavior - but it means the stat-item tier is no longer a flat 1.

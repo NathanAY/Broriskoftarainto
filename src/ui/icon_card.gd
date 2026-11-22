@@ -105,8 +105,8 @@ func set_display(resource: Resource) -> void:
 	if resource == null:
 		name_label.text = ""
 		return
-	# A weapon above common wears its rarity as the tile border.
-	if resource is BaseWeapon and resource.rarity != BaseWeapon.Rarity.COMMON:
+	# A weapon or item above common wears its rarity as the tile border.
+	if (resource is BaseWeapon or resource is Item) and resource.rarity != BaseWeapon.Rarity.COMMON:
 		set_border_color(BaseWeapon.RARITY_COLORS[resource.rarity])
 	set_icon(ItemDisplayPanel.make_icon(resource, ICON_SIZE * scale_factor))
 	set_card_name(ItemDisplayPanel.display_name(resource))

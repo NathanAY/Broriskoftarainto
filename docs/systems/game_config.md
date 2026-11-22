@@ -19,6 +19,19 @@ How the weights behave:
 - **Only two costs exist** (`FlatLifeDrainModifier`, `PercentLifeDrainModifier`), so lowering one alone just moves the roll onto the other. To make drains rarer overall, lower `negative_modifier_chance` as well. The chance of one specific cost on an item is `negative_modifier_chance * its weight / sum of cost weights`.
 - If every weight in a pool is `0` the pick falls back to uniform rather than failing.
 
+## `item_rarity`
+
+Read through `Item.rarity_value()` by `ItemFactory` (rolling and applying rarity) and `ItemPriceAnalyzer` (price). Every list has 5 entries: common, uncommon, rare, epic, legendary. `docs/systems/item_factory.md` ("Rarity") has the mechanics.
+
+| Key | Meaning |
+|---|---|
+| `weights` | Relative roll weight per rarity on loop 1. |
+| `loop_weight_growth` | Each loop past the first multiplies tier `i`'s weight by `1 + growth * (loop - 1) * i`. `0` keeps the odds fixed. |
+| `positive_multipliers` | Gains on the item (and its buff/debuff payload) are multiplied by this. Also multiplies the shop price. |
+| `negative_multipliers` | Losses on the item are multiplied by this. Keep it below the positive one. |
+| `extra_positive_chance` | Chance per attempt of an extra gain line; a rarity gets as many attempts as its index (common 0, legendary 4). |
+| `extra_negative_chance` | Chance of one extra loss line. |
+
 ## Adding a new setting
 
 Add the key to the JSON, read it where it is used with `GameConfig.section("...").get("key", fallback)`, and document it in this file. Keep a fallback in code so a missing key does not break the game.

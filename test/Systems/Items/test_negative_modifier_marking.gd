@@ -183,15 +183,18 @@ func test_two_cost_scenes_on_one_item_are_both_red() -> void:
 	assert_int(rows[1].tone).is_equal(ItemCardRow.Tone.NEGATIVE)
 
 
-func test_an_effect_item_keeps_its_stat_modifiers_as_tradeoffs() -> void:
-	# The item's positive half is the effect, so every stat on it is a cost and
-	# stays forced red even though a "tradeoff" can read as a gain.
-	var item := _polarity_item([load(KNOCKBACK_SCENE), load(FLAT_DRAIN_SCENE)], {"armor": {"flat": 2.0}})
+func test_an_effect_item_tones_its_stat_modifiers_by_sign() -> void:
+	# A rare effect item carries extra gain lines next to its curse, so a stat on
+	# an effect item is toned by its own sign, not forced red.
+	var item := _polarity_item([load(KNOCKBACK_SCENE), load(FLAT_DRAIN_SCENE)],
+		{"damage": {"flat": 2.0}, "armor": {"flat": -2.0}})
+	var tones := {}
 	for row in ItemTooltip.card_rows(item):
 		var typed: ItemCardRow = row
 		if typed.kind == ItemCardRow.Kind.STAT:
-			assert_int(typed.tone).override_failure_message(
-				"a positive stat on an effect item is still a tradeoff").is_equal(ItemCardRow.Tone.NEGATIVE)
+			tones[typed.label] = typed.tone
+	assert_int(int(tones.get("Damage", -1))).is_equal(ItemCardRow.Tone.POSITIVE)
+	assert_int(int(tones.get("Armor", -1))).is_equal(ItemCardRow.Tone.NEGATIVE)
 
 
 func test_a_stat_item_carrying_only_a_cost_keeps_its_positive_stat_green() -> void:

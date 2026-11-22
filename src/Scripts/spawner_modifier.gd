@@ -24,10 +24,11 @@ func attach_on_death_effects(event: Dictionary):
     call_deferred("_spawn_item", event.get("self").global_position)
     DeathMark.leave_corpse(event.get("self"))
 
-## Pays the character `coins_per_kill` from the `economy` config.
+## Pays the character `coins_per_kill` from the `economy` config, scaled by
+## `coin_gain`.
 func award_kill() -> void:
     if character and character.stats:
-        Wallet.earn(character, float(Wallet.config().get("coins_per_kill", 1)), "kill")
+        Wallet.earn(character, Wallet.coins_for(character, float(Wallet.config().get("coins_per_kill", 1))), "kill")
 
 func _spawn_item(position: Vector2):
     # Generate alter 5%, item drop chance 5%

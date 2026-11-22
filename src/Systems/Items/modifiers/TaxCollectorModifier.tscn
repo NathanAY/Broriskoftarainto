@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://c7wnlyjp2yl5k"]
+
+[ext_resource type="Script" uid="uid://b1k3hh5tpvs86" path="res://src/Systems/Items/modifiers/tax_collector_modifier.gd" id="1_gv7ii"]
+
+[node name="TaxCollectorModifier" type="Node" unique_id=1979218319]
+script = ExtResource("1_gv7ii")
+effect_kind = 1

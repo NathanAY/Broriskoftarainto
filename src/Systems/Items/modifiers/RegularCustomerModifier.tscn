@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bmo8nb5hi2irm"]
+
+[ext_resource type="Script" uid="uid://bwnhcf3wp4cs8" path="res://src/Systems/Items/modifiers/regular_customer_modifier.gd" id="1_bs2y0"]
+
+[node name="RegularCustomerModifier" type="Node" unique_id=356801849]
+script = ExtResource("1_bs2y0")

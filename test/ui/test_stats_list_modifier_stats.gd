@@ -149,7 +149,8 @@ func test_character_ui_omits_a_zero_modifier_only_stat() -> void:
 	add_child(ui)
 	await get_tree().process_frame
 
-	assert_int(ui.stats_container.get_child_count()).is_equal(stats.stats.size())
+	# Every base stat except the economy ones, which are hidden while at 0.
+	assert_int(ui.stats_container.get_child_count()).is_equal(stats.stats.size() - Wallet.ECONOMY_STATS.size())
 	assert_that(_listed_stats(ui)).not_contains(REGEN)
 
 	GlobalGameState.current_character = prev_character if is_instance_valid(prev_character) else null

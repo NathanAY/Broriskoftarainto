@@ -34,6 +34,12 @@ const STAT_HINTS: Dictionary = {
     "projectile_speed_multiplier": "Multiplier for projectile travel speed.",
     "life_leach_multiplier": "Life leech: heals you for a share of the damage you deal, on every hit.\nEach life leech item heals 5% of the final damage of each hit.\nThe stat multiplies that heal: 1 = 100% (no change), 1.5 = 150%.\nFormula: damage dealt x 5% x items x life leach multiplier.\nExample: 1 item, life leach multiplier 1, a 40 damage hit heals 2 HP.",
     "money": "Currency used to buy and reroll items in the shop.",
+    "stock_investment": "Pays this many coins (rounded down) every time you enter the shop, then grows by a share of itself, so it pays more every loop.",
+    "coin_gain": "Extra coins from every kill and boss bounty.\n0.03 = 3 percent more coins.",
+    "interest_rate": "When you enter the shop, pays this share of the money you kept from the previous shop.\nCoins earned this wave do not count. Capped per shop.\n0.1 = 10 percent.",
+    "shop_discount": "Takes this share off every item price in the shop. Rerolls are not discounted.\n0.03 = 3 percent off.",
+    "resale_value": "Added to the share of an item's price you get back when you sell it.\n0.05 = 5 percent more.",
+    "free_rerolls": "Rerolls you get for free in every shop visit. Free rerolls do not make the next paid reroll more expensive.",
 }
 
 

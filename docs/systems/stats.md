@@ -14,6 +14,9 @@ Data flow
 Stats the damage pipeline reads
 - `critical_chance` / `critical_multiplier` and `armor` are plain numbers here; the damage pipeline reads them (`docs/systems/damage.md`). No item effect is needed to switch them on.
 
+Economy stats
+- `stock_investment`, `coin_gain`, `interest_rate`, `shop_discount`, `resale_value` are in `DEFAULT_STATS` at 0 but only the wallet reads them, and `display_stat_names()` hides them while they are 0. See `docs/systems/economy.md`.
+
 Provided (dynamic) stats
 - A behavior modifier can OWN a stat on the holder via `BaseModifier.provided_stat`. The stat is dynamic: it only exists while at least one such modifier is attached.
 - `claim_provided_stat(stat_name, default_value)` installs the base value on first claim and bumps a reference count; `release_provided_stat(stat_name)` decrements and erases the stat key at zero. Both emit `on_stat_changes`.

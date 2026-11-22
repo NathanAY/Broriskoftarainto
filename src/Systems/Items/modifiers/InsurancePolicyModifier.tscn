@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://d18vstxu1y2f4"]
+
+[ext_resource type="Script" uid="uid://bfsgke6g6xxjv" path="res://src/Systems/Items/modifiers/insurance_policy_modifier.gd" id="1_pvhjn"]
+
+[node name="InsurancePolicyModifier" type="Node" unique_id=1628720942]
+script = ExtResource("1_pvhjn")

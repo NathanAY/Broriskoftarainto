@@ -6,7 +6,12 @@
 			"health": {
 				"min_roll": 3.0,
 				"pick_weight": 3
-			}
+			},
+			"stock_investment": {"roll": 2.0},
+			"coin_gain": {"roll": 0.03},
+			"interest_rate": {"roll": 0.15},
+			"shop_discount": {"roll": 0.03},
+			"resale_value": {"roll": 0.05}
 		},
 		"modifier_weights": {
 			"ChainModifier": 1.0,
@@ -30,7 +35,15 @@
 			"SpinningOrbsModifier": 1.0,
 			"SpreadModifier": 1.0,
 			"StatOnKillModifier": 1.0,
-			"bombOnHitModifier": 1.0
+			"bombOnHitModifier": 1.0,
+			"GildedEdgeModifier": 1.0,
+			"MarketRallyModifier": 1.0,
+			"InsurancePolicyModifier": 1.0,
+			"BountyMarkModifier": 1.0,
+			"RegularCustomerModifier": 1.0,
+			"FireSaleModifier": 1.0,
+			"TaxCollectorModifier": 0.5,
+			"CreditLineModifier": 0.0
 		}
 	},
 	"item_rarity": {
@@ -50,6 +63,23 @@
 		"type_prices": {"stat": 1, "buff": 2, "effect": 3, "weapon": 5},
 		"item_price_growth_per_loop": 0.5,
 		"boss_coins_base": 5,
-		"boss_coins_per_loop": 5
+		"boss_coins_per_loop": 5,
+		"stock_growth": 0.1,
+		"stock_investment_cap": 100,
+		"coin_gain_cap": 1.0,
+		"interest_rate_cap": 0.3,
+		"interest_cap": 10,
+		"shop_discount_cap": 0.4,
+		"resale_value_cap": 0.4
+	},
+	"economy_modifiers": {
+		"GildedEdgeModifier": {"per_unit": 0.003, "cap": 0.15, "cap_per_extra_stack": 0.05},
+		"MarketRallyModifier": {"per_unit": 0.01, "cap": 0.15, "cap_per_extra_stack": 0.05},
+		"InsurancePolicyModifier": {"premium_base": 10, "premium_per_loop": 10, "survive_health": 1},
+		"BountyMarkModifier": {"interval": 10.0, "coins_base": 2, "coins_per_loop": 1, "bonus_per_extra_stack": 0.5},
+		"RegularCustomerModifier": {"max_free_rerolls": 3},
+		"FireSaleModifier": {"stock_per_coin": 0.5, "bonus_per_extra_stack": 0.5},
+		"TaxCollectorModifier": {"tax_rate": 0.1, "tax_rate_per_extra_stack": 0.05},
+		"CreditLineModifier": {"credit_limit": 15, "debt_interest": 0.25, "debt_damage_penalty": 0.2}
 	}
 }

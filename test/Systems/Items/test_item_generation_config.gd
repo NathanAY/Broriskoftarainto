@@ -9,6 +9,8 @@ const FACTORY_SCENE := "res://src/Systems/Items/ItemFactory.tscn"
 const SEED: int = 20260930
 const BATCH: int = 400
 const FLAT_DRAIN := "FlatLifeDrainModifier"
+## A third cost, zeroed in the weight tests so they compare the two drains only.
+const TAX := "TaxCollectorModifier"
 const PERCENT_DRAIN := "PercentLifeDrainModifier"
 
 
@@ -68,7 +70,7 @@ func test_every_configured_weight_names_a_real_modifier_scene() -> void:
 
 func test_a_zero_weight_modifier_is_never_picked() -> void:
 	var factory := _factory()
-	factory.modifier_weights = {PERCENT_DRAIN: 0.0}
+	factory.modifier_weights = {PERCENT_DRAIN: 0.0, TAX: 0.0}
 	var counts := _cost_pick_counts(factory)
 	assert_int(counts.get(PERCENT_DRAIN, 0)).is_equal(0)
 	assert_int(counts.get(FLAT_DRAIN, 0)).is_equal(BATCH)
@@ -77,7 +79,7 @@ func test_a_zero_weight_modifier_is_never_picked() -> void:
 
 func test_a_lower_weight_is_picked_less_often() -> void:
 	var factory := _factory()
-	factory.modifier_weights = {PERCENT_DRAIN: 0.25}
+	factory.modifier_weights = {PERCENT_DRAIN: 0.25, TAX: 0.0}
 	var counts := _cost_pick_counts(factory)
 	# Present, but clearly behind the scene left at the default weight of 1.
 	assert_int(counts.get(PERCENT_DRAIN, 0)).is_greater(0)
@@ -87,7 +89,7 @@ func test_a_lower_weight_is_picked_less_often() -> void:
 
 func test_all_zero_weights_fall_back_to_a_uniform_pick() -> void:
 	var factory := _factory()
-	factory.modifier_weights = {PERCENT_DRAIN: 0.0, FLAT_DRAIN: 0.0}
+	factory.modifier_weights = {PERCENT_DRAIN: 0.0, FLAT_DRAIN: 0.0, TAX: 0.0}
 	var counts := _cost_pick_counts(factory)
 	assert_int(counts.get(PERCENT_DRAIN, 0)).is_greater(0)
 	assert_int(counts.get(FLAT_DRAIN, 0)).is_greater(0)

@@ -165,6 +165,11 @@ func _gratable_stat_names() -> Array:
             names.append(stat_name)
     return names
 
+## Stats a buff or debuff may carry: the economy stats are only read at the
+## shop or on a kill, so a few seconds of "+2 stock" would do nothing.
+func _temporary_stat_names() -> Array:
+    return _gratable_stat_names().filter(func(stat_name): return not stat_name in Wallet.ECONOMY_STATS)
+
 func get_item_from_pool_or_generate() -> Item:
     var pool_size := drop_pool.size()
     # An empty pool gives a chance of 0, so the first call always generates.
@@ -379,7 +384,7 @@ func _generate_effect_item(index: int = -1) -> Item:
     return item
 
 func _generate_buff_item(index: int = -1) -> Item:
-    var stat_names = _gratable_stat_names()
+    var stat_names = _temporary_stat_names()
 
     var chosen_scene: PackedScene
     if index != -1:
@@ -404,7 +409,7 @@ func _generate_buff_item(index: int = -1) -> Item:
     return item
 
 func _generate_debuff_item(_index: int = -1) -> Item:
-    var stat_names = _gratable_stat_names()
+    var stat_names = _temporary_stat_names()
     var chosen_scene: PackedScene = debuff_scene
 
     var chosen_stat = stat_names[rng.randi_range(0, stat_names.size() - 1)]
@@ -597,7 +602,7 @@ func _pick_weight(stat_name: String) -> float:
 func _generate_stat_modifiers(chosen_stat, base_value) -> Dictionary:
     var modifier_value = {}
     if base_value == 0:
-        modifier_value["flat"] = 1
+        modifier_value["flat"] = float(stat_overrides.get(str(chosen_stat), {}).get("roll", 1.0))
     else:
         modifier_value["flat"] = float("%.2f" % [base_value * rng.randf_range(0.05, 0.1)])
     var min_roll = stat_overrides.get(str(chosen_stat), {}).get("min_roll")

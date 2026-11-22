@@ -37,4 +37,4 @@ func test_chain_projectile_selects_next_target():
 
 https://pastebin.com/66W5QrDx?source=public_pastes
 WARNING: "await"
-@warning_ignore("redundant_await")
+@warning_ignore("redundant_await") 

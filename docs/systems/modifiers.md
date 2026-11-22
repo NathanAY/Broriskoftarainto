@@ -102,7 +102,7 @@ Anti-recursion
 - Handlers early-return when the event carries an object already carrying that meta, so a chain fired by a chain never chains again. `SpinningOrbsModifier` also checks the `damage_context.tags` of any event that carries one (not its own `trigger_event` name) before spawning.
 
 Events used
-- Consumed: `on_attack`, `on_hit`, `before_take_damage`, `after_take_damage`, `before_deal_damage`, `on_kill`, `on_item_added`, `on_condition_change`, `on_stat_changes`.
+- Consumed: `on_attack`, `on_hit`, `before_take_damage`, `after_take_damage`, `before_deal_damage`, `on_kill`, `on_item_added`, `on_condition_change`, `on_stat_changes`, and the economy events `on_shop_enter`, `on_sell`, `on_payday`. `_subscribe(event, listener, phase)` takes an optional listener phase.
 - Emitted: `on_shield_changed` (energy shield). `on_crit` is emitted by `Damage.deal()`, not by a modifier.
 - `on_hit` fires for **direct weapon hits only** (`docs/systems/damage.md`), so an on-hit effect never procs from an explosion, orb, poison tick or a projectile another modifier spawned. Read the target, source and weapon from the `damage_context`; damage events carry no other keys. A listener that changes `final_amount` subscribes with a `Damage.PHASE_*` constant.
 
@@ -132,6 +132,13 @@ Catalog
 | SpreadModifier | `spread_modifier.gd` | `on_attack` | Spawns 2 extra projectiles per stack. |
 | StatMultiplierModifier | `stat_multiplier_modifier.gd` | `on_item_added` | Multiplies flat bonuses of a target stat from items by 2.0× per stack. Script-only (no `.tscn`; packed via `ItemBuilder`). |
 | StatOnKillModifier | `stat_on_kill_modifier.gd` | `on_kill` | Gains a randomized stat per stack (`health`, `movement_speed`, ...). |
+| GildedEdgeModifier, MarketRallyModifier | `economy_scaling_modifier.gd` | `on_stat_changes` | An economy value (coins held, stock) published as a capped combat stat. See `docs/systems/economy.md`. |
+| InsurancePolicyModifier | `insurance_policy_modifier.gd` | `before_take_damage` | Pays a premium to survive a lethal hit, once per loop per stack. |
+| BountyMarkModifier | `bounty_mark_modifier.gd` | `on_kill` (+ timer) | Marks enemies; killing a marked one pays coins. |
+| RegularCustomerModifier | `regular_customer_modifier.gd` | passive | Publishes `free_rerolls` for the shop. |
+| FireSaleModifier | `fire_sale_modifier.gd` | `on_sell` | Sales add `stock_investment`. |
+| TaxCollectorModifier | `tax_collector_modifier.gd` | `on_payday` | `COST`: takes a share of held money each payday. |
+| CreditLineModifier | `credit_line_modifier.gd` | `on_shop_enter` | Tycoon only (generation weight 0): spend into debt up to `credit_limit`; debt grows each shop and cuts damage. |
 
 Guidelines for adding a new modifier
 1. `extends BaseModifier` (`src/Systems/Items/modifiers/base_modifier.gd`), matching the file's indentation style (4-space), in `Systems/Items/modifiers/`. For a variant of an existing behavior, extend that script instead and set differing defaults in `_init()`.

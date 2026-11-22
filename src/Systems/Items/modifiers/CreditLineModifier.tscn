@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bm5olbukyjr4k"]
+
+[ext_resource type="Script" uid="uid://ok0twwccn42j" path="res://src/Systems/Items/modifiers/credit_line_modifier.gd" id="1_1vm6u"]
+
+[node name="CreditLineModifier" type="Node" unique_id=1351455496]
+script = ExtResource("1_1vm6u")

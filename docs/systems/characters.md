@@ -4,7 +4,7 @@ This document explains the new character system (data, UI, and integration point
 
 ## Overview
 - Characters are data-driven Resources (`CharacterData`). Each one lives in its own folder under `src/Assets/character/`, named `<Id>.tres` next to its art — e.g. `src/Assets/character/ranger/Ranger.tres`.
-- The five characters today are **Brawler, Multitasker, Ranger, Soldier, Wildling**. Multitasker is the default (`GlobalGameState.DEFAULT_CHARACTER`). Each owns a distinct attack archetype: Multitasker (Fist, baseline), Brawler (Fist melee bruiser), Ranger (Pistol + Spread, glass-cannon gunner), Soldier (Shotgun, armored mid-range), Wildling (Thorns contact, berserker). The power budget for the roster lives in `docs/systems/balance.md` §5.
+- The six characters today are **Brawler, Multitasker, Ranger, Soldier, Tycoon, Wildling**. Multitasker is the default (`GlobalGameState.DEFAULT_CHARACTER`). Each owns a distinct attack archetype: Multitasker (Fist, baseline), Brawler (Fist melee bruiser), Ranger (Pistol + Spread, glass-cannon gunner), Soldier (Shotgun, armored mid-range), Wildling (Thorns contact, berserker), Tycoon (SMG, the economy character: starting stock, less coin per kill, and a Credit Line that lets him spend into debt — see `docs/systems/economy.md`). The power budget for the roster lives in `docs/systems/balance.md` §5.
 - Selection UI: `src/Scenes/menu/CharacterSelect.tscn` lets the player pick a character at the start of a run. It scans `src/Assets/character/` and picks up any new `.tres` without a code change.
 - The chosen character is stored in the autoload `GlobalGameState.starting_character` and applied when the player `Character` instance is created.
 

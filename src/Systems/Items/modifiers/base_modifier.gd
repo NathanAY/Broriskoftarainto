@@ -123,13 +123,20 @@ func _published_value(stat_name: String) -> float:
 ## unnecessary: any modifier that subscribes via `_subscribe` is correctly scoped
 ## the moment a weapon binds it. Unbound modifiers (item-pickup path) get the raw
 ## listener with zero behavior change.
-func _subscribe(event_name: String, listener: Callable) -> void:
+func _subscribe(event_name: String, listener: Callable, phase: int = 0) -> void:
 	var effective := listener
 	if bound_weapon != null:
 		effective = Callable(self, "_guard_weapon_event").bind(listener)
 	_subscriptions.append([event_name, effective])
 	if event_manager:
-		event_manager.subscribe(event_name, effective)
+		event_manager.subscribe(event_name, effective, phase)
+
+
+## This modifier's block in the `economy_modifiers` config, keyed by its scene's
+## file name (`GildedEdgeModifier`). Empty when there is none.
+func _economy_config() -> Dictionary:
+	var key := scene_file_path.get_file().get_basename()
+	return GameConfig.section("economy_modifiers").get(key, {})
 
 ## Bound-listener wrapper: forwards `data` to the wrapped listener only when the
 ## event belongs to the bound weapon (or the modifier is unbound).

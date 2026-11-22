@@ -12,10 +12,11 @@ Read by `src/Systems/Items/item_factory.gd` when a factory is created.
 |---|---|
 | `negative_modifier_chance` | 0-1. How often a generated item's downside is a harmful **modifier** (a life drain) instead of a negated stat. `0` switches harmful modifiers off. |
 | `repeat_item_chance_scale` | 0-1. Scales how often the shop / a drop re-offers an item generated earlier this run. The raw chance is `N / (N + 1)` for a pool of `N` items; this multiplies it. `1` is the old behaviour (almost always a repeat), `0.25` caps repeats at 25%, `0` is a new item every time. |
-| `stat_overrides` | Per-stat tweaks, keyed by stat name (any stat in `stats.gd` or a modifier's `provided_stat`). Each entry may set `min_roll` and/or `pick_weight`, see below. |
+| `stat_overrides` | Per-stat tweaks, keyed by stat name (any stat in `stats.gd` or a modifier's `provided_stat`). Each entry may set `roll`, `min_roll` and/or `pick_weight`, see below. |
 | `modifier_weights` | Drop weight per modifier, keyed by the scene's file name in `src/Systems/Items/modifiers/` without `.tscn`. A modifier that is not listed weighs `1`. `0` means never. |
 
 `stat_overrides` entries (all optional; the script holds no default for any stat):
+- `roll`: the flat amount a rolled line gives for a stat whose base value is 0 (the economy stats). Default `1`. A stat with a non-zero base rolls 5-10% of it instead.
 - `min_roll`: smallest flat amount a rolled line for that stat can give (the roll is raised to it; a loss is negated afterwards).
 - `pick_weight`: relative chance the stat is picked when a stat item or an extra stat line is rolled. Unlisted stats weigh `1`; `0` means never.
 
@@ -54,6 +55,30 @@ Read through `Wallet.config()` by `src/Systems/Items/wallet.gd`, `src/Systems/It
 | `item_price_growth_per_loop` | Every price is multiplied by `1 + growth × (loop − 1)`. `0` keeps prices flat. |
 | `boss_coins_base` | Coins the loop-1 boss pays on death. The final boss pays nothing. |
 | `boss_coins_per_loop` | Added to the boss bounty for every loop past the first. |
+| `stock_growth` | At payday, stock grows by `stock_investment × stock_growth`. |
+| `stock_investment_cap` | Stock stops growing here (items can still push it higher). |
+| `coin_gain_cap` | Highest `coin_gain` that counts. |
+| `interest_rate_cap` | Highest `interest_rate` that counts. |
+| `interest_cap` | Most coins interest can pay in one payday. |
+| `shop_discount_cap` | Highest `shop_discount` that counts. |
+| `resale_value_cap` | Highest `resale_value` that counts; added to `sell_ratio`. |
+
+The per-item amount of each economy stat is its `roll` in `item_generation.stat_overrides`.
+
+## `economy_modifiers`
+
+One block per economy modifier, keyed by its scene name in `src/Systems/Items/modifiers/`, read by `BaseModifier._economy_config()`. `docs/systems/economy.md` describes each modifier. "Extra stack" means every copy after the first.
+
+| Block | Keys |
+|---|---|
+| `GildedEdgeModifier` | `per_unit` (damage per coin held), `cap`, `cap_per_extra_stack` |
+| `MarketRallyModifier` | `per_unit` (attack speed per point of stock), `cap`, `cap_per_extra_stack` |
+| `InsurancePolicyModifier` | `premium_base` (coins on loop 1), `premium_per_loop`, `survive_health` (HP left after a saved hit) |
+| `BountyMarkModifier` | `interval` (seconds between marks), `coins_base`, `coins_per_loop`, `bonus_per_extra_stack` |
+| `RegularCustomerModifier` | `max_free_rerolls` |
+| `FireSaleModifier` | `stock_per_coin` (stock per coin of sale price), `bonus_per_extra_stack` |
+| `TaxCollectorModifier` | `tax_rate` (share of money taken), `tax_rate_per_extra_stack` |
+| `CreditLineModifier` | `credit_limit` (coins of debt allowed), `debt_interest` (share a debt grows by each shop), `debt_damage_penalty` (damage lost while in debt) |
 
 ## Adding a new setting
 

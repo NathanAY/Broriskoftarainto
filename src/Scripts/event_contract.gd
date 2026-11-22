@@ -112,6 +112,9 @@ const SCHEMAS := {
 	"on_reroll": {
 		"required": ["cost"],
 	},
+	"on_payday": {
+		"required": ["loop", "breakdown"],
+	},
 	# --- misc ---
 	"on_crit": {
 		"required": ["damage_context"],

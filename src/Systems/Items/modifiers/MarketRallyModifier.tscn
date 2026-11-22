@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://cu4ygevre2nwb"]
+
+[ext_resource type="Script" uid="uid://daj4fr88xixxr" path="res://src/Systems/Items/modifiers/economy_scaling_modifier.gd" id="1_xhee3"]
+
+[node name="MarketRallyModifier" type="Node" unique_id=842065014]
+script = ExtResource("1_xhee3")
+display_name = "Market Rally"
+trigger_event = ""
+source_stat = "stock_investment"
+target_stat = "attack_speed"
+source_label = "Stock Investment"
+effect_kind = 0
+provided_stat = ""
+provided_stat_default = 0.0
+provided_stat_owned = true

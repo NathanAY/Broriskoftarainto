@@ -7,12 +7,16 @@ class_name ItemPriceAnalyzer
 ## `economy` block of `game_config.json`.
 
 
-## `loop` 0 means the loop of the running game.
-func get_price(resource: Resource, loop: int = 0) -> int:
+## `loop` 0 means the loop of the running game. `discount` is the buyer's
+## `shop_discount` (`Wallet.discount()`); a discounted price never drops below 1.
+func get_price(resource: Resource, loop: int = 0, discount: float = 0.0) -> int:
     var price := float(_type_price(resource))
     if resource is Item:
         price *= Item.rarity_value("positive_multipliers", (resource as Item).rarity)
-    return roundi(price * _loop_growth(loop))
+    price = roundi(price * _loop_growth(loop))
+    if discount == 0.0:
+        return int(price)
+    return maxi(1, roundi(price * (1.0 - discount)))
 
 
 ## The price by type alone; `get_price` scales it by rarity and loop.
@@ -38,8 +42,9 @@ func _loop_growth(loop: int) -> float:
 
 
 ## Sell value: a ratio of the current shop price (`sell_ratio` when `ratio` is
-## negative), never below 1.
-func get_sell_price(resource: Resource, ratio: float = -1.0, loop: int = 0) -> int:
+## negative), never below 1. It is a ratio of the *discounted* price, so a
+## discount plus resale can never turn buy-then-sell into a profit.
+func get_sell_price(resource: Resource, ratio: float = -1.0, loop: int = 0, discount: float = 0.0) -> int:
     if ratio < 0.0:
         ratio = float(Wallet.config().get("sell_ratio", 0.5))
-    return maxi(1, roundi(get_price(resource, loop) * ratio))
+    return mini(maxi(1, roundi(get_price(resource, loop, discount) * ratio)), get_price(resource, loop, discount))

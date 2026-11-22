@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cwp142ggo0y8c"]
+
+[ext_resource type="Script" uid="uid://cx7ryh6m7xcp6" path="res://src/Systems/Items/modifiers/bounty_mark_modifier.gd" id="1_ugiy1"]
+
+[node name="BountyMarkModifier" type="Node" unique_id=1564446625]
+script = ExtResource("1_ugiy1")

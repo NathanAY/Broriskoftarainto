@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://6t2i2hyj1pyi"]
+
+[ext_resource type="Script" uid="uid://7rx77jg2b0bo" path="res://src/Systems/Items/modifiers/fire_sale_modifier.gd" id="1_iqexw"]
+
+[node name="FireSaleModifier" type="Node" unique_id=2032400362]
+script = ExtResource("1_iqexw")

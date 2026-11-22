@@ -59,6 +59,41 @@ The 10-second window is what makes regen and life leech scoreable: a +4 HP/0.5s 
 | **Item inflation** | One item is worth +200% or more. | §2 item budget table, §3 per-stat budgets. |
 | **Snowball** | A weapon found at loop 3 doubles a build that already has 10 items. | §4.4 anti-snowball rule. |
 
+### 1.3 The third axis — ECO (economy)
+
+An economy item gives no offense and no survivability. It pays coins, and the coins buy power later. It is budgeted on a third axis so it can be compared with the other two. The mechanics are in `docs/systems/economy.md`.
+
+```
+ECO = coins the item returns from the shop it was bought in to the loop-3 shop,
+      each coin divided by that loop's price growth  1 + item_price_growth_per_loop × (loop − 1)
+ROI = ECO / the price paid
+```
+
+Measured for a purchase in the **loop-1 shop**, against the **income profile** below. Coins are deflated because prices rise each loop: a coin earned at loop 3 buys half of what it did at loop 1.
+
+| Rule | Value | Why |
+|---|---|---|
+| ROI of a coin-returning item | **2.0 … 3.0×** | Below 2× a stat item is always the better pick. At 3× the item returns three price-1 stat items' worth of coins, bought late: +9…15% power, delayed — exactly the §1 cap. |
+| ROI of a shop-quality item (free rerolls) | **1.5 … 3.0×** | Coins saved understate a reroll, whose value is the better offer it finds. |
+| Upside | economy only | No `OFF`/`DEF` gain. The cost is fighting the next wave without one. |
+| Cash-out modifiers (coins or stock → a combat stat) | the §1 cap, +15% at their cap | They are `OFF` items whose size depends on the economy, so they are budgeted like any other item. |
+| Anything that compounds | a config cap | Loops past 3 have no ceiling. |
+
+**Income profile [CURRENT]** — measured 2026-11-22, Multitasker, loops 1-3, one run. It is a measurement, not a design value; re-measure it when enemy pacing or rewards change.
+
+| Loop | Kills | Income (kills + boss) | Carried into the shop | Spent in the shop |
+|---|---|---|---|---|
+| 1 | 45 | 50 | 0 | 42 |
+| 2 | 70 | 80 | 8 | 55 |
+| 3 | 62 | 77 | 33 | 93 |
+
+`test/Systems/economy/test_economy_roi_budget.gd` holds this profile and checks every economy stat item and coin modifier against the band, through the real payout code, with the item numbers read from `game_config.json`. Change a `roll` or a modifier number and the suite says whether it is still in budget.
+
+Not checked, and why:
+- `resale_value` and `FireSaleModifier` return coins only when something is sold, and the profile has no sales data.
+- `InsurancePolicyModifier` is a `DEF` item whose value is a death avoided, not coins.
+- The Tycoon is checked by the character budget (§5) on `WB_solo` and EHP; his Credit Line and starting stock are an economy kit that table does not see.
+
 ---
 
 ## 2. Power budgets at a glance
@@ -398,8 +433,9 @@ The test needs `tier` on `BaseWeapon` (see `balance_audit.md`), and the range ba
 | Ranger | `attack_speed 1.0`, `damage 0.85`, `health 30`, `movement_speed 1.25` | — | Pistol (starts with the Spread item) | 7.8 | **6.6** |
 | Soldier | `attack_speed 0.9`, `damage 0.85`, `health 42`, `movement_speed 0.9`, `armor 5` | — | Shotgun (`Σ 17.5`) | 8.9 | **7.6** |
 | Wildling | `attack_speed 1.15`, `damage 1.05`, `health 38`, `movement_speed 1.1` | `WildlingRegenModifier` (1 HP / 0.5 s) | Thorns (contact) | 9.7 | **8.7** |
+| Tycoon | `damage 0.9`, `health 35`, `stock_investment 5`, `coin_gain −0.25` | `CreditLineModifier` | SMG (`2.0 × 5`) | 9.0 | **7.7** |
 
-The five characters live in `src/Assets/character/<id>/<Id>.tres`; `docs/systems/characters.md` is the format reference. Four attack archetypes are represented: melee arc (Multitasker, Brawler), ranged single shot (Ranger), pellet cone (Soldier) and contact (Wildling).
+The six characters live in `src/Assets/character/<id>/<Id>.tres`; `docs/systems/characters.md` is the format reference. Five attack archetypes are represented: melee arc (Multitasker, Brawler), ranged single shot (Ranger), rapid fire (Tycoon), pellet cone (Soldier) and contact (Wildling).
 
 **Rules [PROPOSED]:**
 
@@ -409,13 +445,14 @@ The five characters live in `src/Assets/character/<id>/<Id>.tres`; `docs/systems
 | Character | `health` | `armor` | Mitigation | `EHP` | vs reference |
 |---|---|---|---|---|---|
 | Ranger | 30 | 0 | 1.00 | **30** | 0.75× |
+| Tycoon | 35 | 0 | 1.00 | **35** | 0.88× |
 | Wildling | 38 | 0 | 1.00 | **38** | 0.95× |
 | Multitasker | 40 | 0 | 1.00 | **40** | 1.00× |
 | Brawler | 45 | 4 | 0.714 | **63** | 1.58× |
 | Soldier | 42 | 5 | 0.667 | **63** | 1.58× |
 
 - **A character's own regen is outside the EHP table.** EHP counts armor, which reduces each hit; a regen tick recovers health over time, so folding it in would need a damage-rate model the budget test deliberately does not have. The Wildling's `1 HP / 0.5 s` is therefore an unmeasured sustain add-on on top of its listed `EHP 38` — set it low, and prefer the archetype it reinforces (the Wildling trades hits taken for speed and contact damage) over raw throughput.
-- **A character that starts with no weapon is a design error until it has one.** All five now start armed.
+- **A character that starts with no weapon is a design error until it has one.** All six now start armed.
 - **Ranger's Spread is a deliberate clear-power exception.** `SpreadModifier` is +200% clear `WB` (audit row 1) and is kept as-is by design; Ranger is a glass cannon whose solo `WB_solo` (6.6) is in band while its pack damage is not. The budget test measures the weapon only, not the item.
 - Each character owns a distinct kit: no two share the same `base_stats` + weapon + item signature (also asserted by the budget test).
 

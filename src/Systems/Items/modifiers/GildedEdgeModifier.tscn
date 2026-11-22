@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://83i7a2f04vh8"]
+
+[ext_resource type="Script" uid="uid://daj4fr88xixxr" path="res://src/Systems/Items/modifiers/economy_scaling_modifier.gd" id="1_56e0o"]
+
+[node name="GildedEdgeModifier" type="Node" unique_id=845106558]
+script = ExtResource("1_56e0o")
+display_name = "Gilded Edge"
+trigger_event = ""
+source_stat = "money"
+target_stat = "damage"
+source_label = "coin held"
+effect_kind = 0
+provided_stat = ""
+provided_stat_default = 0.0
+provided_stat_owned = true

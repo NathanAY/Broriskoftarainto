@@ -39,11 +39,14 @@ var character: Character = null
 @export var item_factory: ItemFactory = null
 var phase: int = 1  # 1 = collected pickups, 2 = generated shop items
 var value_labels: Dictionary = {}  # stat_name -> Label
-var rerolls_done: int = 0  # rerolls made in the current shop visit
+var rerolls_done: int = 0  # paid rerolls made in the current shop visit
+var free_rerolls_used: int = 0  # free rerolls used in the current shop visit
 
 ## Set when `on_shop_enter` has fired for this visit, so a second `show_menu()`
 ## in the same visit does not fire it again. Reset by `_on_next_stage_pressed()`.
 var _entered: bool = false
+## What this visit's payday paid, shown next to the money. Empty when it paid nothing.
+var _payday_text: String = ""
 
 func _ready():
     visible = false
@@ -60,11 +63,12 @@ func show_menu():
     reroll_button.visible = false
     phase = 1
     rerolls_done = 0
+    free_rerolls_used = 0
     if not _entered and character:
         _entered = true
         var loop := StageManager.loop_of(self)
-        print("Shop loop %d, income this loop: %s" % [loop, Wallet.income_for_loop(character, loop)])
         character.event_manager.emit_event("on_shop_enter", {"loop": loop})
+        _payday_text = _describe_payday(Wallet.payday(character, loop))
     _update_reroll_button()
     _update_money_label()
     _update_stats() # Update stats when opening the shop
@@ -114,7 +118,7 @@ func _bind_sell(card: IconCard, weapon: BaseWeapon) -> void:
     var weapon_holder: WeaponHolder = character.get_node_or_null("WeaponHolder")
     if weapon_holder == null:
         return
-    var sell_price: int = price_analyzer.get_sell_price(weapon)
+    var sell_price: int = price_analyzer.get_sell_price(weapon, Wallet.sell_ratio(character), 0, Wallet.discount(character))
     var button := Button.new()
     button.name = "SellButton"
     button.text = "Sell +%d" % sell_price
@@ -170,7 +174,7 @@ func _has_room_for(offer: Resource) -> bool:
 ## so on the button, since the price hint would otherwise blame the money.
 func _apply_buyable(card: ShopItemCard) -> void:
     var room := _has_room_for(card.get_meta("item"))
-    card.set_affordable(_current_money() >= card.price and room)
+    card.set_affordable(character != null and Wallet.can_afford(character, card.price) and room)
     card.primary_button.text = ("Buy (%d)" % card.price) if room else "No free slot"
     if not room:
         card.price_label.tooltip_text = "All weapon slots are full."
@@ -182,6 +186,7 @@ func hide_menu():
 func _on_next_stage_pressed():
     hide_menu()
     _entered = false
+    _payday_text = ""
     staged_items.clear()
     emit_signal("next_stage_pressed")
 
@@ -280,7 +285,7 @@ func _add_item_entry(item: Item):
     items_container.add_child(card)
     card.set_item_display(item)
     card.primary_button.text = "Take"
-    var sell_price: int = price_analyzer.get_sell_price(item)
+    var sell_price: int = price_analyzer.get_sell_price(item, Wallet.sell_ratio(character))
     card.secondary_button.text = "Sell (+%d)" % sell_price
     card.set_price(sell_price)
     card.set_affordable(true)  # pickups are free to take
@@ -313,7 +318,7 @@ func _add_shop_item_entry(offer: Resource, existing_id: String = ""):
     card.set_item_display(offer)
 
     # Buy button
-    var price: int = price_analyzer.get_price(offer)
+    var price: int = price_analyzer.get_price(offer, 0, Wallet.discount(character))
     card.set_price(price)
     _apply_buyable(card)
     card.primary_button.pressed.connect(func():
@@ -375,6 +380,20 @@ func _current_money() -> float:
 # ------------------- Shared -------------------
 func _update_money_label():
     money_label.text = "Money: %d" % _current_money()
+    if not _payday_text.is_empty():
+        money_label.text += "   " + _payday_text
+
+
+## "Payday +27 (dividend +22, interest +5)", or "" when nothing was paid.
+static func _describe_payday(breakdown: Dictionary) -> String:
+    if breakdown.is_empty():
+        return ""
+    var total := 0
+    var parts := PackedStringArray()
+    for source in breakdown:
+        total += int(breakdown[source])
+        parts.append("%s +%d" % [source, int(breakdown[source])])
+    return "Payday +%d (%s)" % [total, ", ".join(parts)]
 
 
 ## Pays a sale and tells listeners about it. Pickups and weapons both sell here.
@@ -506,24 +525,38 @@ func _generate_entry_id() -> String:
 ## Reroll price: a base that grows with every loop, plus a surcharge for each
 ## reroll already made in this shop visit (reset by `show_menu()`).
 func reroll_cost() -> int:
+    if _free_rerolls_left() > 0:
+        return 0
     var economy := Wallet.config()
     return int(economy.get("reroll_base_cost", 1)) \
         + int(economy.get("reroll_loop_step", 2)) * (StageManager.loop_of(self) - 1) \
         + int(economy.get("reroll_step", 1)) * rerolls_done
 
 
+## Free rerolls this visit still has: the `free_rerolls` stat (published by
+## `RegularCustomerModifier`) minus the ones already used.
+func _free_rerolls_left() -> int:
+    if character == null or character.stats == null:
+        return 0
+    return int(character.stats.get_stat("free_rerolls")) - free_rerolls_used
+
+
 func _update_reroll_button() -> void:
-    reroll_button.text = "Reroll (%d)" % reroll_cost()
+    var cost := reroll_cost()
+    reroll_button.text = "Reroll (free)" if cost == 0 else "Reroll (%d)" % cost
 
 
 func _on_reroll_pressed():
     if phase != 2:
         return
     var cost := reroll_cost()
-    if not Wallet.spend(character, cost, "reroll"):
+    if cost == 0:
+        free_rerolls_used += 1  # a free reroll does not raise the surcharge
+    elif Wallet.spend(character, cost, "reroll"):
+        rerolls_done += 1
+    else:
         return
     character.event_manager.emit_event("on_reroll", {"cost": cost})
-    rerolls_done += 1
     _update_reroll_button()
 
     # remove all non-locked items by comparing IDs

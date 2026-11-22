@@ -1,8 +1,28 @@
 # Plan: the economy build direction
 
-Status: **Phase 0 implemented** except the income measurement (§3.3), which needs a played run. What shipped is described in `docs/systems/economy.md`; everything from Phase 1 on is still **[PROPOSED]**. Section 2 describes the game *before* Phase 0.
+Status: **Phases 0-3 implemented.** What shipped is described in `docs/systems/economy.md`; Phase 4 is done except the playtest: the `ECO` rules are §1.3 of `docs/systems/balance.md`, and `test/Systems/economy/test_economy_roi_budget.gd` checks every economy item against them using the measured income. **What is left is a human playtest** of an all-in economy run and a Tycoon run, checking the §9 acceptance shape (weakest at loop 1, even at loop 2, strongest at the loop-3 choice point). The Tycoon uses a copy of the Ranger's face art for now, and Credit Line starts at 15 coins of credit, 25% debt interest per shop and a 20% damage penalty while in debt. Section 2 describes the game *before* Phase 0.
 
-Phase 0 differs from §3 in one way: `on_wave_start` and `on_payday` are not registered yet. Nothing emits them until Phase 1 (payday) and Phase 2 (Market Rally, Insurance Policy), so they land with their first emitter.
+Where the implementation differs from the text below:
+- **No `on_wave_start` event.** It is not needed: one wave per loop means "once per wave" equals "once per loop", so Insurance Policy resets on `on_shop_enter` instead.
+- **Market Rally is a permanent bonus, not a wave-start buff.** It publishes `attack_speed` from `stock_investment` the way Gilded Edge publishes `damage` from coins, so the two share one script (`EconomyScalingModifier`) and need no buff timing.
+- Phase 2 amounts (`economy_modifiers` in `game_config.json`) follow §4 with the measured income: Bounty Mark at one mark per 10 s and 2 coins + 1 per loop is ROI ≈ 2.7 at price 3 if both marks of a 20 s wave are killed; Regular Customer's one free reroll saves 3 + 5 coins over loops 2-3 (≈ 1.5 in loop-1 coins, more with stacks). None has been playtested.
+- **Interest is paid on money carried over from the previous shop**, not on everything held at payday. With the measured income, interest on the whole balance would be a second income multiplier rather than a reward for saving.
+- Caps are named `<stat>_cap` (`stock_investment_cap`, `coin_gain_cap`, ...), plus `interest_cap` for coins per payday.
+- The per-item amounts in §5 were replaced by the measured ones in §3.6.
+
+### 3.6 Measured income and the Phase 1 amounts
+
+One played run, Multitasker, loops 1-3: income per loop (kills + boss) **50 / 80 / 77**, spent **42 / 55 / 93**. Money is scarce: the player spent most of it every shop.
+
+Because prices grow each loop, a coin earned at loop `L` buys `1 / (1 + 0.5 × (L − 1))` of a loop-1 coin. §4's ROI is therefore measured in **loop-1 coins**, and the per-price-1 amounts are set for ROI ≈ 2.5 on a loop-1 purchase:
+
+| Stat | `roll` | ROI derivation |
+|---|---|---|
+| `stock_investment` | +2.0 | `2/1.5 + 2.2/2 = 2.4` |
+| `coin_gain` | +3% | kills 70 and 62 in loops 2-3: `0.03 × (70/1.5 + 62/2) = 2.3` |
+| `interest_rate` | +15% | carried 8 and 33, floored per payday: `floor(1.2)/1.5 + floor(4.95)/2 = 2.7`. Was +10%, which floors to `0 + 3/2 = 1.5`, under budget — found by the Phase 4 budget test |
+| `shop_discount` | +3% | spent 55 and 93: `0.03 × (55/1.5 + 93/2) = 2.5` |
+| `resale_value` | +5 pp | depends on what is sold; deliberately small |
 
 ## 1. Goal
 

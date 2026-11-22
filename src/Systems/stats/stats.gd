@@ -49,6 +49,12 @@ const DEFAULT_STATS := {
     "area_size_multiplier": 1.0,
     "projectile_pierce": 0.0,
     "projectile_speed_multiplier": 1.0,
+    # Economy stats (see `docs/systems/economy.md`). Listed while non-zero only.
+    "stock_investment": 0.0,
+    "coin_gain": 0.0,
+    "interest_rate": 0.0,
+    "shop_discount": 0.0,
+    "resale_value": 0.0,
 }
 
 # Base stats
@@ -104,7 +110,10 @@ func get_stat(stat_name: String) -> float:
 ## iterating the base keys alone would hide them. They are listed while their
 ## value is non-zero.
 func display_stat_names() -> Array:
-    var names: Array = stats.keys()
+    # Economy stats sit at 0 for any build that ignores them; five zero rows
+    # would crowd a combat build's panel.
+    var names: Array = stats.keys().filter(
+        func(stat_name): return not (stat_name in Wallet.ECONOMY_STATS and get_stat(stat_name) == 0.0))
     for mod in modifiers:
         if typeof(mod) != TYPE_DICTIONARY:
             continue

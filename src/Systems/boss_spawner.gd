@@ -94,7 +94,7 @@ func _spawn_boss(loop: int, is_final: bool = false):
         health.event_manager.subscribe("on_death",
             func(event: Dictionary) -> void:
                 if bounty > 0 and character:
-                    Wallet.earn(character, bounty, "boss")
+                    Wallet.earn(character, Wallet.coins_for(character, bounty), "boss")
                 DeathMark.leave_corpse(event.get("self")))
 
     # Apply loop-based scaling

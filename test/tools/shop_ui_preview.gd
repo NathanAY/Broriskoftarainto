@@ -92,6 +92,11 @@ func _ready() -> void:
 		weapon_holder.weapons.append(load("res://src/Resources/weapons/%s.tres" % weapon).duplicate(true))
 
 	character.stats.set_base_stat("money", 78)
+	# Some economy stats, so the shot shows the payday line, the discounted
+	# prices and the economy rows in the stats panel.
+	character.stats.set_base_stat("stock_investment", 22.0)
+	character.stats.set_base_stat("interest_rate", 0.1)
+	character.stats.set_base_stat("shop_discount", 0.2)
 	GlobalGameState.current_character = character
 
 	var shop: CanvasLayer = load("res://src/Scenes/menu/ShopMenu.tscn").instantiate()

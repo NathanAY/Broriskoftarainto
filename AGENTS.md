@@ -3,6 +3,9 @@
 - Task -> Read relevant code -> Read testing rules/docs -> Write test -> RUN TEST -> Read error -> Fix -> RUN TEST again -> Done
 - If you have questions or options for some implementation than ask about it.
 
+# No hardcoded tunables
+- Any number that could be rebalanced (chances, weights, minimums, multipliers, caps) goes into `game_config.json`, read via `GameConfig.section(...).get(key, fallback)`, and is documented in `docs/systems/game_config.md`. Never a `const` or literal in a script. Check this before adding any new number.
+
 # Simplicity first
 - Minimum code that solves the problem. Nothing speculative
 - No abstractions for single-use code

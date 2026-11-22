@@ -2,6 +2,12 @@
 	"item_generation": {
 		"negative_modifier_chance": 0.2,
 		"repeat_item_chance_scale": 0.1,
+		"stat_overrides": {
+			"health": {
+				"min_roll": 3.0,
+				"pick_weight": 3
+			}
+		},
 		"modifier_weights": {
 			"ChainModifier": 1.0,
 			"EmergencyHealModifier": 1.0,

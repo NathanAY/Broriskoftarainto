@@ -295,7 +295,7 @@ func _add_stat_line(item: Item, scale: float) -> void:
             candidates.append(stat_name)
     if candidates.is_empty():
         return
-    var chosen = candidates[rng.randi_range(0, candidates.size() - 1)]
+    var chosen := _pick_stat_name(candidates)
     var value := _generate_stat_modifiers(chosen, stats.stats.get(chosen, 0.0))
     value["flat"] = snappedf(float(value["flat"]) * scale, 0.01)
     item.modifiers[chosen] = value
@@ -312,8 +312,7 @@ func _current_loop() -> int:
 
 func _generate_stat_item(index: int = -1) -> Item:
     var stat_names = _gratable_stat_names()
-    var index_to_use = index if index != -1 else rng.randi_range(0, stat_names.size() - 1)
-    var chosen_stat = stat_names[index_to_use]
+    var chosen_stat = stat_names[index] if index != -1 else _pick_stat_name(stat_names)
     var base_value = stats.stats.get(chosen_stat, 0.0)
     var value = _generate_stat_modifiers(chosen_stat, base_value)
 
@@ -580,14 +579,36 @@ func _configure_dynamic_modifier(scene: PackedScene) -> PackedScene:
     instance.free()
     return repacked
 
-func _generate_stat_modifiers(_chosen_stat, base_value) -> Dictionary:
+## Per-stat overrides from `game_config.json` (`item_generation.stat_overrides`),
+## keyed by stat name. Each entry may set `min_roll` and/or `pick_weight`; a stat
+## or key that is not listed gets no override.
+var stat_overrides: Dictionary = GameConfig.section("item_generation").get("stat_overrides", {})
+
+## A random entry of `names`, weighted by each stat's `pick_weight` override
+## (1 when it has none).
+func _pick_stat_name(names: Array) -> String:
+    var total := 0.0
+    for stat_name in names:
+        total += _pick_weight(str(stat_name))
+    var roll := rng.randf() * total
+    for stat_name in names:
+        roll -= _pick_weight(str(stat_name))
+        if roll < 0.0:
+            return str(stat_name)
+    return str(names[names.size() - 1])
+
+func _pick_weight(stat_name: String) -> float:
+    return maxf(0.0, float(stat_overrides.get(stat_name, {}).get("pick_weight", 1.0)))
+
+func _generate_stat_modifiers(chosen_stat, base_value) -> Dictionary:
     var modifier_value = {}
     if base_value == 0:
         modifier_value["flat"] = 1
-    elif base_value == 1:
-        modifier_value["flat"] = float("%.2f" % [base_value * rng.randf_range(0.05, 0.1)])
     else:
         modifier_value["flat"] = float("%.2f" % [base_value * rng.randf_range(0.05, 0.1)])
+    var min_roll = stat_overrides.get(str(chosen_stat), {}).get("min_roll")
+    if min_roll != null:
+        modifier_value["flat"] = maxf(float(modifier_value["flat"]), float(min_roll))
     return modifier_value
 
 func _generate_item_name(stat: String) -> String:

@@ -90,15 +90,6 @@ func do_damage(body):
     ctx.target = body
     ctx.base_amount = damage
     ctx.final_amount = damage
+    ctx.weapon = source_weapon as BaseWeapon
     ctx.tags.append("projectile")
-    if event_manager: 
-        event_manager.emit_event("before_deal_damage", {"damage_context": ctx})
-    var bodyHealth: Health = body.get_node("Health")
-    if not bodyHealth.apply_damage(ctx):
-        return  # already dead: the shot does not land, so no hit/kill events either
-    if event_manager:
-        event_manager.emit_event("after_deal_damage", {"projectile": self, "body": body, "damage_context": ctx, "weapon": source_weapon})
-    if event_manager:
-        event_manager.emit_event("on_hit", {"projectile": self, "body": body, "damage_context": ctx, "weapon": source_weapon})
-    if event_manager and bodyHealth.current_health <= 0:
-        event_manager.emit_event("on_kill", {"projectile": self, "body": body, "damage_context": ctx, "weapon": source_weapon})
+    Damage.deal(ctx, event_manager)

@@ -55,7 +55,7 @@ var bound_weapon: Object = null
 @export var provided_stat_default: float = 0.0
 
 ## True = dynamic presence: claim on attach, release (erase) on last detach.
-## False = the stat already exists on the holder (e.g. armor); the modifier is a
+## False = the stat already exists on the holder; the modifier is a
 ## pure consumer and never claims/releases it.
 @export var provided_stat_owned: bool = true
 
@@ -67,8 +67,8 @@ var _subscriptions: Array = []
 ## keyed by stat name -> the modifier dict it added to `Stats.modifiers`.
 ##
 ## `provided_stat_owned = false` means the modifier does not claim the stat, but
-## it may still have to WRITE it: `ArmorModifier` and the regen modifiers both
-## grant a per-stack amount that no character declares. Publishing it is what
+## it may still have to WRITE it: the regen modifiers grant a per-stack rate
+## that no character declares. Publishing it is what
 ## makes the amount visible - the stat panels list the stat, so an amount kept
 ## inside the modifier is an amount the player cannot see. [method detach] takes
 ## every entry back off again.
@@ -148,21 +148,18 @@ func _unsubscribe_all() -> void:
 func _is_bound_event(data: Dictionary) -> bool:
 	if bound_weapon == null:
 		return true
-	return data.get("weapon") == bound_weapon
+	return event_weapon(data) == bound_weapon
+
+## The weapon behind an event: `on_attack` names it in the payload, damage
+## events carry it on their `DamageContext`.
+static func event_weapon(data: Dictionary) -> Object:
+	if data.has("weapon"):
+		return data["weapon"]
+	var ctx := data.get("damage_context") as DamageContext
+	return ctx.weapon if ctx else null
 
 func _active_stacks() -> int:
 	return max(1, stacks.count(true))
-
-## True for a node [method attach] created - a behavior a character declared in
-## `CharacterData.modifiers`, not an item the holder picked up.
-##
-## The distinction matters because a declared baseline arrives with a stack of
-## its own (that is what makes it "attached"), while that stack is not a held
-## item: the character's armor, damage or whatever the modifier reads is declared
-## as a value beside the scene. So a modifier that grants something per held item
-## counts the stacks above this one - see `ArmorModifier._stack_bonus`. Without
-## the flag a character's baseline would eat the first item's bonus.
-var is_declared_baseline: bool = false
 
 func add_stack(active: bool):
 	stacks.append(active)
@@ -208,7 +205,7 @@ func get_provided_stat() -> float:
 	return stats.get_stat(provided_stat)
 
 ## Claim the owned stat on the holder's Stats (first claim installs the base).
-## Non-owning modifiers (e.g. armor) skip this — their stat already exists.
+## Non-owning modifiers skip this — their stat already exists.
 func _claim_provided_stat() -> void:
 	if provided_stat.is_empty() or not stats or not provided_stat_owned:
 		return
@@ -277,8 +274,6 @@ static func attach(scene: PackedScene, parent: Node, em: EventManager) -> BaseMo
 		return null
 	var instance := node as BaseModifier
 	instance.attachEventManager(em)
-	# The stack is what marks the behavior as live, and for a declared baseline it
-	# stands for the character's own declaration rather than a held item.
-	instance.is_declared_baseline = true
+	# The stack is what marks the behavior as live.
 	instance.add_stack(true)
 	return instance

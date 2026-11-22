@@ -23,7 +23,7 @@ var _current_projectile_speed_multiplier: float = 1
 func attachEventManager(em: EventManager):
     _cache_holder(em)
     ignore_groups = holder.get_groups().filter(func(g): return g != "damageable")
-    event_manager.subscribe(trigger_event, Callable(self, "_on_trigger"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_trigger"), Damage.PHASE_OBSERVE)
     event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func _on_trigger(event: Dictionary) -> void:
@@ -36,10 +36,8 @@ func _on_trigger(event: Dictionary) -> void:
 
 ## Shared with homing_rocket_from_target modifier (subclass).
 func _is_own_projectile(event: Dictionary) -> bool:
-    if event.has("projectile"):
-        var projectile: Projectile = event["projectile"]
-        return projectile.get_meta(modifier_meta, false)
-    return false
+    var ctx := event.get("damage_context") as DamageContext
+    return ctx != null and is_instance_valid(ctx.source) and ctx.source.get_meta(modifier_meta, false)
 
 ## Shared with homing_rocket_from_target modifier (subclass).
 func _extract_damage(event: Dictionary) -> float:

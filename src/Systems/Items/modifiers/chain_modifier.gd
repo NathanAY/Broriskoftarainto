@@ -26,18 +26,14 @@ func attachEventManager(em: EventManager):
     event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func _on_trigger(event: Dictionary) -> void:
-    # Skip if this projectile was already spawned by this modifier
-    if event.has("projectile"):
-        var projectile: Projectile = event["projectile"]
-        if projectile.get_meta(modifier_meta, false):
-            return
-
     var damage: float = 0
     var spawn_position: Vector2
+    var ignore_enemy: Node = null
     if event.has("damage_context"):
         var damage_ctx: DamageContext = event["damage_context"]
-        if damage_ctx.target != holder: 
+        if damage_ctx.target != holder:
             spawn_position = damage_ctx.target.global_position
+            ignore_enemy = damage_ctx.target
         damage = max(damage_ctx.base_amount, damage_ctx.final_amount)
     elif event.has("weapon"):
         var weapon: BaseWeapon = event["weapon"]
@@ -47,10 +43,6 @@ func _on_trigger(event: Dictionary) -> void:
 
     if !spawn_position:
         spawn_position = holder.global_position
-
-    var ignore_enemy: Node = null
-    if event.has("body"):
-        ignore_enemy = event["body"]
 
     var next_target = _find_next_target(ignore_enemy)
     call_deferred("_spawn_chain_projectile", damage, spawn_position, next_target, ignore_enemy)

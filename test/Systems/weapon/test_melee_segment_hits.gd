@@ -45,7 +45,9 @@ func _make_target(at: Vector2, radius: float = TARGET_RADIUS) -> Node2D:
 	hitbox.add_child(shape)
 	body.add_child(hitbox)
 	var stub := GDScript.new()
-	stub.source_code = "extends Node\nvar current_health := 100.0\nvar hits := 0\nfunc apply_damage(_c) -> bool:\n\thits += 1\n\treturn true\n"
+	# A real `Health` subclass, so `Damage.deal()` accepts it, with the bus and
+	# stats wiring skipped.
+	stub.source_code = "extends Health\nvar hits := 0\nfunc _ready() -> void:\n\tpass\nfunc apply_damage(_c: DamageContext) -> bool:\n\thits += 1\n\treturn true\n"
 	stub.reload()
 	var health := Node.new()
 	health.name = "Health"

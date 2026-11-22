@@ -6,8 +6,8 @@
 # reference. Nothing is pinned to a literal - every figure is derived from the
 # .tres under test, so a rebalance moves the numbers without rotting the suite.
 #
-# EHP counts armor only when an ArmorModifier scene is declared next to the armor
-# value, because a bare `armor` stat never reduces damage (armor_modifier.gd).
+# EHP divides health by `Damage.armor_multiplier()`: armor is a core step of
+# the damage pipeline, so the declared `armor` value counts on its own.
 #
 # WB_solo uses the character's *weapon* only. The Ranger's Spread item is a
 # deliberate clear-power exception (SpreadModifier is +200% clear WB and is kept
@@ -17,7 +17,6 @@ extends GdUnitTestSuite
 
 const CHARACTERS_DIR := "res://src/Assets/character"
 const MULTITASKER := "res://src/Assets/character/multitasker/Multitasker.tres"
-const ARMOR_MODIFIER_SCENE := "res://src/Systems/Items/modifiers/ArmorModifier.tscn"
 
 # docs/systems/balance.md §5 target bands, relative to the reference character.
 const WB_SOLO_BAND := 0.30
@@ -57,7 +56,7 @@ func test_starting_ehp_is_within_band() -> void:
 	var reference: Dictionary = _reference()
 	for path in _character_paths():
 		var data: CharacterData = load(path)
-		var ehp := _ehp(data, _folded_stats(data))
+		var ehp := _ehp(_folded_stats(data))
 		var ratio := ehp / float(reference["ehp"])
 		assert_float(ratio).override_failure_message(
 			"%s EHP %.1f is %.2fx the reference %.1f (band %.2f..%.2f)" % [
@@ -106,7 +105,7 @@ func _collect(dir_path: String, out: PackedStringArray) -> void:
 func _reference() -> Dictionary:
 	var data: CharacterData = load(MULTITASKER)
 	var stats := _folded_stats(data)
-	return {"wb": _wb_solo(data, stats), "ehp": _ehp(data, stats)}
+	return {"wb": _wb_solo(data, stats), "ehp": _ehp(stats)}
 
 
 ## DEFAULT_STATS, then the character's base_stats overwrite, then dict modifiers.
@@ -126,19 +125,10 @@ func _folded_stats(data: CharacterData) -> Dictionary:
 	return stats
 
 
-func _has_armor_behavior(data: CharacterData) -> bool:
-	for mod in data.modifiers:
-		if mod is PackedScene and mod.resource_path == ARMOR_MODIFIER_SCENE:
-			return true
-	return false
-
-
-func _ehp(data: CharacterData, stats: Dictionary) -> float:
+func _ehp(stats: Dictionary) -> float:
 	var health := float(stats.get("health", 0.0))
-	if not _has_armor_behavior(data):
-		return health
 	var armor := float(stats.get("armor", 0.0))
-	return health / (10.0 / (10.0 + armor))
+	return health / Damage.armor_multiplier(armor)
 
 
 func _wb_solo(data: CharacterData, stats: Dictionary) -> float:

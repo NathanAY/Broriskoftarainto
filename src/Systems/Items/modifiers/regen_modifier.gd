@@ -38,9 +38,7 @@ func _on_stacks_changed() -> void:
 ## subclass names, so the stat panels show what the timer is actually doing.
 ##
 ## `_active_stacks()` is the same multiplier `_on_regen_tick` applies, floor
-## included, so the panel and the tick cannot disagree. Unlike armor there is no
-## declared-baseline exception: a regen amount lives on the modifier, not on a
-## value the character declares beside the scene, so even a character's own
+## included, so the panel and the tick cannot disagree. Even a character's own
 ## baseline stack is a full stack of regen.
 func _publish_rate() -> void:
     _publish_stat_value(_regen_stat_name(), _regen_per_second() * _active_stacks())

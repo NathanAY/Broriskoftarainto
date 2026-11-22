@@ -147,23 +147,17 @@ func _candidate_stat_names() -> Array:
                 instance.free()
     return _candidate_stats
 
-## Stat names that only do anything while one of the modifier scenes is listening
-## for them. `armor` reduces damage solely through an ArmorModifier and the two
-## regen rates only fire through a regen modifier, so a bare `{"armor": ...}` /
-## `{"flat_regen_per_second": ...}` entry is a number nothing reads - and it would
-## still be listed in the stat panel as a benefit the character does not really
-## get. These therefore never roll as plain stat values: they reach the player as
-## the modifier item, which publishes its value into the stat (see
-## `armor_modifier.gd` and `regen_modifier.gd`).
+## Stat names that never roll as plain stat values: the two regen rates only fire
+## through a regen modifier, so a bare `{"flat_regen_per_second": ...}` would be a
+## number nothing reads. They reach the player as the modifier item, which
+## publishes its value into the stat (see `regen_modifier.gd`).
 const LISTENER_ONLY_STATS: Array[String] = [
-	"armor",
 	"flat_regen_per_second",
 	"percent_regen_per_second",
 ]
 
 ## The candidates a stat value may be rolled from: the full candidate list minus
-## the listener-only stats. Armor stays in `_candidate_stat_names()` because the
-## modifier advertises it, it is simply not a value an item may hand out alone.
+## the listener-only stats.
 func _gratable_stat_names() -> Array:
     var names: Array = []
     for stat_name in _candidate_stat_names():
@@ -382,7 +376,7 @@ func _roll_negative_stat(exclude: String, stat_names: Array, scale: float) -> Di
     var candidates := []
     for stat_name in stat_names:
         # A curse on a listener-only stat is as dead as the positive half would
-        # be: on a character without the modifier, negated armor changes nothing.
+        # be: on a character without the modifier, a negated regen rate changes nothing.
         if stat_name != exclude and not stat_name in LISTENER_ONLY_STATS:
             candidates.append(stat_name)
     if candidates.is_empty():

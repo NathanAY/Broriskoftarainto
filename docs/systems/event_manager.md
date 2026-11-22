@@ -25,7 +25,7 @@ Payload convention
 - Emitting an array (the legacy `[{...}]` form), a non-Dictionary value, an unregistered event name, or a payload missing a required key is a hard error in debug builds (event dropped / subscribe refused).
 
 Event schema (required keys; extra keys are tolerated)
-- Damage pipeline: `before_deal_damage`, `before_take_damage`, `after_take_damage`, `after_deal_damage`, `on_hit`, `on_kill` -> `damage_context`
+- Damage pipeline: `before_deal_damage`, `before_take_damage`, `after_take_damage`, `after_deal_damage`, `on_hit`, `on_kill` -> `damage_context` (the only key; see `docs/systems/damage.md`)
 - Combat: `on_attack` -> `weapon`
 - Stats / conditions: `on_stat_changes` -> `stat_name`, `final_value`; `on_condition_change` -> `condition_name`, `value`
 - Equipment / inventory: `on_weapon_changes` -> `weapon_inst`; `on_item_added` / `on_item_removed` -> `hold_owner`, `item`, `items`
@@ -35,20 +35,11 @@ Event schema (required keys; extra keys are tolerated)
 
 **The buff / debuff schema is unchanged and needs no change.** `on_buff_added` / `on_buff_removed` carry `buff`, `holder`, `id`; `on_debuff_added` / `on_debuff_removed` carry `debuff`, `holder`, `target` — and that is sufficient for everything the HUD reads. The display fields added to `Buff` and `DebuffSource` (`display_name`, `tooltip_text`, `Debuff.source`, `Debuff.timer`) live on the **node the payload points at**, not in the payload, precisely so no event schema had to widen. Widening it to carry a flattened `display_name` would be the mistake here: a listener can already reach it through `buff` / `debuff`.
 
-Damage pipeline ownership
-- The six damage-pipeline events split across two buses, and the split matters when writing a new damage source:
-  - **Attacker side**, emitted by the weapon/effect on its own (the holder's) bus: `before_deal_damage` -> [armor, crit, high-HP modifiers] -> ... -> `after_deal_damage`, `on_hit`, `on_kill`.
-  - **Defender side**, emitted by `Health.apply_damage()` on the *target's* bus: `before_take_damage` -> subtract -> `on_death` (if lethal) -> `after_take_damage`. The order is fixed, and `target_take_persent_damage` is set before `on_death` so listeners can scale by it.
-- `Health.apply_damage(damage_context) -> bool` (`src/Systems/damage/health.gd`) is the ONLY way to damage anything. Do not emit `before_take_damage` / `after_take_damage` yourself and do not call `take_damage` (removed); hand the context over and let `Health` run the phase. That is what makes the dead check unbypassable.
-- It latches `Health.is_dead` on death, so every hit after the killing blow is rejected: no `HitFlashManager` flash, no `ParticleEffectManager` particles, no `TextureBurstManager` burst, no `on_death`, no `on_health_changed`. This matters because a dying entity stays in the tree for its whole death animation (an `Enemy` is freed from the `death` animation's `animation_finished`, ~0.7s later).
-- `false` means the hit did not land. Skip `after_deal_damage` / `on_hit` / `on_kill` in that case, otherwise kill rewards (e.g. `StatOnKillModifier`) and the attacker's hit modifiers fire once per corpse. Note the `on_kill` guards in the weapons read `current_health <= 0`, which is only reachable on the killing blow for the same reason.
-- Do not guard damage by reading the owner's private state (`Enemy._alive`) or its groups: a dying enemy has already left `damageable`, but rays and already-registered overlaps can still resolve it, so `Health` is the backstop.
+Damage pipeline
+- The damage events are emitted only by `Damage.deal()` (attacker bus) and `Health.apply_damage()` (target bus), in a fixed order, and each carries only `damage_context`. Never emit them from a damage source; the order, direct-hit rule, crit and armor are in `docs/systems/damage.md`.
 
-Weapon attribution on hit events
-- `on_hit`, `on_kill` and `after_deal_damage` now consistently carry the firing weapon as an extra `"weapon"` key:
-  - melee (`melee_weapon_node.gd`) and contact/area weapons (`contact_weapon.gd`, `area_weapon.gd`) pass their weapon resource directly;
-  - projectiles (`projectile.gd`) report `"weapon": source_weapon`, a back-link to the firing `BaseWeapon` set by `ProjectileWeapon.shoot_projectile`.
-- This lets weapon-bound modifiers (see `bound_weapon` in `docs/systems/modifiers.md`) filter events to exactly the hits their own weapon caused. Secondary hits that never had a weapon (e.g. `explosion.gd`, `orbiting_orb.gd`) simply carry no `weapon`, so weapon-bound modifiers correctly ignore them.
+Listener order (`phase`)
+- `subscribe(event, listener, phase := 0)`: lower phases run first, equal phases in subscription order. A listener that changes a hit's `final_amount` passes a `Damage.PHASE_*` constant, so the result does not depend on which item was bought first. Everything else keeps the default.
 
 Adding a new event
 - Register a schema entry in `EventContracts.SCHEMAS` (file `src/Scripts/event_contract.gd`), then emit/subscribe; the bus will not accept the event until the schema exists.

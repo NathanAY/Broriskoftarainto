@@ -71,10 +71,9 @@ func _apply_modifier(character: Node, stats_node: Node, mod: Variant) -> void:
     # One entry in CharacterData.modifiers is one of two things, dispatched by
     # type so no stat is ever named here:
     #   Dictionary  -> a value: passed to Stats.add_modifier
-    #                  (e.g. {"armor": {"flat": 4}})
+    #                  (e.g. {"attack_speed": {"percent": 0.2}})
     #   PackedScene -> a behavior: a modifier scene instantiated and wired to
-    #                  this character (e.g. ArmorModifier.tscn, which is what
-    #                  makes the `armor` value actually reduce damage)
+    #                  this character (e.g. FlatRegenModifier.tscn)
     # A character that needs a brand new behavior only lists that modifier's
     # scene; nothing in this file changes.
     if mod is Dictionary:

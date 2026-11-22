@@ -4,7 +4,6 @@ class_name ProvidedStatTest
 extends GdUnitTestSuite
 
 const LIFE_LEACH_SCENE := "res://src/Systems/Items/modifiers/LifeLeachModifier.tscn"
-const ARMOR_SCENE := "res://src/Systems/Items/modifiers/ArmorModifier.tscn"
 
 
 func _build_holder() -> Node:
@@ -121,19 +120,6 @@ func test_on_hit_heals_from_provided_stat() -> void:
     holder.free()
 
 
-func test_armor_reads_stat_and_is_not_owned() -> void:
-    var holder := _build_holder()
-    var stats: Stats = holder.get_node("Stats")
-    stats.set_base_stat("armor", 10.0)
-    var modifier := _attach_modifier(holder, ARMOR_SCENE)
-    var before_keys: Array = stats.stats.keys()
-    modifier.remove_latest_stack()
-    # armor pre-exists -> not claimed/released by the modifier
-    assert_bool(stats.stats.has("armor")).is_true()
-    assert_int(stats.stats.keys().size()).is_equal(before_keys.size())
-    holder.free()
-
-
 func test_remove_item_detaches_stat_and_unsubscribes() -> void:
     var holder := _build_holder()
     var item_holder := ItemHolder.new()
@@ -173,5 +159,4 @@ func test_factory_candidates_include_dynamic_stats() -> void:
     var item_factory: ItemFactory = test_scene.get_node("ItemFactory")
     var candidates: Array = item_factory._candidate_stat_names()
     assert_bool("life_leach_multiplier" in candidates).is_true()
-    assert_bool("armor" in candidates).is_true()
     test_scene.free()

@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" uid="uid://mbosqo7n71jx" path="res://src/Assets/character/soldier/soldier_mouth.png" id="7_soldier"]
 [ext_resource type="Script" uid="uid://2vl1rp4agc1u" path="res://src/Systems/weapon/BaseWeapon.gd" id="3_soldier"]
 [ext_resource type="Resource" uid="uid://fov62q3eb6q7" path="res://src/Resources/weapons/Shotgun.tres" id="4_soldier"]
-[ext_resource type="PackedScene" uid="uid://cdfucojif8qe6" path="res://src/Systems/Items/modifiers/ArmorModifier.tscn" id="5_soldier"]
 
 [resource]
 script = ExtResource("1_soldier")
@@ -16,13 +15,9 @@ base_stats = {
 "attack_speed": 0.9,
 "damage": 0.85,
 "health": 42.0,
-"movement_speed": 0.9
+"movement_speed": 0.9,
+"armor": 5.0
 }
-modifiers = [{
-"armor": {
-"flat": 5
-}
-}, ExtResource("5_soldier")]
 starting_weapons = Array[ExtResource("3_soldier")]([ExtResource("4_soldier")])
 body = ExtResource("2_soldier")
 eyes = ExtResource("6_soldier")

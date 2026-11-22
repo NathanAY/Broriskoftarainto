@@ -21,7 +21,7 @@ func _ready() -> void:
 	if bus == null:
 		push_warning("FrontShield: the owner has no EventManager, so the shield never blocks.")
 		return
-	bus.subscribe("before_take_damage", Callable(self, "_on_before_take_damage"))
+	bus.subscribe("before_take_damage", Callable(self, "_on_before_take_damage"), Damage.PHASE_MITIGATE)
 
 
 func _on_before_take_damage(event: Dictionary) -> void:

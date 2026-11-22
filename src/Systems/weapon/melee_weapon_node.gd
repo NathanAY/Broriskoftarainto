@@ -171,15 +171,6 @@ func do_damage(body):
     ctx.target = body
     ctx.base_amount = weapon_data.current_damage
     ctx.final_amount = weapon_data.current_damage
+    ctx.weapon = weapon_data
     ctx.tags.append("melee")
-    if event_manager: 
-        event_manager.emit_event("before_deal_damage", {"damage_context": ctx})
-    var bodyHealth = body.get_node("Health")
-    if not bodyHealth.apply_damage(ctx):
-        return  # already dead: the swing does not land, so no hit/kill events either
-    if event_manager:
-        event_manager.emit_event("after_deal_damage", {"melee": self, "body": body, "damage_context": ctx, "weapon": weapon_data})
-    if event_manager:
-        event_manager.emit_event("on_hit", {"melee": self, "body": body, "damage_context": ctx, "weapon": weapon_data})
-    if event_manager and bodyHealth.current_health <= 0:
-        event_manager.emit_event("on_kill", {"melee": self, "body": body, "damage_context": ctx, "weapon": weapon_data})
+    Damage.deal(ctx, event_manager)

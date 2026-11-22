@@ -3,7 +3,7 @@ class_name ItemPriceAnalyzerTest
 extends GdUnitTestSuite
 
 const STAT_ITEM := "res://src/Resources/items/PlusDamageItem.tres"
-const MODIFIER_ITEM := "res://src/Resources/items/CritGlass.tres"
+const MODIFIER_ITEM := "res://src/Resources/items/Knockback.tres"
 const WEAPON := "res://src/Resources/weapons/Pistol.tres"
 const BUFF_SCENE := "res://src/Systems/Items/Buffs/buff.tscn"
 const DEBUFF_SCENE := "res://src/Systems/Items/Buffs/DebuffSource.tscn"

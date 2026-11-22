@@ -76,18 +76,8 @@ func do_damage(body: Node) -> void:
     ctx.target = body
     ctx.base_amount = current_damage
     ctx.final_amount = current_damage
+    ctx.weapon = self
     ctx.tags.append("contact")
-
-    if event_manager:
-        event_manager.emit_event("before_deal_damage", {"damage_context": ctx})
-
-    var bodyHealth: Health = body.get_node("Health")
-    if not bodyHealth.apply_damage(ctx):
-        return  # already dead: the contact does not land, so no hit/kill events either
-
-    if event_manager:
-        event_manager.emit_event("after_deal_damage", {"weapon": self, "body": body, "damage_context": ctx})
+    # Contact has no shot of its own, so each landed hit doubles as its attack.
+    if Damage.deal(ctx, event_manager) and event_manager:
         event_manager.emit_event("on_attack", {"weapon": self, "body": body, "damage_context": ctx})
-        event_manager.emit_event("on_hit", {"weapon": self, "body": body, "damage_context": ctx})
-        if bodyHealth.current_health <= 0:
-            event_manager.emit_event("on_kill", {"weapon": self, "body": body, "damage_context": ctx})

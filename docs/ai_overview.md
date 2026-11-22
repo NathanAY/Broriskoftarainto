@@ -28,6 +28,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | Doc | What it covers |
 |---|---|
 | `characters.md` | `CharacterData` resources, character select UI, how a character is applied at spawn |
+| `damage.md` | `Damage.deal()`, the one pipeline every hit goes through: crit, armor, listener phases, direct vs secondary hits |
 | `debug_scenarios.md` | The main menu's "Debug scenarios" button: four dev-only mid/endgame runs and how a scenario is configured |
 | `enemies.md` | `Enemy` behaviour, health, boss variant |
 | `effects.md` | Every VFX the game spawns — impact sparks, blast fireballs, damage flashes, death shards — and the three authoring traps that decide whether one works |

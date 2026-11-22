@@ -434,11 +434,6 @@ func _effect_line_for_scene(path: String) -> String:
     return ""
 
 
-func test_armor_tooltip() -> void:
-    assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/ArmorModifier.tscn")).is_equal(
-        "effect: Armor — Armor reduces incoming damage. +5 armor per stack (Triggers on before take damage)")
-
-
 func test_bomb_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/BombOnHitModifier.tscn")).is_equal(
         "effect: Bomb — Attached bombs explode for 30% of hit damage after 3.0s (Triggers on hit)")
@@ -447,11 +442,6 @@ func test_bomb_tooltip() -> void:
 func test_chain_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/ChainModifier.tscn")).is_equal(
         "effect: Chain — Chains to 3 extra targets per stack (Triggers on hit)")
-
-
-func test_crit_tooltip() -> void:
-    assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/CritModifier.tscn")).is_equal(
-        "effect: Crit — Critical hits deal extra damage based on your critical chance and multiplier. +0.15 crit multiplier per stack (Triggers on before deal damage)")
 
 
 func test_emergency_heal_tooltip() -> void:

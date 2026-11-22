@@ -37,35 +37,22 @@ func _on_attack(data: Dictionary):
 func _on_hit(data: Dictionary) -> void:
     var active_count = _active_stacks()
 
-    var body: Node = data.get("body", null)
-    if not body or not is_instance_valid(body):
+    var ctx := data.get("damage_context") as DamageContext
+    if ctx == null or not is_instance_valid(ctx.target):
         return
+    var body: Node = ctx.target
 
-    var dir := Vector2.ZERO
-
-    if data.has("projectile"):
-        var proj = data["projectile"]
-        if proj and is_instance_valid(proj):
-            # the KnockbackBehavior attached at on_attack already handles
-            # projectile hits; avoid double knockback
-            if proj.get_node_or_null("KnockbackBehavior") != null:
-                return
-            # push away from projectile
-            dir = (body.global_position - proj.global_position).normalized()
-
-    elif data.has("melee"):
-        var melee_node = data["melee"]
-        if melee_node and is_instance_valid(melee_node):
-            # flip the direction for melee (push away from the *holder*, not the swing node)
-            if holder and is_instance_valid(holder):
-                dir = (body.global_position - holder.global_position).normalized()
-            else:
-                dir = (body.global_position - melee_node.global_position).normalized()
-    else:
-        var ctx = data.get("damage_context", null)
-        if ctx and ctx.source and is_instance_valid(ctx.source) and ctx.source is Node:
-            var src = ctx.source
-            dir = (body.global_position - src.global_position).normalized()
+    # Push away from the holder (melee, aura, contact), or from the projectile.
+    var from: Node2D = holder if is_instance_valid(holder) else ctx.source as Node2D
+    if ctx.source is Projectile and is_instance_valid(ctx.source):
+        # the KnockbackBehavior attached at on_attack already handles
+        # projectile hits; avoid double knockback
+        if ctx.source.get_node_or_null("KnockbackBehavior") != null:
+            return
+        from = ctx.source
+    if from == null:
+        return
+    var dir: Vector2 = (body.global_position - from.global_position).normalized()
     if dir != Vector2.ZERO:
         # ensure body can get knockback controller
         var kb = body.get_node_or_null("KnockbackController")

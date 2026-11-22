@@ -67,22 +67,14 @@ func _on_tick() -> void:
     ctx.base_amount = damage_per_tick * stacks
     ctx.final_amount = ctx.base_amount
     ctx.tags.append("poison")
+    ctx.can_crit = false  # damage over time never crits
 
-    var sorce_em: EventManager = null
-    if source:
-        sorce_em = source.get_node_or_null("EventManager")
-        if sorce_em:
-            sorce_em.emit_event("before_deal_damage", {"damage_context": ctx})
-    # Run through defender phase (so armor/resists can apply). Health owns the
-    # whole phase and drops the tick if the target died in the meantime, so a
-    # corpse cannot be re-killed once per second for the death animation.
-    if not target_health.apply_damage(ctx):
-        return
-
-    if source and source.get_node_or_null("EventManager"):
-        sorce_em.emit_event("after_deal_damage", {"damage_context": ctx})
-        if target_health.current_health <= 0:
-            sorce_em.emit_event("on_kill", {"damage_context": ctx, "body": ctx.target})
+    # Health drops the tick if the target died in the meantime, so a corpse
+    # cannot be re-killed once per second for the death animation.
+    var source_bus: EventManager = null
+    if is_instance_valid(source):
+        source_bus = source.get_node_or_null("EventManager")
+    Damage.deal(ctx, source_bus)
 
 ## Puts the bubble visual on the poisoned entity (the Health node's owner) and
 ## keeps its density in step with `stacks`.

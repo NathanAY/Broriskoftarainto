@@ -7,7 +7,7 @@ var spawn_offset: float = 10.0         # max random horizontal/vertical jitter
 
 func _ready() -> void:
     event_manager.subscribe("on_heal", Callable(self, "_on_heal"))
-    event_manager.subscribe("before_take_damage", Callable(self, "_before_take_damage"))
+    event_manager.subscribe("before_take_damage", Callable(self, "_before_take_damage"), Damage.PHASE_OBSERVE)
 
 func _spawn_parent() -> Node:
     var scene: Node = get_tree().current_scene

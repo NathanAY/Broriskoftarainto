@@ -245,15 +245,12 @@ func test_a_declared_baseline_regen_shows_in_full() -> void:
 	baseline.health_delta = 1.0
 	baseline.interval = 0.5
 	character.get_node("ItemHolder").add_child(baseline)
-	# The three steps `BaseModifier.attach` performs, on an instance this test can
-	# configure. attach() only takes a scene, so the flag is set here too - it is
-	# exactly what marks the stack as declared rather than held.
-	baseline.is_declared_baseline = true
+	# The steps `BaseModifier.attach` performs, on an instance this test can
+	# configure (attach() only takes a scene).
 	baseline.attachEventManager(character.get_node("EventManager") as EventManager)
 	baseline.add_stack(true)
 
 	var expected: float = baseline.health_delta / baseline.interval
-	assert_bool(baseline.is_declared_baseline).is_true()
 	assert_float(stats.get_stat("flat_regen_per_second")).is_equal_approx(expected, 0.001)
 
 	character.free()

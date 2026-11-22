@@ -1,9 +1,9 @@
-# GdUnit TestSuite for stat lists showing modifier-only stats.
+# GdUnit TestSuite for the in-game stat lists.
 #
-# `armor` is not in `Stats.DEFAULT_STATS` (a character declares it in
-# `CharacterData.modifiers` instead), so a list built from the base stat keys
-# alone hid it. These tests pin that a non-zero modifier-only stat gets a row in
-# the in-game lists and that a zero one does not.
+# A modifier-only stat (the regen rates) is not in `Stats.DEFAULT_STATS`, so a
+# list built from the base stat keys alone would hide it. These tests pin that a
+# non-zero modifier-only stat gets a row and a zero one does not. `armor` is a
+# base stat, so it is always listed and its row tracks the live value.
 class_name StatsListModifierStatsTest
 extends GdUnitTestSuite
 
@@ -11,6 +11,9 @@ const CHARACTER_UI_SCENE := "res://src/ui/CharacterUI.tscn"
 const PLAYER_UI_SCENE := "res://src/ui/PlayerUI.tscn"
 const SHOP_SCENE := "res://src/Scenes/menu/ShopMenu.tscn"
 const ARMOR_ITEM := "res://src/Resources/items/ArmorPlate.tres"
+## A real modifier-only stat: published by the regen modifiers, absent from
+## `Stats.DEFAULT_STATS`.
+const REGEN := "flat_regen_per_second"
 
 
 func _build_character() -> Character:
@@ -66,22 +69,28 @@ func _row_for(ui: Control, stat_name: String) -> Control:
 
 func test_display_stat_names_adds_a_non_zero_modifier_only_stat() -> void:
 	var stats := _lone_stats()
-	stats.add_modifier({"armor": {"flat": 4.0}})
+	stats.add_modifier({REGEN: {"flat": 4.0}})
 
-	# Armor is not a base stat key, so only the modifier puts it on the list.
-	assert_bool(stats.stats.has("armor")).is_false()
-	assert_that(stats.display_stat_names()).contains("armor")
+	# Not a base stat key, so only the modifier puts it on the list.
+	assert_bool(stats.stats.has(REGEN)).is_false()
+	assert_that(stats.display_stat_names()).contains(REGEN)
 
 
 func test_display_stat_names_omits_a_zero_modifier_only_stat() -> void:
 	var stats := _lone_stats()
-	# Flat and percent that cancel, so the stat exists on the modifier but is
-	# worth nothing to show.
-	stats.add_modifier({"armor": {"flat": 10.0}})
-	stats.add_modifier({"armor": {"flat": -10.0}})
+	# Two that cancel, so the stat exists on the modifiers but is worth nothing
+	# to show.
+	stats.add_modifier({REGEN: {"flat": 10.0}})
+	stats.add_modifier({REGEN: {"flat": -10.0}})
 
-	assert_float(stats.get_stat("armor")).is_zero()
-	assert_that(stats.display_stat_names()).not_contains("armor")
+	assert_float(stats.get_stat(REGEN)).is_zero()
+	assert_that(stats.display_stat_names()).not_contains(REGEN)
+
+
+func test_armor_is_always_listed_as_a_base_stat() -> void:
+	var stats := _lone_stats()
+	assert_bool(stats.stats.has("armor")).is_true()
+	assert_that(stats.display_stat_names()).contains("armor")
 
 
 func test_display_stat_names_never_lists_the_condition_key() -> void:
@@ -127,31 +136,29 @@ func test_character_ui_lists_armor_with_its_value() -> void:
 	character.free()
 
 
-func test_character_ui_omits_the_armor_row_when_it_is_zero() -> void:
+func test_character_ui_omits_a_zero_modifier_only_stat() -> void:
 	var character := _build_character()
 	var prev_character: Character = GlobalGameState.current_character
 	GlobalGameState.current_character = character
 
 	var stats: Stats = character.get_node("Stats")
-	# An ArmorModifier with no armor source behind it: the stat is declared but
-	# flat 0, which is the same as no armor at all.
-	stats.add_modifier({"armor": {"flat": 0.0}})
+	# Declared but flat 0, which is the same as no regen at all.
+	stats.add_modifier({REGEN: {"flat": 0.0}})
 
 	var ui = load(CHARACTER_UI_SCENE).instantiate()
 	add_child(ui)
 	await get_tree().process_frame
 
 	assert_int(ui.stats_container.get_child_count()).is_equal(stats.stats.size())
-	assert_that(_listed_stats(ui)).not_contains("armor")
+	assert_that(_listed_stats(ui)).not_contains(REGEN)
 
 	GlobalGameState.current_character = prev_character if is_instance_valid(prev_character) else null
 	ui.free()
 	character.free()
 
 
-## Picking up an armor item is the in-game way armor becomes non-zero, and it
-## arrives as a modifier after the list was built.
-func test_character_ui_adds_the_armor_row_when_an_item_grants_armor() -> void:
+## Picking up an armor item updates the armor row that was already there.
+func test_character_ui_armor_row_tracks_an_armor_item() -> void:
 	var character := _build_character()
 	var prev_character: Character = GlobalGameState.current_character
 	GlobalGameState.current_character = character
@@ -159,43 +166,23 @@ func test_character_ui_adds_the_armor_row_when_an_item_grants_armor() -> void:
 	var ui = load(CHARACTER_UI_SCENE).instantiate()
 	add_child(ui)
 	await get_tree().process_frame
-	assert_that(_listed_stats(ui)).not_contains("armor")
-
-	var stats: Stats = character.get_node("Stats")
-	var armor: Item = load(ARMOR_ITEM)
-	character.get_node("ItemHolder").add_item(armor)
-	await get_tree().process_frame
-
-	assert_float(stats.get_stat("armor")).is_not_zero()
 	assert_that(_listed_stats(ui)).contains("armor")
 
-	GlobalGameState.current_character = prev_character if is_instance_valid(prev_character) else null
-	ui.free()
-	character.free()
-
-
-## The row goes away again when the armor is removed, because the list only
-## shows a non-zero modifier-only stat.
-func test_character_ui_drops_the_armor_row_when_the_item_is_sold() -> void:
-	var character := _build_character()
-	var prev_character: Character = GlobalGameState.current_character
-	GlobalGameState.current_character = character
-
+	var stats: Stats = character.get_node("Stats")
 	var item_holder: ItemHolder = character.get_node("ItemHolder")
 	var armor: Item = load(ARMOR_ITEM)
 	item_holder.add_item(armor)
-
-	var ui = load(CHARACTER_UI_SCENE).instantiate()
-	add_child(ui)
 	await get_tree().process_frame
-	assert_that(_listed_stats(ui)).contains("armor")
 
+	var label: Label = _row_for(ui, "armor").get_child(1)
+	assert_float(stats.get_stat("armor")).is_not_zero()
+	assert_str(label.text).is_equal("Armor: %.2f" % stats.get_stat("armor"))
+
+	# Sold: the row stays, back at zero.
 	item_holder.remove_item(armor)
 	await get_tree().process_frame
-
-	var stats: Stats = character.get_node("Stats")
-	assert_float(stats.get_stat("armor")).is_zero()
-	assert_that(_listed_stats(ui)).not_contains("armor")
+	assert_that(_listed_stats(ui)).contains("armor")
+	assert_str((_row_for(ui, "armor").get_child(1) as Label).text).is_equal("Armor: 0.00")
 
 	GlobalGameState.current_character = prev_character if is_instance_valid(prev_character) else null
 	ui.free()
@@ -221,15 +208,14 @@ func test_player_ui_lists_armor() -> void:
 	character.free()
 
 
-## The shop's stats panel is a third list, rebuilt after every buy. It used to
-## iterate the base stat keys, so a bought armor item showed no armor there.
-func test_shop_menu_lists_armor_after_an_armor_item_is_bought() -> void:
+## The shop's stats panel is a third list, rebuilt after every buy.
+func test_shop_menu_shows_armor_bought_from_an_armor_item() -> void:
 	var character := _build_character()
 	var shop = load(SHOP_SCENE).instantiate()
 	add_child(shop)
 	shop.character = character
 	shop._update_stats()
-	assert_that(_listed_stats(shop)).not_contains("armor")
+	assert_that(_listed_stats(shop)).contains("armor")
 
 	character.get_node("ItemHolder").add_item(load(ARMOR_ITEM))
 	shop._update_stats()

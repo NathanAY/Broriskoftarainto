@@ -1,9 +1,10 @@
 # GdUnit TestSuite for CharacterData.modifiers - the single, universal way a
-# character declares what makes it different from the default Stats.
+# character declares the behaviors that make it different from the default
+# Stats. Plain numbers, armor included, live in `base_stats`.
 #
 # One list, two entry kinds (dispatched by type, no stat names in code):
-#   Dictionary  -> Stats.add_modifier        (the value, e.g. armor)
-#   PackedScene -> a wired BaseModifier      (the behavior that reads it)
+#   Dictionary  -> Stats.add_modifier        (a value, e.g. attack_speed)
+#   PackedScene -> a wired BaseModifier      (a behavior, e.g. regen)
 class_name CharacterModifiersTest
 extends GdUnitTestSuite
 
@@ -12,8 +13,6 @@ const SOLDIER := "res://src/Assets/character/soldier/Soldier.tres"
 const RANGER := "res://src/Assets/character/ranger/Ranger.tres"
 const WILDLING := "res://src/Assets/character/wildling/Wildling.tres"
 const CHARACTER_SCENE := "res://src/Systems/Character.tscn"
-const ARMOR_SCENE := "res://src/Systems/Items/modifiers/ArmorModifier.tscn"
-const ARMOR_SCRIPT := preload("res://src/Systems/Items/modifiers/armor_modifier.gd")
 const FLAT_REGEN_SCENE := "res://src/Systems/Items/modifiers/FlatRegenModifier.tscn"
 const REGEN_SCRIPT := preload("res://src/Systems/Items/modifiers/flat_regen_modifier.gd")
 
@@ -44,15 +43,6 @@ func _modifier_scenes(character: CharacterData) -> Array:
 	return found
 
 
-func _armor_modifier_nodes(node: Node) -> Array:
-	var found: Array = []
-	if node.get_script() == ARMOR_SCRIPT:
-		found.append(node)
-	for child in node.get_children():
-		found.append_array(_armor_modifier_nodes(child))
-	return found
-
-
 ## A regen scene instantiated from FlatRegenModifier.tscn keeps that script, so
 ## the search matches both the shared default and a character's own variant.
 func _regen_modifier_nodes(node: Node) -> Array:
@@ -79,86 +69,38 @@ func _declared_regen_scene(data: CharacterData) -> PackedScene:
 	return null
 
 
-## Emits the damage pipeline hook and returns the resulting damage.
+## Runs the armor step and returns the resulting damage.
 func _damage_after_armor(character: Node, amount: float) -> float:
 	var ctx := DamageContext.new()
 	ctx.final_amount = amount
-	# `target` is read by the damage-number spawner that also listens to
-	# `before_take_damage`.
-	ctx.target = character
-	character.get_node("EventManager").emit_event("before_take_damage", {"damage_context": ctx})
+	# The armor step `Health.apply_damage()` runs before any listener.
+	Damage.apply_armor(ctx, character.get_node("Stats"))
 	return ctx.final_amount
 
 
-# ---------------- the one convention ----------------
+# ---------------- base stats are applied ----------------
 
-func test_armor_is_declared_only_in_modifiers_never_base_stats() -> void:
-	for path in _all_character_paths():
-		var character: CharacterData = load(path)
-		# `base_stats` is the archetype's stat block only; a stat that needs a
-		# modifier to do anything never belongs there.
-		assert_bool(character.base_stats.has("armor")).override_failure_message(
-			"%s declares armor in base_stats" % character.display_name).is_false()
-		# A character declares both halves of armor (the value dict and the
-		# ArmorModifier that reads it) or neither - never one without the other.
-		var declares_value := false
-		var declares_behavior := false
-		for mod in character.modifiers:
-			if mod is PackedScene and mod.resource_path == ARMOR_SCENE:
-				declares_behavior = true
-			elif mod is Dictionary and mod.has("armor"):
-				declares_value = true
-		assert_bool(declares_value == declares_behavior).override_failure_message(
-			"%s declares armor value/behavior separately" % character.display_name).is_true()
-
-
-func test_armor_value_and_behavior_live_in_the_same_list() -> void:
-	for path in [BRAWLER, SOLDIER]:
-		var character: CharacterData = load(path)
-		# One list, both kinds: the value dict and the modifier scene that
-		# makes the value reduce damage.
-		var has_value := false
-		var has_behavior := false
-		for mod in character.modifiers:
-			if mod is PackedScene and mod.resource_path == ARMOR_SCENE:
-				has_behavior = true
-			elif mod is Dictionary and mod.has("armor"):
-				has_value = true
-		assert_bool(has_value).is_true()
-		assert_bool(has_behavior).is_true()
-
-
-# ---------------- values are applied ----------------
-
-func test_stat_dict_entry_reaches_stats() -> void:
+func test_base_stats_reach_stats() -> void:
 	var data: CharacterData = load(BRAWLER)
 	var character := await _spawn_character(BRAWLER)
 	var stats: Stats = character.get_node("Stats")
-	assert_float(stats.get_stat("armor")).is_equal_approx(_declared_armor(data), 0.001)
+	assert_float(stats.get_stat("armor")).is_equal_approx(float(data.base_stats["armor"]), 0.001)
 	assert_float(stats.get_stat("health")).is_equal_approx(float(data.base_stats["health"]), 0.001)
 	assert_float(stats.get_stat("damage")).is_equal_approx(_expected_damage(data), 0.001)
 	character.free()
 
 
-func test_character_modifier_scene_is_attached_and_wired() -> void:
+## Armor is a plain stat the damage pipeline reads: no modifier is attached.
+func test_base_stat_armor_reduces_damage_with_no_modifier() -> void:
 	var character := await _spawn_character(BRAWLER)
-	assert_int(_armor_modifier_nodes(character).size()).is_equal(1)
-	var modifier: Node = _armor_modifier_nodes(character)[0]
-	# attach() is the full contract: wired to the event manager, one live stack.
-	assert_that(modifier.event_manager).is_not_null()
-	assert_int(modifier.stacks.size()).is_equal(1)
-	assert_bool(modifier.stacks[0]).is_true()
+	var armor: float = character.get_node("Stats").get_stat("armor")
+	assert_float(armor).is_greater(0.0)
+	assert_float(_damage_after_armor(character, 100.0)).is_equal_approx(100.0 * Damage.armor_multiplier(armor), 0.001)
+	assert_int(_modifier_scenes(load(BRAWLER)).size()).is_equal(0)
 	character.free()
 
 
-func test_declared_behavior_makes_the_declared_value_apply() -> void:
-	var character := await _spawn_character(BRAWLER)
-	# armor 4 -> 10 / (10 + 4)
-	assert_float(_damage_after_armor(character, 100.0)).is_equal_approx(100.0 * 10.0 / 14.0, 0.001)
-	character.free()
-
-
-func test_two_characters_using_the_same_convention() -> void:
+func test_two_characters_take_their_own_armor() -> void:
 	var brawler := await _spawn_character(BRAWLER)
 	var brawler_armor: float = brawler.get_node("Stats").get_stat("armor")
 	var brawler_damage := _damage_after_armor(brawler, 100.0)
@@ -169,32 +111,17 @@ func test_two_characters_using_the_same_convention() -> void:
 	var soldier_damage := _damage_after_armor(soldier, 100.0)
 	soldier.free()
 
-	# Same declaration shape, different numbers - nothing character-specific: each
-	# takes the mitigation its own declared armor implies.
-	assert_float(brawler_damage).is_equal_approx(100.0 * 10.0 / (10.0 + brawler_armor), 0.001)
-	assert_float(soldier_damage).is_equal_approx(100.0 * 10.0 / (10.0 + soldier_armor), 0.001)
+	# Nothing character-specific: each takes the mitigation its own armor implies.
+	assert_float(brawler_damage).is_equal_approx(100.0 * Damage.armor_multiplier(brawler_armor), 0.001)
+	assert_float(soldier_damage).is_equal_approx(100.0 * Damage.armor_multiplier(soldier_armor), 0.001)
 
 
 func test_character_without_modifier_scenes_declares_no_behavior() -> void:
-	var character := await _spawn_character(RANGER)
 	var data: CharacterData = load(RANGER)
 	assert_int(_modifier_scenes(data).size()).is_equal(0)
-	assert_int(_armor_modifier_nodes(character).size()).is_equal(0)
-	character.free()
 
 
 # ---------------- universality ----------------
-
-func test_a_value_without_its_behavior_stays_inert() -> void:
-	# Proves the behavior really comes from the scene entry: a stat-only
-	# character has the number but takes full damage.
-	var character := await _spawn_character(BRAWLER)
-	var modifier: Node = _armor_modifier_nodes(character)[0]
-	modifier.detach()
-	assert_float(character.get_node("Stats").get_stat("armor")).is_equal_approx(4.0, 0.001)
-	assert_float(_damage_after_armor(character, 100.0)).is_equal_approx(100.0, 0.001)
-	character.free()
-
 
 func test_extra_behavior_scenes_attach_without_code_changes() -> void:
 	# The initializer only forwards scenes, so an unrelated modifier (energy
@@ -231,25 +158,23 @@ func test_attach_rejects_a_scene_that_is_not_a_modifier() -> void:
 	assert_object(BaseModifier.attach(bogus, host, em)).is_null()
 	assert_int(host.get_child_count()).is_equal(2)
 	assert_object(BaseModifier.attach(null, host, em)).is_null()
-	assert_object(BaseModifier.attach(load(ARMOR_SCENE), host, null)).is_null()
+	assert_object(BaseModifier.attach(load(FLAT_REGEN_SCENE), host, null)).is_null()
 	host.free()
 	plain.free()
 
 
-func test_modifier_scene_entry_shows_up_in_the_character_tooltip() -> void:
+func test_base_armor_shows_up_in_the_character_tooltip() -> void:
 	var character: CharacterData = load(BRAWLER)
 	var text := "\n".join(CharacterTooltip.tooltip_lines(character))
-	assert_str(text).contains("armor flat: 4")
-	# The declared behavior is visible in the select screen too.
-	assert_str(text).contains("effect: Armor")
-	assert_str(text).not_contains("base armor")
+	assert_str(text).contains("base armor: %s" % str(character.base_stats["armor"]))
+	assert_str(text).not_contains("effect: Armor")
 
 
 # ---------------- a character brings its own regen numbers ----------------
 
 # The Wildling's regen is a flat HP tick, and like every other stat-driven
-# behavior it is declared in `modifiers` rather than in `base_stats`. Unlike
-# armor, a regen amount is an export on the modifier itself, so the character
+# behavior it is declared in `modifiers` rather than in `base_stats`. A regen
+# amount is an export on the modifier itself, so the character
 # lists a scene configured with its own numbers instead of the shop default.
 
 func test_declared_regen_is_attached_and_wired() -> void:
@@ -319,14 +244,6 @@ func test_wildling_declares_a_regen_behavior() -> void:
 
 
 # ---------------- helpers ----------------
-
-## The flat armor a character declares in its modifiers, or 0.0.
-func _declared_armor(data: CharacterData) -> float:
-	for mod in data.modifiers:
-		if mod is Dictionary and mod.has("armor"):
-			return float(mod["armor"].get("flat", 0.0))
-	return 0.0
-
 
 ## base_stats damage folded with any percent damage modifiers.
 func _expected_damage(data: CharacterData) -> float:

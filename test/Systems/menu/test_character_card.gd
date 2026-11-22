@@ -15,7 +15,7 @@ func test_tooltip_lines_cover_name_stats_modifiers_items() -> void:
 	assert_str(text).contains(res.description)
 	# Values come from the `.tres`, so a rebalance moves them without rotting this.
 	assert_str(text).contains("base health: " + str(res.base_stats["health"]))
-	assert_str(text).contains("armor flat: " + str(_armor_value(res)))
+	assert_str(text).contains("base armor: " + str(res.base_stats["armor"]))
 	# The Soldier's gear is its weapon; the row must render whichever it ships.
 	assert_str(text).contains("starting weapon: " + str(res.starting_weapons[0].name))
 
@@ -202,22 +202,13 @@ func test_character_rows_cover_stats_modifiers_and_gear() -> void:
 	assert_str(text).contains("name: Soldier")
 	assert_str(text).contains(soldier.description)
 	assert_str(text).contains("Health: " + ItemTooltip.format_value(soldier.base_stats["health"]))
-	assert_str(text).contains("Armor: +" + ItemTooltip.format_value(_armor_value(soldier)))
-	# Effect and gear rows render as prose / "Label: value", not "key: value".
-	assert_str(text).contains("Armor — Armor reduces incoming damage.")
+	assert_str(text).contains("Armor: " + ItemTooltip.format_value(soldier.base_stats["armor"]))
+	# Gear rows render as "Label: value", not "key: value".
 	assert_str(text).contains("Starting Weapon: " + str(soldier.starting_weapons[0].name))
 
 	# `tooltip_lines()` is the flat contract and must stay byte-identical.
 	assert_str("\n".join(ItemTooltip.tooltip_lines(soldier))).is_equal(
 		"\n".join(CharacterTooltip.tooltip_lines(soldier)))
-
-
-## The flat armor a character declares in its modifiers, or 0.
-func _armor_value(data: CharacterData) -> Variant:
-	for mod in data.modifiers:
-		if mod is Dictionary and mod.has("armor"):
-			return mod["armor"]["flat"]
-	return 0
 
 
 func _row_for(panel: ItemDisplayPanel, label: String) -> ItemCardRow:

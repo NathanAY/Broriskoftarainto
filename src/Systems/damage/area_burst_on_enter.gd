@@ -101,28 +101,17 @@ func _detonate() -> void:
             continue
         if global_position.distance_to((target as Node2D).global_position) > radius:
             continue
-        var health := target.get_node_or_null("Health") as Health
-        if health == null:
-            continue
-        _damage(health, target, bus)
+        _damage(target, bus)
     # The burst is over: detach, so it cannot fire a second time and does not
     # outlive the corpse it belongs to.
     queue_free()
 
 
-func _damage(health: Health, target: Node, bus: EventManager) -> void:
+func _damage(target: Node, bus: EventManager) -> void:
     var ctx := DamageContext.new()
     ctx.source = _corpse if is_instance_valid(_corpse) else null
     ctx.target = target
     ctx.base_amount = blast_damage
     ctx.final_amount = blast_damage
     ctx.tags.append("explosion")
-    if bus != null:
-        bus.emit_event("before_deal_damage", {"damage_context": ctx})
-    if not health.apply_damage(ctx):
-        return  # already dead: the blast does not land, so no hit/kill events either
-    if bus != null:
-        bus.emit_event("after_deal_damage", {"area_burst": self, "body": target, "damage_context": ctx})
-        bus.emit_event("on_hit", {"area_burst": self, "body": target, "damage_context": ctx})
-        if health.current_health <= 0:
-            bus.emit_event("on_kill", {"area_burst": self, "body": target, "damage_context": ctx})
+    Damage.deal(ctx, bus)

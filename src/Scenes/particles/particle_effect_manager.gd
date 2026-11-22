@@ -15,7 +15,7 @@ func _ready():
 
 func _emit_particle(event: Dictionary):
     var ctx: DamageContext = event.get("damage_context")
-    var total := mini(int(8 * ctx.target_take_persent_damage), MAX_PARTICLES)
+    var total := mini(int(8 * ctx.fraction_of_max_health), MAX_PARTICLES)
     if total < 1:
         return
     var omni_amount := int(total * OMNI_SHARE)

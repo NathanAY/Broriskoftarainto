@@ -42,11 +42,13 @@ func test_bound_poison_only_fires_on_its_weapon() -> void:
     ctx.base_amount = 10.0
 
     # a hit from another weapon must NOT poison
-    em.emit_event("on_hit", {"weapon": other_weapon, "body": enemy, "damage_context": ctx})
+    ctx.weapon = other_weapon
+    em.emit_event("on_hit", {"damage_context": ctx})
     assert_that(health_node.get_node_or_null("PoisonEffect")).is_null()
 
     # a hit from the bound weapon applies poison
-    em.emit_event("on_hit", {"weapon": poison.bound_weapon, "body": enemy, "damage_context": ctx})
+    ctx.weapon = poison.bound_weapon
+    em.emit_event("on_hit", {"damage_context": ctx})
     assert_that(health_node.get_node_or_null("PoisonEffect")).is_not_null()
 
     test_scene.free()
@@ -77,11 +79,13 @@ func test_bound_knockback_only_fires_on_its_weapon() -> void:
     ctx.base_amount = 10.0
 
     # a hit from another weapon must NOT knock back
-    em.emit_event("on_hit", {"weapon": other_weapon, "body": enemy, "damage_context": ctx})
+    ctx.weapon = other_weapon
+    em.emit_event("on_hit", {"damage_context": ctx})
     assert_that(enemy.get_node_or_null("KnockbackController")).is_null()
 
     # a hit from the bound weapon knocks back
-    em.emit_event("on_hit", {"weapon": knockback.bound_weapon, "body": enemy, "damage_context": ctx})
+    ctx.weapon = knockback.bound_weapon
+    em.emit_event("on_hit", {"damage_context": ctx})
     assert_that(enemy.get_node_or_null("KnockbackController")).is_not_null()
 
     test_scene.free()
@@ -244,20 +248,22 @@ func test_bound_explosive_shot_only_fires_on_its_weapon() -> void:
     var other_weapon: BaseWeapon = load(PISTOL).duplicate(true)
 
     var ctx := DamageContext.new()
-    ctx.source = character
+    ctx.source = projectile  # the shot that hit; the blast spawns where it is
     ctx.target = enemy
     ctx.base_amount = 10.0
     ctx.final_amount = 10.0
 
     # a hit from another weapon must NOT explode
-    em.emit_event("on_hit", {"projectile": projectile, "weapon": other_weapon, "body": enemy, "damage_context": ctx})
+    ctx.weapon = other_weapon
+    em.emit_event("on_hit", {"damage_context": ctx})
     @warning_ignore("redundant_await")
     await runner.simulate_frames(2)
     assert_that(_first_explosion(test_scene)).is_null()
 
     # a hit from the bound weapon explodes. `_spawn_explosion` is deferred, so a
     # frame must pass before the node is in the tree.
-    em.emit_event("on_hit", {"projectile": projectile, "weapon": explosive.bound_weapon, "body": enemy, "damage_context": ctx})
+    ctx.weapon = explosive.bound_weapon
+    em.emit_event("on_hit", {"damage_context": ctx})
     @warning_ignore("redundant_await")
     await runner.simulate_frames(2)
     assert_that(_first_explosion(test_scene)).is_not_null()
@@ -324,7 +330,8 @@ func test_remove_weapon_detaches_builtins() -> void:
     ctx.source = character
     ctx.target = enemy
     ctx.base_amount = 10.0
-    em.emit_event("on_hit", {"weapon": fist_inst, "body": enemy, "damage_context": ctx})
+    ctx.weapon = fist_inst
+    em.emit_event("on_hit", {"damage_context": ctx})
     assert_that(enemy.get_node_or_null("KnockbackController")).is_null()
 
     test_scene.free()

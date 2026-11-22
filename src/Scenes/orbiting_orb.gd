@@ -61,9 +61,6 @@ func _deal_contact_damage():
     for body in overlapping_bodies:
         if not is_instance_valid(body):
             continue
-        var health: Health = body.get_node_or_null("Health")
-        if not health:
-            continue
 
         var ctx := DamageContext.new()
         ctx.source = orbit_center
@@ -71,16 +68,5 @@ func _deal_contact_damage():
         ctx.base_amount = damage
         ctx.final_amount = damage
         ctx.tags.append(modifier_meta)
-
-        # apply global modifiers
-        event_manager.emit_event("before_deal_damage", {"damage_context": ctx})
-
-        # apply to target
-        if not health.apply_damage(ctx):
-            continue  # already dead: the orb passes through, no hit/kill events
-
-        event_manager.emit_event("after_deal_damage", {"damage_context": ctx})
-        event_manager.emit_event("on_hit", {"damage_context": ctx, "body": body})
-        if health.current_health <= 0:
-            event_manager.emit_event("on_kill", {"damage_context": ctx, "body": body})
+        Damage.deal(ctx, event_manager)
     overlapping_bodies.clear()

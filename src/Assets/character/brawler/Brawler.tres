@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" uid="uid://fvfk1usjpfjb" path="res://src/Assets/character/brawler/brawler_eyes.png" id="6_brawler"]
 [ext_resource type="Texture2D" uid="uid://cefx377qfe5io" path="res://src/Assets/character/brawler/brawler_mouth.png" id="7_brawler"]
 [ext_resource type="Resource" uid="uid://dj8an5x7vxx4e" path="res://src/Resources/weapons/Fist.tres" id="4_brawler"]
-[ext_resource type="PackedScene" uid="uid://cdfucojif8qe6" path="res://src/Systems/Items/modifiers/ArmorModifier.tscn" id="5_brawler"]
 
 [resource]
 script = ExtResource("1_brawler")
@@ -16,13 +15,9 @@ base_stats = {
 "attack_speed": 1.05,
 "damage": 1.2,
 "health": 45.0,
-"movement_speed": 0.9
+"movement_speed": 0.9,
+"armor": 4.0
 }
-modifiers = [{
-"armor": {
-"flat": 4
-}
-}, ExtResource("5_brawler")]
 starting_weapons = Array[ExtResource("2_brawler")]([ExtResource("4_brawler")])
 body = ExtResource("3_brawler")
 eyes = ExtResource("6_brawler")

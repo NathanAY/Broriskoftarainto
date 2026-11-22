@@ -35,16 +35,15 @@ Every modifier `extends BaseModifier`, which provides the shared scaffolding so 
    - Per-event handlers stay idempotent and cheap: bail out early when the event lacks what they need.
    - Spawned objects are tagged to avoid recursive triggers (see "Anti-recursion" below).
    - `static instantiate_attached(scene, parent) -> Node` — the one place an effect scene becomes a live node (`instantiate()` + `add_child()`). Wiring is left to the caller because the effect kinds differ: modifiers go through `attachEventManager`, while buffs / poison effects wire themselves in their own `_ready()` from their `ItemHolder` parent.
-   - `static attach(scene, parent, em) -> BaseModifier` — the full contract for a `BaseModifier` scene: `instantiate_attached` + `attachEventManager(em)` + one `add_stack(true)`, and it marks the node `is_declared_baseline = true`. Used by hosts that merely declare a modifier scene (a character's `CharacterData.modifiers`); warns and returns `null` when the scene is not a `BaseModifier` or `em` is null, so a misconfigured declaration never silently does nothing. The flag says that this node's first stack stands for what the host **declared**, not for an item the holder picked up — `ArmorModifier` skips it when counting held stacks, so a character does not gain its baseline armor twice while its first armor item still counts in full.
+   - `static attach(scene, parent, em) -> BaseModifier` — the full contract for a `BaseModifier` scene: `instantiate_attached` + `attachEventManager(em)` + one `add_stack(true)`. Used by hosts that merely declare a modifier scene (a character's `CharacterData.modifiers`); warns and returns `null` when the scene is not a `BaseModifier` or `em` is null, so a misconfigured declaration never silently does nothing.
 3. Owning a stat (implemented in `BaseModifier`)
    - A modifier can OWN a stat on the holder's `Stats` node by setting `provided_stat` (e.g. `LifeLeach` owns `life_leach_multiplier`). The stat is **dynamic**: it exists while at least one claiming modifier is attached (reference-counted) and is erased when the last one detaches.
-   - Contract fields: `provided_stat` (name, `""` = none), `provided_stat_default` (base installed on first claim, e.g. `1.0`), `provided_stat_owned` (`true` = claim/release dynamic presence; `false` = the stat already exists, e.g. armor, modifier is a pure consumer).
+   - Contract fields: `provided_stat` (name, `""` = none), `provided_stat_default` (base installed on first claim, e.g. `1.0`), `provided_stat_owned` (`true` = claim/release dynamic presence; `false` = the stat already exists and the modifier is a pure consumer).
    - `_cache_holder(em)` calls `claim_provided_stat` on first attach. `detach()` (called by `remove_stack` on the last stack, or directly before freeing) releases the claim and unsubscribes all recorded subscriptions.
    - **The modifier never writes the stat.** Behavior handlers read the live value through `get_provided_stat()`. Stat items/buffs/debuffs compose with the installed base via the normal `add_modifier` pipeline and can drive the value negative.
-   - Two semantics:
+   - Semantics:
      - Multiplier (LifeLeach): stat base is `1.0`; stacks drive the power, the stat scales it — `heal = LIFESTEAL_PER_STACK * _active_stacks() * get_provided_stat()` (1 item = 5%, 2 = 10%; a stat item `flat -2` makes the multiplier `-1.0` → negative leach).
-     - Additive shared (Armor): the stat already exists on the holder; the modifier reads `get_provided_stat()`, and publishes its per-held-stack contribution **into that same stat** as an ordinary modifier so the stat panels and the damage formula cannot disagree.
-   - Stack changes (`add_stack`/`remove_stack`/`set_stack_active`) never touch an **owned** stat — stacks combine inside the subclass behavior. A modifier that publishes into a *shared* stat does republish on a stack change, which is the one case where a stack writes a value (`ArmorModifier._publish_armor`).
+   - Stack changes (`add_stack`/`remove_stack`/`set_stack_active`) never touch an **owned** stat — stacks combine inside the subclass behavior. A modifier that publishes into a *shared* stat does republish on a stack change, which is the one case where a stack writes a value (the regen modifiers' `_publish_rate`).
    - `_publish_stat_value(stat_name, value)` / `_unpublish_stat_value()` on the base are that write path, keyed in `_published_values` and cleared by `detach()`. Any modifier that grants a per-stack amount nobody declares uses it, so the amount shows up in the stat panels instead of living only inside the modifier (see `docs/systems/stats.md`).
 
 4. Display contract (tooltips)
@@ -84,14 +83,14 @@ Harmful modifiers (red effect line)
 
 Losing health over time
 - `regen_modifier.gd` carries a **signed** delta: subclasses return `_health_delta_per_tick(h)` and a positive value heals, a negative one drains. `FlatRegenModifier` / `PercentRegenModifier` export `health_delta` / `health_delta_percent`; `FlatLifeDrainModifier` / `PercentLifeDrainModifier` are the same code with negative defaults and `effect_kind = COST`.
-- **The regen base also publishes its rate**, so the stat panel shows it: subclasses return `_regen_stat_name()` (`flat_regen_per_second` for the flat pair, `percent_regen_per_second` for the percent pair) and `_regen_per_second()`, and the base multiplies by `_active_stacks()` — the same multiplier the tick applies. Both rows are per second, and a drain publishes a negative rate into the same row, so the panel shows the character's **net** rate. There is no declared-baseline exception here (unlike armor): the amount lives on the modifier, not on a value the character declares beside the scene. `test/Systems/Items/test_regen_stat_visibility.gd` pins it.
+- **The regen base also publishes its rate**, so the stat panel shows it: subclasses return `_regen_stat_name()` (`flat_regen_per_second` for the flat pair, `percent_regen_per_second` for the percent pair) and `_regen_per_second()`, and the base multiplies by `_active_stacks()` — the same multiplier the tick applies. Both rows are per second, and a drain publishes a negative rate into the same row, so the panel shows the character's **net** rate. The amount lives on the modifier, so even a character's declared baseline stack is a full stack. `test/Systems/Items/test_regen_stat_visibility.gd` pins it.
 - **A drain must not go through `Health.heal()`.** `heal()` is `min(current + amount, max)`: it clamps only at the ceiling, so a negative amount drives health below zero while the entity stays alive, and it fires `on_heal` with a negative payload that every heal listener reads as a gain. `Health.apply_damage()` is the only place the dead check lives, so a drain routes there and gets the whole defender phase for free (`before_take_damage` → armor / energy shield → damage → `on_death` → `after_take_damage`).
 - Consequence worth knowing: because the drain runs the defender phase, armor reduces it and energy shield soaks it before health. That is intentional — those systems are documented as "reduces incoming damage" / "absorbs incoming damage before health" — but it does mean armor is a stat that matters against debuffs.
 - A drain emits **nothing on an attacker's bus** (`before_deal_damage`, `after_deal_damage`, `on_kill`). There is no attacker, so the only bus available is the holder's own, and a self-inflicted tick must not pay the holder its own `StatOnKillModifier` rewards for dying.
 - Exactly zero is a no-op: healing by 0 would still emit `on_heal`, and damaging by 0 would still flash a sprite and float a damage number.
 
 Scaling models (how per-stack growth is implemented)
-- Multiplicative growth: `value = base * (1.0 + bonus_per_stack * (_active_stacks() - 1))` — bomb detonation, explosive shot, poison tick base, crit multiplier bonus.
+- Multiplicative growth: `value = base * (1.0 + bonus_per_stack * (_active_stacks() - 1))` — bomb detonation, explosive shot, poison tick base.
 - Owned-stat multiplier: `value = per_stack * _active_stacks() * stats.get_stat(provided_stat)` — life leach (`0.05` per stack, stat base `1.0`); the stat scales power and can go negative.
 - Flat-per-stack: `value * (1.0 + bonus * _active_stacks())` — plus-damage-to-healthy.
 - Count-per-stack: `for i in range(_active_stacks())` spawn/attach N copies — homing (projectile steering modules), homing rockets, spread (left+right pair per stack = "2 extra projectiles per stack"), projectile bounce attachment count, knockback strength scaling, reflect volley `volley + (active - 1)`, spinning orbs `ORB_COUNT + (active - 1)`, chain bounce count `max_bounces * active`.
@@ -104,15 +103,14 @@ Anti-recursion
 
 Events used
 - Consumed: `on_attack`, `on_hit`, `before_take_damage`, `after_take_damage`, `before_deal_damage`, `on_kill`, `on_item_added`, `on_condition_change`, `on_stat_changes`.
-- Emitted: `on_crit` (crit), `on_shield_changed` (energy shield).
+- Emitted: `on_shield_changed` (energy shield). `on_crit` is emitted by `Damage.deal()`, not by a modifier.
+- `on_hit` fires for **direct weapon hits only** (`docs/systems/damage.md`), so an on-hit effect never procs from an explosion, orb, poison tick or a projectile another modifier spawned. Read the target, source and weapon from the `damage_context`; damage events carry no other keys. A listener that changes `final_amount` subscribes with a `Damage.PHASE_*` constant.
 
 Catalog
 | Modifier (class) | Script | Trigger event | Effect |
 |---|---|---|---|
-| ArmorModifier | `armor_modifier.gd` | `before_take_damage` | Reduces damage by armor formula `10/(10+armor)`; +5 armor per held stack. Publishes that bonus into the (existing) `armor` stat as an ordinary modifier, so the stat panels list the armor the character really has — pure consumer, not owned. A character's declared baseline stack (`BaseModifier.is_declared_baseline`) publishes nothing, because the armor that character declares beside the scene is already in the stat; every stack an item adds counts in full. |
 | BombOnHitModifier | `bomb_on_hit_modifier.gd` | `on_hit` | Attaches a bomb to the target, explodes for 30% of hit damage after 3s; +20% explosion damage per stack. |
 | ChainModifier | `chain_modifier.gd` | `on_hit` | Spawns a chain projectile that chains to 3 extra targets per stack. |
-| CritModifier | `crit_modifier.gd` | `before_deal_damage` | On crit applies crit multiplier; +0.15 crit multiplier per stack. |
 | EmergencyHealModifier | `emergency_heal_modifier.gd` | `after_take_damage` | Heals 75% max HP when below 25% HP; cooldown 60s shortens per stack. |
 | EnergyShieldModifier | `energy_shield_modifier.gd` | `before_take_damage` | Shield absorbs damage, recharges 10/s after 1.5s; +5 max shield per stack. |
 | ProjectileExplosionModifier | `projectile_explosion_modifier.gd` | `on_hit` | Each connecting projectile hit explodes (melee, aura, contact and orb hits carry no `projectile`, so they never trigger it) for a fraction of that hit's damage (`damage_fraction_of_hit`, default 20%); +50% per stack. Works as an item effect or a weapon built-in (the Shotgun declares it). |

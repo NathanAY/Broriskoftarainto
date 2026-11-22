@@ -11,18 +11,20 @@ Data flow
 - Processing: `get_stat()` computes final stat by applying all modifiers (flat then percent multipliers) and honoring conditional modifiers via `_check_condition()`.
 - Outputs: emits `on_stat_changes` and `on_condition_change` events via `event_manager` when stats or conditions change.
 
+Stats the damage pipeline reads
+- `critical_chance` / `critical_multiplier` and `armor` are plain numbers here; the damage pipeline reads them (`docs/systems/damage.md`). No item effect is needed to switch them on.
+
 Provided (dynamic) stats
 - A behavior modifier can OWN a stat on the holder via `BaseModifier.provided_stat`. The stat is dynamic: it only exists while at least one such modifier is attached.
 - `claim_provided_stat(stat_name, default_value)` installs the base value on first claim and bumps a reference count; `release_provided_stat(stat_name)` decrements and erases the stat key at zero. Both emit `on_stat_changes`.
-- The modifier READS the stat (never writes it), so stat items/buffs/debuffs compose with its base and can drive the value negative. Two semantics:
+- The modifier READS the stat (never writes it), so stat items/buffs/debuffs compose with its base and can drive the value negative. Semantics:
   - Multiplier (e.g. `life_leach_multiplier`, base `1.0`): stacks drive the power, the stat scales it.
-  - Additive shared (e.g. `armor`, `provided_stat_owned = false`): the stat already exists on the holder; the modifier is a pure consumer.
 
 Stats a modifier PUBLISHES
-- Not owning a stat does not mean never writing one. A modifier that grants a per-stack amount nobody declares - `ArmorModifier`'s held-item armor, the regen modifiers' per-second rate - pushes it into the shared stat through `BaseModifier._publish_stat_value()`, which adds an ordinary modifier and takes it off again in `detach()`. This is what makes the amount visible: the stat panels list the stat, so an amount kept inside the modifier is one the player cannot see (the armor bug in `docs/systems/characters.md`).
+- Not owning a stat does not mean never writing one. A modifier that grants a per-stack amount nobody declares - the regen modifiers' per-second rate - pushes it into the shared stat through `BaseModifier._publish_stat_value()`, which adds an ordinary modifier and takes it off again in `detach()`. This is what makes the amount visible: the stat panels list the stat, so an amount kept inside the modifier is one the player cannot see.
 - Because it is an ordinary modifier, a stat item / buff / debuff on the same stat composes with it and can drive it negative - which is how a life drain lands in the same row as the regen it cancels. The row is therefore the character's **net** rate.
-- Three stats work this way and are not in `DEFAULT_STATS`: `armor`, `flat_regen_per_second` (HP/s) and `percent_regen_per_second` (percentage points of max HP per second, the `0-100` convention `critical_chance` uses). They appear in a stat list only while non-zero, and `ItemFactory.LISTENER_ONLY_STATS` keeps generated items from handing one out without the modifier that reads it.
-- Their icons are **not** in `src/Assets/stats/`. `Stats.get_stat_icon()` searches that folder first and falls through to `src/Assets/modifiers/`, where these three are named after the stat key — see "Asset classes" in `docs/visual_style.md`. The reason for the second folder is that `get_stat_icon()` is handed only a stat name, so it cannot reach the `flatregenmodifier.png` naming the modifier scenes use.
+- Two stats work this way and are not in `DEFAULT_STATS`: `flat_regen_per_second` (HP/s) and `percent_regen_per_second` (percentage points of max HP per second, the `0-100` convention `critical_chance` uses). They appear in a stat list only while non-zero, and `ItemFactory.LISTENER_ONLY_STATS` keeps generated items from handing one out without the modifier that reads it.
+- Their icons are **not** in `src/Assets/stats/`. `Stats.get_stat_icon()` searches that folder first and falls through to `src/Assets/modifiers/`, where these are named after the stat key — see "Asset classes" in `docs/visual_style.md`. The reason for the second folder is that `get_stat_icon()` is handed only a stat name, so it cannot reach the `flatregenmodifier.png` naming the modifier scenes use.
 
 Units
 - **Designer-facing distances are authored in meters; pixels exist only at the boundary.** `Stats.PIXELS_PER_METER` is `300.0`, and `meters_to_px()` / `px_to_meters()` are the only conversions. Prefer the helpers over multiplying by `PIXELS_PER_METER` inline: a call site then reads as meters and the world scale lives in one place. Pixels are for the physics server, a `Vector2` offset and a target selector's search radius - nowhere else.

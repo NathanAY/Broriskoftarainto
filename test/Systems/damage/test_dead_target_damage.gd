@@ -259,6 +259,8 @@ func test_projectile_stops_reporting_hits_once_the_target_is_a_corpse() -> void:
 
     var projectile := Projectile.new()
     projectile.damage = LETHAL_HIT
+    # A weapon makes it a direct hit, the only kind that reports `on_hit`.
+    projectile.source_weapon = BaseWeapon.new()
     _root.add_child(projectile)
     projectile.attachEventManager(attacker_bus)
 

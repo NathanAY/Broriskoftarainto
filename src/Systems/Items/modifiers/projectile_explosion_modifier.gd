@@ -27,12 +27,12 @@ func attachEventManager(em: Node):
     _subscribe(trigger_event, Callable(self, "_on_hit"))
 
 func _on_hit(event: Dictionary):
-    if !event.has("projectile"):
+    var ctx := event.get("damage_context") as DamageContext
+    if ctx == null or not (ctx.source is Projectile):
         return
-    var projectile = event["projectile"]
+    var projectile: Projectile = ctx.source
     var base_damage := explosion_damage
-    var ctx: DamageContext = event.get("damage_context")
-    if damage_fraction_of_hit > 0.0 and ctx:
+    if damage_fraction_of_hit > 0.0:
         base_damage = max(ctx.base_amount, ctx.final_amount) * damage_fraction_of_hit
     # Defer the explosion spawn to avoid flushing query errors
     call_deferred("_spawn_explosion", projectile.global_position, base_damage)

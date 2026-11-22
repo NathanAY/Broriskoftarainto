@@ -10,7 +10,7 @@
 class_name ItemHolderNodesTest
 extends GdUnitTestSuite
 
-const ARMOUR := "res://src/Resources/items/ArmorPlate.tres"    # has an effect_scene
+const KNOCKBACK := "res://src/Resources/items/Knockback.tres"  # has an effect_scene
 const BOOTS := "res://src/Resources/items/BootsOfSpeed.tres"   # no effect_scene
 const EFFECT_SCENE := "res://src/Systems/Items/Buffs/buff.tscn"
 
@@ -28,12 +28,12 @@ func _character_without_items() -> Dictionary:
 func test_adding_an_item_creates_a_node_named_after_it() -> void:
 	var ctx := _character_without_items()
 	var character: Character = ctx["character"]
-	var item: Item = load(ARMOUR)
+	var item: Item = load(KNOCKBACK)
 
 	character.item_holder.add_item(item)
 
-	assert_that(character.item_holder.has_node("Armour plate")).is_true()
-	var node: ItemNode = character.item_holder.get_node("Armour plate")
+	assert_that(character.item_holder.has_node("Knockback")).is_true()
+	var node: ItemNode = character.item_holder.get_node("Knockback")
 	assert_that(node.item).is_same(item)
 	assert_that(node.get_parent()).is_same(character.item_holder)
 
@@ -44,13 +44,13 @@ func test_item_node_sits_next_to_the_effect_node() -> void:
 	var ctx := _character_without_items()
 	var character: Character = ctx["character"]
 
-	character.item_holder.add_item(load(ARMOUR))
+	character.item_holder.add_item(load(KNOCKBACK))
 
 	# the effect node stays a direct child of the ItemHolder: add_item and
 	# remove_item look it up by scanning the direct children
 	var effect: Node = null
 	for child in character.item_holder.get_children():
-		if child.scene_file_path.ends_with("ArmorModifier.tscn"):
+		if child.scene_file_path.ends_with("KnockbackModifier.tscn"):
 			effect = child
 	assert_that(effect).is_not_null()
 	assert_that(effect.get_parent()).is_same(character.item_holder)
@@ -77,13 +77,13 @@ func test_two_holders_sharing_an_item_each_get_their_own_node() -> void:
 	# duplicate), so the node must belong to the holder, not to the item
 	var other: Character = load("res://src/Systems/Character.tscn").instantiate()
 	ctx["test_scene"].add_child(other)
-	var item: Item = load(ARMOUR)
+	var item: Item = load(KNOCKBACK)
 
 	character.item_holder.add_item(item)
 	other.item_holder.add_item(item)
 
-	var mine: ItemNode = character.item_holder.get_node("Armour plate")
-	var theirs: ItemNode = other.item_holder.get_node("Armour plate")
+	var mine: ItemNode = character.item_holder.get_node("Knockback")
+	var theirs: ItemNode = other.item_holder.get_node("Knockback")
 	assert_that(mine).is_not_same(theirs)
 	assert_that(mine.item).is_same(item)
 	assert_that(theirs.item).is_same(item)
@@ -136,12 +136,12 @@ func test_two_items_with_the_same_effect_scene_share_one_effect_node() -> void:
 	var ctx := _character_without_items()
 	var character: Character = ctx["character"]
 
-	character.item_holder.add_item(load(ARMOUR))
-	character.item_holder.add_item(load(ARMOUR))
+	character.item_holder.add_item(load(KNOCKBACK))
+	character.item_holder.add_item(load(KNOCKBACK))
 
 	var modifiers := 0
 	for child in character.item_holder.get_children():
-		if child.scene_file_path.ends_with("ArmorModifier.tscn"):
+		if child.scene_file_path.ends_with("KnockbackModifier.tscn"):
 			modifiers += 1
 	assert_that(modifiers).is_equal(1)
 

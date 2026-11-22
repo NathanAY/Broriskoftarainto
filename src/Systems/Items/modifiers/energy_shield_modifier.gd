@@ -22,7 +22,7 @@ func attachEventManager(em: Node):
     if not stats:
         return
     _update_max_shield([])
-    event_manager.subscribe(trigger_event, Callable(self, "_on_before_take_damage"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_before_take_damage"), Damage.PHASE_ABSORB)
     event_manager.subscribe("on_stat_changes", Callable(self, "_update_max_shield"))
 
 func _process(delta: float) -> void:

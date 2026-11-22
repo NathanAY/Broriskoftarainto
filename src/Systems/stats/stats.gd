@@ -45,6 +45,7 @@ const DEFAULT_STATS := {
     "movement_speed": 1.0,
     "critical_chance": 0.0,
     "critical_multiplier": 1.5,
+    "armor": 0.0,
     "area_size_multiplier": 1.0,
     "projectile_pierce": 0.0,
     "projectile_speed_multiplier": 1.0,
@@ -99,11 +100,9 @@ func get_stat(stat_name: String) -> float:
 ## The stat names a stats panel should list: every base stat, plus any stat that
 ## exists only because a modifier provides it.
 ##
-## `armor` is deliberately absent from [constant DEFAULT_STATS] - it is a number
-## nothing reads unless an ArmorModifier listens (see `CharacterData`), so a
-## character that has one declares it in `modifiers` instead. Iterating the base
-## keys alone therefore hid it entirely. Modifier-only stats are listed while
-## their value is non-zero, so a character with no armor shows no armor row.
+## Modifier-only stats (the regen rates) are not in [constant DEFAULT_STATS], so
+## iterating the base keys alone would hide them. They are listed while their
+## value is non-zero.
 func display_stat_names() -> Array:
     var names: Array = stats.keys()
     for mod in modifiers:

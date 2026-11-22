@@ -5,7 +5,7 @@ extends GdUnitTestSuite
 const CHARACTER_UI_SCENE := "res://src/ui/CharacterUI.tscn"
 const KNOCKBACK_ITEM := "res://src/Resources/items/Knockback.tres"
 const POISON_ITEM := "res://src/Resources/items/PoisonHit.tres"
-const ARMOR_MODIFIER := "res://src/Systems/Items/modifiers/ArmorModifier.tscn"
+const REGEN_MODIFIER := "res://src/Systems/Items/modifiers/FlatRegenModifier.tscn"
 const PISTOL := "res://src/Resources/weapons/Pistol.tres"
 
 
@@ -79,10 +79,10 @@ func test_character_baseline_and_weapon_builtins_are_listed() -> void:
     var character := _build_character()
     var holder: ItemHolder = character.get_node("ItemHolder")
     var em: EventManager = character.get_node("EventManager")
-    BaseModifier.attach(load(ARMOR_MODIFIER), holder, em)
+    BaseModifier.attach(load(REGEN_MODIFIER), holder, em)
 
-    var armor_display := ItemTooltip.resolve_effect_display(load(ARMOR_MODIFIER))
-    assert_array(_names(ModifierSummary.entries(character))).contains([armor_display["name"]])
+    var regen_display := ItemTooltip.resolve_effect_display(load(REGEN_MODIFIER))
+    assert_array(_names(ModifierSummary.entries(character))).contains([regen_display["name"]])
 
     # A weapon's own built-in effect shows up too, though no item carries it.
     var before_names := _names(ModifierSummary.entries(character))

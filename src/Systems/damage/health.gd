@@ -18,16 +18,19 @@ func _ready():
     max_health = stats.get_stat("health")
     current_health = max_health
 
-## The single entry point for dealing damage, and the only place the dead check
-## lives. It owns the whole defender phase of the pipeline
-## (`before_take_damage` -> damage -> `on_death` -> `after_take_damage`) so a
-## caller cannot skip the guard, and so nothing downstream of a rejected hit
-## fires: no `HitFlashManager` flash, no `ParticleEffectManager` particles, no
-## `TextureBurstManager` burst, no `on_kill` rewards.
+## The defender half of the damage pipeline, and the only place the dead check
+## lives. Attackers go through `Damage.deal()`, which calls this; only damage
+## with no attacker behind it (life drain) calls it directly. It owns the whole
+## defender phase (armor -> `before_take_damage` -> damage -> `on_death` ->
+## `after_take_damage`) so a caller cannot skip the guard, and so nothing
+## downstream of a rejected hit fires: no `HitFlashManager` flash, no
+## `ParticleEffectManager` particles, no `TextureBurstManager` burst, no
+## `on_kill` rewards.
 ## Returns true when the damage was actually applied.
 func apply_damage(damage_context: DamageContext) -> bool:
     if is_dead:
         return false
+    Damage.apply_armor(damage_context, stats)
     if event_manager:
         event_manager.emit_event("before_take_damage", {"damage_context": damage_context})
     if is_dead:
@@ -36,7 +39,7 @@ func apply_damage(damage_context: DamageContext) -> bool:
         return false
     current_health -= damage_context.final_amount
     _emit_on_health_changed_event(-damage_context.final_amount)
-    damage_context.target_take_persent_damage = damage_context.final_amount / max_health
+    damage_context.fraction_of_max_health =damage_context.final_amount / max_health
     if current_health <= 0:
         die(damage_context)
     if event_manager:

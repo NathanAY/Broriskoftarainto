@@ -16,11 +16,8 @@ Data flow
 - `ProjectileWeapon.projectile_speed` (m/s) is the weapon-level muzzle speed, authored in the same meter scale. `0` keeps the projectile scene's own speed in px/s; a positive value overrides it before the `projectile_speed_multiplier` stat is applied. The boss uses it to slow its shotgun pellets to `1.0` m/s so they can be outrun (`src/Resources/weapons/boss/BossShotgun.tres`).
 
 Dealing damage
-- Every damage source follows one contract (`projectile.gd`, `melee_weapon_node.gd`, `contact_weapon.gd`, `area_weapon.gd`, `explosion.gd`, `orbiting_orb.gd`, `poison_effect.gd`):
-  1. Build a `DamageContext` (`source`, `target`, amounts, tags) and emit `before_deal_damage` on the **holder's** bus.
-  2. `if not target.get_node("Health").apply_damage(ctx): return` — `Health` runs the whole defender phase on the **target's** bus and rejects the hit outright if the target is already dead.
-  3. Only on `true`, emit `after_deal_damage` and `on_hit`, plus `on_kill` when `current_health <= 0`.
-- Step 2 is what stops a corpse being hit again while its death animation plays; see `docs/systems/event_manager.md`. Do not emit `before_take_damage` / `after_take_damage` from a damage source — that is `Health`'s job.
+- Every damage source builds a `DamageContext` and calls `Damage.deal(ctx, event_manager)` — nothing else. A weapon hit sets `ctx.weapon`, which makes it a direct hit that procs on-hit effects; projectiles get it from `source_weapon`. The pipeline, crit, armor and the direct-hit rule are in `docs/systems/damage.md`.
+- `AreaWeapon` and `ContactWeapon` also emit `on_attack` after each landed hit, because they have no shot of their own to report.
 
 The `AreaWeapon` aura (`area_weapon.gd`)
 - An `AreaWeapon` damages **every `damageable` node within `weapon_range` of its own `sprite_node`, on every timer tick** — an aura centred on the wielder, not a target that was picked and then exploded around. `weapon_range` is the whole of that reach: there is no second, hidden radius. An earlier version halved `weapon_range` into a private `radius`, so the card printed a range twice as large as the circle that dealt damage; the halving is gone and `try_shoot` damages the list `BaseWeapon._on_timeout` hands it instead of re-querying the selector. Paired with `AllTargetsInRangeSelector` (`src/Resources/weapons/aim/all.tres`).

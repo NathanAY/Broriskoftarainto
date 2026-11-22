@@ -179,7 +179,7 @@ func test_manager_spawns_burst_as_sibling_on_death() -> void:
 	var ctx := DamageContext.new()
 	ctx.source = null
 	ctx.target = holder
-	ctx.target_take_persent_damage = 0.5
+	ctx.fraction_of_max_health = 0.5
 	event_manager.emit_event("on_death", {"self": holder, "damage_context": ctx})
 	# Burst must be added to the container (sibling of holder), not inside holder,
 	# so it survives the owner's queue_free.
@@ -228,7 +228,7 @@ func _spawn_death_burst(percent: float) -> Node:
 	var ctx := DamageContext.new()
 	ctx.source = null
 	ctx.target = holder
-	ctx.target_take_persent_damage = percent
+	ctx.fraction_of_max_health = percent
 	event_manager.emit_event("on_death", {"self": holder, "damage_context": ctx})
 	var found_burst = null
 	for child in container.get_children():
@@ -259,7 +259,7 @@ func test_manager_hides_ground_shadow_on_death() -> void:
 	holder.add_child(MANAGER_SCENE.instantiate())
 	var ctx := DamageContext.new()
 	ctx.target = holder
-	ctx.target_take_persent_damage = 0.5
+	ctx.fraction_of_max_health = 0.5
 	event_manager.emit_event("on_death", {"self": holder, "damage_context": ctx})
 	assert_bool(shadow.visible).is_false()
 	container.queue_free()

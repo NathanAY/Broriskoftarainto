@@ -15,6 +15,7 @@
 ## Player & combat
 - `src/Scripts/character.gd`: player entity holds `WeaponHolder` and `ItemHolder` children
 - `src/Systems/damage/health.gd`: health/stats subsystem (uses modifiers and conditions)
+- `src/Systems/damage/damage.gd`: `Damage.deal(ctx, bus)` is the only way to hurt something. It owns crit, armor and listener phases; `Stats` holds only numbers. See `docs/systems/damage.md`
 
 ## Items & modifiers
 - `src/Systems/Items/item_pickup.gd`: item pickup logic

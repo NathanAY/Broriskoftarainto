@@ -94,14 +94,4 @@ func do_damage(body):
     ctx.final_amount = damage
     ctx.tags.append("explosion")
     ctx.tags.append_array(damage_tags)
-    if event_manager: 
-        event_manager.emit_event("before_deal_damage", {"damage_context": ctx})
-    var bodyHealth: Health = body.get_node("Health")
-    if not bodyHealth.apply_damage(ctx):
-        return  # already dead: the blast does not land, so no hit/kill events either
-    if event_manager:
-        event_manager.emit_event("after_deal_damage", {"explosion": self, "body": body, "damage_context": ctx})
-    if event_manager:
-        event_manager.emit_event("on_hit", {"explosion": self, "body": body, "damage_context": ctx})
-    if event_manager and bodyHealth.current_health <= 0:
-        event_manager.emit_event("on_kill", {"explosion": self, "body": body, "damage_context": ctx})
+    Damage.deal(ctx, event_manager)

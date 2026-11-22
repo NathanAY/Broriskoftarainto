@@ -188,7 +188,7 @@ func test_sell_button_uses_analyzer_price() -> void:
     shop.character = character
     character.get_node("Stats").set_base_stat("money", 0)
 
-    var modifier: Item = load("res://src/Resources/items/CritGlass.tres")
+    var modifier: Item = load("res://src/Resources/items/Knockback.tres")
     shop._add_item_entry(modifier)
     var card: ShopItemCard = shop.items_container.get_child(0)
     assert_str(card.secondary_button.text).is_equal("Sell (+2)")
@@ -427,7 +427,7 @@ func test_selling_pickup_refreshes_other_cards_affordability() -> void:
     assert_bool(weapon_card.primary_button.disabled).is_true()
 
     # Selling a pickup worth 2 still leaves the 5-cost weapon unaffordable.
-    shop._add_item_entry(load("res://src/Resources/items/CritGlass.tres"))
+    shop._add_item_entry(load("res://src/Resources/items/Knockback.tres"))
     var first_pickup: ShopItemCard = shop.items_container.get_child(1)
     first_pickup.secondary_button.pressed.emit()
     assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(2.0)
@@ -435,7 +435,7 @@ func test_selling_pickup_refreshes_other_cards_affordability() -> void:
 
     # Sold cards free on a tween, so look the new pickup up by identity rather
     # than by index.
-    shop._add_item_entry(load("res://src/Resources/items/CritGlass.tres"))
+    shop._add_item_entry(load("res://src/Resources/items/Knockback.tres"))
     for child in shop.items_container.get_children():
         if child != first_pickup and child is ShopItemCard and not child.has_meta("id"):
             (child as ShopItemCard).secondary_button.pressed.emit()
@@ -444,7 +444,7 @@ func test_selling_pickup_refreshes_other_cards_affordability() -> void:
     assert_bool(weapon_card.primary_button.disabled).is_true()
 
     # One more sale crosses the 5 coin threshold and re-enables the weapon.
-    shop._add_item_entry(load("res://src/Resources/items/CritGlass.tres"))
+    shop._add_item_entry(load("res://src/Resources/items/Knockback.tres"))
     for child in shop.items_container.get_children():
         if child is ShopItemCard and not child.has_meta("id") and not child.is_queued_for_deletion():
             (child as ShopItemCard).secondary_button.pressed.emit()

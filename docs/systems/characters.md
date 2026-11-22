@@ -25,10 +25,10 @@ This document explains the new character system (data, UI, and integration point
 ## CharacterData format
 - `display_name` (String): shown in UI.
 - `description` (String): short description.
-- `base_stats` (Dictionary): the archetype's own stat block — the values that differ from the default `Stats` (`health`, `movement_speed`, `damage`, `attack_speed`, ...). Each key calls `Stats.set_base_stat(stat_name, value)`. `movement_speed` is in meters per second (`PIXELS_PER_METER` = 300, so base 1.0 m/s = 300 px/s). **Never** put a stat here that needs a modifier to do anything (e.g. `armor`) — see below.
+- `base_stats` (Dictionary): the archetype's own stat block — the values that differ from the default `Stats` (`health`, `movement_speed`, `damage`, `attack_speed`, ...). Each key calls `Stats.set_base_stat(stat_name, value)`. `movement_speed` is in meters per second (`PIXELS_PER_METER` = 300, so base 1.0 m/s = 300 px/s). `armor` is a plain stat too and goes here — see below.
 - `modifiers` (Array): everything else that makes this character different, as one flat list of two entry kinds applied in order:
-  - **Dictionary** — a value, passed to `Stats.add_modifier` as-is: `{"armor": {"flat": 4}}`, `{"damage": {"percent": 0.2}}`, `{"attack_speed": {"percent": 0.2}, "condition": {...}}`.
-  - **PackedScene** — a behavior: a modifier scene from `Systems/Items/modifiers/*.tscn`, instantiated and wired to the character by `BaseModifier.attach` (e.g. `ArmorModifier.tscn`).
+  - **Dictionary** — a value, passed to `Stats.add_modifier` as-is: `{"damage": {"percent": 0.2}}`, `{"attack_speed": {"percent": 0.2}, "condition": {...}}`.
+  - **PackedScene** — a behavior: a modifier scene from `Systems/Items/modifiers/*.tscn`, instantiated and wired to the character by `BaseModifier.attach` (e.g. `FlatRegenModifier.tscn`).
 - `starting_items` (Array[Item]): `Item` resources equipped at spawn via the `ItemHolder`.
 - `starting_weapons` (Array[BaseWeapon]): `BaseWeapon` resources (e.g. `res://src/Resources/weapons/Fist.tres`) equipped at spawn via the `WeaponHolder`.
 - `body`, `eyes`, `mouth` (Texture2D): the layered art parts, drawn bottom to top. See "Character art" below.
@@ -36,8 +36,8 @@ This document explains the new character system (data, UI, and integration point
 Example (pseudo):
 ```
 display_name = "Brawler"
-base_stats = {"health": 35.0, "movement_speed": 0.35, "damage": 0.8}
-modifiers = [{"armor": {"flat": 4}}, <ArmorModifier.tscn>, {"attack_speed": {"percent": 0.2}}]
+base_stats = {"health": 35.0, "movement_speed": 0.35, "damage": 0.8, "armor": 4.0}
+modifiers = [<FlatRegenModifier.tscn>, {"attack_speed": {"percent": 0.2}}]
 ```
 
 ## Character art
@@ -69,54 +69,33 @@ Reuse is just pointing two `.tres` files at the same texture. `src/Assets/charac
 
 This keeps character data separate from player logic and allows easy addition of new characters.
 
-## One way to give a character armor (or any stat-driven behavior)
-A stat on its own is inert: `armor` is just a number, and the
-`10 / (10 + armor)` damage reduction lives in `ArmorModifier`'s
-`before_take_damage` handler. Nothing subscribes to that event unless an
-`ArmorModifier` node is attached, which is why a character needs **both** halves
-of the declaration — and why both live in the same `modifiers` list:
+## Armor is a plain stat
+`armor` is in `Stats.DEFAULT_STATS` (default 0) and is read by the damage
+pipeline itself (`Damage.apply_armor`, run by `Health.apply_damage()` before any
+listener), so the value alone reduces every hit by `10 / (10 + armor)` — see
+`docs/systems/damage.md`. An armored character just sets it in `base_stats`:
 
 ```
-modifiers = [{"armor": {"flat": 5}}, <ArmorModifier.tscn>]   # Soldier
-modifiers = [{"armor": {"flat": 4}}, <ArmorModifier.tscn>]   # Brawler
+base_stats = {..., "armor": 5.0}   # Soldier
+base_stats = {..., "armor": 4.0}   # Brawler
 ```
 
-Rules that keep this the only correct way:
-- A behavior that needs a stat always declares the value as a Dictionary in
-  `modifiers` and the listener as a modifier scene in the same list. Never a
-  bare `armor` key in `base_stats` — that is the archetype stat block only.
+Rules:
+- Every armor source (base stat, stat items, rolled stats) sums into the one
+  `armor` stat, so a hit is reduced exactly once.
+- There is no armor modifier. An armor item is a stat item (`ArmorPlate.tres`),
+  and the item factory rolls armor like any other stat.
 - `CharacterInitializer` names no stat and no modifier. Adding a brand new
   behavior to a character is a data edit: drop that modifier's scene into
   `modifiers`. The same is true for items (`ItemHolder` goes through the shared
   `BaseModifier.instantiate_attached`).
 - A modifier scene entry that is not a `BaseModifier`, or an entry of any other
   type, logs a warning instead of failing silently.
-- Armor items picked up later bring their own `ArmorModifier` instance; the
-  handler's "strongest armor source wins" guard (`ctx.armor_applied`) keeps a hit
-  reduced exactly once no matter how many armor sources are live.
-- An armor item never declares armor as a plain stat value. It attaches the
-  modifier, which **publishes** its per-stack bonus into the `armor` stat
-  (`_publish_armor`), so the stat, the damage formula and the panels are one
-  number. `ItemFactory.LISTENER_ONLY_STATS` keeps armor out of the rollable stat
-  pool for the same reason a character must declare both halves: a bare
-  `{"armor": ...}` is inert on a character with no `ArmorModifier`.
-- The modifier's **first** stack means different things on the two paths, and
-  `BaseModifier.is_declared_baseline` is what tells them apart. A stack from
-  `BaseModifier.attach` (a character's declared behavior) stands for the armor
-  that character declares beside the scene, which is already in the stat, so it
-  publishes nothing. A stack from `ItemHolder` is a held item and counts in full
-  — so a single armor item from the shop, a drop or the Configure panel is worth
-  its full `armor_per_stack`, and only the *items above* the character's baseline
-  stack add on top of it.
-
-`CharacterTooltip` renders both halves: stat dicts as `armor flat: 4` and
-modifier scenes as `effect: Armor — ... (Triggers on before take damage)`.
 
 ## When the amount lives on the modifier, not on a stat
-Armor is the easy case because its amount is a **stat**, so one shared scene
-serves every character that names the number. Not every modifier is shaped that
-way: `FlatRegenModifier` exports `health_delta` on the scene, because a regen
-tick is not a stat and nothing reads a `regen` value out of `Stats`.
+Unlike armor, a regen amount is not a stat: `FlatRegenModifier` exports
+`health_delta` on the scene, because a regen tick is not a stat and nothing
+reads a `regen` value out of `Stats`.
 
 So a character that wants its own regen rate declares a **configured variant**
 of the shared scene — a `.tscn` that instances the modifier and overrides the
@@ -142,22 +121,15 @@ Rules that keep this the only correct way:
   behavior change to the modifier automatically.
 
 ## Where armor shows up during a run
-Because `armor` is not in `Stats.DEFAULT_STATS`, a list built from the base stat
-keys alone hid it entirely. `Stats.display_stat_names()` is the one list every
-stat panel reads (`src/ui/character_ui.gd`, `src/ui/player_ui.gd` and the shop's
-`src/Scenes/menu/shop_menu.gd`):
-every base stat, plus any stat that only a modifier provides, and those extra
-names only while their value is non-zero. So Brawler shows `Armor: 4.00`, and
-the row appears and disappears as armor items are picked up and sold.
+`armor` is a base stat, so every stat panel lists it (`Stats.display_stat_names()`,
+read by `src/ui/character_ui.gd`, `src/ui/player_ui.gd` and the shop's
+`src/Scenes/menu/shop_menu.gd`). Brawler shows `Armor: 4.00`, a character with
+none shows `Armor: 0.00`, and the row tracks armor items as they are picked up
+and sold. That number is the one the damage formula reads.
+`test/Systems/Items/test_armor_stat_visibility.gd` pins it.
 
-The value in that row is the same number the damage formula reads, because an
-armor item's bonus is published into the stat rather than kept inside the
-modifier. `test/Systems/Items/test_armor_stat_visibility.gd` pins both halves of
-that.
-
-`src/Scenes/menu/configure_panel.gd` is a different list — it walks
-`DEFAULT_STATS` directly to build its editor rows, so it still has no armor
-field.
+`src/Scenes/menu/configure_panel.gd` walks `DEFAULT_STATS` to build its editor
+rows, so armor is editable there too.
 
 ## How a character's stats are coloured
 `base_stats` are **absolute** values that overwrite the `Stats` defaults, not

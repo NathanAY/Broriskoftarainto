@@ -23,7 +23,7 @@ const FLASH_OUT_DURATION := 0.15
 var _tween: Tween = null
 
 func _ready():
-    event_manager.subscribe("before_take_damage", Callable(self, "_flash"))
+    event_manager.subscribe("before_take_damage", Callable(self, "_flash"), Damage.PHASE_OBSERVE)
 
 func _flash(event: Dictionary):
     var sprite := get_parent().get_node_or_null(sprite_path) as Sprite2D

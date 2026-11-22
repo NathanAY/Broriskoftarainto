@@ -19,7 +19,7 @@ var _current_damage_multiplier: float = 1.0
 func attachEventManager(em: EventManager):
     _cache_holder(em)
     ignore_groups = holder.get_groups().filter(func(g): return g != "damageable")
-    event_manager.subscribe(trigger_event, Callable(self, "_on_trigger"))
+    event_manager.subscribe(trigger_event, Callable(self, "_on_trigger"), Damage.PHASE_OBSERVE)
     event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func _on_trigger(_event: Dictionary) -> void:

@@ -37,6 +37,9 @@ const PANEL_RADIUS := 8
 
 var item: Resource = null
 var is_weapon: bool = false
+## Whose stats a weapon's final "(16)" values use. Set by the shop for offers,
+## which are not equipped and so carry no Stats of their own.
+var holder_stats: Stats = null
 
 
 func _ready() -> void:
@@ -69,8 +72,15 @@ func set_resource(resource: Resource) -> void:
     icon_plate.visible = true
     separator.visible = true
     _add_icon(make_icon(resource, _icon_size()))
-    info_label.text = build_bbcode(ItemTooltip.card_rows(resource), resource)
+    refresh_body()
     _on_resource_changed()
+
+
+## Rebuilds only the stat body, e.g. after the holder's stats changed.
+func refresh_body() -> void:
+    if item == null:
+        return
+    info_label.text = build_bbcode(ItemTooltip.card_rows(item, holder_stats), item)
 
 
 ## Override in subclasses to react to a new resource (borders, badges...).

@@ -94,9 +94,20 @@ func can_combine_with(other: BaseWeapon) -> bool:
 ## as unused.
 var current_damage: float:
     get:
-        if not is_instance_valid(stats):
-            return rarity_damage()
-        return (rarity_damage() + stats.get_stat("flat_weapon_damage")) * stats.get_stat("damage")
+        return damage_with(stats)
+
+## Damage this weapon would deal held by `holder_stats` - also asked of a shop
+## offer that is not equipped yet, so its tooltip can show the player's number.
+func damage_with(holder_stats: Stats) -> float:
+    if not is_instance_valid(holder_stats):
+        return rarity_damage()
+    return (rarity_damage() + holder_stats.get_stat("flat_weapon_damage")) * holder_stats.get_stat("damage")
+
+## Attacks per second held by `holder_stats`; the same number the fire timer uses.
+func attack_speed_with(holder_stats: Stats) -> float:
+    if not is_instance_valid(holder_stats):
+        return base_attack_speed
+    return base_attack_speed * holder_stats.get_stat("attack_speed")
 
 var _current_attack_speed
 
@@ -194,12 +205,7 @@ func _on_timeout() -> void:
 
 func _update_timer_wait() -> void:
     if not timer: return
-    var holder = get_holder()
-    var _stats_node: Node = holder.get_node_or_null("Stats") if holder else null
-
-    var base_weapon_speed := base_attack_speed
-    var owner_speed = stats.get_stat("attack_speed") if stats else 1.0
-    _current_attack_speed = owner_speed * base_weapon_speed
+    _current_attack_speed = attack_speed_with(stats)
     if _current_attack_speed <= 0.001:
         _current_attack_speed = 0.001
     timer.wait_time = 1.0 / _current_attack_speed

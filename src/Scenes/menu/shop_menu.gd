@@ -303,6 +303,7 @@ func _add_shop_item_entry(offer: Resource, existing_id: String = ""):
     card.set_meta("item", offer)
     card.set_meta("id", entry_id)
     items_container.add_child(card)
+    card.holder_stats = character.stats if character else null
     card.set_item_display(offer)
 
     # Buy button
@@ -381,6 +382,11 @@ func _update_stats() -> void:
     for child in stats_container.get_children():
         child.queue_free()
     value_labels.clear()
+    # A weapon offer's "(16)" final values follow the player's stats, so buying
+    # a damage item must update them too.
+    for card in items_container.get_children():
+        if card is ShopItemCard and card.is_weapon:
+            card.refresh_body()
 
     if not character or not character.has_node("Stats"):
         return

@@ -80,12 +80,13 @@ static func tooltip_lines(resource: Resource) -> PackedStringArray:
 ## Structured counterpart of `tooltip_lines()`, used by `ShopItemCard` so
 ## each line can be colored and get its own stat icon. `tooltip_lines()`
 ## stays the flat-text source for hover tooltips and is left untouched.
-static func card_rows(resource: Resource) -> Array:
+## `holder_stats` only matters for weapons; see `weapon_card_rows`.
+static func card_rows(resource: Resource, holder_stats: Stats = null) -> Array:
     var rows: Array = []
     if resource is CharacterData:
         return CharacterTooltip.card_rows(resource as CharacterData)
     if resource is BaseWeapon:
-        return weapon_card_rows(resource as BaseWeapon)
+        return weapon_card_rows(resource as BaseWeapon, holder_stats)
     if not (resource is Item):
         return rows
 
@@ -99,19 +100,26 @@ static func card_rows(resource: Resource) -> Array:
     return rows
 
 
-static func weapon_card_rows(weapon: BaseWeapon) -> Array:
+## `holder_stats` is whose stats the final "(16)" values are computed with: an
+## equipped weapon defaults to its own holder's, a shop offer is passed the
+## player's. Neither -> base numbers only.
+static func weapon_card_rows(weapon: BaseWeapon, holder_stats: Stats = null) -> Array:
     var rows: Array = []
     if weapon == null:
         return rows
+    if not is_instance_valid(holder_stats):
+        holder_stats = weapon.stats
     _append_name_row(rows, weapon.name)
     # Weapon base stats are the weapon's own numbers, not deltas the holder
     # gains, so they are never signed (contrast `stat_rows`, where a "+" means
     # a gain to the player's stats). Attack speed shows the rate it actually
     # means, "0.8 attack/sec", instead of a bare multiplier-like number.
-    _append_weapon_row(rows, "Damage", format_value(weapon.rarity_damage()))
+    # The number it really deals/fires at follows in parentheses: "Damage: 10 (16)".
+    _append_weapon_row(rows, "Damage", _with_final(weapon.rarity_damage(), weapon.damage_with(holder_stats)))
     if weapon.has_tooltip_range():
         _append_weapon_row(rows, "Range", format_value(weapon.weapon_range) + " m")
-    _append_weapon_row(rows, "Attack Speed", format_value(weapon.base_attack_speed) + " attack/sec")
+    _append_weapon_row(rows, "Attack Speed",
+            _with_final(weapon.base_attack_speed, weapon.attack_speed_with(holder_stats)) + " attack/sec")
     # Whatever the weapon's own subclass wants to add (a shotgun's pellets, ...).
     # Asked of the weapon rather than branched on here, so a new weapon type is a
     # weapon-script change and never another `if weapon is ...` in this file.
@@ -134,6 +142,15 @@ static func _append_name_row(rows: Array, display_name: String) -> void:
     row.kind = ItemCardRow.Kind.NAME
     row.label = humanize_effect_name(str(display_name))
     rows.append(row)
+
+
+## "10 (16)" when the holder's stats change the value, plain "10" otherwise.
+## Rounded to 2 decimals so a multiplied float does not print 15 digits.
+static func _with_final(base: float, final: float) -> String:
+    var shown := format_value(snappedf(base, 0.01))
+    if is_equal_approx(base, final):
+        return shown
+    return "%s (%s)" % [shown, format_value(snappedf(final, 0.01))]
 
 
 ## Weapon rows are the weapon's own numbers, so they are left unsigned: a "+"

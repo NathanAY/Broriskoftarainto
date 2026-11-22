@@ -10,6 +10,17 @@ class_name StageManager
 ## the player decides when to stop. `FINAL_BOSS_LOOP` is where that decision is
 ## first offered, and it is offered again after every extra loop taken.
 
+## The loop of the running game as seen from `node`, or 1 outside one (tests,
+## previews, a detached node). The one lookup for shop prices, rerolls and the
+## wallet's tally, so they cannot disagree about which loop it is.
+static func loop_of(node: Node) -> int:
+    if node == null or not node.is_inside_tree():
+        return 1
+    var scene := node.get_tree().current_scene
+    # `as`, not a typed assignment: test harnesses name a plain Node "StageManager".
+    var stage_manager := scene.get_node_or_null("StageManager") as StageManager if scene else null
+    return stage_manager.current_loop if stage_manager else 1
+
 ## 1 = enemies, 2 = boss, 3 = shop (waits for the player).
 const STAGE_WAVE := 1
 const STAGE_BOSS := 2

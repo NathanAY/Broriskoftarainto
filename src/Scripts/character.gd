@@ -28,6 +28,9 @@ var anim_player: AnimationPlayer:
     get:
         return get_node_or_null("AnimationPlayer") as AnimationPlayer
 
+## Coins earned this run: loop -> {source -> coins}. Written only by `Wallet`.
+var income_by_loop: Dictionary = {}
+
 var current_target = null
 var fire_timer = 0.0
 

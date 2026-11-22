@@ -19,12 +19,15 @@ func attach_to_enemy(enemy: Node, new_character: Character):
         push_warning("ExplosionModifier: Entity has no Health or EventManager!")
 
 func attach_on_death_effects(event: Dictionary):
-    # award money to character
-    if character and character.stats:
-        character.stats.set_base_stat("money", character.stats.stats.get("money", 0) + 1)
+    award_kill()
     # Use deferred spawn to avoid physics flushing error
     call_deferred("_spawn_item", event.get("self").global_position)
     DeathMark.leave_corpse(event.get("self"))
+
+## Pays the character `coins_per_kill` from the `economy` config.
+func award_kill() -> void:
+    if character and character.stats:
+        Wallet.earn(character, float(Wallet.config().get("coins_per_kill", 1)), "kill")
 
 func _spawn_item(position: Vector2):
     # Generate alter 5%, item drop chance 5%

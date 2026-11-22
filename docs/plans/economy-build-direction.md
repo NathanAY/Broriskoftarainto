@@ -1,6 +1,8 @@
 # Plan: the economy build direction
 
-Status: **[PROPOSED]** — nothing here is implemented. Open questions are at the end; Phase 0 has to be measured before the numbers in Phase 1 are final.
+Status: **Phase 0 implemented** except the income measurement (§3.3), which needs a played run. What shipped is described in `docs/systems/economy.md`; everything from Phase 1 on is still **[PROPOSED]**. Section 2 describes the game *before* Phase 0.
+
+Phase 0 differs from §3 in one way: `on_wave_start` and `on_payday` are not registered yet. Nothing emits them until Phase 1 (payday) and Phase 2 (Market Rally, Insurance Policy), so they land with their first emitter.
 
 ## 1. Goal
 

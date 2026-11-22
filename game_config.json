@@ -40,5 +40,16 @@
 		"negative_multipliers": [1.0, 1.05, 1.1, 1.15, 1.25],
 		"extra_positive_chance": [0.0, 0.35, 0.45, 0.55, 0.65],
 		"extra_negative_chance": [0.2, 0.15, 0.1, 0.05, 0.02]
+	},
+	"economy": {
+		"coins_per_kill": 1,
+		"sell_ratio": 0.5,
+		"reroll_base_cost": 1,
+		"reroll_loop_step": 2,
+		"reroll_step": 1,
+		"type_prices": {"stat": 1, "buff": 2, "effect": 3, "weapon": 5},
+		"item_price_growth_per_loop": 0.5,
+		"boss_coins_base": 5,
+		"boss_coins_per_loop": 5
 	}
 }

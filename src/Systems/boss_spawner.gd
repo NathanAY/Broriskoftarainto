@@ -51,12 +51,21 @@ func spawn_boss():
 ## The final boss: the same encounter as the current loop's boss, scaled past
 ## it. `StageManager` calls this only from its final-boss stage.
 func spawn_final_boss():
-    _spawn_boss(current_loop + final_boss_extra_loops)
+    _spawn_boss(current_loop + final_boss_extra_loops, true)
+
+
+## Coins the boss of `loop` pays on death, from the `economy` config. The final
+## boss pays nothing: the run ends there and no shop follows.
+static func bounty_for(loop: int, is_final: bool) -> int:
+    if is_final:
+        return 0
+    var economy := Wallet.config()
+    return roundi(float(economy.get("boss_coins_base", 0)) + float(economy.get("boss_coins_per_loop", 0)) * (loop - 1))
 
 
 ## `loop` is the loop whose scaling this boss gets, which is `current_loop` for
 ## an ordinary boss and a few loops above it for the final one.
-func _spawn_boss(loop: int):
+func _spawn_boss(loop: int, is_final: bool = false):
     if _spawning or (boss_instance and is_instance_valid(boss_instance)):
         return # already spawned (or teleporting in)
 
@@ -77,12 +86,16 @@ func _spawn_boss(loop: int):
     boss_instance.global_position = spawn_position
     enemiesNode.add_child(boss_instance)
 
-    # The boss does not go through `SpawnerModifier` (no money or drops), so it
-    # leaves its corpse decal here.
+    # The boss does not go through `SpawnerModifier` (no drops), so it pays its
+    # bounty and leaves its corpse decal here.
+    var bounty := bounty_for(loop, is_final)
     var health: Health = boss_instance.get_node_or_null("Health")
     if health and health.event_manager:
         health.event_manager.subscribe("on_death",
-            func(event: Dictionary) -> void: DeathMark.leave_corpse(event.get("self")))
+            func(event: Dictionary) -> void:
+                if bounty > 0 and character:
+                    Wallet.earn(character, bounty, "boss")
+                DeathMark.leave_corpse(event.get("self")))
 
     # Apply loop-based scaling
     _apply_scaling(loop)

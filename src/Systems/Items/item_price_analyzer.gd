@@ -1,33 +1,45 @@
 extends Node
 class_name ItemPriceAnalyzer
 
-## Returns the shop cost of an offer based on its type:
-## stat item = 1, buff/debuff = 2, modifier = 3, weapon = 5. An item's price is
-## then multiplied by its rarity's positive multiplier and rounded.
+## Returns the shop cost of an offer: its type price (stat, buff/debuff, effect,
+## weapon), times its rarity's positive multiplier, times the loop growth
+## `1 + item_price_growth_per_loop * (loop - 1)`, rounded. Every number is in the
+## `economy` block of `game_config.json`.
 
-const STAT_PRICE: int = 1
-const BUFF_DEBUFF_PRICE: int = 2
-const MODIFIER_PRICE: int = 3
-const WEAPON_PRICE: int = 5
 
-const DEFAULT_SELL_RATIO: float = 0.5
-
-func get_price(resource: Resource) -> int:
-    if resource is BaseWeapon:
-        return WEAPON_PRICE
+## `loop` 0 means the loop of the running game.
+func get_price(resource: Resource, loop: int = 0) -> int:
+    var price := float(_type_price(resource))
     if resource is Item:
+        price *= Item.rarity_value("positive_multipliers", (resource as Item).rarity)
+    return roundi(price * _loop_growth(loop))
+
+
+## The price by type alone; `get_price` scales it by rarity and loop.
+func _type_price(resource: Resource) -> int:
+    var prices: Dictionary = Wallet.config().get("type_prices", {})
+    var type := "stat"
+    if resource is BaseWeapon:
+        type = "weapon"
+    elif resource is Item:
         var item := resource as Item
-        return roundi(_type_price(item) * Item.rarity_value("positive_multipliers", item.rarity))
-    return STAT_PRICE
+        if ItemTooltip.is_buff_item(item) or ItemTooltip.is_debuff_item(item):
+            type = "buff"
+        elif ItemTooltip.has_effect_scene(item):
+            type = "effect"
+    return int(prices.get(type, {"stat": 1, "buff": 2, "effect": 3, "weapon": 5}[type]))
 
-## The price by item type alone; `get_price` scales it by rarity.
-func _type_price(item: Item) -> int:
-    if ItemTooltip.is_buff_item(item) or ItemTooltip.is_debuff_item(item):
-        return BUFF_DEBUFF_PRICE
-    if ItemTooltip.has_effect_scene(item):
-        return MODIFIER_PRICE
-    return STAT_PRICE
 
-## Sell value of a collected pickup: a ratio of its shop price (default 50%).
-func get_sell_price(resource: Resource, ratio: float = DEFAULT_SELL_RATIO) -> int:
-    return maxi(1, roundi(get_price(resource) * ratio))
+func _loop_growth(loop: int) -> float:
+    if loop <= 0:
+        loop = StageManager.loop_of(self)
+    var growth := float(Wallet.config().get("item_price_growth_per_loop", 0.0))
+    return 1.0 + growth * (loop - 1)
+
+
+## Sell value: a ratio of the current shop price (`sell_ratio` when `ratio` is
+## negative), never below 1.
+func get_sell_price(resource: Resource, ratio: float = -1.0, loop: int = 0) -> int:
+    if ratio < 0.0:
+        ratio = float(Wallet.config().get("sell_ratio", 0.5))
+    return maxi(1, roundi(get_price(resource, loop) * ratio))

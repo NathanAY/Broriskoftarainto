@@ -41,9 +41,9 @@ var phase: int = 1  # 1 = collected pickups, 2 = generated shop items
 var value_labels: Dictionary = {}  # stat_name -> Label
 var rerolls_done: int = 0  # rerolls made in the current shop visit
 
-const REROLL_BASE_COST: int = 1   # loop 1, first reroll
-const REROLL_LOOP_STEP: int = 2   # added to the base for every loop past the first
-const REROLL_STEP: int = 1        # added for every reroll already made this visit
+## Set when `on_shop_enter` has fired for this visit, so a second `show_menu()`
+## in the same visit does not fire it again. Reset by `_on_next_stage_pressed()`.
+var _entered: bool = false
 
 func _ready():
     visible = false
@@ -60,6 +60,11 @@ func show_menu():
     reroll_button.visible = false
     phase = 1
     rerolls_done = 0
+    if not _entered and character:
+        _entered = true
+        var loop := StageManager.loop_of(self)
+        print("Shop loop %d, income this loop: %s" % [loop, Wallet.income_for_loop(character, loop)])
+        character.event_manager.emit_event("on_shop_enter", {"loop": loop})
     _update_reroll_button()
     _update_money_label()
     _update_stats() # Update stats when opening the shop
@@ -113,12 +118,12 @@ func _bind_sell(card: IconCard, weapon: BaseWeapon) -> void:
     var button := Button.new()
     button.name = "SellButton"
     button.text = "Sell +%d" % sell_price
-    button.tooltip_text = "Sell this weapon for half its shop price."
+    button.tooltip_text = "Sell this weapon for part of its shop price."
     button.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
     button.add_theme_font_size_override("font_size", IconCard.MIN_NAME_FONT_SIZE)
     button.pressed.connect(func() -> void:
         weapon_holder.remove_weapon(weapon)
-        character.stats.set_base_stat("money", _current_money() + sell_price)
+        _sell(weapon, sell_price)
         tooltip.hide_tooltip()
         _update_money_label()
         _update_stats()
@@ -176,6 +181,7 @@ func hide_menu():
 
 func _on_next_stage_pressed():
     hide_menu()
+    _entered = false
     staged_items.clear()
     emit_signal("next_stage_pressed")
 
@@ -288,7 +294,7 @@ func _add_item_entry(item: Item):
         _check_phase_progression()
     )
     card.secondary_button.pressed.connect(func():
-        character.stats.set_base_stat("money", character.stats.stats.get("money", 0) + price_analyzer.get_sell_price(item))
+        _sell(item, sell_price)
         _resolve_card(card)
         _update_money_label()
         _update_stats() # Update stats after selling
@@ -311,9 +317,8 @@ func _add_shop_item_entry(offer: Resource, existing_id: String = ""):
     card.set_price(price)
     _apply_buyable(card)
     card.primary_button.pressed.connect(func():
-        var money = _current_money()
-        if money >= price and _has_room_for(offer):
-            character.stats.set_base_stat("money", money - price)
+        if _has_room_for(offer) and Wallet.spend(character, price, "buy"):
+            character.event_manager.emit_event("on_purchase", {"resource": offer, "price": price})
             if offer is BaseWeapon:
                 var weapon_holder: WeaponHolder = character.get_node_or_null("WeaponHolder")
                 if weapon_holder:
@@ -362,19 +367,20 @@ func _refresh_affordability() -> void:
 
 
 func _current_money() -> float:
-    if character == null or not character.has_node("Stats"):
+    if character == null or character.stats == null:
         return 0.0
-    return float(character.get_node("Stats").stats.get("money", 0))
+    return Wallet.balance(character)
 
 
 # ------------------- Shared -------------------
 func _update_money_label():
-    if character and character.has_node("Stats"):
-        var stats = character.get_node("Stats")
-        var money = stats.stats.get("money", 0)
-        money_label.text = "Money: %d" % money
-    else:
-        money_label.text = "Money: 0"
+    money_label.text = "Money: %d" % _current_money()
+
+
+## Pays a sale and tells listeners about it. Pickups and weapons both sell here.
+func _sell(resource: Resource, price: int) -> void:
+    Wallet.earn(character, price, "sell")
+    character.event_manager.emit_event("on_sell", {"resource": resource, "price": price})
 
 # --- stats UI ---------------------------------------------------------------
 
@@ -500,13 +506,10 @@ func _generate_entry_id() -> String:
 ## Reroll price: a base that grows with every loop, plus a surcharge for each
 ## reroll already made in this shop visit (reset by `show_menu()`).
 func reroll_cost() -> int:
-    return REROLL_BASE_COST + REROLL_LOOP_STEP * (_current_loop() - 1) + REROLL_STEP * rerolls_done
-
-
-func _current_loop() -> int:
-    var scene := get_tree().current_scene
-    var stage_manager: StageManager = scene.get_node_or_null("StageManager") if scene else null
-    return stage_manager.current_loop if stage_manager else 1
+    var economy := Wallet.config()
+    return int(economy.get("reroll_base_cost", 1)) \
+        + int(economy.get("reroll_loop_step", 2)) * (StageManager.loop_of(self) - 1) \
+        + int(economy.get("reroll_step", 1)) * rerolls_done
 
 
 func _update_reroll_button() -> void:
@@ -516,11 +519,10 @@ func _update_reroll_button() -> void:
 func _on_reroll_pressed():
     if phase != 2:
         return
-    var money = character.stats.stats.get("money", 0)
     var cost := reroll_cost()
-    if money < cost:
+    if not Wallet.spend(character, cost, "reroll"):
         return
-    character.stats.set_base_stat("money", money - cost)
+    character.event_manager.emit_event("on_reroll", {"cost": cost})
     rerolls_done += 1
     _update_reroll_button()
 

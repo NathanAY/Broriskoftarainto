@@ -301,14 +301,8 @@ func _add_stat_line(item: Item, scale: float) -> void:
     item.modifiers[chosen] = value
 
 
-## Same lookup as the shop's reroll price: the loop of the running game, 1
-## outside one (tests, previews).
 func _current_loop() -> int:
-    if not is_inside_tree():
-        return 1
-    var scene := get_tree().current_scene
-    var stage_manager: StageManager = scene.get_node_or_null("StageManager") if scene else null
-    return stage_manager.current_loop if stage_manager else 1
+    return StageManager.loop_of(self)
 
 func _generate_stat_item(index: int = -1) -> Item:
     var stat_names = _gratable_stat_names()

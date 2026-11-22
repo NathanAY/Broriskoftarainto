@@ -96,6 +96,22 @@ const SCHEMAS := {
 	"on_debuff_removed": {
 		"required": ["debuff", "holder", "target"],
 	},
+	# --- economy (character bus, see docs/systems/economy.md) ---
+	"on_money_changed": {
+		"required": ["old", "new", "source"],
+	},
+	"on_shop_enter": {
+		"required": ["loop"],
+	},
+	"on_purchase": {
+		"required": ["resource", "price"],
+	},
+	"on_sell": {
+		"required": ["resource", "price"],
+	},
+	"on_reroll": {
+		"required": ["cost"],
+	},
 	# --- misc ---
 	"on_crit": {
 		"required": ["damage_context"],

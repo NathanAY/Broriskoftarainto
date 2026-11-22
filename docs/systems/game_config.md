@@ -39,6 +39,22 @@ Read through `Item.rarity_value()` by `ItemFactory` (rolling and applying rarity
 | `extra_positive_chance` | Chance per attempt of an extra gain line; a rarity gets as many attempts as its index (common 0, legendary 4). |
 | `extra_negative_chance` | Chance of one extra loss line. |
 
+## `economy`
+
+Read through `Wallet.config()` by `src/Systems/Items/wallet.gd`, `src/Systems/Items/item_price_analyzer.gd`, `src/Scenes/menu/shop_menu.gd`, `src/Scripts/spawner_modifier.gd` and `src/Systems/boss_spawner.gd`. `docs/systems/economy.md` has the mechanics.
+
+| Key | Meaning |
+|---|---|
+| `coins_per_kill` | Coins paid for every enemy death (not the boss). |
+| `sell_ratio` | 0-1. Share of an item's current shop price paid when it is sold. |
+| `reroll_base_cost` | Price of the first reroll on loop 1. |
+| `reroll_loop_step` | Added to the reroll base for every loop past the first. |
+| `reroll_step` | Added for every reroll already made in this shop visit. |
+| `type_prices` | Shop price per offer type before rarity and loop scaling: `stat`, `buff` (buffs and debuffs), `effect`, `weapon`. |
+| `item_price_growth_per_loop` | Every price is multiplied by `1 + growth × (loop − 1)`. `0` keeps prices flat. |
+| `boss_coins_base` | Coins the loop-1 boss pays on death. The final boss pays nothing. |
+| `boss_coins_per_loop` | Added to the boss bounty for every loop past the first. |
+
 ## Adding a new setting
 
 **Do not hardcode tunable numbers.** Any chance, weight, minimum, multiplier, cap or other value someone might rebalance goes into `game_config.json`, not into a `const` or a literal in a script. A `const` is fine only for a true invariant (an array index, an enum, a unit conversion).

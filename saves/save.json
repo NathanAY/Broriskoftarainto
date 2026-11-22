@@ -1,6 +1,7 @@
 {
 	"options": {
 		"music_volume": 73.0,
+		"screen_shake": 100.0,
 		"sfx_volume": 100.0,
 		"show_stats": false,
 		"sound_volume": 43.0,

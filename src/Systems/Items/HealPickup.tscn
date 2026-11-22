@@ -1,28 +1,28 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://kw67a46bherk"]
 
-[ext_resource type="Script" path="res://src/Systems/Items/heal_pickup.gd" id="1_heal"]
-[ext_resource type="Texture2D" path="res://src/Assets/pickups/heal.png" id="2_heal"]
+[ext_resource type="Script" uid="uid://ciekk5tpaanix" path="res://src/Systems/Items/heal_pickup.gd" id="1_heal"]
+[ext_resource type="Texture2D" uid="uid://ddy1l3pr775jw" path="res://src/Assets/pickups/heal.png" id="2_heal"]
 [ext_resource type="Texture2D" uid="uid://uvdr1fc1uowf" path="res://src/Assets/particles/particle_glow.png" id="3_glow"]
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_heal"]
-radius = 40.0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_glow"]
 blend_mode = 1
 
-[node name="HealPickup" type="Area2D"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_heal"]
+radius = 40.0
+
+[node name="HealPickup" type="Area2D" unique_id=1865258190]
 script = ExtResource("1_heal")
 
-[node name="Glow" type="Sprite2D" parent="."]
+[node name="Glow" type="Sprite2D" parent="." unique_id=1646782710]
 modulate = Color(0.45, 1, 0.3, 0.7)
 material = SubResource("CanvasItemMaterial_glow")
 scale = Vector2(2, 2)
 texture = ExtResource("3_glow")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1448816771]
 texture_filter = 5
 scale = Vector2(0.0667, 0.0667)
 texture = ExtResource("2_heal")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=673518479]
 shape = SubResource("CircleShape2D_heal")

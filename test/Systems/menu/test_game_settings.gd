@@ -118,6 +118,26 @@ func test_show_stats_survives_rebuilding_the_options_menu() -> void:
 ## from the store, and filling a slider emits `value_changed`; if that were
 ## wired first, opening the menu would overwrite the stored value with the
 ## default it had just been handed.
+func test_screen_shake_survives_rebuilding_the_options_menu() -> void:
+    var first_menu := _build_options_menu()
+    first_menu._on_screen_shake_changed(35.0)
+    _free_options_menu(first_menu)
+
+    var second_menu := _build_options_menu()
+    assert_float(second_menu.shake_slider.value).is_equal(35.0)
+    assert_float(GameSettings.screen_shake).is_equal(35.0)
+    _free_options_menu(second_menu)
+
+
+## The slider's lowest value is the "off" position, so it has to reach 0.
+func test_screen_shake_slider_reaches_zero() -> void:
+    var menu := _build_options_menu()
+    assert_float(menu.shake_slider.min_value).is_equal(0.0)
+    menu.shake_slider.value = menu.shake_slider.min_value
+    assert_float(GameSettings.screen_shake).is_equal(0.0)
+    _free_options_menu(menu)
+
+
 func test_opening_the_menu_does_not_overwrite_stored_volumes() -> void:
     GameSettings.set_music_volume(64.0)
     GameSettings.set_sfx_volume(23.0)
@@ -150,6 +170,7 @@ func test_settings_are_read_back_by_a_fresh_store() -> void:
     GameSettings.set_music_volume(60.0)
     GameSettings.set_sfx_volume(50.0)
     GameSettings.set_show_stats(true)
+    GameSettings.set_screen_shake(40.0)
 
     # Drop the in-memory copy first, so the values can only come from the file.
     SaveManager.load_from_disk()
@@ -161,6 +182,7 @@ func test_settings_are_read_back_by_a_fresh_store() -> void:
     assert_float(store.music_volume).is_equal(60.0)
     assert_float(store.sfx_volume).is_equal(50.0)
     assert_bool(store.show_stats).is_true()
+    assert_float(store.screen_shake).is_equal(40.0)
     store.free()
 
 

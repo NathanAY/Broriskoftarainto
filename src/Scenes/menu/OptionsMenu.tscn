@@ -73,6 +73,14 @@ horizontal_alignment = 1
 [node name="SfxSlider" type="HSlider" parent="Control/VBoxContainer" unique_id=375940325]
 layout_mode = 2
 
+[node name="ShakeLabel" type="Label" parent="Control/VBoxContainer" unique_id=2011458816]
+layout_mode = 2
+text = "Screen shake"
+horizontal_alignment = 1
+
+[node name="ShakeSlider" type="HSlider" parent="Control/VBoxContainer" unique_id=375940326]
+layout_mode = 2
+
 [node name="BackButton" type="Button" parent="Control/VBoxContainer" unique_id=82364102]
 layout_mode = 2
 text = "Back"

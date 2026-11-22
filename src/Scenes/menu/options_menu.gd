@@ -1,6 +1,7 @@
 extends CanvasLayer
 
-## The options panel: window mode, show-stats and the three volume sliders.
+## The options panel: window mode, show-stats, the three volume sliders and the
+## screen shake slider (0 turns shake off).
 ##
 ## Every value lives in the `GameSettings` autoload, not on this node. This menu
 ## is instanced once per menu scene, so state kept here was thrown away by the
@@ -12,6 +13,7 @@ extends CanvasLayer
 @onready var sound_slider: HSlider = $Control/VBoxContainer/SoundSlider
 @onready var music_slider: HSlider = $Control/VBoxContainer/MusicSlider
 @onready var sfx_slider: HSlider = $Control/VBoxContainer/SfxSlider
+@onready var shake_slider: HSlider = $Control/VBoxContainer/ShakeSlider
 @onready var back_button: Button = $Control/VBoxContainer/BackButton
 
 
@@ -29,6 +31,7 @@ func _ready() -> void:
     sound_slider.value_changed.connect(_on_sound_volume_changed)
     music_slider.value_changed.connect(_on_music_volume_changed)
     sfx_slider.value_changed.connect(_on_sfx_volume_changed)
+    shake_slider.value_changed.connect(_on_screen_shake_changed)
 
     # Re-assert rather than trust: a scene change can rebuild the window
     # between two visits to this menu, and this is where it gets put back.
@@ -44,6 +47,7 @@ func _read_settings_into_controls() -> void:
     sound_slider.value = GameSettings.sound_volume
     music_slider.value = GameSettings.music_volume
     sfx_slider.value = GameSettings.sfx_volume
+    shake_slider.value = GameSettings.screen_shake
 
 
 func _on_window_toggle_pressed() -> void:
@@ -77,6 +81,10 @@ func _on_music_volume_changed(value: float) -> void:
 
 func _on_sfx_volume_changed(value: float) -> void:
     GameSettings.set_sfx_volume(value)
+
+
+func _on_screen_shake_changed(value: float) -> void:
+    GameSettings.set_screen_shake(value)
 
 
 func _on_back_pressed() -> void:

@@ -13,6 +13,7 @@ const SLIDER_PATHS := [
     "Control/VBoxContainer/SoundSlider",
     "Control/VBoxContainer/MusicSlider",
     "Control/VBoxContainer/SfxSlider",
+    "Control/VBoxContainer/ShakeSlider",
 ]
 
 

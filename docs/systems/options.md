@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The settings the player changes from the options panel: the window mode, the master/music/sfx volumes, and whether the character stats panel is shown.
+The settings the player changes from the options panel: the window mode, the master/music/sfx volumes, the screen shake strength, and whether the character stats panel is shown.
 
 **[CURRENT]** The values live in the `GameSettings` autoload and are mirrored to the `options` section of the save file (`docs/systems/save_system.md`) on every change, so they survive a scene change *and* a restart.
 
@@ -13,7 +13,9 @@ They used to live on `OptionsMenu` itself, which is instanced once per menu scen
 | Path | Role |
 |---|---|
 | `src/Scripts/autoload/game_settings.gd` | The store. Owns the values, persists them, applies them to the window and the audio buses. |
-| `src/Scenes/menu/OptionsMenu.tscn` | The panel. Nine controls and no state; each volume slider has a label above it. |
+| `src/Scenes/menu/OptionsMenu.tscn` | The panel. Eleven controls and no state; each slider has a label above it. |
+| `src/Scripts/camera_2d.gd` | The game camera; reads `GameSettings.screen_shake` on every kick. |
+| `test/Systems/test_camera_shake.gd` | Attack shakes a little, damage more, the slider scales it and `0` turns it off. |
 | `src/Scenes/menu/options_menu.gd` | Reads the store into the controls on `_ready`, writes back on every user interaction. |
 | `src/default_bus_layout.tres` | Where the `Music` and `SFX` buses come from. |
 | `test/Systems/menu/test_game_settings.gd` | Persistence across a rebuilt menu, the file round-trip, and the clamping. |
@@ -29,10 +31,12 @@ They used to live on `OptionsMenu` itself, which is instanced once per menu scen
 
 Values are `0`–`100` percent in the store and converted to decibels on the way to the bus. A slider at `0` gives `linear_to_db(0)`, i.e. `-inf`, which is the correct reading of silence — do not special-case it to `0` dB.
 
+Screen shake is also `0`–`100` percent, a straight multiplier on the camera's pixel amplitudes (`attack_shake`, `damage_shake`). It is read at the moment of each kick rather than applied anywhere, so `0` simply means no kick ever moves the camera — that is the "off" position, not a separate toggle.
+
 ## Dependencies
 
 - `DisplayServer` for the window mode and `AudioServer` for the buses. Both are reached only from `GameSettings`.
-- `SaveManager` (`src/Scripts/autoload/save_manager.gd`), section `options`, keys `window_mode_index`, `sound_volume`, `music_volume`, `sfx_volume`, `show_stats`.
+- `SaveManager` (`src/Scripts/autoload/save_manager.gd`), section `options`, keys `window_mode_index`, `sound_volume`, `music_volume`, `sfx_volume`, `show_stats`, `screen_shake`.
 - `WindowFocus` is a separate autoload and knows nothing about this one; raising the window and sizing it are different jobs.
 
 ## Known limitations / TODOs

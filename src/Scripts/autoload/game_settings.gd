@@ -26,12 +26,15 @@ const DEFAULT_SOUND_VOLUME := 30.0
 const DEFAULT_MUSIC_VOLUME := 100.0
 const DEFAULT_SFX_VOLUME := 100.0
 const DEFAULT_SHOW_STATS := false
+const DEFAULT_SCREEN_SHAKE := 100.0
 
 var window_mode_index: int = DEFAULT_WINDOW_MODE_INDEX
 var sound_volume: float = DEFAULT_SOUND_VOLUME
 var music_volume: float = DEFAULT_MUSIC_VOLUME
 var sfx_volume: float = DEFAULT_SFX_VOLUME
 var show_stats: bool = DEFAULT_SHOW_STATS
+## 0-100 percent scale on every camera shake; 0 turns shaking off entirely.
+var screen_shake: float = DEFAULT_SCREEN_SHAKE
 
 
 func _ready() -> void:
@@ -50,6 +53,7 @@ func reset_to_defaults() -> void:
     music_volume = DEFAULT_MUSIC_VOLUME
     sfx_volume = DEFAULT_SFX_VOLUME
     show_stats = DEFAULT_SHOW_STATS
+    screen_shake = DEFAULT_SCREEN_SHAKE
     save_settings()
     apply_volumes()
 
@@ -175,6 +179,14 @@ func set_show_stats(visible_on_screen: bool) -> void:
     save_settings()
 
 
+# ------------------ screen shake ------------------
+
+
+func set_screen_shake(percent: float) -> void:
+    screen_shake = _clamp_percent(percent)
+    save_settings()
+
+
 # ------------------ persistence ------------------
 
 
@@ -188,6 +200,7 @@ func save_settings() -> void:
         "music_volume": music_volume,
         "sfx_volume": sfx_volume,
         "show_stats": show_stats,
+        "screen_shake": screen_shake,
     })
 
 
@@ -207,3 +220,4 @@ func load_settings() -> void:
     music_volume = _clamp_percent(float(options.get("music_volume", DEFAULT_MUSIC_VOLUME)))
     sfx_volume = _clamp_percent(float(options.get("sfx_volume", DEFAULT_SFX_VOLUME)))
     show_stats = bool(options.get("show_stats", DEFAULT_SHOW_STATS))
+    screen_shake = _clamp_percent(float(options.get("screen_shake", DEFAULT_SCREEN_SHAKE)))

@@ -92,5 +92,22 @@
 		"FireSaleModifier": {"stock_per_coin": 0.5, "bonus_per_extra_stack": 0.5},
 		"TaxCollectorModifier": {"tax_rate": 0.1, "tax_rate_per_extra_stack": 0.05},
 		"CreditLineModifier": {"credit_limit": 15, "debt_interest": 0.25, "debt_damage_penalty": 0.2}
+	},
+	"arena": {
+		"decor_chance": 0.3,
+		"decor_scale": 0.5,
+		"themes": [
+			{"name": "dirt", "hue_shift": 0.0, "saturation": 1.0, "brightness": 1.0},
+			{"name": "grass", "hue_shift": 75.0, "saturation": 1.1, "brightness": 1.0},
+			{"name": "moss", "hue_shift": 100.0, "saturation": 0.8, "brightness": 0.85},
+			{"name": "teal", "hue_shift": 140.0, "saturation": 1.0, "brightness": 1.0},
+			{"name": "ice", "hue_shift": 180.0, "saturation": 0.8, "brightness": 1.15},
+			{"name": "night", "hue_shift": 215.0, "saturation": 1.0, "brightness": 0.8},
+			{"name": "violet", "hue_shift": 255.0, "saturation": 1.0, "brightness": 0.95},
+			{"name": "clay", "hue_shift": -25.0, "saturation": 1.2, "brightness": 1.0},
+			{"name": "ash", "hue_shift": 0.0, "saturation": 0.1, "brightness": 0.95},
+			{"name": "meadow", "hue_shift": 85.0, "saturation": 1.3, "brightness": 1.2, "decor": "res://src/Assets/tiles/tiles_grass.png"},
+			{"name": "snow", "hue_shift": 200.0, "saturation": 0.12, "brightness": 2.3, "decor": "res://src/Assets/tiles/tiles_snow.png"}
+		]
 	}
 }

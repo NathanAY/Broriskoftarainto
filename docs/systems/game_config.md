@@ -97,6 +97,16 @@ One block per economy modifier, keyed by its scene name in `src/Systems/Items/mo
 | `TaxCollectorModifier` | `tax_rate` (share of money taken), `tax_rate_per_extra_stack` |
 | `CreditLineModifier` | `credit_limit` (coins of debt allowed), `debt_interest` (share a debt grows by each shop), `debt_damage_penalty` (damage lost while in debt) |
 
+## `arena`
+
+Read by `src/Systems/arena.gd`. The ground art is brown; each theme recolours it (and the wall outline) with a hue-rotate shader. A random theme is picked when the arena loads and a different one at every `StageManager.start_new_stage()`.
+
+| Key | Meaning |
+|---|---|
+| `decor_chance` | Chance that each 64 px ground cell gets one decor sprite (from `tiles_3.png`, or the theme's own `decor` sheet). |
+| `decor_scale` | Scale of a decor sprite (the sheet cells are 128x128 px, so 0.5 is 64x64, one ground cell). |
+| `themes` | List of themes, one picked per stage: `{name, hue_shift, saturation, brightness}` recolours the flat ground and the border (`hue_shift` is degrees, the art starts brown so ~75-100 is green; the others are multipliers). An optional `decor` is the path of an 8x8 sheet of transparent-background sprites scattered over the ground instead of the default sheet; unlike the default it is not recoloured, so pair it with a ground colour that suits it. Add a row for a new look; an empty list leaves the art brown. |
+
 ## Adding a new setting
 
 **Do not hardcode tunable numbers.** Any chance, weight, minimum, multiplier, cap or other value someone might rebalance goes into `game_config.json`, not into a `const` or a literal in a script. A `const` is fine only for a true invariant (an array index, an enum, a unit conversion).

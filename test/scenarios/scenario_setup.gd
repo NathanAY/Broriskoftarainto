@@ -82,6 +82,9 @@ static var pending_monster_multiplier: float = 1.0
 ## A gallery rather than a fight: the roster is disarmed and the phase is frozen,
 ## because a live wave would kill the player before the whole set could be read.
 @export var spawn_enemy_roster: bool = false
+## Holds the run empty and adds a "New arena" pause-menu button that rolls the
+## arena theme again, so every look can be flicked through.
+@export var arena_preview: bool = false
 
 
 ## Runs before *any* child's `_ready`, which is what makes this the right hook:
@@ -104,6 +107,7 @@ func _ready() -> void:
 	_apply_start_mode()
 	_apply_monster_multiplier()
 	_install_sandbox_menu()
+	_install_arena_preview()
 	_freeze_phase()
 	_spawn_enemy_roster()
 	_on_phase_applied()
@@ -280,7 +284,7 @@ func _install_sandbox_menu() -> void:
 ##   it would otherwise keep ticking and keep re-reading the empty arena through
 ##   `EnemySpawner._process()`, the refill watchdog.
 func _freeze_phase() -> void:
-	if not (sandbox or spawn_enemy_roster):
+	if not (sandbox or spawn_enemy_roster or arena_preview):
 		return
 	var stage_manager := get_node_or_null("../StageManager") as StageManager
 	if stage_manager == null:
@@ -342,3 +346,24 @@ func _on_phase_applied() -> void:
 			enemy_item_name if not enemy_item_name.is_empty() else "nothing",
 		]
 	)
+
+
+## Adds a "New arena" button to the pause menu. Each press rolls a new theme
+## (and a new ground layout) and names the theme on the button.
+func _install_arena_preview() -> void:
+	if not arena_preview:
+		return
+	var pause_menu := get_node_or_null("../UI/PauseMenu")
+	var arena := get_node_or_null("../Arena") as Arena
+	if pause_menu == null or arena == null:
+		push_warning("DebugScenarioSetup: no PauseMenu or Arena for the arena preview.")
+		return
+	var button := UiMenuButton.new()
+	button.name = "NewArenaButton"
+	button.text = "New arena"
+	button.pressed.connect(func() -> void:
+		var index := arena.randomize_theme()
+		var themes: Array = GameConfig.section("arena").get("themes", [])
+		if index >= 0:
+			button.text = "New arena (%s)" % themes[index].get("name", index))
+	(pause_menu.get_node("Control/VBoxContainer") as VBoxContainer).add_child(button)

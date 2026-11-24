@@ -40,6 +40,11 @@ const SCENARIOS := [
 		"scene": "res://test/scenarios/scenario_cursed_enemies.tscn",
 	},
 	{
+		"title": "Arena preview",
+		"description": "Empty, frozen stage. Pause and press New arena to roll the arena theme and ground layout again.",
+		"scene": "res://test/scenarios/scenario_arena_preview.tscn",
+	},
+	{
 		"title": "Enemy preview",
 		"description": "Every enemy type, boss included, in a ring around you. The phase is frozen and they cannot hurt you, so the whole roster can be walked and watched.",
 		"scene": "res://test/scenarios/scenario_enemy_preview.tscn",

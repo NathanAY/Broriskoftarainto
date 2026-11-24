@@ -14,6 +14,7 @@ None of it ships. The picker, the scenarios and their tests live in `test/scenar
 | Stage 3 | `test/scenarios/scenario_stage_three.tscn` | Stage 3 phase 1: enemies already scaled by `current_stage`, boss spawner scaled to match |
 | Cursed enemies | `test/scenarios/scenario_cursed_enemies.tscn` | Stage 1, phase 1, with a **debuff item on every enemy**, so the HUD's debuff row fills. Also picks up a buff item, so both rows show at once |
 | Enemy preview | `test/scenarios/scenario_enemy_preview.tscn` | Frozen phase 1 with **one of every enemy type**, boss included, in a ring around the player. The roster chases but cannot hurt you, so the whole set can be walked and watched |
+| Arena preview | `test/scenarios/scenario_arena_preview.tscn` | Frozen, empty phase 1. The pause menu gets a **New arena** button that rolls the arena theme (recolour or full-tile sheet) and ground layout again and names the theme on the button |
 
 ## Sandbox: typing the numbers instead of scaling to them
 

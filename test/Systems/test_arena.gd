@@ -4,6 +4,7 @@ extends GdUnitTestSuite
 
 func test_default_arena_rect_is_centered_medium_big() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	add_child(arena)
 	var rect: Rect2 = arena.get_arena_rect()
 	assert_that(rect.size).is_equal(Vector2(2048, 1536))
@@ -13,6 +14,7 @@ func test_default_arena_rect_is_centered_medium_big() -> void:
 
 func test_random_point_inside_stays_in_arena() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	add_child(arena)
 	for i in range(20):
 		var p: Vector2 = arena.get_random_point_inside(64.0)
@@ -21,6 +23,7 @@ func test_random_point_inside_stays_in_arena() -> void:
 
 func test_clamp_to_arena_keeps_inside() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	add_child(arena)
 	var clamped: Vector2 = arena.clamp_to_arena(Vector2(99999, -99999))
 	# Rect2.has_point() excludes the right/bottom edge, so check with a
@@ -33,6 +36,7 @@ func test_clamp_to_arena_keeps_inside() -> void:
 
 func test_walls_have_four_colliders() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	add_child(arena)
 	var walls: StaticBody2D = arena.get_node("Walls")
 	assert_int(walls.get_child_count()).is_equal(4)
@@ -40,6 +44,7 @@ func test_walls_have_four_colliders() -> void:
 
 func test_custom_size_and_colors_apply() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	arena.arena_size = Vector2(640, 320)
 	arena.wall_color = Color.RED
 	add_child(arena)
@@ -63,6 +68,7 @@ func test_game_with_ground_scene_contains_arena() -> void:
 
 func test_ground_fills_expected_cell_count() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	arena.ground_seed = 12345
 	add_child(arena)
 	# Default 2048x1536 with 64px tiles = 32x24 cells, centered on origin.
@@ -75,6 +81,7 @@ func test_ground_fills_expected_cell_count() -> void:
 
 func test_ground_tiles_come_from_atlas() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	arena.ground_seed = 12345
 	add_child(arena)
 	for cell in arena.get_ground_cells():
@@ -85,6 +92,7 @@ func test_ground_tiles_come_from_atlas() -> void:
 
 func test_plain_tile_is_majority() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	arena.ground_seed = 12345
 	add_child(arena)
 	var cells: Array[Vector2i] = arena.get_ground_cells()
@@ -98,9 +106,11 @@ func test_plain_tile_is_majority() -> void:
 
 func test_ground_seed_is_deterministic() -> void:
 	var first: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	first.random_theme = false
 	first.ground_seed = 777
 	add_child(first)
 	var second: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	second.random_theme = false
 	second.ground_seed = 777
 	add_child(second)
 	var first_cells: Array[Vector2i] = first.get_ground_cells()
@@ -111,13 +121,14 @@ func test_ground_seed_is_deterministic() -> void:
 
 func test_outline_frames_ground() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	add_child(arena)
 	var outline: NinePatchRect = arena.get_node("Outline")
 	assert_object(outline.texture).is_not_null()
 	# Frame extends one tile (64px) past the ground on each side, like Brotato.
 	assert_that(outline.position).is_equal(Vector2(-1024 - 64, -768 - 64))
 	assert_that(outline.size).is_equal(Vector2(2048 + 128, 1536 + 128))
-	assert_that(outline.modulate).is_equal(arena.wall_color)
+	assert_that((outline.material as ShaderMaterial).get_shader_parameter("tint")).is_equal(arena.wall_color)
 	assert_int(outline.patch_margin_left).is_equal(64)
 	assert_int(outline.patch_margin_top).is_equal(64)
 	assert_that(outline.axis_stretch_horizontal).is_equal(NinePatchRect.AXIS_STRETCH_MODE_TILE)
@@ -125,13 +136,14 @@ func test_outline_frames_ground() -> void:
 
 func test_outline_color_change_keeps_ground_layout() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	arena.ground_seed = 4242
 	add_child(arena)
 	var tiles_before: Dictionary = {}
 	for cell in arena.get_ground_cells():
 		tiles_before[cell] = arena.get_cell_tile(cell)
 	arena.wall_color = Color.BLUE
-	assert_that(arena.get_node("Outline").modulate).is_equal(Color.BLUE)
+	assert_that((arena.get_node("Outline").material as ShaderMaterial).get_shader_parameter("tint")).is_equal(Color.BLUE)
 	for cell in arena.get_ground_cells():
 		assert_that(arena.get_cell_tile(cell)).is_equal(tiles_before[cell])
 
@@ -145,6 +157,7 @@ func _inner_face(wall: CollisionShape2D, axis: String) -> float:
 
 func test_walls_default_outset_sits_faces_past_edge() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	add_child(arena)
 	assert_float(arena.wall_outset).is_equal(40.0)
 	var walls: Node = arena.get_node("Walls")
@@ -157,6 +170,7 @@ func test_walls_default_outset_sits_faces_past_edge() -> void:
 
 func test_custom_wall_outset_applies() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	arena.wall_outset = 0.0
 	add_child(arena)
 	var walls: Node = arena.get_node("Walls")
@@ -172,6 +186,7 @@ func test_custom_wall_outset_applies() -> void:
 
 func test_wall_outset_never_goes_negative() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	arena.wall_outset = -50.0
 	add_child(arena)
 	assert_float(arena.wall_outset).is_equal(0.0)
@@ -180,6 +195,7 @@ func test_wall_outset_never_goes_negative() -> void:
 
 func test_walls_use_dedicated_physics_layer() -> void:
 	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
 	add_child(arena)
 	var walls: StaticBody2D = arena.get_node("Walls")
 	assert_int(Arena.WALL_LAYER_BIT).is_equal(8)
@@ -244,3 +260,28 @@ func _find_area(node: Node) -> Area2D:
 			return found
 	return null
 
+
+
+func test_randomize_theme_changes_every_call_and_recolours() -> void:
+	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
+	add_child(arena)
+	var count: int = GameConfig.section("arena").get("themes", []).size()
+	assert_int(count).is_greater(1)
+	for i in range(10):
+		var previous: int = arena.theme_index
+		assert_int(arena.randomize_theme()).is_not_equal(previous)
+	assert_object(arena.ground.material).is_not_null()
+
+
+func test_theme_decor_sheet_keeps_its_colours_and_default_is_recoloured() -> void:
+	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
+	add_child(arena)
+	arena.apply_theme({"hue_shift": 90.0, "decor": "res://src/Assets/tiles/tiles_grass.png"}, 0)
+	var decor: Node2D = arena.get_node("Decor")
+	assert_int(decor.get_child_count()).is_greater(0)
+	assert_object(decor.material).is_null()
+	assert_object(arena.ground.material).is_not_null()
+	arena.apply_theme({"hue_shift": 90.0}, 1)
+	assert_object(arena.get_node("Decor").material).is_not_null()

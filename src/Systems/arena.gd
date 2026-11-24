@@ -16,6 +16,9 @@ class_name Arena
 
 const ATLAS_COLS: int = 3
 const ATLAS_ROWS: int = 4
+## Decor sheets and full-tile theme sheets are a DECOR_COLS x DECOR_ROWS grid of equal cells (any pixel size).
+const DECOR_COLS: int = 8
+const DECOR_ROWS: int = 8
 ## Atlas coords of the plain, decoration-free tile (bottom-right, like Brotato).
 const PLAIN_TILE := Vector2i(2, 3)
 ## How far the outline frame extends past the ground on each side (one tile,
@@ -51,6 +54,9 @@ const WALL_LAYER_BIT: int = 1 << (WALL_PHYSICS_LAYER - 1)
         _rebuild()
 
 ## 0 = new random ground layout every run. Non-zero = deterministic (for tests).
+## Pick a random theme when the arena loads. Tests turn it off for a fixed look.
+@export var random_theme: bool = true
+
 @export var ground_seed: int = 0:
     set(value):
         ground_seed = value
@@ -83,16 +89,87 @@ const WALL_LAYER_BIT: int = 1 << (WALL_PHYSICS_LAYER - 1)
         outline_texture = value
         _rebuild()
 
+## Sheet of tiny flat ground details (transparent background) scattered over a
+## flat ground. null = use the decorated `ground_texture` tiles instead.
+@export var decor_texture: Texture2D = preload("res://src/Assets/tiles/tiles_3.png"):
+    set(value):
+        decor_texture = value
+        _rebuild()
+
 @onready var walls: StaticBody2D = $Walls
 @onready var ground: TileMapLayer = $Ground
 @onready var outline: NinePatchRect = $Outline
 
 var _tile_source_id: int = 0
+var _decor: Node2D
+## Decor sheet the current theme brings (null = `decor_texture`). Its sprites keep
+## their own colours instead of being recoloured with the ground.
+var _theme_decor: Texture2D
+## Index of the theme currently applied (-1 = none).
+var theme_index: int = -1
+var _theme: Array = [0.0, 1.0, 1.0]
 
 
 func _ready() -> void:
     add_to_group("arena")
     _rebuild()
+    if random_theme:
+        randomize_theme()
+
+
+## Picks a random theme from `game_config.json` `arena.themes`, never the one
+## already showing, and recolours the ground and outline. Returns its index
+## (-1 when no themes are configured).
+func randomize_theme() -> int:
+    var themes: Array = GameConfig.section("arena").get("themes", [])
+    if themes.is_empty():
+        return -1
+    var index: int = randi() % themes.size()
+    if themes.size() > 1 and index == theme_index:
+        index = (index + 1 + randi() % (themes.size() - 1)) % themes.size()
+    apply_theme(themes[index], index)
+    return index
+
+
+func apply_theme(theme: Dictionary, index: int = -1) -> void:
+    theme_index = index
+    var hue: float = float(theme.get("hue_shift", 0.0))
+    var sat: float = float(theme.get("saturation", 1.0))
+    var bright: float = float(theme.get("brightness", 1.0))
+    _theme = [-deg_to_rad(hue), sat, bright]
+    var decor_path: String = theme.get("decor", "")
+    _theme_decor = load(decor_path) if not decor_path.is_empty() else null
+    # Ground, decor and outline all depend on the theme, so lay them out again.
+    _rebuild()
+    _update_outline_color()
+
+
+static var _shader: Shader
+
+static func _recolor_shader() -> Shader:
+    if _shader == null:
+        _shader = Shader.new()
+        _shader.code = """
+shader_type canvas_item;
+uniform vec4 tint : source_color = vec4(1.0);
+uniform float hue_shift = 0.0;
+uniform float saturation = 1.0;
+uniform float brightness = 1.0;
+void fragment() {
+    vec4 c = texture(TEXTURE, UV) * tint;
+    // Rotate hue in YIQ space.
+    float y = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+    float i = dot(c.rgb, vec3(0.596, -0.274, -0.322));
+    float q = dot(c.rgb, vec3(0.211, -0.523, 0.312));
+    float s = sin(hue_shift);
+    float co = cos(hue_shift);
+    float i2 = (i * co - q * s) * saturation;
+    float q2 = (i * s + q * co) * saturation;
+    vec3 rgb = vec3(y + 0.956 * i2 + 0.621 * q2, y - 0.272 * i2 - 0.647 * q2, y - 1.106 * i2 + 1.703 * q2);
+    COLOR = vec4(clamp(rgb * brightness, 0.0, 1.0), c.a);
+}
+"""
+    return _shader
 
 
 func _rebuild() -> void:
@@ -102,6 +179,7 @@ func _rebuild() -> void:
     _build_walls()
     _fill_ground()
     _update_outline()
+    _scatter_decor()
 
 
 ## Tint-only update: changing the outline color must NOT reshuffle the ground
@@ -109,7 +187,9 @@ func _rebuild() -> void:
 func _update_outline_color() -> void:
     if not is_node_ready() or outline == null:
         return
-    outline.modulate = wall_color
+    _apply_material(outline, wall_color)
+    _apply_material(ground, Color.WHITE)
+    _apply_decor_material()
 
 
 func get_arena_rect() -> Rect2:
@@ -178,6 +258,8 @@ func _fill_ground() -> void:
     else:
         rng.seed = ground_seed
     var bag := _build_tile_bag()
+    if decor_texture != null:
+        bag = [PLAIN_TILE]
     var grid := get_ground_grid_size()
     var half_x := int(grid.x / 2.0)
     var half_y := int(grid.y / 2.0)
@@ -207,6 +289,7 @@ func _build_walls() -> void:
     walls.collision_layer = WALL_LAYER_BIT
     walls.collision_mask = 0
     for child in walls.get_children():
+        walls.remove_child(child)
         child.queue_free()
     # Inner faces sit wall_outset past the ground edge so bodies can press
     # onto the visible edge (they stop one body-radius from the face).
@@ -244,4 +327,71 @@ func _update_outline() -> void:
     outline.axis_stretch_vertical = NinePatchRect.AXIS_STRETCH_MODE_TILE
     outline.position = -arena_size * 0.5 - Vector2(OUTLINE_MARGIN, OUTLINE_MARGIN)
     outline.size = arena_size + Vector2(OUTLINE_MARGIN, OUTLINE_MARGIN) * 2.0
-    outline.modulate = wall_color
+    _apply_material(outline, wall_color)
+
+
+## One material per node: the same recolour shader, with `tint` carrying the
+## node's own base colour so the outline and ground rotate identically and meet
+## without a seam.
+func _apply_material(node: CanvasItem, tint: Color) -> void:
+    if node == null:
+        return
+    var mat := ShaderMaterial.new()
+    mat.shader = _recolor_shader()
+    mat.set_shader_parameter("tint", tint)
+    mat.set_shader_parameter("hue_shift", _theme[0])
+    mat.set_shader_parameter("saturation", _theme[1])
+    mat.set_shader_parameter("brightness", _theme[2])
+    node.material = mat
+
+
+## Scatters tiny decor sprites over the ground: each ground cell gets one with
+## `arena.decor_chance`, a random cell of the decor sheet, at `arena.decor_scale`.
+func _scatter_decor() -> void:
+    if _decor != null:
+        _decor.free()
+        _decor = null
+    var sheet: Texture2D = _theme_decor if _theme_decor != null else decor_texture
+    if sheet == null or ground == null:
+        return
+    var cfg: Dictionary = GameConfig.section("arena")
+    var chance: float = float(cfg.get("decor_chance", 0.3))
+    var decor_scale: float = float(cfg.get("decor_scale", 0.25))
+    _decor = Node2D.new()
+    _decor.name = "Decor"
+    add_child(_decor)
+    move_child(_decor, ground.get_index() + 1)
+    var cell := Vector2(sheet.get_width() / float(DECOR_COLS), sheet.get_height() / float(DECOR_ROWS))
+    var rng := RandomNumberGenerator.new()
+    if ground_seed == 0:
+        rng.randomize()
+    else:
+        rng.seed = ground_seed
+    var grid := get_ground_grid_size()
+    var origin := -arena_size * 0.5
+    for gx in range(grid.x):
+        for gy in range(grid.y):
+            if rng.randf() >= chance:
+                continue
+            var atlas := AtlasTexture.new()
+            atlas.atlas = sheet
+            atlas.region = Rect2(Vector2(rng.randi_range(0, DECOR_COLS - 1), rng.randi_range(0, DECOR_ROWS - 1)) * cell, cell)
+            var sprite := Sprite2D.new()
+            sprite.texture = atlas
+            sprite.scale = Vector2(decor_scale, decor_scale)
+            sprite.use_parent_material = true
+            sprite.flip_h = rng.randf() < 0.5
+            sprite.position = origin + (Vector2(gx, gy) + Vector2(rng.randf(), rng.randf())) * tile_size
+            _decor.add_child(sprite)
+    _apply_decor_material()
+
+
+## Decor from the theme's own sheet keeps its colours; the default sheet is
+## brown like the ground, so it is recoloured with it.
+func _apply_decor_material() -> void:
+    if _decor == null:
+        return
+    if _theme_decor == null:
+        _apply_material(_decor, Color.WHITE)
+    else:
+        _decor.material = null

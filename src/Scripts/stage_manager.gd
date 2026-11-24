@@ -209,6 +209,11 @@ func start_new_stage() -> void:
     if enemy_spawner:
         enemy_spawner._on_next_stage()
 
+    # Fresh arena look every stage
+    var arena := get_tree().get_first_node_in_group("arena") as Arena
+    if arena:
+        arena.randomize_theme()
+
     # Now go to enemies phase for the new stage
     go_to_phase(PHASE_WAVE)
 

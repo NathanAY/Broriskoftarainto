@@ -15,7 +15,7 @@ var detonation_delay := 3.0
 var _tag = "bomb_modifier"
 
 func get_tooltip_stats() -> String:
-    return "Attached bombs explode for %d%% of hit damage after %ss" % [int(round(explosion_damage * 100.0)), str(detonation_delay)]
+    return "Bomb explodes for %d%% of hit damage after %ss" % [int(round(explosion_damage * 100.0)), str(detonation_delay)]
 
 func attachEventManager(em: Node):
     _cache_holder(em)

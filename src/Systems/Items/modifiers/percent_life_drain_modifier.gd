@@ -17,7 +17,7 @@ func _regen_per_second() -> float:
 
 ## Dynamic fragment so generated values are always shown, never stale static text.
 func get_tooltip_stats() -> String:
-    return "Loses %d%% max HP every %ss" % [int(round(absf(health_delta_percent) * 100.0)), str(interval)]
+    return "Loses %s%% HP every second" % ItemTooltip.format_value(snappedf(absf(_regen_per_second()), 0.01))
 
 func _health_delta_per_tick(h: Health) -> float:
     return h.max_health * health_delta_percent

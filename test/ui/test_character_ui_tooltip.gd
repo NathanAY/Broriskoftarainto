@@ -426,7 +426,7 @@ func test_flat_regen_tooltip_shows_amount_without_trigger() -> void:
     var item: Item = ItemBuilder.make_effect_item("Flat Regen Modifier", "flavor", scene, {})
     var lines: PackedStringArray = ItemTooltip.tooltip_lines(item)
     # Regen is a passive timer effect: amounts shown, no trigger suffix.
-    assert_that(lines).contains("effect: Flat Regen — Regenerates 4.0 HP every 0.5s")
+    assert_that(lines).contains("effect: Flat Regen — Regenerates 8 health every second")
 
 
 func test_percent_regen_tooltip_shows_amount_without_trigger() -> void:
@@ -434,14 +434,31 @@ func test_percent_regen_tooltip_shows_amount_without_trigger() -> void:
     var item: Item = ItemBuilder.make_effect_item("Percent Regen Modifier", "flavor", scene, {})
     var lines: PackedStringArray = ItemTooltip.tooltip_lines(item)
     # Regen is a passive timer effect: amounts shown, no trigger suffix.
-    assert_that(lines).contains("effect: Percent Regen — Regenerates 1% max HP every 0.5s")
+    assert_that(lines).contains("effect: Percent Regen — Regenerates 2% HP every second")
+
+
+func test_life_drain_tooltips_show_a_per_second_rate() -> void:
+    # Rate is derived from the modifier's own tick size and interval, so the
+    # text stays right when either is rebalanced.
+    var flat: Node = load("res://src/Systems/Items/modifiers/FlatLifeDrainModifier.tscn").instantiate()
+    var percent: Node = load("res://src/Systems/Items/modifiers/PercentLifeDrainModifier.tscn").instantiate()
+    var flat_rate := ItemTooltip.format_value(snappedf(absf(flat.health_delta) / flat.interval, 0.01))
+    var percent_rate := ItemTooltip.format_value(snappedf(absf(percent.health_delta_percent) / percent.interval * 100.0, 0.01))
+    assert_str(flat.get_tooltip_stats()).is_equal("Loses %s health every second" % flat_rate)
+    assert_str(percent.get_tooltip_stats()).is_equal("Loses %s%% HP every second" % percent_rate)
+    flat.free()
+    percent.free()
 
 
 func test_poison_tooltip_shows_trigger_and_amount() -> void:
     var scene: PackedScene = load("res://src/Systems/Items/modifiers/PoisonModifier.tscn")
     var item: Item = ItemBuilder.make_effect_item("Poison Modifier", "flavor", scene, {})
     var lines: PackedStringArray = ItemTooltip.tooltip_lines(item)
-    assert_that(lines).contains("effect: Poison — Poison deals 100% of hit damage per tick for 3.0s (Triggers on hit)")
+    var poison: Node = scene.instantiate()
+    var expected := "effect: Poison — %s (Triggers on hit)" % poison.get_tooltip_stats()
+    poison.free()
+    assert_that(lines).contains(expected)
+    assert_str(expected).contains("Poison:")
 
 
 func _effect_line_for_scene(path: String) -> String:
@@ -456,8 +473,11 @@ func _effect_line_for_scene(path: String) -> String:
 
 
 func test_bomb_tooltip() -> void:
-    assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/BombOnHitModifier.tscn")).is_equal(
-        "effect: Bomb — Attached bombs explode for 30% of hit damage after 3.0s (Triggers on hit)")
+    var bomb: Node = load("res://src/Systems/Items/modifiers/BombOnHitModifier.tscn").instantiate()
+    var expected := "effect: Bomb — %s (Triggers on hit)" % bomb.get_tooltip_stats()
+    bomb.free()
+    assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/BombOnHitModifier.tscn")).is_equal(expected)
+    assert_str(expected).contains("Bomb explodes")
 
 
 func test_chain_tooltip() -> void:
@@ -472,7 +492,7 @@ func test_emergency_heal_tooltip() -> void:
 
 func test_energy_shield_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/EnergyShieldModifier.tscn")).is_equal(
-        "effect: Energy Shield — Shield absorbs damage, recharges 10.0 per second after 1.5s (+5.0 max shield per stack) (Triggers on before take damage)")
+        _expected_effect_line("EnergyShieldModifier", "Energy Shield", "before take damage"))
 
 
 func test_explosive_shot_tooltip() -> void:
@@ -487,12 +507,12 @@ func test_homing_tooltip() -> void:
 
 func test_homing_rocket_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/HomingRocketModifier.tscn")).is_equal(
-        "effect: Homing Rocket — Launches a homing rocket dealing 100% of hit damage (+1 per stack) (Triggers on before take damage)")
+        _expected_effect_line("HomingRocketModifier", "Homing Rocket", "before take damage"))
 
 
 func test_homing_rocket_from_target_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/HomingRocketFromTargetModifier.tscn")).is_equal(
-        "effect: Homing Rocket From Target — Launches a homing rocket dealing 100% of hit damage (+1 per stack) (Triggers on hit)")
+        _expected_effect_line("HomingRocketFromTargetModifier", "Homing Rocket From Target", "hit"))
 
 
 func test_knockback_tooltip() -> void:
@@ -526,7 +546,7 @@ func test_high_health_bonus_tooltip() -> void:
 
 func test_reflect_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/ReflectProjectilesModifier.tscn")).is_equal(
-        "effect: Reflect Projectiles — Fires 2 projectiles back at attackers (+1 per stack), each dealing your item base damage (Triggers on before take damage)")
+        _expected_effect_line("ReflectProjectilesModifier", "Reflect Projectiles", "before take damage"))
 
 
 func test_spread_tooltip() -> void:
@@ -540,7 +560,8 @@ func test_stat_multiplier_tooltip() -> void:
     var packed: PackedScene = ItemBuilder.pack_instance(modifier)
     var item: Item = ItemBuilder.make_effect_item("Test Item", "flavor", packed, {})
     var lines: PackedStringArray = ItemTooltip.tooltip_lines(item)
-    assert_that(lines).contains("effect: Stat Multiplier — Multiplies damage bonuses from items by 2.0x per stack (Triggers on item added)")
+    assert_that(lines).contains("effect: Stat Multiplier — %s (Triggers on item added)" % modifier.get_tooltip_stats())
+    assert_str(modifier.get_tooltip_stats()).contains("from items")
     modifier.free()
 
 
@@ -1182,3 +1203,12 @@ func test_freeing_character_clears_global() -> void:
     # With a live (mismatched) value this would corrupt the global, so assert null:
     GlobalGameState.current_character = GlobalGameState.current_character
     assert_that(GlobalGameState.current_character).is_null()
+
+
+## The effect line a modifier should render, built from its own `get_tooltip_stats()`
+## so the test pins the line's shape rather than a copy of its wording and numbers.
+func _expected_effect_line(scene_name: String, effect_name: String, trigger: String) -> String:
+    var inst: Node = load("res://src/Systems/Items/modifiers/%s.tscn" % scene_name).instantiate()
+    var stats: String = inst.get_tooltip_stats()
+    inst.free()
+    return "effect: %s — %s (Triggers on %s)" % [effect_name, stats, trigger]

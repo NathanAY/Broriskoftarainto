@@ -14,7 +14,7 @@ extends BaseModifier
 @export var trigger_event: String = "before_take_damage" #"on_attack", "on_hit", "before_take_damage"
 
 func get_tooltip_stats() -> String:
-    return "Launches a homing rocket dealing 100% of hit damage (+1 per stack)"
+    return "Homing rocket: 100% of hit damage (+1 per stack)"
 
 var modifier_meta = "spawned_by_HomingRocketModifier"
 var ignore_groups: Array = []

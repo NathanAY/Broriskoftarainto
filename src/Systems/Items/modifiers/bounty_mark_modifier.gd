@@ -14,7 +14,7 @@ const RING_NAME := "BountyMarkRing"
 
 func get_tooltip_stats() -> String:
     var config := _economy_config()
-    return "Marks an enemy every %ss; killing it pays %d coins (+%d per loop)" % [
+    return "Mark an enemy every %ss: kill pays %d coins (+%d per loop)" % [
         str(config.get("interval", 0.0)), int(config.get("coins_base", 0)), int(config.get("coins_per_loop", 0))]
 
 

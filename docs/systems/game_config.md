@@ -27,6 +27,14 @@ How the weights behave:
 - **Only two costs exist** (`FlatLifeDrainModifier`, `PercentLifeDrainModifier`), so lowering one alone just moves the roll onto the other. To make drains rarer overall, lower `negative_modifier_chance` as well. The chance of one specific cost on an item is `negative_modifier_chance * its weight / sum of cost weights`.
 - If every weight in a pool is `0` the pick falls back to uniform rather than failing.
 
+## `buff`
+
+Read by `src/Systems/Items/Buffs/buff.gd` as the default for `max_stacks`.
+
+| Key | Meaning |
+|---|---|
+| `max_stacks` | Most stacks a buff holds at once. At the cap the oldest stack expires to make room for a new one. A buff `.tres` that sets its own `max_stacks` overrides this. |
+
 ## `item_rarity`
 
 Read through `Item.rarity_value()` by `ItemFactory` (rolling and applying rarity) and `ItemPriceAnalyzer` (price). Every list has 5 entries: common, uncommon, rare, epic, legendary. `docs/systems/item_factory.md` ("Rarity") has the mechanics.

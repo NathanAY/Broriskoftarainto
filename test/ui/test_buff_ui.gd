@@ -391,7 +391,7 @@ func test_an_empty_row_is_hidden() -> void:
 func test_tooltip_reports_the_summed_stat_change() -> void:
     var character := _build_character("Character")
     var grid := _build_grid(character)
-    _add_buff(character, {"attack_speed": {"flat": 0.5}})
+    var buff := _add_buff(character, {"attack_speed": {"flat": 0.5}})
     _trigger(character)
     _trigger(character)
     _trigger(character)
@@ -402,7 +402,8 @@ func test_tooltip_reports_the_summed_stat_change() -> void:
     # Three stacks of +0.5 read as +1.5, not +0.5. A per-stack number would
     # disagree with the stat the player is actually watching.
     assert_str(grid.tooltip.label.text).contains("+1.5")
-    assert_str(grid.tooltip.label.text).contains("3 stacks (max 10)")
+    # The cap is a balance value (game_config.json), so read it from the buff.
+    assert_str(grid.tooltip.label.text).contains("3 stacks (max %d)" % buff.max_stacks)
 
     grid.free()
     character.free()

@@ -15,7 +15,7 @@ var _claims_used: int = 0
 
 func get_tooltip_stats() -> String:
     var config := _economy_config()
-    return "Survive a lethal hit for %d coins (+%d per loop), once per loop per stack" % [
+    return "Survive a lethal hit for %d coins (+%d per loop), once per loop" % [
         int(config.get("premium_base", 0)), int(config.get("premium_per_loop", 0))]
 
 

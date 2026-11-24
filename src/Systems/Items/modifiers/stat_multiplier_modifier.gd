@@ -8,7 +8,7 @@ extends BaseModifier
 @export var multiplier: float = 2.0
 
 func get_tooltip_stats() -> String:
-    return "Multiplies %s bonuses from items by %sx per stack" % [target_stat, str(multiplier)]
+    return "%s from items x%s per stack" % [target_stat, str(multiplier)]
 
 func attachEventManager(em: Node):
     _cache_holder(em)

@@ -402,7 +402,7 @@ func _generate_buff_item(index: int = -1) -> Item:
     var configured_buff_scene: PackedScene = _configure_dynamic_modifier(chosen_scene)
     var buff_trigger := _read_scene_trigger(configured_buff_scene)
     var item_name = _generate_buff_name(chosen_scene.resource_path, chosen_stat)
-    var description := "Grants a temporary buff: increases %s (Triggers on %s)." % [chosen_stat, ItemTooltip.humanize_trigger(buff_trigger)]
+    var description := "Buff: increases %s (Triggers on %s)." % [chosen_stat, ItemTooltip.humanize_trigger(buff_trigger)]
 
     var item := ItemBuilder.make_buff_item(item_name, description, chosen_stat, modifier_value, configured_buff_scene)
     _attach_roll_negative_half(item, str(chosen_stat), stat_names, 1.0)
@@ -422,7 +422,7 @@ func _generate_debuff_item(_index: int = -1) -> Item:
     var configured_debuff_scene: PackedScene = _configure_dynamic_modifier(chosen_scene)
     var debuff_trigger := _read_scene_trigger(configured_debuff_scene)
     var item_name = _generate_buff_name(chosen_scene.resource_path, chosen_stat)
-    var description := "Grants a debuff: decreases %s (Triggers on %s)." % [chosen_stat, ItemTooltip.humanize_trigger(debuff_trigger)]
+    var description := "Debuff: decreases %s (Triggers on %s)." % [chosen_stat, ItemTooltip.humanize_trigger(debuff_trigger)]
 
     var item := ItemBuilder.make_debuff_item(item_name, description, chosen_stat, modifier_value, configured_debuff_scene)
     _attach_roll_negative_half(item, str(chosen_stat), stat_names, 2.0)

@@ -12,7 +12,7 @@ func _init() -> void:
 
 
 func get_tooltip_stats() -> String:
-    return "Lose %d%% of your money every time you enter the shop" % roundi(_rate() * 100.0)
+    return "Lose %d%% of coins each shop" % roundi(_rate() * 100.0)
 
 
 func attachEventManager(em: Node):

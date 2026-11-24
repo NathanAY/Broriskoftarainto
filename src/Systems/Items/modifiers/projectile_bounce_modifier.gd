@@ -9,7 +9,7 @@ extends BaseModifier
 @export var bounce_range: float = 3.33
 
 func get_tooltip_stats() -> String:
-    return "Projectiles bounce to %d extra targets per stack" % max_bounces
+    return "Bounces to %d extra targets per stack" % max_bounces
 
 func attachEventManager(em: EventManager):
     _cache_holder(em)

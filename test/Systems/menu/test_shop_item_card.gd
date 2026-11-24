@@ -220,6 +220,19 @@ func test_card_text_is_scrollable() -> void:
     card.free()
 
 
+## The body label must not force a minimum height, otherwise every card scrolls
+## even when its text already fits.
+func test_info_label_has_no_forced_minimum_height() -> void:
+    var card: ShopItemCard = load(CARD_SCENE).instantiate()
+    add_child(card)
+    assert_float(card.info_label.custom_minimum_size.y).is_equal(0.0)
+    card.info_label.text = "short"
+    await get_tree().process_frame
+    await get_tree().process_frame
+    assert_float(card.info_label.get_combined_minimum_size().y).is_less(card.info_scroll.size.y + 1.0)
+    card.free()
+
+
 # --- new card structure -----------------------------------------------------
 
 func test_card_shows_item_name_in_header() -> void:

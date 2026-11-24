@@ -14,7 +14,7 @@ var _penalty: Dictionary = {}
 
 func get_tooltip_stats() -> String:
     var config := _economy_config()
-    return "Spend up to %d coins into debt. Debt grows %d%% every shop and cuts damage by %d%%" % [
+    return "Debt up to %d coins, +%d%% each shop, -%d%% damage" % [
         int(config.get("credit_limit", 0)), roundi(float(config.get("debt_interest", 0.0)) * 100.0),
         roundi(float(config.get("debt_damage_penalty", 0.0)) * 100.0)]
 

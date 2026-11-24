@@ -20,7 +20,7 @@ const _PoisonEffect = preload("res://src/Systems/Items/Buffs/poison_effect.gd")
 ## damage, then grows by `damage_per_stack` for every extra modifier stack.
 func get_tooltip_stats() -> String:
     var pct := int(round(damage_multiplier * 100.0))
-    return "Poison deals %d%% of hit damage per tick for %ss" % [pct, str(duration)]
+    return "Poison: %d%% of hit damage per tick, %ss" % [pct, str(duration)]
 
 func attachEventManager(em: Node):
     _cache_holder(em)

@@ -9,7 +9,7 @@ extends BaseModifier
 @export var trigger_event: String = "before_take_damage"
 
 func get_tooltip_stats() -> String:
-    return "Fires %d projectiles back at attackers (+1 per stack), each dealing your item base damage" % volley_projectile_count
+    return "Fires %d projectiles back at attackers (+1 per stack)" % volley_projectile_count
 
 ## Share of `item_base_damage` each projectile deals (all of it); the tooltip turns it into a number.
 func tooltip_item_damage_fraction() -> float:

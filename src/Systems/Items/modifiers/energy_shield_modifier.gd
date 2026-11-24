@@ -9,7 +9,7 @@ var max_shield: float = 0.0
 @export var recharge_delay: float = 1.5         # seconds after last damage
 
 func get_tooltip_stats() -> String:
-    return "Shield absorbs damage, recharges %s per second after %ss (+%s max shield per stack)" % [str(recharge_rate), str(recharge_delay), str(shield_per_stack)]
+    return "Shield absorbs damage, recharges %s/s after %ss (+%s per stack)" % [str(recharge_rate), str(recharge_delay), str(shield_per_stack)]
 
 var current_shield: float = 0.0
 var _time_since_damage: float = 0.0

@@ -18,7 +18,7 @@ class_name EconomyScalingModifier
 
 
 func get_tooltip_stats() -> String:
-    return "+%s %s per %s, up to +%s (+%s per extra stack)" % [
+    return "+%s %s per %s (max +%s, +%s per stack)" % [
         ItemTooltip.format_value(_per_unit()).trim_prefix("+"), target_stat.capitalize(), source_label,
         ItemTooltip.format_value(_cap()).trim_prefix("+"),
         ItemTooltip.format_value(float(_economy_config().get("cap_per_extra_stack", 0.0))).trim_prefix("+")]

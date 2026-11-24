@@ -92,4 +92,7 @@ func do_damage(body):
     ctx.final_amount = damage
     ctx.weapon = source_weapon as BaseWeapon
     ctx.tags.append("projectile")
-    Damage.deal(ctx, event_manager)
+    # The shooter's bus is freed when the shooter dies, and this projectile can
+    # still land after that. Hit without a bus rather than pass a freed object.
+    var bus: EventManager = event_manager if is_instance_valid(event_manager) else null
+    Damage.deal(ctx, bus)

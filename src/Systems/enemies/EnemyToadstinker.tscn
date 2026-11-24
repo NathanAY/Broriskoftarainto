@@ -12,7 +12,6 @@
 [ext_resource type="PackedScene" uid="uid://cx3p26icyy5wu" path="res://src/animations/animation_player.tscn" id="10_anim"]
 [ext_resource type="AnimationLibrary" uid="uid://cwclbp73qaped" path="res://src/animations/enemy_animations.res" id="11_anims"]
 [ext_resource type="PackedScene" uid="uid://c0miaq2nbp3m6" path="res://src/Systems/movement/bahaviour/ChaseMovementBehaviour.tscn" id="12_move"]
-[ext_resource type="PackedScene" uid="uid://cmvgx8sqctngm" path="res://src/Scenes/effects/TextureBurstManager.tscn" id="13_burst"]
 [ext_resource type="PackedScene" uid="uid://brgr2yeaajlxi" path="res://src/Scenes/effects/HitFlashManager.tscn" id="14_flash"]
 [ext_resource type="PackedScene" uid="uid://c5mkhi6kbs6kl" path="res://src/Systems/damage/AreaBurstOnEnter.tscn" id="15_burst_damage"]
 
@@ -27,16 +26,16 @@ fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
-radius = 55.2
+radius = 38.64
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hitbox"]
-radius = 61.6
+radius = 43.12
 
 [node name="Enemy" type="CharacterBody2D" unique_id=1262615031]
 script = ExtResource("1_enemy")
 contact_weapon = null
 description = "Arms no weapon and bursts when it dies. Kill it at range, or let it reach you and take the blast."
-art_width = 127.893
+art_width = 89.525
 
 [node name="Node2D" type="Node2D" parent="." unique_id=526697769]
 
@@ -93,8 +92,6 @@ event_manager = NodePath("../EventManager")
 
 [node name="ParticleEffectManager" parent="." unique_id=1836960485 instance=ExtResource("9_particles")]
 
-[node name="TextureBurstManager" parent="." unique_id=2031254566 instance=ExtResource("13_burst")]
-
 [node name="HitFlashManager" parent="." unique_id=637114249 instance=ExtResource("14_flash")]
 
 [node name="AnimationPlayer" parent="." unique_id=625751420 instance=ExtResource("10_anim")]
@@ -105,5 +102,5 @@ autoplay = &""
 
 [node name="AreaBurstOnEnter" parent="." unique_id=1768375853 instance=ExtResource("15_burst_damage")]
 blast_damage = 8.0
-blast_radius = 1.0
+blast_radius = 0.35
 detonation_delay = 1.0

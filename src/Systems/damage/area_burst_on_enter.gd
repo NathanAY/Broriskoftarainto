@@ -86,7 +86,23 @@ func _on_owner_died(_event: Dictionary) -> void:
         _detonate()
         return
     reparent.call_deferred(home, true)
+    _light_fuse()
     get_tree().create_timer(detonation_delay).timeout.connect(_detonate)
+
+
+## The telegraph rides along as a child, so it is freed with the burst. It takes
+## over drawing the creature, so the corpse's own visual is hidden: otherwise its
+## death spin would play on top of the swelling body.
+func _light_fuse() -> void:
+    var fuse := DetonationFuse.new()
+    fuse.duration = detonation_delay
+    var sprite := _corpse.get_node_or_null("Node2D/Sprite2D") as Sprite2D
+    if sprite != null and sprite.texture != null:
+        fuse.copy_sprite(sprite, global_position)
+        var holder := sprite.get_parent() as CanvasItem
+        if holder != null:
+            holder.visible = false
+    add_child.call_deferred(fuse)
 
 
 func _detonate() -> void:

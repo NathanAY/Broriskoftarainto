@@ -121,3 +121,41 @@ func test_a_delayed_burst_waits_then_hits_and_draws_the_blast() -> void:
     var visuals := _root.get_children().filter(func(n): return n is ExplosionBurst)
     assert_int(visuals.size()).override_failure_message("no blast visual was drawn").is_equal(1)
     assert_float((visuals[0] as ExplosionBurst).radius).is_equal(expected_radius)
+
+
+## The delay is telegraphed: a fuse burns while the player can still step out,
+## and leaves with the blast.
+func test_a_delayed_burst_shows_a_fuse_until_it_detonates() -> void:
+    var enemy := _spawn_bursting_enemy()
+    var burst := enemy.get_node("AreaBurstOnEnter") as AreaBurstOnEnter
+    burst.detonation_delay = 0.2
+
+    _kill(enemy)
+    await get_tree().process_frame
+
+    var fuses := _fuses()
+    assert_int(fuses.size()).override_failure_message("the delay was not telegraphed").is_equal(1)
+    var fuse := fuses[0] as DetonationFuse
+    assert_float(fuse.duration).is_equal(burst.detonation_delay)
+
+    await get_tree().create_timer(0.4).timeout
+    await get_tree().process_frame
+
+    assert_int(_fuses().size()).override_failure_message(
+        "the fuse outlived the blast"
+    ).is_equal(0)
+
+
+func test_an_instant_burst_shows_no_fuse() -> void:
+    var enemy := _spawn_bursting_enemy()
+
+    _kill(enemy)
+    await get_tree().process_frame
+
+    assert_int(_fuses().size()).is_equal(0)
+
+
+func _fuses() -> Array[Node]:
+    # find_children's type filter does not match script class names.
+    return _root.find_children("*", "", true, false).filter(
+        func(n: Node) -> bool: return n is DetonationFuse and not n.is_queued_for_deletion())

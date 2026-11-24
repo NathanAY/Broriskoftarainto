@@ -595,6 +595,32 @@ func test_the_toadstinker_detonates_when_it_dies() -> void:
 	).is_less(health_before)
 
 
+## The Toadstinker does not shatter: its own body swells on the fuse instead,
+## so the corpse's sprite is hidden and the fuse draws the same texture.
+func test_the_toadstinker_swells_on_its_fuse_instead_of_shattering() -> void:
+	var toadstinker := _spawn_enemy(TOADSTINKER_SCENE)
+	var texture := toadstinker.sprite.texture
+
+	_kill(toadstinker)
+	await get_tree().process_frame
+
+	var world := _world_root()
+	assert_int(world.find_children("*", "", true, false).filter(
+		func(n: Node) -> bool: return n is TextureBurst).size()).override_failure_message(
+		"the Toadstinker still shatters on death"
+	).is_equal(0)
+	var fuses := world.find_children("*", "", true, false).filter(
+		func(n: Node) -> bool: return n is DetonationFuse)
+	assert_int(fuses.size()).is_equal(1)
+	assert_object((fuses[0] as DetonationFuse).texture).override_failure_message(
+		"the fuse does not draw the Toadstinker's own sprite"
+	).is_same(texture)
+	if is_instance_valid(toadstinker):
+		assert_bool(toadstinker.visual.visible).override_failure_message(
+			"the corpse is still drawn under the swelling body"
+		).is_false()
+
+
 func test_the_game_spawns_swarmers_in_packs() -> void:
 	var game: Node = auto_free(load("res://src/Scenes/Game.tscn").instantiate())
 	var spawner := game.get_node("StageManager/EnemySpawner") as EnemySpawner

@@ -147,6 +147,9 @@ Both are spawner rows rather than enemy scripts, so they apply to any scene:
 - **`pack_size`** on `EnemySpawnEntry` — one draw spawns this many copies of the row's scene. The Swarmer row uses 8. A pack overrides the spawner's ordinary group size for that draw, and the spawn budget still caps it.
 - **`elite_min_loop`** and the multipliers on `EnemySpawnEntry` — from that loop on, the row spawns the same scene with multiplied health and damage and a tint on its `Node2D` container. Every shipped row turns elite at loop 3. The tint lives on `Node2D` so the hit flash cannot reset it.
 
+## Common vs special
+The arena is meant to feel full of common enemies (Grunt, Slimeling, Swarmer) with a few special ones. The `enemy_rarity` block of `game_config.json` is the single source of spawn weights: commons weigh a lot, specials (Bulwark, Lancer, Toadstinker, Blink, Gunner, Shieldbearer) weigh little and carry a `base_health` that overrides their scene health. Keys and meaning are in `docs/systems/game_config.md`.
+
 ## Dependencies
 - `Stats` (child), `Health`, `WeaponHolder`, `ItemHolder`, `EventManager`, MovementBehaviour.
 

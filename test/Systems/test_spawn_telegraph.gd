@@ -82,6 +82,32 @@ func test_zero_telegraph_spawns_instantly_without_an_effect() -> void:
     assert_int(_portals(ctx["nodes"]).size()).is_equal(0)
 
 
+# Stands in for a real spawner modifier. Its typed `Character` parameter is what
+# turns a freed character into a hard "invalid type" error, as in the bug report.
+class _ModifierStub extends Node:
+    var calls := 0
+
+    func attach_to_enemy(_enemy: Node, _character: Character) -> void:
+        calls += 1
+
+
+## Regression: the character dies while an enemy is still teleporting in. The
+## spawn must be dropped quietly, and no modifier may be handed the dead character.
+func test_character_dying_during_the_telegraph_spawns_nothing() -> void:
+    var ctx := _build_tree(0.2)
+    var spawner: EnemySpawner = ctx["spawner"]
+    var enemies: Node = ctx["enemies"]
+    var stub: _ModifierStub = auto_free(_ModifierStub.new())
+    spawner.modifiers.append(stub)
+
+    spawner.spawn_enemy()
+    spawner.character.free()
+    await await_millis(400)
+
+    assert_int(enemies.get_child_count()).is_equal(0)
+    assert_int(stub.calls).is_equal(0)
+
+
 func test_the_effect_sits_where_the_enemy_appears() -> void:
     var ctx := _build_tree(0.2)
 

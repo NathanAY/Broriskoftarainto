@@ -6,7 +6,7 @@
 ## Key scripts / scenes
 - `src/Systems/enemy_spawner.gd` (`EnemySpawner`)
 - `src/Systems/boss_spawner.gd` (`BossSpawner`)
-- `src/Systems/enemies/enemy_spawn_entry.gd` (`EnemySpawnEntry`) — one row of the spawn table: a scene, a weight, and the loop it unlocks on.
+- `src/Systems/enemies/enemy_spawn_entry.gd` (`EnemySpawnEntry`) — one row of the spawn table: a scene and the loop it unlocks on (its weight is in `game_config.json`).
 - `src/Systems/SpawnerModifier.tscn` (+ `src/Scripts/spawner_modifier.gd`) — death rewards (money via `Wallet`, drops, death mark — see `docs/systems/economy.md`). Drops: 5% altar, else 5% item pickup, else `HEAL_DROP_CHANCE` (8%) a `src/Systems/Items/HealPickup.tscn` (`heal_pickup.gd`: walking over it heals `heal_fraction` of max health plus `heal_flat`). The mark is `src/Systems/damage/DeathMark.tscn`: `DeathMark.setup()` picks a decal from the sheets in `src/Assets/death_marks/` (every png there is read; each cell's colour is measured, not listed), taking a coloured one half the time when the enemy sprite's average colour is red, green or purple (`DeathMark.tint_of()`, no per-scene setting). The pixel scans sample a 20x20 grid per area (not every pixel) on `WorkerThreadPool` workers; the texture readback (`get_image()`) stays on the main thread, one sheet per frame, because it is a rendering-server call and deadlocks if a worker does it while the main thread waits. Both are started when an enemy is created (`DeathMark.warm_up()` / `request_tint()` in `Enemy._ready`), so nothing is computed on the frame an enemy dies. `BossSpawner` hooks the boss's `on_death` itself, because the boss skips `SpawnerModifier`; both call `DeathMark.leave_corpse()`. Its size is a fixed fraction of the enemy's `art_width`, and it tilts at most 15 degrees
 
 ## Data flow
@@ -17,7 +17,7 @@
 ## The spawn table
 The regular spawner used to spawn one hardcoded scene — `src/Systems/enemies/Enemy.tscn` — for every wave of every run. It now spawns from a table:
 
-- **`spawn_table`** — an array of `EnemySpawnEntry` rows. A row names the enemy scene, how likely it is to come up (`weight`), and the loop it unlocks on (`min_loop`). A row with no weight never comes up.
+- **`spawn_table`** — an array of `EnemySpawnEntry` rows. A row names the enemy scene, and the loop it unlocks on (`min_loop`). How likely it is to come up is its `weight` in the `enemy_rarity` block of `game_config.json`, keyed by the scene file name; a scene the block does not list weighs `1`, and a weight of `0` never comes up.
 - **`pack_size`** — how many bodies one draw of a row spawns. A pack enemy arrives as a group; an ordinary row is a pack of one. The Swarmer row uses 8.
 - **`elite_min_loop`** — from that loop on the row spawns the same scene as an elite: `elite_health_multiplier` and `elite_damage_multiplier` scale its base stats and `elite_tint` multiplies its `Node2D` container. `0` means the row never turns elite. Every shipped row uses 3.
 - **`fallback_enemy_scene`** — what is spawned when the table is empty, or when every row is still locked behind its loop. It defaults to `src/Systems/enemies/Enemy.tscn`, so a scene that forgot to fill the table still spawns.

@@ -65,6 +65,15 @@ Read through `Wallet.config()` by `src/Systems/Items/wallet.gd`, `src/Systems/It
 
 The per-item amount of each economy stat is its `roll` in `item_generation.stat_overrides`.
 
+## `enemy_rarity`
+
+Read by `src/Systems/enemy_spawner.gd`. One block per enemy type, keyed by its scene file name in `src/Systems/enemies/` without `.tscn`. Give every enemy in the spawn table a `weight`: common ones high, specials low, so the arena stays mostly grunts with the odd tough specialist. `base_health` is optional and only set for specials.
+
+| Key | Meaning |
+|---|---|
+| `weight` | Spawn weight of that enemy's row in `src/Scenes/Game.tscn`, relative to the other open rows. The only place weights live: a scene not listed weighs `1`, and `0` never spawns it. |
+| `base_health` | Replaces the `health` stat in the enemy's `Stats` node at spawn, before elite and loop scaling. Omit it to keep the scene's own health. |
+
 ## `economy_modifiers`
 
 One block per economy modifier, keyed by its scene name in `src/Systems/Items/modifiers/`, read by `BaseModifier._economy_config()`. `docs/systems/economy.md` describes each modifier. "Extra stack" means every copy after the first.

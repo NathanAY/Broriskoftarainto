@@ -72,6 +72,17 @@
 		"shop_discount_cap": 0.4,
 		"resale_value_cap": 0.4
 	},
+	"enemy_rarity": {
+		"Enemy": {"weight": 1.0},
+		"EnemySlimeling": {"weight": 0.4},
+		"EnemySwarmer": {"weight": 0.3},
+		"EnemyBulwark": {"weight": 0.16, "base_health": 30.0},
+		"EnemyLancer": {"weight": 0.16, "base_health": 16.0},
+		"EnemyToadstinker": {"weight": 0.16, "base_health": 10.0},
+		"EnemyBlink": {"weight": 0.14, "base_health": 16.0},
+		"EnemyGunner": {"weight": 0.08, "base_health": 16.0},
+		"EnemyShieldbearer": {"weight": 0.14, "base_health": 21.0}
+	},
 	"economy_modifiers": {
 		"GildedEdgeModifier": {"per_unit": 0.003, "cap": 0.15, "cap_per_extra_stack": 0.05},
 		"MarketRallyModifier": {"per_unit": 0.01, "cap": 0.15, "cap_per_extra_stack": 0.05},

@@ -215,18 +215,32 @@ func pick_spawn_entry() -> EnemySpawnEntry:
             continue
         if current_loop < entry.min_loop:
             continue
-        if entry.weight <= 0.0:
+        if _entry_weight(entry) <= 0.0:
             continue
         open.append(entry)
-        total += entry.weight
+        total += _entry_weight(entry)
     if open.is_empty():
         return null
     var roll := randf() * total
     for entry in open:
-        roll -= entry.weight
+        roll -= _entry_weight(entry)
         if roll <= 0.0:
             return entry
     return open[open.size() - 1]
+
+## The `enemy_rarity` block of `game_config.json` for a row's scene, keyed by the
+## scene's file name. An unlisted scene is a common enemy: nothing changes.
+func _rarity(entry: EnemySpawnEntry) -> Dictionary:
+    if entry == null or entry.scene == null:
+        return {}
+    var key := entry.scene.resource_path.get_file().get_basename()
+    return GameConfig.section("enemy_rarity").get(key, {})
+
+
+## Spawn weight from the config's `weight`; a scene it does not list weighs 1.
+func _entry_weight(entry: EnemySpawnEntry) -> float:
+    return float(_rarity(entry).get("weight", 1.0))
+
 
 func spawn_enemy_group():
     if not character:
@@ -316,16 +330,31 @@ func _spawn_from_entry(entry: EnemySpawnEntry, spawn_position: Vector2) -> Enemy
         _pending_spawns.erase(spawn_position)
         if not is_instance_valid(enemiesNode) or not enemiesNode.is_inside_tree():
             return null
+    # The character can die during the telegraph (or between a group's staggered
+    # spawns). Modifiers take it as a typed argument, so a freed one is a hard error.
+    if not is_instance_valid(character):
+        return null
     var scene: PackedScene = entry.scene if entry != null else fallback_enemy_scene
     var enemy := scene.instantiate() as Enemy
     enemy.global_position = spawn_position
     for mod in modifiers:
         mod.attach_to_enemy(enemy, character)
+    _apply_rarity_health(enemy, entry)
     _apply_elite_scaling(enemy, entry)
     _apply_stage_scaling(enemy)
     enemiesNode.add_child(enemy)
     enemy.set_target_position(character)
     return enemy
+
+
+## Special enemies are rarer but tougher: the config's `base_health` for the
+## row's scene replaces the health in the enemy's Stats node, before elite and
+## loop scaling. A scene with no `base_health` keeps its own.
+func _apply_rarity_health(enemy: Node, entry: EnemySpawnEntry) -> void:
+    var rarity := _rarity(entry)
+    var stats = enemy.get_node_or_null("Stats")
+    if stats and rarity.has("base_health"):
+        stats.set_base_stat("health", float(rarity["base_health"]))
 
 
 ## Applies a row's elite multipliers once the run has reached its

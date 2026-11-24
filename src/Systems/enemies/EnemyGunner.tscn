@@ -35,8 +35,8 @@ radius = 45.2769
 
 [node name="Enemy" type="CharacterBody2D" unique_id=2037486778]
 script = ExtResource("1_r5v6p")
-description = "Shoots from a fixed distance and does not hurt on touch. Break line of sight or close the gap."
 contact_weapon = null
+description = "Shoots from a fixed distance and does not hurt on touch. Break line of sight or close the gap."
 
 [node name="Node2D" type="Node2D" parent="." unique_id=981681602]
 

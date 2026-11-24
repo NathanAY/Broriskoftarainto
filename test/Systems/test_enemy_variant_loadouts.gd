@@ -29,8 +29,7 @@ const VARIANTS := [
 		"scene": "res://src/Systems/enemies/EnemyBulwark.tscn",
 		# It is the contact-damage wall, so it keeps Thorns.
 		"weapon": "contact",
-		# It trades its speed for its health. That is the whole row.
-		"tougher_than_grunt": true,
+		# Its health is set in game_config.json (enemy_rarity), not in the scene.
 		"slower_than_grunt": true,
 	},
 	{
@@ -55,8 +54,7 @@ const VARIANTS := [
 		"scene": "res://src/Systems/enemies/EnemyLancer.tscn",
 		# The charge is a body check, so it still hurts on touch.
 		"weapon": "contact",
-		# Its threat is the locked charge, not a bigger health pool.
-		"fragile_than_grunt": true,
+		# Its health is set in game_config.json (enemy_rarity), not in the scene.
 		"behaviour": "charge",
 	},
 	{
@@ -64,7 +62,6 @@ const VARIANTS := [
 		"scene": "res://src/Systems/enemies/EnemyToadstinker.tscn",
 		# It arms no weapon: the threat is the blast it leaves when it dies.
 		"weapon": "none",
-		"fragile_than_grunt": true,
 		"has_burst": true,
 	},
 	{
@@ -72,7 +69,6 @@ const VARIANTS := [
 		"scene": "res://src/Systems/enemies/EnemyBlink.tscn",
 		# It reappears next to you and then touches you like the basic enemy.
 		"weapon": "contact",
-		"fragile_than_grunt": true,
 		"behaviour": "blink",
 	},
 	{
@@ -80,8 +76,7 @@ const VARIANTS := [
 		"scene": "res://src/Systems/enemies/EnemyShieldbearer.tscn",
 		# It still hurts on touch; the shield is what makes you approach it.
 		"weapon": "contact",
-		# It pays for the shield with speed and gets a little health back.
-		"tougher_than_grunt": true,
+		# It pays for the shield with speed. Health is set in game_config.json.
 		"slower_than_grunt": true,
 		"has_shield": true,
 	},

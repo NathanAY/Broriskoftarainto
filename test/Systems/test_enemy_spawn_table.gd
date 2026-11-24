@@ -9,13 +9,35 @@ const ENEMY_SCENE := "res://src/Systems/enemies/Enemy.tscn"
 const BOSS_SCENE := "res://src/Systems/enemies/EnemyBoss.tscn"
 
 
-func _entry(scene_path: String, weight: float = 1.0, min_loop: int = 1) -> EnemySpawnEntry:
+## Weights live in `game_config.json` (`enemy_rarity`), not on the row, so a test
+## that needs a particular weight sets it there with `_set_weight`.
+func _entry(scene_path: String, min_loop: int = 1) -> EnemySpawnEntry:
     var entry := EnemySpawnEntry.new()
     entry.scene = load(scene_path)
-    entry.weight = weight
     entry.min_loop = min_loop
     return entry
 
+
+var _saved_rarity: Dictionary = {}
+
+
+## Overrides one scene's `weight` in the live config block; `after_test` restores it.
+func _set_weight(scene_path: String, weight: float) -> void:
+    var block := GameConfig.section("enemy_rarity")
+    var key := scene_path.get_file().get_basename()
+    if not _saved_rarity.has(key):
+        _saved_rarity[key] = block.get(key, null)
+    block[key] = {"weight": weight}
+
+
+func after_test() -> void:
+    var block := GameConfig.section("enemy_rarity")
+    for key in _saved_rarity:
+        if _saved_rarity[key] == null:
+            block.erase(key)
+        else:
+            block[key] = _saved_rarity[key]
+    _saved_rarity.clear()
 
 ## The tree every enemy-spawning test wants: TestRoot/Nodes/Enemies,
 ## TestRoot/StageManager/<spawner>, TestRoot/Character. The spawner reaches its
@@ -50,7 +72,7 @@ func test_empty_table_falls_back_to_the_fallback_scene() -> void:
 
 func test_a_row_locked_behind_a_later_loop_is_not_picked() -> void:
     var spawner: EnemySpawner = _build_tree()["spawner"]
-    spawner.spawn_table = [_entry(BOSS_SCENE, 1.0, 2)]
+    spawner.spawn_table = [_entry(BOSS_SCENE, 2)]
 
     spawner.current_loop = 1
     assert_that(spawner.pick_enemy_scene()).is_equal(spawner.fallback_enemy_scene)
@@ -61,7 +83,9 @@ func test_a_row_locked_behind_a_later_loop_is_not_picked() -> void:
 
 func test_a_row_with_no_weight_never_comes_up() -> void:
     var spawner: EnemySpawner = _build_tree()["spawner"]
-    spawner.spawn_table = [_entry(ENEMY_SCENE, 0.0), _entry(BOSS_SCENE, 1.0)]
+    _set_weight(ENEMY_SCENE, 0.0)
+    _set_weight(BOSS_SCENE, 1.0)
+    spawner.spawn_table = [_entry(ENEMY_SCENE), _entry(BOSS_SCENE)]
 
     for _i in range(20):
         assert_that(spawner.pick_enemy_scene()).is_equal(load(BOSS_SCENE))
@@ -69,7 +93,9 @@ func test_a_row_with_no_weight_never_comes_up() -> void:
 
 func test_a_heavier_row_comes_up_more_often() -> void:
     var spawner: EnemySpawner = _build_tree()["spawner"]
-    spawner.spawn_table = [_entry(ENEMY_SCENE, 1.0), _entry(BOSS_SCENE, 9.0)]
+    _set_weight(ENEMY_SCENE, 1.0)
+    _set_weight(BOSS_SCENE, 9.0)
+    spawner.spawn_table = [_entry(ENEMY_SCENE), _entry(BOSS_SCENE)]
 
     var light := 0
     var heavy := 0
@@ -163,3 +189,41 @@ func test_a_row_below_its_elite_loop_is_not_elite() -> void:
     assert_bool(visual.modulate.is_equal_approx(Color.WHITE)).override_failure_message(
         "an enemy was elite before its row's unlock loop"
     ).is_true()
+
+
+const BULWARK_SCENE := "res://src/Systems/enemies/EnemyBulwark.tscn"
+const LANCER_SCENE := "res://src/Systems/enemies/EnemyLancer.tscn"
+
+
+## Rarity numbers are read from `game_config.json`, so the tests derive their
+## expectation from the same block instead of pinning a literal.
+func _rarity(scene_path: String) -> Dictionary:
+    return GameConfig.section("enemy_rarity").get(scene_path.get_file().get_basename(), {})
+
+
+func test_a_row_weight_comes_from_the_config() -> void:
+    var spawner: EnemySpawner = _build_tree()["spawner"]
+
+    assert_float(spawner._entry_weight(_entry(BULWARK_SCENE))).is_equal_approx(
+        float(_rarity(BULWARK_SCENE)["weight"]), 0.0001)
+
+
+func test_a_scene_missing_from_the_config_weighs_one() -> void:
+    var spawner: EnemySpawner = _build_tree()["spawner"]
+
+    assert_float(spawner._entry_weight(_entry(BOSS_SCENE))).is_equal_approx(1.0, 0.0001)
+
+
+func test_a_special_enemy_health_comes_from_the_config() -> void:
+    var ctx := _build_tree()
+    var spawner: EnemySpawner = ctx["spawner"]
+    var enemies: Node = ctx["enemies"]
+    spawner.use_group_spawning = false
+    spawner.health_growth_per_loop = 0.0
+    spawner.spawn_table = [_entry(LANCER_SCENE)]
+
+    spawner.spawn_enemy()
+
+    var spawned := enemies.get_child(0) as Enemy
+    assert_float(spawned.stats.get_stat("health")).is_equal_approx(
+        float(_rarity(LANCER_SCENE)["base_health"]), 0.0001)

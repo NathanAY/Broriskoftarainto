@@ -41,4 +41,5 @@ func _on_before_take_damage(event: Dictionary) -> void:
     if not Wallet.spend(character, premium(), "insurance"):
         return
     _claims_used += 1
+    RunHistory.record(character, display_name, "coins", -premium())
     ctx.final_amount = maxf(0.0, health.current_health - float(_economy_config().get("survive_health", 1)))

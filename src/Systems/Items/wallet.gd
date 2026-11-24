@@ -13,6 +13,10 @@ const ECONOMY_STATS: Array[String] = [
 ]
 
 
+## How each payday source reads in the run history.
+const PAYDAY_LABELS := {"interest": "Interest", "dividend": "Stock Investment dividend"}
+
+
 ## The `economy` block of `game_config.json`.
 static func config() -> Dictionary:
     return GameConfig.section("economy")
@@ -69,9 +73,11 @@ static func payday(character: Character, loop: int) -> Dictionary:
     var growth := clampf(stock * float(economy.get("stock_growth", 0.0)), 0.0, maxf(0.0, cap - stock))
     if growth > 0.0:
         character.stats.set_base_stat("stock_investment", float(character.stats.stats.get("stock_investment", 0.0)) + growth)
+        RunHistory.record(character, "Stock growth", "stock_investment", growth)
 
     for source in breakdown:
         earn(character, breakdown[source], source)
+        RunHistory.record(character, PAYDAY_LABELS.get(source, source), "coins", breakdown[source])
     character.event_manager.emit_event("on_payday", {"loop": loop, "breakdown": breakdown})
     return breakdown
 

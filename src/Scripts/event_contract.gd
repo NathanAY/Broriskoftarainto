@@ -115,6 +115,10 @@ const SCHEMAS := {
 	"on_payday": {
 		"required": ["loop", "breakdown"],
 	},
+	# --- run history (character bus, see docs/systems/run_history.md) ---
+	"on_run_event": {
+		"required": ["source", "what", "amount"],
+	},
 	# --- misc ---
 	"on_crit": {
 		"required": ["damage_context"],

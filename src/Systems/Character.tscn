@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://by0slo3uv1f0e" path="res://src/ui/numberspawn/DamageNumberSpawner.tscn" id="11_khphl"]
 [ext_resource type="PackedScene" uid="uid://bfv23hn20a0ia" path="res://src/ui/numberspawn/HealNumberSpawner.tscn" id="12_fdd6p"]
 [ext_resource type="PackedScene" uid="uid://bh43jhslewxeq" path="res://src/ui/HealthBar.tscn" id="13_mogpt"]
+[ext_resource type="PackedScene" uid="uid://tvea4lfvc3f4" path="res://src/ui/numberspawn/RunEventSpawner.tscn" id="16_runev"]
 [ext_resource type="PackedScene" uid="uid://jsw2vxmrn6yc" path="res://src/Scenes/particles/ParticleEffectManager.tscn" id="14_yw36p"]
 [ext_resource type="PackedScene" uid="uid://brgr2yeaajlxi" path="res://src/Scenes/effects/HitFlashManager.tscn" id="15_flash"]
 [ext_resource type="AnimationLibrary" uid="uid://cv7ddqsudqysx" path="res://src/animations/player_animations.res" id="17_rd1uo"]
@@ -105,6 +106,9 @@ max_weapons = 6
 event_manager = NodePath("../EventManager")
 
 [node name="HealNumberSpawner" parent="." unique_id=2105309788 node_paths=PackedStringArray("event_manager") instance=ExtResource("12_fdd6p")]
+event_manager = NodePath("../EventManager")
+
+[node name="RunEventSpawner" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("16_runev")]
 event_manager = NodePath("../EventManager")
 
 [node name="HealthBar" parent="." unique_id=287219380 node_paths=PackedStringArray("event_manager") instance=ExtResource("13_mogpt")]

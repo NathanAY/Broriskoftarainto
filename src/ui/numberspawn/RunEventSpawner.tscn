@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://tvea4lfvc3f4"]
+
+[ext_resource type="Script" uid="uid://ct8epkkqbj2yr" path="res://src/ui/numberspawn/run_event_spawner.gd" id="1_runev"]
+[ext_resource type="PackedScene" uid="uid://bynru56pu7iam" path="res://src/ui/numberspawn/FloatingNumber.tscn" id="2_float"]
+
+[node name="RunEventSpawner" type="Node"]
+script = ExtResource("1_runev")
+floating_text_scene = ExtResource("2_float")

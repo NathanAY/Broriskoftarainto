@@ -37,7 +37,9 @@ func _on_after_take_damage(event: Dictionary):
         _trigger_emergency_heal(health)
 
 func _trigger_emergency_heal(health: Health):
+    var before_heal := health.current_health
     health.heal(health.max_health * 0.75)
+    RunHistory.record(holder, display_name, "health", health.current_health - before_heal)
     _start_cooldown()
 
 func _start_cooldown():

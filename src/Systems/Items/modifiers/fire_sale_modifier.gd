@@ -26,3 +26,4 @@ func _on_sell(event: Dictionary) -> void:
         return
     var gained := float(event.get("price", 0)) * _stock_per_coin()
     stats.set_base_stat("stock_investment", float(stats.stats.get("stock_investment", 0.0)) + gained)
+    RunHistory.record(holder, display_name, "stock_investment", gained)

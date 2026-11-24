@@ -64,6 +64,7 @@ Events (character bus, schemas in `src/Scripts/event_contract.gd`)
 | `on_money_changed` | `old`, `new`, `source` | every `Wallet.earn` / successful `Wallet.spend` |
 | `on_shop_enter` | `loop` | `ShopMenu.show_menu()`, once per visit (reset by Next Stage) |
 | `on_payday` | `loop`, `breakdown` | `Wallet.payday()`, right after `on_shop_enter` |
+| `on_run_event` | `source`, `what`, `amount` | `RunHistory.record()` — see `docs/systems/run_history.md` |
 | `on_purchase` | `resource`, `price` | an offer is bought |
 | `on_sell` | `resource`, `price` | a pickup or a weapon is sold |
 | `on_reroll` | `cost` | a paid reroll |

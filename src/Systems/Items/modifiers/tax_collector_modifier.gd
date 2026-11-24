@@ -29,4 +29,6 @@ func _on_payday(_event: Dictionary) -> void:
     var character := holder as Character
     if character == null or Wallet.balance(character) <= 0.0:
         return  # nothing to tax, and a negative share of a debt would be a refund
-    Wallet.spend(character, floorf(Wallet.balance(character) * _rate()), "tax")
+    var tax := floorf(Wallet.balance(character) * _rate())
+    if Wallet.spend(character, tax, "tax"):
+        RunHistory.record(character, display_name, "coins", -tax)

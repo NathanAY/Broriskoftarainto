@@ -12,8 +12,14 @@ const SAMPLE_ITEMS := [
 	"ArmorPlate", "AttackSpeedItem", "BootsOfSpeed", "CritGlass", "Knockback",
 	"LifeDrain", "PlusDamageItem", "PoisonHit", "RegenPassive", "ProjSpeed",
 ]
-## Which tab of the right-hand panel the shot shows: 0 Stats, 1 Modifiers.
+## Which tab of the right-hand panel the shot shows: 0 Stats, 1 Modifiers,
+## 2 Run history.
 const STATS_TAB := 0
+## [source, what, amount] recorded into the Run history tab.
+const SAMPLE_HISTORY := [
+	["Bounty Mark", "coins", 12.0], ["Stat On Kill", "health", 0.5], ["Stat On Kill", "health", 0.5],
+	["Interest", "coins", 4.0], ["Stock Investment dividend", "coins", 5.0], ["Tax Collector", "coins", -6.0],
+]
 const SAMPLE_WEAPONS :=["Fist", "Pistol", "Shotgun", "DeathAura", "Thorns"]
 
 
@@ -37,6 +43,8 @@ func _ready() -> void:
 	# `CharacterUi._ready()` reads the character off the global, so it has to be
 	# published before the UI is added.
 	GlobalGameState.current_character = character
+	for event in SAMPLE_HISTORY:
+		RunHistory.record(character, event[0], event[1], event[2])
 
 	var ui: Control = load("res://src/ui/CharacterUI.tscn").instantiate()
 	add_child(ui)

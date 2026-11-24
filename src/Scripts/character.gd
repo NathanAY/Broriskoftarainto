@@ -31,6 +31,10 @@ var anim_player: AnimationPlayer:
 ## Coins earned this run: loop -> {source -> coins}. Written only by `Wallet`.
 var income_by_loop: Dictionary = {}
 
+## What the player's effects did this run, one merged entry per effect per loop.
+## Written only by `RunHistory`.
+var run_history: Array[Dictionary] = []
+
 var current_target = null
 var fire_timer = 0.0
 

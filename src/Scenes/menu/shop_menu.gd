@@ -7,6 +7,7 @@ class_name ShopMenu
 @onready var items_container: HBoxContainer = $Control/VBoxContainer/MidContainer/ShopArea/ItemsList
 @onready var stats_container: VBoxContainer = $Control/VBoxContainer/MidContainer/StatsPanel/StatsTabs/Stats/StatsList
 @onready var modifiers_container: VBoxContainer = $Control/VBoxContainer/MidContainer/StatsPanel/StatsTabs/Modifiers/ModifiersList
+@onready var history_container: VBoxContainer = $"Control/VBoxContainer/MidContainer/StatsPanel/StatsTabs/Run history/HistoryList"
 @onready var collected_items_container: GridContainer = $Control/VBoxContainer/BottomContainer/ItemsContainer/ItemsScroll/ItemsMargin/List
 @onready var weapons_container: GridContainer = $Control/VBoxContainer/BottomContainer/WeaponsContainer/WeaponsScroll/WeaponsMargin/List
 @onready var weapons_label: Label = $Control/VBoxContainer/BottomContainer/WeaponsContainer/Label
@@ -80,6 +81,7 @@ func _update_character_info() -> void:
 
     # Every path that changes the gear (take, sell, buy, open) comes through here.
     ModifierSummary.populate(modifiers_container, character)
+    RunHistory.populate(history_container, character)
 
     var item_holder: ItemHolder = character.get_node_or_null("ItemHolder")
     if item_holder:

@@ -107,8 +107,8 @@ func test_character_ui_modifiers_tab_lists_merged_rows() -> void:
     var ui = load(CHARACTER_UI_SCENE).instantiate()
     add_child(ui)
 
-    # Stats stays the first tab; Modifiers is the second.
-    assert_int(ui.stats_tabs.get_tab_count()).is_equal(2)
+    # Stats stays the first tab; Modifiers is the second, Run history the third.
+    assert_int(ui.stats_tabs.get_tab_count()).is_equal(3)
     assert_str(ui.stats_tabs.get_tab_title(0)).is_equal("Stats")
     assert_str(ui.stats_tabs.get_tab_title(1)).is_equal("Modifiers")
     assert_int(ui.stats_container.get_child_count()).is_greater(0)

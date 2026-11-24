@@ -44,6 +44,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | `save_system.md` | The `SaveManager` autoload and `<project>/saves/save.json`: file format, location, how to add a section |
 | `spawners.md` | `enemy_spawner.gd`, `boss_spawner.gd`, spawn pacing |
 | `stage_manager.md` | Wave → boss → shop orchestration, loop progression, and the end-of-run final-boss / one-more-loop choice |
+| `run_history.md` | `RunHistory.record`: floating text over the player and the Run history tab for effects that pay out (bounty, dividend, stat on kill) |
 | `stats.md` | Stat storage, modifiers, conditions, modifier-owned (provided) stats |
 | `ui_shop_portal.md` | Shop, item cards, tooltips, the tone/colour system, the HUD's buff/debuff tiles |
 | `weapons.md` | `BaseWeapon`, weapon scripts, built-in weapon effects, weapon resources |

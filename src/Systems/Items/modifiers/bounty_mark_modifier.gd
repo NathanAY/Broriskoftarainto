@@ -61,7 +61,9 @@ func _on_kill(event: Dictionary) -> void:
     if ctx == null or character == null or not is_marked(ctx.target):
         return
     ctx.target.remove_meta(META)
-    Wallet.earn(character, Wallet.coins_for(character, bounty()), "bounty")
+    var coins := Wallet.coins_for(character, bounty())
+    Wallet.earn(character, coins, "bounty")
+    RunHistory.record(character, display_name, "coins", coins)
 
 
 ## The gold ring drawn under a marked enemy.

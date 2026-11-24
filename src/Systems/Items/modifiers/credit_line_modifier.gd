@@ -46,4 +46,6 @@ func _on_shop_enter(_event: Dictionary) -> void:
     var character := holder as Character
     if character == null or Wallet.balance(character) >= 0.0:
         return
-    Wallet.charge(character, ceilf(-Wallet.balance(character) * float(_economy_config().get("debt_interest", 0.0))), "debt_interest")
+    var interest := ceilf(-Wallet.balance(character) * float(_economy_config().get("debt_interest", 0.0)))
+    Wallet.charge(character, interest, "debt_interest")
+    RunHistory.record(character, display_name, "coins", -interest)

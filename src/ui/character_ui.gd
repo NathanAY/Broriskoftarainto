@@ -5,6 +5,7 @@ extends Control
 @onready var stats_tabs: TabContainer = $VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsTabs
 @onready var stats_container: VBoxContainer = $VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsTabs/Stats/StatsList
 @onready var modifiers_container: VBoxContainer = $VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsTabs/Modifiers/ModifiersList
+@onready var history_container: VBoxContainer = $"VBoxContainer/WeaponsAndItemsContainer/StatsContainer/StatsTabs/Run history/HistoryList"
 @onready var weapons_container: GridContainer = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/WeaponsScroll/WeaponsMargin/WeaponsList
 @onready var weapons_label: Label = $VBoxContainer/WeaponsAndItemsContainer/LeftContainer/LeftHBox/WeaponsLabel
 @onready var back_button: Button = $VBoxContainer/Footer/Close
@@ -31,6 +32,8 @@ func _ready() -> void:
     # Item and weapon events fire before every effect node is wired in some paths,
     # so the list is also rebuilt whenever the tab is opened.
     stats_tabs.tab_changed.connect(func(_tab: int): _update_modifiers())
+    stats_tabs.tab_changed.connect(func(_tab: int): RunHistory.populate(history_container, character))
+    RunHistory.populate(history_container, character)
     stats_node = character.get_node_or_null("Stats")
     item_holder = character.get_node_or_null("ItemHolder")
     weapon_holder = character.get_node_or_null("WeaponHolder")

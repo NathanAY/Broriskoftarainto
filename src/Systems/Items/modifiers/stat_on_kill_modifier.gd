@@ -53,3 +53,4 @@ func _on_event(_event: Dictionary):
         return
     var total = add_amount * _active_stacks()
     stats.set_base_stat(target_stat, float(stats.stats.get(target_stat)) + total)
+    RunHistory.record(holder, display_name, target_stat, total)

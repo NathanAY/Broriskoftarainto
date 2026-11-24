@@ -15,6 +15,10 @@ class_name AssetSizes
 ## file resolution, so the shared body collider stays matched to the art.
 const ENEMY_SPRITE := 100.0
 
+## The character canvas: the body and the face parts are authored on it. A body
+## wider than this is scaled down to it in the scene.
+const CHARACTER_SPRITE := 150.0
+
 ## The boss is a larger canvas and is drawn at its own size.
 const BOSS_SPRITE := 225.0
 

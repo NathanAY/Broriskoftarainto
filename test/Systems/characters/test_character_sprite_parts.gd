@@ -50,6 +50,57 @@ func test_rig_is_composed_from_the_declared_parts() -> void:
 	character.free()
 
 
+## A source-resolution body is drawn at the character canvas width, and the legs,
+## shadow and face parts keep their canvas-size look.
+func test_every_body_is_drawn_at_the_canvas_width() -> void:
+	for path in _all_character_paths():
+		var data: CharacterData = load(path)
+		var character := await _spawn_character(path)
+		var rig: Sprite2D = character.get_node("Node2D/Sprite2D")
+		var holder: Node2D = rig.get_parent()
+		var drawn := rig.texture.get_width() * holder.scale.x
+		assert_float(drawn).override_failure_message(
+			"%s body is drawn %s px wide" % [path, drawn]).is_equal_approx(AssetSizes.CHARACTER_SPRITE * data.body_scale, 0.01)
+		var eyes := rig.get_node("eyes") as Sprite2D
+		assert_float(eyes.texture.get_width() * eyes.scale.x * holder.scale.x).is_equal_approx(
+			float(data.eyes.get_width()) * data.body_scale, 0.01)
+		var legs := holder.get_node("Legs") as Node2D
+		assert_float(legs.scale.x * holder.scale.x).is_equal_approx(1.0, 0.001)
+		character.free()
+
+
+## The feet offset moves the legs and shadow down and the tint colours the legs,
+## and a character with neither keeps the authored scene values.
+func test_feet_offset_and_legs_tint_reach_the_rig() -> void:
+	var tycoon: CharacterData = load("res://src/Assets/character/tycoon/Tycoon.tres")
+	var character := await _spawn_character("res://src/Assets/character/tycoon/Tycoon.tres")
+	var holder: Node2D = character.get_node("Node2D")
+	var legs := holder.get_node("Legs") as Node2D
+	var plain := await _spawn_character(BRAWLER)
+	var plain_legs := plain.get_node("Node2D/Legs") as Node2D
+	assert_float(legs.position.y * holder.scale.x - plain_legs.position.y).is_equal_approx(
+		tycoon.feet_offset_y, 0.01)
+	assert_that(legs.modulate).is_equal(tycoon.legs_tint)
+	assert_that(plain_legs.modulate).is_equal(Color.WHITE)
+	character.free()
+	plain.free()
+
+
+## Minified every frame, so a body wider than the canvas samples its mipmaps.
+func test_oversize_body_has_mipmaps_and_mipmapped_filter() -> void:
+	for path in _all_character_paths():
+		var data: CharacterData = load(path)
+		if data.body.get_width() <= int(AssetSizes.CHARACTER_SPRITE):
+			continue
+		var source := data.body.resource_path + ".import"
+		assert_str(FileAccess.get_file_as_string(source)).override_failure_message(
+			"%s has no mipmaps" % data.body.resource_path).contains("mipmaps/generate=true")
+		var character := await _spawn_character(path)
+		var holder: Node2D = character.get_node("Node2D")
+		assert_int(holder.texture_filter).is_equal(CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS)
+		character.free()
+
+
 func test_characters_can_share_a_body_and_differ_by_face() -> void:
 	var brawler: CharacterData = load(BRAWLER)
 	var soldier: CharacterData = load(SOLDIER)
@@ -57,6 +108,22 @@ func test_characters_can_share_a_body_and_differ_by_face() -> void:
 	assert_that(brawler.body).is_equal(soldier.body)
 	assert_that(brawler.eyes).is_not_equal(soldier.eyes)
 	assert_that(brawler.mouth).is_not_equal(soldier.mouth)
+
+
+## Parts may be reused, but no two characters may end up looking identical.
+## Compared by pixels, not by path: a copied PNG under a new name (the Tycoon
+## once shipped Ranger's face that way) is still the same look.
+func test_no_two_characters_look_identical() -> void:
+	var seen := {}
+	for path in _all_character_paths():
+		var look := []
+		for layer in CharacterSprites.layers(load(path)):
+			var texture: Texture2D = layer[1]
+			look.append(hash(texture.get_image().get_data()))
+		var key := str(look)
+		assert_bool(seen.has(key)).override_failure_message(
+			"%s looks identical to %s" % [path, seen.get(key, "")]).is_false()
+		seen[key] = path
 
 
 func _spawn_character(character_path: String) -> Node:

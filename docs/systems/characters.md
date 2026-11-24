@@ -32,6 +32,7 @@ This document explains the new character system (data, UI, and integration point
 - `starting_items` (Array[Item]): `Item` resources equipped at spawn via the `ItemHolder`.
 - `starting_weapons` (Array[BaseWeapon]): `BaseWeapon` resources (e.g. `res://src/Resources/weapons/Fist.tres`) equipped at spawn via the `WeaponHolder`.
 - `body`, `eyes`, `mouth` (Texture2D): the layered art parts, drawn bottom to top. See "Character art" below.
+- `body_scale` (float, default 1): scales the whole figure, overlays included, for art drawn bigger than the potato (the Tycoon is 0.8); legs and shadow keep their size. `feet_offset_y` (float, canvas px, default 0): moves the legs and shadow down for a body that reaches lower than the potato's, which would otherwise hide them. `legs_tint` (Color, default white): multiplies the shared legs art, so the fill takes the colour and the outline stays black. The Tycoon sets both.
 
 Example (pseudo):
 ```
@@ -54,9 +55,12 @@ mouth  src/Assets/character/<id>/<id>_mouth.png
 
 - `layers(CharacterData)` returns `[slot, texture]` bottom to top, skipping a missing overlay. A character with no `body` falls back to `CharacterSprites.DEFAULT_BODY` (`src/Assets/character/potato.png`), never to a baked icon.
 - `apply_to_rig()` puts the body on `Node2D/Sprite2D` and adds one child `Sprite2D` per overlay, named after its slot. The overlays inherit `flip_h`, the idle/move scale animation and the hit-flash `modulate` from the parent.
+- **A body may be source resolution** (the Tycoon's is 1024px). `apply_to_rig()` scales the rig's parent `Node2D` so the body draws `AssetSizes.CHARACTER_SPRITE` (150px) wide, the way `Enemy.art_width` fits enemy art; the scale cannot go on the rig because the idle/move animations overwrite it. The legs, shadow and overlays are scaled back so they keep their canvas size, and the node gets `Linear with Mipmaps` — the body's `.import` must have `mipmaps/generate=true` or it shimmers in motion. Overlays stay 150x150. `make_icon()` measures its crop in canvas pixels for the same reason.
 - `make_icon()` builds the UI portrait from the same stack, one `TextureRect` per layer. Every layer shares one crop: the square union of their opaque pixels, so the face stays on the body while the transparent margins around the art are removed. Without that crop the body fills under half its 150x150 canvas and the card portrait reads tiny. `CharacterDetailPanel` also asks for its full 88px plate via `_icon_size()`.
 
-Reuse is just pointing two `.tres` files at the same texture. `src/Assets/character/<id>/<id>_icon.png` is no longer drawn by either path; a character with no parts still renders the shared body.
+Reuse is just pointing two `.tres` files at the same texture, but no two characters may end up with the same *look* — `test_no_two_characters_look_identical` in `test/Systems/characters/test_character_sprite_parts.gd` compares pixels, so a copied PNG under a new name fails it too.
+
+The Tycoon is the one character with its own body (`src/Assets/character/tycoon/tycoon_body.png`, a gold egg with a top hat and a belly chain). Its three parts are cut from the generated sheets in `docs/plans/images/sprites/` by `test/tools/extract_tycoon_parts.gd` (`godot --headless --path . -s res://test/tools/extract_tycoon_parts.gd`); re-run it rather than editing those PNGs by hand. A custom body must stand on the potato's footprint (same width, same bottom edge) so the legs and shadow still line up. `src/Assets/character/<id>/<id>_icon.png` is no longer drawn by either path; a character with no parts still renders the shared body.
 
 ## How selection and application works
 1. Player picks a card in `CharacterSelect` (first character is pre-selected so the detail panel is never empty); the detail panel shows the full `CharacterTooltip` stats. On confirm the script sets `GlobalGameState.starting_character = "res://src/Assets/character/ranger/Ranger.tres"` (string path).

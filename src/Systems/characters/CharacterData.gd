@@ -45,3 +45,12 @@ class_name CharacterData
 @export var body: Texture2D
 @export var eyes: Texture2D
 @export var mouth: Texture2D
+# Legs and shadow sit where the potato body ends. A body that reaches lower
+# (the Tycoon's) moves them down by this many canvas pixels, or it hides them.
+@export var feet_offset_y: float = 0.0
+# Scales the whole figure (body and face) when its art is drawn larger than the
+# potato's. Legs and shadow keep their size.
+@export var body_scale: float = 1.0
+# Multiplies the shared legs art: the black outline stays black, the fill takes
+# the colour. Set it to the body colour.
+@export var legs_tint: Color = Color.WHITE

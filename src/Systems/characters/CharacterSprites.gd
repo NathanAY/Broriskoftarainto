@@ -11,6 +11,11 @@ class_name CharacterSprites
 
 const DEFAULT_BODY := "res://src/Assets/character/potato.png"
 
+## Meta on the rig's parent holding the fit last applied, so applying twice does
+## not compound it.
+const FIT_META := &"character_fit"
+const FEET_META := &"character_feet"
+
 
 ## Bottom-to-top layers for `character`, as `[slot: StringName, texture: Texture2D]`.
 static func layers(character: CharacterData) -> Array:
@@ -37,6 +42,7 @@ static func apply_to_rig(character: CharacterData, rig: Sprite2D) -> void:
 			child.free()
 	rig.texture = null
 	var stack := layers(character)
+	var fit := _apply_fit(rig, stack, character)
 	for i in range(stack.size()):
 		var slot: StringName = stack[i][0]
 		var texture: Texture2D = stack[i][1]
@@ -46,7 +52,50 @@ static func apply_to_rig(character: CharacterData, rig: Sprite2D) -> void:
 		var layer := Sprite2D.new()
 		layer.name = String(slot)
 		layer.texture = texture
+		# Face parts are authored on the character canvas, so they sit at their own
+		# size whatever scale the body's fit put on the rig's parent.
+		layer.scale = Vector2.ONE / fit
 		rig.add_child(layer)
+
+
+## Draws a source-resolution body at `AssetSizes.CHARACTER_SPRITE` wide, the way an
+## enemy sprite is fitted: the scale goes on the rig's **parent**, because the
+## idle/move animations write the rig's own `scale` and would overwrite it. What
+## else lives under that parent (the legs, the rig's shadow) is authored at
+## canvas size, so it is scaled back by the same factor. Returns the fit.
+static func _apply_fit(rig: Sprite2D, stack: Array, character: CharacterData) -> float:
+	var holder := rig.get_parent() as Node2D
+	if holder == null or stack.is_empty():
+		return 1.0
+	var body: Texture2D = stack[0][1]
+	var fit := AssetSizes.scale_for(body, AssetSizes.CHARACTER_SPRITE)
+	# `body_scale` shrinks or grows the whole figure (overlays with it); legs and
+	# shadow are scaled back below, so they keep their canvas size.
+	var total: float = fit * (character.body_scale if character != null else 1.0)
+	var applied: float = holder.get_meta(FIT_META, 1.0)
+	var change := total / applied
+	holder.set_meta(FIT_META, total)
+	holder.scale *= change
+	# A body taller than the potato's hides the legs and shadow behind it, so the
+	# character names how far lower its feet are (canvas pixels).
+	var feet: float = character.feet_offset_y if character != null else 0.0
+	var feet_applied: float = holder.get_meta(FEET_META, 0.0)
+	holder.set_meta(FEET_META, feet)
+	var feet_shift := Vector2(0.0, (feet - feet_applied) / total)
+	var legs := holder.get_node_or_null("Legs") as Node2D
+	if legs != null:
+		legs.scale /= change
+		legs.position += feet_shift
+		legs.modulate = character.legs_tint if character != null else Color.WHITE
+	var shadow := rig.get_node_or_null("Shadow") as Node2D
+	if shadow != null:
+		shadow.scale /= change
+		shadow.position = shadow.position / change + feet_shift
+	# A texture drawn smaller than its file is minified every frame, so it needs
+	# mipmapped sampling or it shimmers while the character moves.
+	if body.get_width() > int(AssetSizes.CHARACTER_SPRITE):
+		holder.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	return fit
 
 
 ## The same stack as a UI icon: one `TextureRect` per layer, anchored full-rect
@@ -63,7 +112,8 @@ static func make_icon(character: CharacterData, plate_size: Vector2) -> Control:
 	for layer in stack:
 		var atlas := AtlasTexture.new()
 		atlas.atlas = layer[1]
-		atlas.region = Rect2(region)
+		var units := _canvas_units(layer[1])
+		atlas.region = Rect2(Vector2(region.position) * units, Vector2(region.size) * units)
 		var rect := TextureRect.new()
 		rect.texture = atlas
 		rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -73,14 +123,22 @@ static func make_icon(character: CharacterData, plate_size: Vector2) -> Control:
 	return container
 
 
-## The square crop shared by every layer: the union of the layers' opaque
+## Texture pixels per canvas pixel: a 1024px body and a 150px face are the same
+## picture, so crops are measured on the canvas and converted per layer.
+static func _canvas_units(texture: Texture2D) -> float:
+	return float(texture.get_width()) / AssetSizes.CHARACTER_SPRITE
+
+
+## The square crop shared by every layer, in canvas pixels: the union of the layers' opaque
 ## pixels, grown to a square around its centre and clamped to the canvas.
 static func _portrait_region(stack: Array) -> Rect2i:
-	var canvas := Rect2i(Vector2i.ZERO, Vector2i(stack[0][1].get_size()))
+	var canvas := Rect2i(Vector2i.ZERO, Vector2i(Vector2(stack[0][1].get_size()) * (1.0 / _canvas_units(stack[0][1]))))
 	var used := Rect2i()
 	var found := false
 	for layer in stack:
-		var bounds := _opaque_bounds(layer[1])
+		var units := _canvas_units(layer[1])
+		var raw := _opaque_bounds(layer[1])
+		var bounds := Rect2i(Vector2i(Vector2(raw.position) / units), Vector2i(Vector2(raw.size) / units))
 		if bounds.size.x <= 0 or bounds.size.y <= 0:
 			continue
 		used = bounds if not found else used.merge(bounds)

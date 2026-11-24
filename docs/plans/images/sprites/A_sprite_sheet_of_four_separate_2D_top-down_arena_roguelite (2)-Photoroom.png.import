@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dmgm4xbo07q18"
-path="res://.godot/imported/A_sprite_sheet_of_four_separate_2D_top-down_arena_roguelite (1).jpg-2ba6e55e22bd0c68915a40031f42aad3.ctex"
+uid="uid://cd0whe77fe34i"
+path="res://.godot/imported/A_sprite_sheet_of_four_separate_2D_top-down_arena_roguelite (2)-Photoroom.png-e388cc7df6a0488a607bb7248e85aa66.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/plans/images/sprites/A_sprite_sheet_of_four_separate_2D_top-down_arena_roguelite (1).jpg"
-dest_files=["res://.godot/imported/A_sprite_sheet_of_four_separate_2D_top-down_arena_roguelite (1).jpg-2ba6e55e22bd0c68915a40031f42aad3.ctex"]
+source_file="res://docs/plans/images/sprites/A_sprite_sheet_of_four_separate_2D_top-down_arena_roguelite (2)-Photoroom.png"
+dest_files=["res://.godot/imported/A_sprite_sheet_of_four_separate_2D_top-down_arena_roguelite (2)-Photoroom.png-e388cc7df6a0488a607bb7248e85aa66.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b76lsg77l6jbu"
-path="res://.godot/imported/Only_if_you_keep_the_overlay_systemA_sprite_sheet_of_eight_s (1).jpg-83e8ab2a31d12af98bf3ee9d6d0bde30.ctex"
+uid="uid://c32k3wiws3vlt"
+path="res://.godot/imported/A_sprite_sheet_of_four_separate_2D_top-down_arena_roguelite (1)-Photoroom.png-ab5a83976426cbaf0be2638609e48325.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/plans/images/sprites/Only_if_you_keep_the_overlay_systemA_sprite_sheet_of_eight_s (1).jpg"
-dest_files=["res://.godot/imported/Only_if_you_keep_the_overlay_systemA_sprite_sheet_of_eight_s (1).jpg-83e8ab2a31d12af98bf3ee9d6d0bde30.ctex"]
+source_file="res://docs/plans/images/sprites/A_sprite_sheet_of_four_separate_2D_top-down_arena_roguelite (1)-Photoroom.png"
+dest_files=["res://.godot/imported/A_sprite_sheet_of_four_separate_2D_top-down_arena_roguelite (1)-Photoroom.png-ab5a83976426cbaf0be2638609e48325.ctex"]
 
 [params]
 

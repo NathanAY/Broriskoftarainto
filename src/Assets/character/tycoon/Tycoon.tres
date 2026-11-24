@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://d366lntatds7u"]
 
 [ext_resource type="Script" uid="uid://b174fx02jtd8q" path="res://src/Systems/characters/CharacterData.gd" id="1_tycoon"]
-[ext_resource type="Texture2D" uid="uid://co8tav7tulvwb" path="res://src/Assets/character/potato.png" id="2_tycoon"]
+[ext_resource type="Texture2D" uid="uid://cr6yrmjoxhu7n" path="res://src/Assets/character/tycoon/tycoon_body.png" id="2_tycoon"]
 [ext_resource type="Texture2D" uid="uid://bd8pg8f7vvaen" path="res://src/Assets/character/tycoon/tycoon_eyes.png" id="6_tycoon"]
 [ext_resource type="Texture2D" uid="uid://cas52k00hiwd0" path="res://src/Assets/character/tycoon/tycoon_mouth.png" id="7_tycoon"]
 [ext_resource type="Script" uid="uid://2vl1rp4agc1u" path="res://src/Systems/weapon/BaseWeapon.gd" id="3_tycoon"]
@@ -23,4 +23,7 @@ starting_weapons = Array[ExtResource("3_tycoon")]([ExtResource("4_tycoon")])
 body = ExtResource("2_tycoon")
 eyes = ExtResource("6_tycoon")
 mouth = ExtResource("7_tycoon")
+body_scale = 0.8
+feet_offset_y = 11.0
+legs_tint = Color(0.949, 0.749, 0.2824, 1)
 metadata/_custom_type_script = "uid://b174fx02jtd8q"

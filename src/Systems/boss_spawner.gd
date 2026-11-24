@@ -9,21 +9,21 @@ class_name BossSpawner
 @export var arena_spawn_margin: float = 64.0
 @export var spawn_active: bool = false
 @export var boss_scene: PackedScene = preload("res://src/Systems/enemies/EnemyBoss.tscn")
-@export var current_loop: int = 1
-@export var health_growth_per_loop: float = 250
-@export var damage_growth_per_loop: float = 1
-## Extra loops' worth of scaling the final boss carries on top of the loop the
-## player reached. The final boss is faced *instead* of another loop, so it has
-## to sit above the loop that led to it - and it keeps climbing with
-## `current_loop` if the player banked extra loops before taking the fight.
-@export var final_boss_extra_loops: int = 2
+@export var current_stage: int = 1
+@export var health_growth_per_stage: float = 250
+@export var damage_growth_per_stage: float = 1
+## Extra stages' worth of scaling the final boss carries on top of the stage the
+## player reached. The final boss is faced *instead* of another stage, so it has
+## to sit above the stage that led to it - and it keeps climbing with
+## `current_stage` if the player banked extra stages before taking the fight.
+@export var final_boss_extra_stages: int = 2
 
-## The boss loadout ramps once per loop and stops here. Two more shotguns a loop
-## is already a lot by loop 4; letting it run on would leave a loop-10 boss
+## The boss loadout ramps once per stage and stops here. Two more shotguns a stage
+## is already a lot by stage 4; letting it run on would leave a stage-10 boss
 ## holding twenty of them, which costs frames instead of adding threat. Four
-## keeps the shipped ramp unchanged through loop 4 (6 shotguns, 2 pistols and
-## the loop-4 `SpreadShot`), so only loops past that are affected.
-const LOADOUT_LOOP_CAP: int = 4
+## keeps the shipped ramp unchanged through stage 4 (6 shotguns, 2 pistols and
+## the stage-4 `SpreadShot`), so only stages past that are affected.
+const LOADOUT_STAGE_CAP: int = 4
 
 ## Seconds the teleport effect plays before the boss appears. 0 = instant.
 @export var spawn_telegraph_time: float = SpawnPortal.DEFAULT_DURATION
@@ -45,27 +45,27 @@ func _ready():
         arena = get_tree().get_first_node_in_group("arena") as Arena
 
 func spawn_boss():
-    _spawn_boss(current_loop)
+    _spawn_boss(current_stage)
 
 
-## The final boss: the same encounter as the current loop's boss, scaled past
-## it. `StageManager` calls this only from its final-boss stage.
+## The final boss: the same encounter as the current stage's boss, scaled past
+## it. `StageManager` calls this only from its final-boss phase.
 func spawn_final_boss():
-    _spawn_boss(current_loop + final_boss_extra_loops, true)
+    _spawn_boss(current_stage + final_boss_extra_stages, true)
 
 
-## Coins the boss of `loop` pays on death, from the `economy` config. The final
+## Coins the boss of `stage` pays on death, from the `economy` config. The final
 ## boss pays nothing: the run ends there and no shop follows.
-static func bounty_for(loop: int, is_final: bool) -> int:
+static func bounty_for(stage: int, is_final: bool) -> int:
     if is_final:
         return 0
     var economy := Wallet.config()
-    return roundi(float(economy.get("boss_coins_base", 0)) + float(economy.get("boss_coins_per_loop", 0)) * (loop - 1))
+    return roundi(float(economy.get("boss_coins_base", 0)) + float(economy.get("boss_coins_per_stage", 0)) * (stage - 1))
 
 
-## `loop` is the loop whose scaling this boss gets, which is `current_loop` for
-## an ordinary boss and a few loops above it for the final one.
-func _spawn_boss(loop: int, is_final: bool = false):
+## `stage` is the stage whose scaling this boss gets, which is `current_stage` for
+## an ordinary boss and a few stages above it for the final one.
+func _spawn_boss(stage: int, is_final: bool = false):
     if _spawning or (boss_instance and is_instance_valid(boss_instance)):
         return # already spawned (or teleporting in)
 
@@ -88,7 +88,7 @@ func _spawn_boss(loop: int, is_final: bool = false):
 
     # The boss does not go through `SpawnerModifier` (no drops), so it pays its
     # bounty and leaves its corpse decal here.
-    var bounty := bounty_for(loop, is_final)
+    var bounty := bounty_for(stage, is_final)
     var health: Health = boss_instance.get_node_or_null("Health")
     if health and health.event_manager:
         health.event_manager.subscribe("on_death",
@@ -97,8 +97,8 @@ func _spawn_boss(loop: int, is_final: bool = false):
                     Wallet.earn(character, Wallet.coins_for(character, bounty), "boss")
                 DeathMark.leave_corpse(event.get("self")))
 
-    # Apply loop-based scaling
-    _apply_scaling(loop)
+    # Apply stage-based scaling
+    _apply_scaling(stage)
 
     if boss_instance.has_method("set_target_position"):
         boss_instance.set_target_position(character)
@@ -111,24 +111,24 @@ func clamp_spawn_position(pos: Vector2) -> Vector2:
         return pos
     return arena.clamp_to_arena(pos, arena_spawn_margin)
 
-## `loop` is the loop this boss is scaled as, not necessarily `current_loop`:
-## `spawn_final_boss()` passes a few loops beyond it.
-func _apply_scaling(loop: int) -> void:
+## `stage` is the stage this boss is scaled as, not necessarily `current_stage`:
+## `spawn_final_boss()` passes a few stages beyond it.
+func _apply_scaling(stage: int) -> void:
     var stats = boss_instance.get_node_or_null("Stats")
     if not stats:
         return
-    # Scale only by stage
-    var extra_health = health_growth_per_loop * loop
-    var extra_damage = damage_growth_per_loop * loop
+    # Scale only by phase
+    var extra_health = health_growth_per_stage * stage
+    var extra_damage = damage_growth_per_stage * stage
     stats.set_base_stat("health", stats.stats["health"] + extra_health)
     stats.set_base_stat("damage", stats.stats["damage"] + extra_damage)
     
     #boss_instance.item_holder.add_item(load("res://src/Resources/items/HealthMeat.tres"))
-    # Clamped: the weapon ramp stops at `LOADOUT_LOOP_CAP` so a boss scaled past
+    # Clamped: the weapon ramp stops at `LOADOUT_STAGE_CAP` so a boss scaled past
     # the normal run carries a budgeted loadout rather than another pair of
-    # shotguns per loop. Below the cap this is the shipped ramp, unchanged.
-    var loadout_loop: int = mini(loop, LOADOUT_LOOP_CAP)
-    for i in loadout_loop:
+    # shotguns per stage. Below the cap this is the shipped ramp, unchanged.
+    var loadout_stage: int = mini(stage, LOADOUT_STAGE_CAP)
+    for i in loadout_stage:
         boss_instance.weapon_holder.add_weapon(load("res://src/Resources/weapons/boss/BossShotgun.tres"))
         boss_instance.weapon_holder.add_weapon(load("res://src/Resources/weapons/boss/BossShotgun.tres"))
         if i == 2:

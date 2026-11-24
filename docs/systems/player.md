@@ -17,7 +17,7 @@ Key scripts / scenes
 Data flow
 - Inputs: player input, `GlobalGameState` (starting character, items, weapons), and `EventManager` events from the same subtree.
 - Processing: equips weapons and items through the two holders, subscribes to the damage and death events, and delegates visual feedback to the child effect managers rather than handling it itself.
-- Outputs: the `character_died` signal, which stage flow and UI listen to; the holders emit `on_item_added` / `on_item_removed` / `on_weapon_changes`.
+- Outputs: the `character_died` signal, which phase flow and UI listen to; the holders emit `on_item_added` / `on_item_removed` / `on_weapon_changes`.
 
 Dependencies
 - `EventManager`, `Stats`, `Health`, `WeaponHolder`, `ItemHolder`, and `GlobalGameState` — the last an autoload at `src/Scripts/autoload/global_game_state.gd`, not an assumed one.

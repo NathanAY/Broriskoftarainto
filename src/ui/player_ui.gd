@@ -16,28 +16,28 @@ var _show_stage_scaleing: bool = false
 func _process(_delta: float) -> void:
     if !stage_manager:
         return
-    # The final boss is the run's last fight and runs on no stage clock, so it
+    # The final boss is the run's last fight and runs on no phase clock, so it
     # gets a name instead of a countdown that would never move.
-    if stage_manager.current_stage == StageManager.STAGE_FINAL_BOSS:
+    if stage_manager.current_phase == StageManager.PHASE_FINAL_BOSS:
         stageTimer.text = "FINAL BOSS"
         return
-    var objective := objective_text(stage_manager.current_loop, stage_manager.current_stage, stage_manager.stage_duration, stage_manager.stage_time_elapsed)
+    var objective := objective_text(stage_manager.current_stage, stage_manager.current_phase, stage_manager.phase_duration, stage_manager.phase_time_elapsed)
     if _show_stage_scaleing and objective.contains("Survive"):
-        var health_growth_per_stage = " enemy health +" + str(stage_manager.enemy_spawner.health_growth_per_loop * (stage_manager.enemy_spawner.current_loop))
-        var damage_growth_per_stage = " damage +" + str(stage_manager.enemy_spawner.damage_growth_per_loop * (stage_manager.enemy_spawner.current_loop))
+        var health_growth_per_stage = " enemy health +" + str(stage_manager.enemy_spawner.health_growth_per_stage * (stage_manager.enemy_spawner.current_stage))
+        var damage_growth_per_stage = " damage +" + str(stage_manager.enemy_spawner.damage_growth_per_stage * (stage_manager.enemy_spawner.current_stage))
         objective += " scaling " + health_growth_per_stage + damage_growth_per_stage
     stageTimer.text = objective
 
-## The HUD line for the current stage. Pure so the wording can be tested without a
-## running stage. `stage` is a `StageManager.STAGE_*` value.
-static func objective_text(loop: int, stage: int, stage_duration: float, stage_time_elapsed: float) -> String:
-    var prefix := "Loop %d." % loop
-    if stage == StageManager.STAGE_BOSS:
+## The HUD line for the current phase. Pure so the wording can be tested without a
+## running phase. `phase` is a `StageManager.PHASE_*` value.
+static func objective_text(stage: int, phase: int, phase_duration: float, phase_time_elapsed: float) -> String:
+    var prefix := "Stage %d." % stage
+    if phase == StageManager.PHASE_BOSS:
         return prefix + " Kill the boss"
-    if stage == StageManager.STAGE_SHOP:
-        # The boss is dead and the shop portal is up: the loop is over, go explore.
+    if phase == StageManager.PHASE_SHOP:
+        # The boss is dead and the shop portal is up: the stage is over, go explore.
         return prefix + " Explore area"
-    var seconds_left := stage_duration - stage_time_elapsed
+    var seconds_left := phase_duration - phase_time_elapsed
     if seconds_left <= 0.0:
         # The timer has run out: no more spawns, the wave ends once the field is clear.
         return prefix + " Kill remaining enemies"

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dmq47sjwfqs6y"]
 
-[ext_resource type="Script" path="res://src/Systems/loop_choice_portal.gd" id="1_portal"]
+[ext_resource type="Script" path="res://src/Systems/stage_choice_portal.gd" id="1_portal"]
 [ext_resource type="PackedScene" path="res://src/Systems/PortalVortex.tscn" id="2_vortex"]
 [ext_resource type="Texture2D" uid="uid://b3lkqt1mjh0l7" path="res://src/Assets/portal.png" id="3_sprite"]
 [ext_resource type="Script" path="res://src/Scenes/particles/portal_aura.gd" id="4_aura"]
@@ -8,7 +8,7 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_portal"]
 radius = 48.0937
 
-[node name="LoopChoicePortal" type="Area2D" unique_id=145604992]
+[node name="StageChoicePortal" type="Area2D" unique_id=145604992]
 z_index = -1
 scale = Vector2(2, 2)
 script = ExtResource("1_portal")

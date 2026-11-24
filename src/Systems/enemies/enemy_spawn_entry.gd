@@ -1,4 +1,4 @@
-# One row of the spawner's enemy table: which scene to spawn and the loop it
+# One row of the spawner's enemy table: which scene to spawn and the stage it
 # unlocks on. How likely it is to come up lives in `game_config.json`
 # (`enemy_rarity`), keyed by the scene's file name.
 #
@@ -12,16 +12,16 @@ extends Resource
 @export var scene: PackedScene
 
 
-## Loop the entry unlocks on. 1 = from the first wave.
-@export_range(1, 3) var min_loop: int = 1
+## Stage the entry unlocks on. 1 = from the first wave.
+@export_range(1, 3) var min_stage: int = 1
 
 ## How many copies of this scene one draw spawns. A pack enemy arrives as a
 ## group; an ordinary enemy is a pack of one.
 @export_range(1, 12) var pack_size: int = 1
 
-## Loop the row turns elite on. 0 = never. An elite is the same scene with its
+## Stage the row turns elite on. 0 = never. An elite is the same scene with its
 ## health and damage multiplied and its sprite tinted, not a separate type.
-@export_range(0, 3) var elite_min_loop: int = 0
+@export_range(0, 3) var elite_min_stage: int = 0
 
 ## Multiplies an elite's base health.
 @export var elite_health_multiplier: float = 1.5

@@ -6,7 +6,7 @@ extends Node2D
 ## The extra frames matter: the vortex animates, and the shot tool's own settle
 ## lands on its first frame.
 
-const LOOP_PORTAL: PackedScene = preload("res://src/Systems/LoopChoicePortal.tscn")
+const STAGE_PORTAL: PackedScene = preload("res://src/Systems/StageChoicePortal.tscn")
 const SHOP_PORTAL: PackedScene = preload("res://src/Systems/ShopPortal.tscn")
 
 ## A dusty arena-floor tan, so the shot is judged against the surface the portals
@@ -24,9 +24,9 @@ func _ready() -> void:
 	add_child(backdrop)
 
 	var y := view.y * 0.55
-	_add_loop_portal(LoopChoicePortal.Choice.FINAL_BOSS, "Final boss",
+	_add_stage_portal(StageChoicePortal.Choice.FINAL_BOSS, "Final boss",
 		Color(1.0, 0.55, 0.55), Vector2(view.x * 0.25, y))
-	_add_loop_portal(LoopChoicePortal.Choice.EXTRA_LOOP, "One more loop",
+	_add_stage_portal(StageChoicePortal.Choice.EXTRA_STAGE, "One more stage",
 		Color(0.55, 0.85, 1.0), Vector2(view.x * 0.5, y))
 
 	var shop: ShopPortal = SHOP_PORTAL.instantiate()
@@ -34,9 +34,9 @@ func _ready() -> void:
 	add_child(shop)
 
 
-func _add_loop_portal(choice: LoopChoicePortal.Choice, label_text: String,
+func _add_stage_portal(choice: StageChoicePortal.Choice, label_text: String,
 		tint: Color, at: Vector2) -> void:
-	var portal: LoopChoicePortal = LOOP_PORTAL.instantiate()
+	var portal: StageChoicePortal = STAGE_PORTAL.instantiate()
 	portal.choice = choice
 	portal.label_text = label_text
 	portal.tint = tint

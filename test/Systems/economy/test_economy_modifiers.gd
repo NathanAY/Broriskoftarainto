@@ -112,7 +112,7 @@ func _lethal_hit(character: Character) -> DamageContext:
 
 
 func _premium() -> float:
-	return _cfg("InsurancePolicyModifier", "premium_base")  # loop 1 outside a game
+	return _cfg("InsurancePolicyModifier", "premium_base")  # stage 1 outside a game
 
 
 func test_insurance_turns_a_lethal_hit_into_a_survivable_one() -> void:
@@ -127,7 +127,7 @@ func test_insurance_turns_a_lethal_hit_into_a_survivable_one() -> void:
 	assert_float(Wallet.balance(character)).is_equal(5.0)
 
 
-func test_insurance_pays_out_once_per_loop() -> void:
+func test_insurance_pays_out_once_per_stage() -> void:
 	var character := _build_character()
 	_attach(character, "InsurancePolicyModifier")
 	Wallet.earn(character, _premium() * 3.0, "kill")
@@ -135,7 +135,7 @@ func test_insurance_pays_out_once_per_loop() -> void:
 
 	assert_float(_lethal_hit(character).final_amount).is_equal(9999.0)
 
-	character.event_manager.emit_event("on_shop_enter", {"loop": 1})
+	character.event_manager.emit_event("on_shop_enter", {"stage": 1})
 	assert_float(_lethal_hit(character).final_amount).is_less(9999.0)
 
 

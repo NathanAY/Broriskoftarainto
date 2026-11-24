@@ -133,7 +133,7 @@ Catalog
 | StatMultiplierModifier | `stat_multiplier_modifier.gd` | `on_item_added` | Multiplies flat bonuses of a target stat from items by 2.0× per stack. Script-only (no `.tscn`; packed via `ItemBuilder`). |
 | StatOnKillModifier | `stat_on_kill_modifier.gd` | `on_kill` | Gains a randomized stat per stack (`health`, `movement_speed`, ...). |
 | GildedEdgeModifier, MarketRallyModifier | `economy_scaling_modifier.gd` | `on_stat_changes` | An economy value (coins held, stock) published as a capped combat stat. See `docs/systems/economy.md`. |
-| InsurancePolicyModifier | `insurance_policy_modifier.gd` | `before_take_damage` | Pays a premium to survive a lethal hit, once per loop per stack. |
+| InsurancePolicyModifier | `insurance_policy_modifier.gd` | `before_take_damage` | Pays a premium to survive a lethal hit, once per stage per stack. |
 | BountyMarkModifier | `bounty_mark_modifier.gd` | `on_kill` (+ timer) | Marks enemies; killing a marked one pays coins. |
 | RegularCustomerModifier | `regular_customer_modifier.gd` | passive | Publishes `free_rerolls` for the shop. |
 | FireSaleModifier | `fire_sale_modifier.gd` | `on_sell` | Sales add `stock_investment`. |

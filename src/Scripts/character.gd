@@ -28,10 +28,10 @@ var anim_player: AnimationPlayer:
     get:
         return get_node_or_null("AnimationPlayer") as AnimationPlayer
 
-## Coins earned this run: loop -> {source -> coins}. Written only by `Wallet`.
-var income_by_loop: Dictionary = {}
+## Coins earned this run: stage -> {source -> coins}. Written only by `Wallet`.
+var income_by_stage: Dictionary = {}
 
-## What the player's effects did this run, one merged entry per effect per loop.
+## What the player's effects did this run, one merged entry per effect per stage.
 ## Written only by `RunHistory`.
 var run_history: Array[Dictionary] = []
 

@@ -25,7 +25,7 @@ class_name SplitOnDeath
 @export_range(0.25, 1.0) var split_scale: float = 0.6
 
 ## Set on a spawned child, so a mini does not split again: a chain of splits
-## would never let the stage end, because a stage ends when the enemy
+## would never let the phase end, because a phase ends when the enemy
 ## container is empty.
 var suppressed: bool = false
 
@@ -69,7 +69,7 @@ func _on_owner_died(_event: Dictionary) -> void:
 		# The death event fires from inside `Health.apply_damage`, which can be
 		# inside a physics callback, and touching the tree from there is a
 		# flushing error. The container is the one the spawner uses, so
-		# `StageManager`'s "no enemies left" stage-end still sees the children.
+		# `StageManager`'s "no enemies left" phase-end still sees the children.
 		container.call_deferred("add_child", child)
 
 

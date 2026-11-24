@@ -101,7 +101,7 @@ const SCHEMAS := {
 		"required": ["old", "new", "source"],
 	},
 	"on_shop_enter": {
-		"required": ["loop"],
+		"required": ["stage"],
 	},
 	"on_purchase": {
 		"required": ["resource", "price"],
@@ -113,7 +113,7 @@ const SCHEMAS := {
 		"required": ["cost"],
 	},
 	"on_payday": {
-		"required": ["loop", "breakdown"],
+		"required": ["stage", "breakdown"],
 	},
 	# --- run history (character bus, see docs/systems/run_history.md) ---
 	"on_run_event": {

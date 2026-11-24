@@ -6,7 +6,7 @@ class_name PortalAura
 ## one-shot. `surge()` and `flash()` are the entry animation's beats.
 ##
 ## Sized from the sibling `Sprite2D` (rule 1 in `docs/systems/effects.md`), and
-## coloured through `color` times the portal's own `modulate`, so a tinted loop
+## coloured through `color` times the portal's own `modulate`, so a tinted stage
 ## portal tints its aura for free.
 
 const GLOW := preload("res://src/Assets/particles/particle_glow.png")

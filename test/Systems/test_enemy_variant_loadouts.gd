@@ -541,7 +541,7 @@ func test_the_slimelings_minis_do_not_split_again() -> void:
 	await _settle()
 
 	assert_int(_enemies_in_world(slimeling).size()).override_failure_message(
-		"a Slimeling mini split again, so a stage could never end"
+		"a Slimeling mini split again, so a phase could never end"
 	).is_equal(minis_before)
 
 
@@ -631,12 +631,12 @@ func test_the_game_spawns_swarmers_in_packs() -> void:
 	).is_true()
 
 
-func test_the_game_makes_every_roster_row_elite_from_loop_three() -> void:
+func test_the_game_makes_every_roster_row_elite_from_stage_three() -> void:
 	var game: Node = auto_free(load("res://src/Scenes/Game.tscn").instantiate())
 	var spawner := game.get_node("StageManager/EnemySpawner") as EnemySpawner
 	for row in spawner.spawn_table:
-		assert_int(row.elite_min_loop).override_failure_message(
-			"a roster row never turns elite, so loop 3 is the same mix as loop 1"
+		assert_int(row.elite_min_stage).override_failure_message(
+			"a roster row never turns elite, so stage 3 is the same mix as stage 1"
 		).is_equal(3)
 
 

@@ -48,7 +48,7 @@ const DEFAULT_MOVEMENT_SPEED := 0.0
 const DEFAULT_AMOUNT := 1
 
 ## Where enemies go. `StageManager/EnemySpawner` reads the same node in its own
-## `_ready()`, so a spawned enemy lands in the arena the stage manager watches.
+## `_ready()`, so a spawned enemy lands in the arena the phase manager watches.
 var enemies_node: Node = null
 var character: Character = null
 
@@ -235,7 +235,7 @@ func _on_close_pressed() -> void:
 ## The stats are set before the enemy joins the tree: `Health._ready()` reads
 ## `max_health` off `Stats` and copies it into `current_health`, so a value written
 ## after `add_child()` would raise the ceiling and leave the enemy already dead.
-## No stage scaling is applied either - a sandbox asks for a number and gets it.
+## No phase scaling is applied either - a sandbox asks for a number and gets it.
 ##
 ## `centre` is the point the ring is laid round; it defaults to the player's current
 ## position, and `spawn_with_effect()` passes the one it showed the portals at.

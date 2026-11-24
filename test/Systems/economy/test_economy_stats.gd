@@ -38,7 +38,7 @@ func _economy(key: String, fallback: Variant) -> float:
 
 
 ## Money left over from the previous shop. Seeded straight into the stat, so the
-## wallet does not count it as this loop's income.
+## wallet does not count it as this stage's income.
 func _carry_over(character: Character, amount: float) -> void:
 	character.stats.set_base_stat("money", amount)
 
@@ -104,7 +104,7 @@ func test_negative_stock_pays_nothing() -> void:
 # --- Interest -----------------------------------------------------------------
 
 
-## Interest rewards money *carried over* from the last shop, not this loop's
+## Interest rewards money *carried over* from the last shop, not this stage's
 ## kills, so the same rate cannot double as an income multiplier.
 func test_interest_is_paid_on_carried_over_money_only() -> void:
 	var character := _build_character()
@@ -145,9 +145,9 @@ func test_payday_emits_breakdown_and_tallies_income() -> void:
 	Wallet.payday(character, 1)
 
 	assert_int(_events.size()).is_equal(1)
-	assert_int(_events[0]["loop"]).is_equal(1)
+	assert_int(_events[0]["stage"]).is_equal(1)
 	assert_float(_events[0]["breakdown"].get("dividend", 0.0)).is_equal(5.0)
-	assert_float(Wallet.income_for_loop(character, 1).get("dividend", 0.0)).is_equal(5.0)
+	assert_float(Wallet.income_for_stage(character, 1).get("dividend", 0.0)).is_equal(5.0)
 
 
 func test_payday_runs_once_per_shop_visit() -> void:
@@ -226,9 +226,9 @@ func test_selling_a_discounted_buy_never_profits() -> void:
 	var weapon: BaseWeapon = load(WEAPON)
 	var discount := _economy("shop_discount_cap", 0.4)
 	var ratio := _economy("sell_ratio", 0.5) + _economy("resale_value_cap", 0.4)
-	for loop in [1, 2, 3, 6]:
-		assert_int(analyzer.get_sell_price(weapon, ratio, loop, discount)).is_less_equal(
-			analyzer.get_price(weapon, loop, discount))
+	for stage in [1, 2, 3, 6]:
+		assert_int(analyzer.get_sell_price(weapon, ratio, stage, discount)).is_less_equal(
+			analyzer.get_price(weapon, stage, discount))
 
 
 # --- Generation and display ---------------------------------------------------

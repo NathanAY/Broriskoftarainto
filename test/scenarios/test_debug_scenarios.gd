@@ -3,15 +3,15 @@ class_name DebugScenariosTest
 extends GdUnitTestSuite
 
 ## Covers what each `test/scenarios/scenario_*.tscn` does to a run it starts: the
-## weapons and items it equips, and the stage/loop it jumps to.
+## weapons and items it equips, and the phase/stage it jumps to.
 ##
 ## Each test runs the real scene, because the two things worth pinning - that the
-## loadout survives `Character._ready()` and that the stage jump lands after
+## loadout survives `Character._ready()` and that the phase jump lands after
 ## `StageManager._ready()` - only exist once the whole `Game.tscn` is up.
 
 const LOADED_BUILD := "res://test/scenarios/scenario_loaded_build.tscn"
 const FIRST_BOSS := "res://test/scenarios/scenario_first_boss.tscn"
-const LOOP_THREE := "res://test/scenarios/scenario_loop_three.tscn"
+const STAGE_THREE := "res://test/scenarios/scenario_stage_three.tscn"
 const CURSED_ENEMIES := "res://test/scenarios/scenario_cursed_enemies.tscn"
 const ENEMY_PREVIEW := "res://test/scenarios/scenario_enemy_preview.tscn"
 
@@ -75,36 +75,36 @@ func test_loaded_build_equips_scenario_weapons_and_stacked_items() -> void:
             ).is_greater_equal(3)
 
 
-func test_loaded_build_stays_on_the_first_enemy_stage() -> void:
+func test_loaded_build_stays_on_the_first_enemy_phase() -> void:
     var scenario := await _run_scenario(LOADED_BUILD)
     var stage_manager: StageManager = scenario.get_node("StageManager")
 
+    assert_int(stage_manager.current_phase).is_equal(1)
     assert_int(stage_manager.current_stage).is_equal(1)
-    assert_int(stage_manager.current_loop).is_equal(1)
-    assert_int(stage_manager.enemy_spawner.current_loop).is_equal(1)
+    assert_int(stage_manager.enemy_spawner.current_stage).is_equal(1)
 
 
-func test_first_boss_skips_the_enemy_stage() -> void:
+func test_first_boss_skips_the_enemy_phase() -> void:
     var scenario := await _run_scenario(FIRST_BOSS)
     var stage_manager: StageManager = scenario.get_node("StageManager")
 
-    assert_int(stage_manager.current_stage).is_equal(2)
+    assert_int(stage_manager.current_phase).is_equal(2)
     assert_bool(stage_manager.boss_spawner.spawn_active).is_true()
-    # The enemy stage never ran, so nothing should be queued up behind it.
+    # The enemy phase never ran, so nothing should be queued up behind it.
     assert_bool(stage_manager.enemy_spawner.spawn_active).is_false()
 
 
-func test_loop_three_scales_both_spawners() -> void:
-    var scenario := await _run_scenario(LOOP_THREE)
+func test_stage_three_scales_both_spawners() -> void:
+    var scenario := await _run_scenario(STAGE_THREE)
     var stage_manager: StageManager = scenario.get_node("StageManager")
 
-    assert_int(stage_manager.current_stage).is_equal(1)
-    # All three counters have to agree: `start_new_loop()` normally keeps them in
-    # step, and a scenario that set only one would spawn loop-2 enemies in loop 3.
-    assert_int(stage_manager.current_loop).is_equal(3)
-    assert_int(stage_manager.enemy_spawner.current_loop).is_equal(3)
-    assert_int(stage_manager.boss_spawner.current_loop).is_equal(3)
-    # The wave is sized from `current_loop`, so a stale loop-1 wave is the failure
+    assert_int(stage_manager.current_phase).is_equal(1)
+    # All three counters have to agree: `start_new_stage()` normally keeps them in
+    # step, and a scenario that set only one would spawn stage-2 enemies in stage 3.
+    assert_int(stage_manager.current_stage).is_equal(3)
+    assert_int(stage_manager.enemy_spawner.current_stage).is_equal(3)
+    assert_int(stage_manager.boss_spawner.current_stage).is_equal(3)
+    # The wave is sized from `current_stage`, so a stale stage-1 wave is the failure
     # this catches.
     assert_int(stage_manager.enemy_spawner.target_enemy_count).is_equal(
         stage_manager.enemy_spawner.base_target_enemy_count + 2
@@ -128,26 +128,26 @@ func test_picked_density_reaches_the_running_spawner() -> void:
 
 ## 1.0 is the picker's default and the shipped look, so the common path must not
 ## resize anything: a scenario at the default has to size its wave from
-## `current_loop` alone.
+## `current_stage` alone.
 func test_default_density_leaves_the_shipped_wave_alone() -> void:
     DebugScenarioSetup.pending_monster_multiplier = 1.0
     var scenario := await _run_scenario(LOADED_BUILD)
     var spawner: EnemySpawner = (scenario.get_node("StageManager") as StageManager).enemy_spawner
 
     assert_int(spawner.target_enemy_count).is_equal(
-        spawner.base_target_enemy_count + spawner.current_loop - 1
+        spawner.base_target_enemy_count + spawner.current_stage - 1
     )
 
 
 ## The density is applied after `_apply_start_mode()`, because that can call
-## `start_wave()` and `start_wave()` re-sizes the wave - so loop 3 at a raised
+## `start_wave()` and `start_wave()` re-sizes the wave - so stage 3 at a raised
 ## density is the case where the two would otherwise overwrite each other.
-func test_density_survives_the_loop_three_stage_jump() -> void:
+func test_density_survives_the_stage_three_phase_jump() -> void:
     DebugScenarioSetup.pending_monster_multiplier = 2.0
-    var scenario := await _run_scenario(LOOP_THREE)
+    var scenario := await _run_scenario(STAGE_THREE)
     var spawner: EnemySpawner = (scenario.get_node("StageManager") as StageManager).enemy_spawner
 
-    assert_int(spawner.current_loop).is_equal(3)
+    assert_int(spawner.current_stage).is_equal(3)
     assert_int(spawner.target_enemy_count).is_equal(
         (spawner.base_target_enemy_count + 2) * 2
     )
@@ -244,13 +244,13 @@ func test_enemy_preview_roster_is_harmless() -> void:
             "%s is still armed" % enemy.name).is_equal(0)
 
 
-## The stage clock is what would end stage 1 and spawn a boss twenty seconds into
+## The phase clock is what would end phase 1 and spawn a boss twenty seconds into
 ## the preview, so it is the one to pin: freeing the spawner alone is not enough.
-func test_enemy_preview_freezes_the_stage() -> void:
+func test_enemy_preview_freezes_the_phase() -> void:
     var scenario := await _run_scenario(ENEMY_PREVIEW)
     var stage_manager: StageManager = scenario.get_node("StageManager")
 
-    assert_bool(stage_manager.stage_active).is_false()
+    assert_bool(stage_manager.phase_active).is_false()
     assert_bool(stage_manager.enemy_spawner.spawn_active).is_false()
     assert_bool(stage_manager.boss_spawner.spawn_active).is_false()
 

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dve88vf3320kk"]
 
-[ext_resource type="Script" uid="uid://bkkobjpwwna7i" path="res://test/Systems/test_shop_stage.gd" id="1_w0k5e"]
+[ext_resource type="Script" uid="uid://bkkobjpwwna7i" path="res://test/Systems/test_shop_phase.gd" id="1_w0k5e"]
 [ext_resource type="PackedScene" uid="uid://dw17weh8b5wc3" path="res://src/Systems/Character.tscn" id="2_yufyw"]
 [ext_resource type="PackedScene" uid="uid://pv8pdtie8vq5" path="res://src/ui/PlayerUI.tscn" id="3_dwdo0"]
 [ext_resource type="PackedScene" uid="uid://d4dr0kikva8xx" path="res://src/Scenes/menu/ShopMenu.tscn" id="4_j3p81"]
@@ -10,7 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://bmqxtyoaqbpks" path="res://src/Systems/Items/ItemFactory.tscn" id="8_wq0nc"]
 [ext_resource type="PackedScene" uid="uid://ygv8thab1ic1" path="res://src/Systems/ShopPortal.tscn" id="9_36xtd"]
 
-[node name="ShopStage" type="Node2D" unique_id=34987921]
+[node name="ShopPhase" type="Node2D" unique_id=34987921]
 script = ExtResource("1_w0k5e")
 
 [node name="Character" parent="." unique_id=502610022 instance=ExtResource("2_yufyw")]

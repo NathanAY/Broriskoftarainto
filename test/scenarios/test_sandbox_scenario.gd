@@ -161,8 +161,8 @@ func test_spawned_enemies_start_alive_at_their_full_health() -> void:
     assert_float(enemy.health_node.max_health).is_equal_approx(100000.0, 0.001)
 
 
-## Enemies have to land in the node the stage manager watches, or they never count
-## towards ending a stage and never get cleaned up.
+## Enemies have to land in the node the phase manager watches, or they never count
+## towards ending a phase and never get cleaned up.
 func test_spawned_enemies_land_in_the_arena_enemies_node() -> void:
     var scenario := await _run_scenario()
     var menu: SandboxMenu = scenario.get_node("ScenarioSetup/SandboxMenu")
@@ -214,8 +214,8 @@ func test_spawn_effect_off_spawns_at_once() -> void:
 ## The whole point of the change: an untouched sandbox arena has to stay empty, so
 ## a number read off a spawned enemy is the enemy under test and nothing else.
 ##
-## This waits out more than one full `StageManager.stage_duration`, because the
-## stage clock runs on its own and is the thing that used to end the stage. An
+## This waits out more than one full `StageManager.phase_duration`, because the
+## phase clock runs on its own and is the thing that used to end the phase. An
 ## arena that is merely empty for a few frames proves nothing about 20 seconds.
 func test_the_wave_does_not_spawn_anything_by_itself() -> void:
     var scenario := await _run_scenario()
@@ -228,38 +228,38 @@ func test_the_wave_does_not_spawn_anything_by_itself() -> void:
     assert_bool(spawner.spawn_timer.is_stopped()).override_failure_message(
         "the spawn timer is still running, so it keeps re-reading the empty arena through the refill watchdog"
     ).is_true()
-    # The stage clock is a separate clock from the spawner's, and it is the one
-    # that ends the stage: without this the run reaches `stage_duration` anyway
-    # and `go_to_stage(2)` spawns the boss over the top of the sandbox.
-    assert_bool(stage_manager.stage_active).override_failure_message(
-        "the stage clock is still running, so the stage ends and the boss spawns"
+    # The phase clock is a separate clock from the spawner's, and it is the one
+    # that ends the phase: without this the run reaches `phase_duration` anyway
+    # and `go_to_phase(2)` spawns the boss over the top of the sandbox.
+    assert_bool(stage_manager.phase_active).override_failure_message(
+        "the phase clock is still running, so the phase ends and the boss spawns"
     ).is_false()
 
     var enemies_node: Node = scenario.get_node("Nodes/Enemies")
-    # Asserted on the clock rather than by outlasting `stage_duration` in real
+    # Asserted on the clock rather than by outlasting `phase_duration` in real
     # time: 20s of game time is 2400 frames of a full `Game.tscn`, which does not
     # fit the suite's timeout. A clock that is not advancing cannot reach
-    # `stage_duration`, so the boss case is covered without paying for the wait.
-    var elapsed_before := stage_manager.stage_time_elapsed
+    # `phase_duration`, so the boss case is covered without paying for the wait.
+    var elapsed_before := stage_manager.phase_time_elapsed
     for _frame in range(60):
         await get_tree().process_frame
-    assert_float(stage_manager.stage_time_elapsed).override_failure_message(
-        "the stage clock kept running, so the stage ends at stage_duration and the boss spawns over the sandbox"
+    assert_float(stage_manager.phase_time_elapsed).override_failure_message(
+        "the phase clock kept running, so the phase ends at phase_duration and the boss spawns over the sandbox"
     ).is_equal_approx(elapsed_before, 0.001)
     assert_int(enemies_node.get_child_count()).override_failure_message(
         "%d enemies wandered in with nobody pressing Spawn" % enemies_node.get_child_count()
     ).is_equal(0)
-    assert_int(stage_manager.current_stage).override_failure_message(
-        "the run advanced past the enemy stage; the stage clock was not frozen"
+    assert_int(stage_manager.current_phase).override_failure_message(
+        "the run advanced past the enemy phase; the phase clock was not frozen"
     ).is_equal(1)
     assert_bool(stage_manager.boss_spawner.spawn_active).override_failure_message(
         "the boss spawned over the sandbox"
     ).is_false()
 
 
-## Holding the stage must not be a one-way door for the rest of the run: the
+## Holding the phase must not be a one-way door for the rest of the run: the
 ## panel still spawns, so only the wave was stopped.
-func test_holding_the_stage_leaves_the_sandbox_able_to_spawn() -> void:
+func test_holding_the_phase_leaves_the_sandbox_able_to_spawn() -> void:
     var scenario := await _run_scenario()
     var menu: SandboxMenu = scenario.get_node("ScenarioSetup/SandboxMenu")
     _set_spawn_values(menu, 100000.0, 0.0, 1)

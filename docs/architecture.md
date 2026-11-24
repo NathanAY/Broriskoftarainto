@@ -9,10 +9,10 @@ The gameplay scene is `src/Scenes/Game.tscn`. Its root is named `Main` (a `Node2
 | Node under `Game.tscn` | Role |
 |---|---|
 | `Arena` | Playfield geometry and walls |
-| `StageManager` | Owns the `EnemySpawner` and `BossSpawner` children and drives the stage loop |
+| `StageManager` | Owns the `EnemySpawner` and `BossSpawner` children and drives the phase stage |
 | `Character` | An instance of `src/Systems/Character.tscn` — the runtime **Player** |
 | `ItemFactory` | An instance the factory uses to read stats and generate items |
-| `Nodes/` | Plain-node runtime containers. `Nodes/Enemies` is where the spawners add enemies and where `StageManager` counts them to decide a stage is over; siblings are `pickups`, `altars`, `death_marks`. |
+| `Nodes/` | Plain-node runtime containers. `Nodes/Enemies` is where the spawners add enemies and where `StageManager` counts them to decide a phase is over; siblings are `pickups`, `altars`, `death_marks`. |
 | `InteractionManager` | Pickup/altar interaction |
 | `UI/` | `CanvasLayer/CharacterUi`, plus `ShopMenu` and `PauseMenu` |
 
@@ -22,9 +22,9 @@ Everything else is a reusable piece instanced into that tree:
 |---|---|
 | `src/Systems/Character.tscn` | The Player scene — see `docs/systems/player.md` for its child contract |
 | `src/Systems/enemies/Enemy.tscn`, `src/Systems/enemies/EnemyBoss.tscn`, `src/Systems/enemies/EnemyBulwark.tscn`, `src/Systems/enemies/EnemyGunner.tscn`, `src/Systems/enemies/EnemySlimeling.tscn`, `src/Systems/enemies/EnemyLancer.tscn`, `src/Systems/enemies/EnemyToadstinker.tscn`, `src/Systems/enemies/EnemyBlink.tscn`, `src/Systems/enemies/EnemyShieldbearer.tscn`, `src/Systems/enemies/EnemySwarmer.tscn` | Enemy scenes. The basic enemy, the boss and the roster types; all of them take `Stats`, `Health`, `WeaponHolder`, `ItemHolder`, `EventManager` as children. An enemy type is a scene, not a class - see `docs/systems/enemies.md` |
-| `src/Systems/enemies/enemy_spawn_entry.gd` | One row of the regular spawner's table: the enemy scene, its weight, the loop it unlocks on, its pack size, and the loop and multipliers at which it turns elite. See `docs/systems/spawners.md` |
+| `src/Systems/enemies/enemy_spawn_entry.gd` | One row of the regular spawner's table: the enemy scene, its weight, the stage it unlocks on, its pack size, and the stage and multipliers at which it turns elite. See `docs/systems/spawners.md` |
 | `src/Systems/ShopPortal.tscn` | The shop entry portal spawned after a boss dies |
-| `src/Systems/LoopChoicePortal.tscn` | The two end-of-run world portals offering the final boss or one more loop. Spawned by `StageManager` after the shop of loop 3 and of every extra loop. See `docs/systems/stage_manager.md` |
+| `src/Systems/StageChoicePortal.tscn` | The two end-of-run world portals offering the final boss or one more stage. Spawned by `StageManager` after the shop of stage 3 and of every extra stage. See `docs/systems/stage_manager.md` |
 | `src/Systems/PortalVortex.tscn` | The animated gate surface both portal scenes share: a quad with `portal_vortex.gdshader`, drawn *behind* the ring so the stone crops it. See `docs/systems/effects.md` |
 | `src/Systems/SpawnerModifier.tscn` | Death rewards (money, drops, death mark). Attached to spawners, despite the name — it is not a spawner. |
 | `src/Systems/stats/`, `src/Systems/weapon/`, `src/Systems/Items/` | Reusable subsystems |
@@ -49,7 +49,7 @@ There is no separate `MainScene`; `Game.tscn` is the gameplay entry, and the men
 - `src/Systems/Items/*`: the `Item` resource, `ItemHolder`, `item_pickup`, `ItemBuilder`, and `ItemFactory`.
 - `src/Systems/Items/modifiers/*`: **effects** — Node behaviour modules an item attaches to an actor. See `docs/systems/modifiers.md`; this is the one naming inversion in the project.
 - `src/Systems/enemy_spawner.gd`, `src/Systems/boss_spawner.gd`: spawn logic and scaling. Both reach the enemy container with a relative `get_node("../../Nodes/Enemies")`, so their position in the `Game.tscn` tree is part of their contract.
-- `src/Scripts/stage_manager.gd`: stage transitions (enemy → boss → shop → final boss) and loop progression, including the end-of-run final-boss / one-more-loop choice. A stage ends when `Nodes/Enemies.get_child_count() == 0`, which is why a corpse mid-death-animation still holds its stage open.
+- `src/Scripts/stage_manager.gd`: phase transitions (enemy → boss → shop → final boss) and stage progression, including the end-of-run final-boss / one-more-stage choice. A phase ends when `Nodes/Enemies.get_child_count() == 0`, which is why a corpse mid-death-animation still holds its phase open.
 
 ## How systems communicate
 

@@ -10,7 +10,7 @@ extends GdUnitTestSuite
 ##  - the aura is sized from the ring sprite (rule 1 of `docs/systems/effects.md`).
 
 const SHOP_PORTAL := "res://src/Systems/ShopPortal.tscn"
-const LOOP_PORTAL := "res://src/Systems/LoopChoicePortal.tscn"
+const STAGE_PORTAL := "res://src/Systems/StageChoicePortal.tscn"
 const PICKUP := "res://src/Systems/Items/ItemPickup.tscn"
 const HEAL_PICKUP := "res://src/Systems/Items/HealPickup.tscn"
 
@@ -54,8 +54,8 @@ func _wait(seconds: float) -> void:
 	await get_tree().create_timer(seconds).timeout
 
 
-func test_loop_portal_reports_only_after_the_entry_animation() -> void:
-	var portal := _add_portal(LOOP_PORTAL, Vector2.ZERO)
+func test_stage_portal_reports_only_after_the_entry_animation() -> void:
+	var portal := _add_portal(STAGE_PORTAL, Vector2.ZERO)
 	var reports: Array = []
 	portal.chosen.connect(func(choice): reports.append(choice))
 
@@ -69,7 +69,7 @@ func test_loop_portal_reports_only_after_the_entry_animation() -> void:
 
 ## Mashing Enter mid-animation must not answer the question twice.
 func test_second_enter_during_the_animation_is_ignored() -> void:
-	var portal := _add_portal(LOOP_PORTAL, Vector2.ZERO)
+	var portal := _add_portal(STAGE_PORTAL, Vector2.ZERO)
 	var reports: Array = []
 	portal.chosen.connect(func(choice): reports.append(choice))
 
@@ -82,7 +82,7 @@ func test_second_enter_during_the_animation_is_ignored() -> void:
 
 
 func test_entry_pulls_the_player_in_and_pops_them_back_out() -> void:
-	var portal := _add_portal(LOOP_PORTAL, Vector2(300, 200))
+	var portal := _add_portal(STAGE_PORTAL, Vector2(300, 200))
 	var character := _add_character(Vector2(380, 260))
 	var movement := character.get_node("Movement")
 	var start_scale := character.scale
@@ -161,7 +161,7 @@ func test_shop_portal_draws_pickups_in_and_hands_them_to_the_shop() -> void:
 ## Rule 1: the aura's ring comes from the sprite it decorates, so resizing the
 ## portal art cannot leave the motes and rune rings at the old size.
 func test_aura_is_sized_from_the_ring_sprite() -> void:
-	for path in [SHOP_PORTAL, LOOP_PORTAL]:
+	for path in [SHOP_PORTAL, STAGE_PORTAL]:
 		var portal := _add_portal(path, Vector2.ZERO)
 		var sprite := portal.get_node("Sprite2D") as Sprite2D
 		assert_object(portal.aura).is_not_null()

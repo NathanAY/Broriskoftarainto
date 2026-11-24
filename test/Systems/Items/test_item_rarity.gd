@@ -19,10 +19,10 @@ func _factory() -> ItemFactory:
 	return factory
 
 
-func _counts(factory: ItemFactory, loop: int) -> Array[int]:
+func _counts(factory: ItemFactory, stage: int) -> Array[int]:
 	var counts: Array[int] = [0, 0, 0, 0, 0]
 	for i in range(BATCH):
-		counts[factory.roll_rarity(loop)] += 1
+		counts[factory.roll_rarity(stage)] += 1
 	return counts
 
 
@@ -59,7 +59,7 @@ func test_every_tier_can_roll_and_common_leads() -> void:
 	assert_int(counts.max()).is_equal(counts[BaseWeapon.Rarity.COMMON])
 
 
-func test_later_loops_roll_higher_rarity_more_often() -> void:
+func test_later_stages_roll_higher_rarity_more_often() -> void:
 	var first := _counts(_factory(), 1)
 	var later := _counts(_factory(), 4)
 	assert_int(later[LEGENDARY]).is_greater(first[LEGENDARY])

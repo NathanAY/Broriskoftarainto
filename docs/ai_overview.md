@@ -1,15 +1,15 @@
 # Overview
 
 ## What this is
-- Genre: Top-down arena roguelite (wave-based shooter with boss and shop loops).
-- Core loop: Clear enemy waves → defeat boss → enter shop/upgrade phase → repeat with increased difficulty → after loop 3, choose the final boss (win) or another loop.
+- Genre: Top-down arena roguelite (wave-based shooter with boss and shop stages).
+- Core stage: Clear enemy waves → defeat boss → enter shop/upgrade phase → repeat with increased difficulty → after stage 3, choose the final boss (win) or another stage.
 - Inspiration: Brotato-style item/weapon stacking and fast-paced wave combat.
-- Engine: Godot 4.6. Stage: early prototype — the loop is playable, balance is not (see `docs/systems/balance_audit.md`).
+- Engine: Godot 4.6. Stage: early prototype — the stage is playable, balance is not (see `docs/systems/balance_audit.md`).
 
 ## Key gameplay pillars
 - Rapid arena combat with multiple orbiting/attached weapons.
 - Item-driven character progression: persistent modifiers, temporary buffs, and effect scenes.
-- Wave → boss → shop loop with scaling difficulty.
+- Wave → boss → shop stage with scaling difficulty.
 - Modular systems using resource-based weapons/items to enable fast iteration.
 
 ## Reading order
@@ -31,7 +31,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | `damage.md` | `Damage.deal()`, the one pipeline every hit goes through: crit, armor, listener phases, direct vs secondary hits |
 | `debug_scenarios.md` | The main menu's "Debug scenarios" button: four dev-only mid/endgame runs and how a scenario is configured |
 | `enemies.md` | `Enemy` behaviour, health, boss variant |
-| `economy.md` | Money: the `Wallet` every coin goes through, the five economy stats, payday, shop events, price growth per loop, the boss bounty |
+| `economy.md` | Money: the `Wallet` every coin goes through, the five economy stats, payday, shop events, price growth per stage, the boss bounty |
 | `effects.md` | Every VFX the game spawns — impact sparks, blast fireballs, damage flashes, death shards — and the three authoring traps that decide whether one works |
 | `event_manager.md` | The `LocalEventManager` event bus and the `event_contract.gd` schema checker |
 | `game_config.md` | `game_config.json`: the one hand-edited file for item drop weights and other tunable numbers |
@@ -43,7 +43,7 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 | `player.md` | The runtime player entity and its scene |
 | `save_system.md` | The `SaveManager` autoload and `<project>/saves/save.json`: file format, location, how to add a section |
 | `spawners.md` | `enemy_spawner.gd`, `boss_spawner.gd`, spawn pacing |
-| `stage_manager.md` | Wave → boss → shop orchestration, loop progression, and the end-of-run final-boss / one-more-loop choice |
+| `stage_manager.md` | Wave → boss → shop orchestration, stage progression, and the end-of-run final-boss / one-more-stage choice |
 | `run_history.md` | `RunHistory.record`: floating text over the player and the Run history tab for effects that pay out (bounty, dividend, stat on kill) |
 | `stats.md` | Stat storage, modifiers, conditions, modifier-owned (provided) stats |
 | `ui_shop_portal.md` | Shop, item cards, tooltips, the tone/colour system, the HUD's buff/debuff tiles |

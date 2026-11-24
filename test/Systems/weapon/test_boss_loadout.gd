@@ -1,4 +1,4 @@
-# The loop-1 boss used to swing two melee Fists. Its wander behaviour keeps it
+# The stage-1 boss used to swing two melee Fists. Its wander behaviour keeps it
 # only 50-200 px from the player, so those swings were effectively unavoidable
 # and killed most characters in a couple of hits. This suite pins the
 # replacement: the boss carries shotguns whose pellets travel slower than an
@@ -12,7 +12,7 @@ const BOSS_SHOTGUN := "res://src/Resources/weapons/boss/BossShotgun.tres"
 
 
 ## Minimal runtime tree matching the BossSpawner's `../../Nodes/Enemies` contract
-## (the same harness `test_spawner_arena.gd` uses), then spawns the loop-1 boss.
+## (the same harness `test_spawner_arena.gd` uses), then spawns the stage-1 boss.
 func _spawn_boss() -> BossSpawner:
 	var root: Node = auto_free(Node.new())
 	add_child(root)
@@ -22,15 +22,15 @@ func _spawn_boss() -> BossSpawner:
 	var enemies := Node.new()
 	enemies.name = "Enemies"
 	nodes.add_child(enemies)
-	var stage := Node.new()
-	stage.name = "StageManager"
-	root.add_child(stage)
+	var phase := Node.new()
+	phase.name = "StageManager"
+	root.add_child(phase)
 	var character: Character = auto_free(load("res://src/Systems/Character.tscn").instantiate())
 	root.add_child(character)
 	var spawner: BossSpawner = auto_free(load(BOSS_SPAWNER).instantiate())
 	spawner.character = character
 	spawner.spawn_telegraph_time = 0.0 # the tests read the boss straight after the call
-	stage.add_child(spawner)
+	phase.add_child(spawner)
 	spawner.spawn_boss()
 	return spawner
 

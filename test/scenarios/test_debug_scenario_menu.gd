@@ -54,7 +54,7 @@ func test_every_listed_scenario_scene_exists() -> void:
 
 
 func test_every_scenario_scene_carries_one_setup_node() -> void:
-    # Without its `ScenarioSetup` a scenario silently gives a plain loop-1 run.
+    # Without its `ScenarioSetup` a scenario silently gives a plain stage-1 run.
     for entry in menu.SCENARIOS:
         var scenario: Node = load(entry["scene"]).instantiate()
         var setups := scenario.find_children("ScenarioSetup", "DebugScenarioSetup", true, false)

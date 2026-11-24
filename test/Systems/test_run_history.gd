@@ -1,5 +1,5 @@
 # RunHistory: effects that pay out are recorded on the character, merged per
-# loop, shown as floating text, and listed in the Run history tab.
+# stage, shown as floating text, and listed in the Run history tab.
 # Amounts are derived from config / the modifier under test, never literals.
 class_name RunHistoryTest
 extends GdUnitTestSuite
@@ -65,7 +65,7 @@ func test_a_bounty_payout_is_recorded_and_announced() -> void:
 	assert_float(_events[0]["amount"]).is_equal(Wallet.balance(character))
 
 
-func test_repeats_in_one_loop_merge_into_one_entry_with_a_count() -> void:
+func test_repeats_in_one_stage_merge_into_one_entry_with_a_count() -> void:
 	var character := _build_character()
 	var modifier: StatOnKillModifier = _attach(character, "StatOnKillModifier")
 	modifier.target_stat = "health"
@@ -173,7 +173,7 @@ func test_character_menu_has_a_run_history_tab_listing_entries() -> void:
 	var lines: Array[String] = []
 	for child in ui.history_container.get_children():
 		lines.append((child as Label).text)
-	assert_array(lines).contains(["Loop 1", RunHistory.describe(character.run_history[0])])
+	assert_array(lines).contains(["Stage 1", RunHistory.describe(character.run_history[0])])
 
 	GlobalGameState.current_character = prev_character if is_instance_valid(prev_character) else null
 

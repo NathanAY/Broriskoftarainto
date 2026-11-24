@@ -6,7 +6,7 @@ extends RefCounted
 ## `record` is the one call an effect makes: it adds the event to
 ## `Character.run_history` and emits `on_run_event`, which
 ## `RunEventSpawner` turns into floating text. Repeats of the same effect in the
-## same loop merge into one entry, so a stat gained on every kill is one line
+## same stage merge into one entry, so a stat gained on every kill is one line
 ## with a count rather than hundreds. The Run history tab lists the entries.
 ## See `docs/systems/run_history.md`.
 
@@ -19,10 +19,10 @@ static func record(holder: Node, source: String, what: String, amount: float) ->
     var character := holder as Character
     if character == null or is_zero_approx(amount):
         return
-    var loop := StageManager.loop_of(character)
-    var entry := _find(character.run_history, loop, source, what)
+    var stage := StageManager.stage_of(character)
+    var entry := _find(character.run_history, stage, source, what)
     if entry.is_empty():
-        character.run_history.append({"loop": loop, "source": source, "what": what, "amount": amount, "count": 1})
+        character.run_history.append({"stage": stage, "source": source, "what": what, "amount": amount, "count": 1})
     else:
         entry["amount"] = float(entry["amount"]) + amount
         entry["count"] = int(entry["count"]) + 1
@@ -44,8 +44,8 @@ static func describe(entry: Dictionary) -> String:
     return text
 
 
-## Replaces the children of `container` with the history, newest loop first,
-## under one "Loop N" heading per loop.
+## Replaces the children of `container` with the history, newest stage first,
+## under one "Stage N" heading per stage.
 static func populate(container: Container, character: Character) -> void:
     for child in container.get_children():
         container.remove_child(child)
@@ -55,19 +55,19 @@ static func populate(container: Container, character: Character) -> void:
         empty.text = "Nothing has happened yet."
         container.add_child(empty)
         return
-    var loops: Array = []
+    var stages: Array = []
     for entry in character.run_history:
-        if not loops.has(entry["loop"]):
-            loops.append(entry["loop"])
-    loops.sort()
-    loops.reverse()
-    for loop in loops:
+        if not stages.has(entry["stage"]):
+            stages.append(entry["stage"])
+    stages.sort()
+    stages.reverse()
+    for stage in stages:
         var heading := Label.new()
-        heading.text = "Loop %d" % int(loop)
+        heading.text = "Stage %d" % int(stage)
         heading.add_theme_color_override("font_color", Color.GOLD)
         container.add_child(heading)
         for entry in character.run_history:
-            if entry["loop"] == loop:
+            if entry["stage"] == stage:
                 var line := Label.new()
                 line.text = describe(entry)
                 line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -76,8 +76,8 @@ static func populate(container: Container, character: Character) -> void:
                 container.add_child(line)
 
 
-static func _find(history: Array, loop: int, source: String, what: String) -> Dictionary:
+static func _find(history: Array, stage: int, source: String, what: String) -> Dictionary:
     for entry in history:
-        if entry["loop"] == loop and entry["source"] == source and entry["what"] == what:
+        if entry["stage"] == stage and entry["source"] == source and entry["what"] == what:
             return entry
     return {}

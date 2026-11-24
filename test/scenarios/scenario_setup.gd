@@ -8,7 +8,7 @@ class_name DebugScenarioSetup
 ## keeps a scenario to a single short file: the scene *is* the configuration, and
 ## nothing has to be remembered between the picker and the run.
 ##
-## The scenario never returns here - `_on_stage_applied` is the log line to read
+## The scenario never returns here - `_on_phase_applied` is the log line to read
 ## when a scenario did not do what it claims.
 
 const DEFAULT_CHARACTER := "res://src/Assets/character/multitasker/Multitasker.tres"
@@ -37,9 +37,9 @@ const ENEMY_ROSTER := [
 const ROSTER_RADIUS := 420.0
 
 enum StartMode {
-	STAGE_ONE, ## normal run: the enemy stage of `current_loop`.
-	BOSS_STAGE, ## straight to stage 2 - the enemy stage is skipped entirely.
-	LOOP, ## the enemy stage of `start_loop`, with both spawners already scaled.
+	PHASE_ONE, ## normal run: the enemy phase of `current_stage`.
+	BOSS_PHASE, ## straight to phase 2 - the enemy phase is skipped entirely.
+	STAGE, ## the enemy phase of `start_stage`, with both spawners already scaled.
 }
 
 ## Monster-density multiplier for the run the picker is about to start, read by
@@ -63,9 +63,9 @@ static var pending_monster_multiplier: float = 1.0
 @export var item_names: Array[String] = []
 ## Adds the stacked mid-game build from `stacked_items()` on top of the above.
 @export var stacked_build: bool = false
-@export var start_mode: StartMode = StartMode.STAGE_ONE
-## Only read by `StartMode.LOOP`.
-@export var start_loop: int = 1
+@export var start_mode: StartMode = StartMode.PHASE_ONE
+## Only read by `StartMode.STAGE`.
+@export var start_stage: int = 1
 ## Bare file name under `src/Resources/items`. Given to every enemy the spawner
 ## fields, so an item that curses whatever it hits actually lands on the player.
 ## Enemies carry no items in the shipped game (`src/Scripts/Enemy.gd`), which is
@@ -79,7 +79,7 @@ static var pending_monster_multiplier: float = 1.0
 ## rest of this folder.
 @export var sandbox: bool = false
 ## Puts one of every enemy type in a ring around the character, boss included.
-## A gallery rather than a fight: the roster is disarmed and the stage is frozen,
+## A gallery rather than a fight: the roster is disarmed and the phase is frozen,
 ## because a live wave would kill the player before the whole set could be read.
 @export var spawn_enemy_roster: bool = false
 
@@ -96,7 +96,7 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
-	# The loadout and the stage jump both need a character and a `StageManager`
+	# The loadout and the phase jump both need a character and a `StageManager`
 	# that have finished their own `_ready`, so they wait one frame.
 	await get_tree().process_frame
 	_equip_loadout()
@@ -104,9 +104,9 @@ func _ready() -> void:
 	_apply_start_mode()
 	_apply_monster_multiplier()
 	_install_sandbox_menu()
-	_freeze_stage()
+	_freeze_phase()
 	_spawn_enemy_roster()
-	_on_stage_applied()
+	_on_phase_applied()
 
 
 func _equip_loadout() -> void:
@@ -194,29 +194,29 @@ func _apply_start_mode() -> void:
 		return
 
 	match start_mode:
-		StartMode.STAGE_ONE:
-			# `StageManager._ready()` already ran stage 1 for us.
+		StartMode.PHASE_ONE:
+			# `StageManager._ready()` already ran phase 1 for us.
 			pass
-		StartMode.BOSS_STAGE:
-			# The same call `_end_stage()` makes, so the boss gets the normal
-			# scaling and the stage-end rule stays in one place.
-			stage_manager.go_to_stage(2)
-		StartMode.LOOP:
-			# Each spawner keeps its own `current_loop`. `start_new_loop()` is
+		StartMode.BOSS_PHASE:
+			# The same call `_end_phase()` makes, so the boss gets the normal
+			# scaling and the phase-end rule stays in one place.
+			stage_manager.go_to_phase(2)
+		StartMode.STAGE:
+			# Each spawner keeps its own `current_stage`. `start_new_stage()` is
 			# deliberately not used here: it advances the enemy spawner through
 			# `_on_next_stage()`, which would leave the two counters disagreeing.
-			stage_manager.current_loop = start_loop
-			stage_manager.enemy_spawner.current_loop = start_loop
-			stage_manager.boss_spawner.current_loop = start_loop
-			# Re-enter the enemy stage so the wave is sized for the new loop
-			# (`start_wave()` reads `current_loop`) instead of the loop-1 wave
+			stage_manager.current_stage = start_stage
+			stage_manager.enemy_spawner.current_stage = start_stage
+			stage_manager.boss_spawner.current_stage = start_stage
+			# Re-enter the enemy phase so the wave is sized for the new stage
+			# (`start_wave()` reads `current_stage`) instead of the stage-1 wave
 			# that `_ready()` already started.
-			stage_manager.go_to_stage(1)
+			stage_manager.go_to_phase(1)
 
 
 ## Applies the picker's monster density. Last of the three, because
 ## `_apply_start_mode()` can call `start_wave()`, which re-sizes the wave from
-## `current_loop` and would drop a multiplier set before it.
+## `current_stage` and would drop a multiplier set before it.
 func _apply_monster_multiplier() -> void:
 	var stage_manager := get_node_or_null("../StageManager") as StageManager
 	if stage_manager == null:
@@ -262,31 +262,31 @@ func _install_sandbox_menu() -> void:
 	(pause_menu.get_node("Control/VBoxContainer") as VBoxContainer).add_child(button)
 
 
-## Holds the run at stage 1 with nothing spawning, so the arena holds only what
+## Holds the run at phase 1 with nothing spawning, so the arena holds only what
 ## the scenario put there - the sandbox panel or the roster preview. Applied to
 ## both, because either way the wave would otherwise fill the arena and move the
 ## run on under the thing being looked at.
 ##
 ## Three parts, and the first is the one that matters:
 ##
-## - `StageManager.stage_active = false` freezes the *stage clock*. That is a
+## - `StageManager.phase_active = false` freezes the *phase clock*. That is a
 ##   separate clock from the spawner's, and it is the one that moves the run on:
-##   `_process_enemy_stage()` counts `stage_time_elapsed` to `stage_duration`,
-##   then `_end_stage()` calls `go_to_stage(2)`, which spawns the boss and turns
+##   `_process_enemy_phase()` counts `phase_time_elapsed` to `phase_duration`,
+##   then `_end_phase()` calls `go_to_phase(2)`, which spawns the boss and turns
 ##   `spawn_active` back on. Silencing only the spawner still gets a boss at 20s.
 ## - `spawn_active = false` stops the spawn cadence on its own terms, rather than
-##   relying on the stage being frozen.
-## - `spawn_timer.stop()` puts the timer to sleep, because with the stage frozen
+##   relying on the phase being frozen.
+## - `spawn_timer.stop()` puts the timer to sleep, because with the phase frozen
 ##   it would otherwise keep ticking and keep re-reading the empty arena through
 ##   `EnemySpawner._process()`, the refill watchdog.
-func _freeze_stage() -> void:
+func _freeze_phase() -> void:
 	if not (sandbox or spawn_enemy_roster):
 		return
 	var stage_manager := get_node_or_null("../StageManager") as StageManager
 	if stage_manager == null:
 		push_warning("DebugScenarioSetup: no StageManager to hold for '%s'." % scenario_title)
 		return
-	stage_manager.stage_active = false
+	stage_manager.phase_active = false
 	var spawner := stage_manager.enemy_spawner
 	spawner.spawn_active = false
 	if spawner.spawn_timer != null:
@@ -330,14 +330,14 @@ func _character() -> Character:
 	return get_tree().get_first_node_in_group("character") as Character
 
 
-func _on_stage_applied() -> void:
+func _on_phase_applied() -> void:
 	var stage_manager := get_node_or_null("../StageManager") as StageManager
-	var stage := stage_manager.current_stage if stage_manager != null else 0
-	var loop_number := stage_manager.current_loop if stage_manager != null else 0
+	var phase := stage_manager.current_phase if stage_manager != null else 0
+	var stage_number := stage_manager.current_stage if stage_manager != null else 0
 	print(
-		"Debug scenario '%s': stage %d, loop %d, %d weapons, stacked build: %s, monsters %.1fx, enemies get %s"
+		"Debug scenario '%s': phase %d, stage %d, %d weapons, stacked build: %s, monsters %.1fx, enemies get %s"
 		% [
-			scenario_title, stage, loop_number, weapon_names.size(),
+			scenario_title, phase, stage_number, weapon_names.size(),
 			str(stacked_build), pending_monster_multiplier,
 			enemy_item_name if not enemy_item_name.is_empty() else "nothing",
 		]

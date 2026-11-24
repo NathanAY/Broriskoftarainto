@@ -233,21 +233,21 @@ func generate_random_item() -> Item:
         item = _generate_buff_item()
     else:
         item = _generate_debuff_item()
-    apply_rarity(item, roll_rarity(_current_loop()))
+    apply_rarity(item, roll_rarity(_current_stage()))
     return item
 
 # -------------------
 # Rarity
 # -------------------
-## How much each loop past the first boosts the higher tiers' weights: tier `i`
-## weighs `weight * (1 + growth * (loop - 1) * i)`. Read from `game_config.json`.
-var rarity_loop_growth: float = float(GameConfig.section("item_rarity").get("loop_weight_growth", 0.5))
+## How much each stage past the first boosts the higher tiers' weights: tier `i`
+## weighs `weight * (1 + growth * (stage - 1) * i)`. Read from `game_config.json`.
+var rarity_stage_growth: float = float(GameConfig.section("item_rarity").get("stage_weight_growth", 0.5))
 
-func roll_rarity(loop: int) -> BaseWeapon.Rarity:
+func roll_rarity(stage: int) -> BaseWeapon.Rarity:
     var weights: Array[float] = []
     var total := 0.0
     for i in range(BaseWeapon.Rarity.LEGENDARY + 1):
-        var weight := maxf(0.0, Item.rarity_value("weights", i) * (1.0 + rarity_loop_growth * maxi(0, loop - 1) * i))
+        var weight := maxf(0.0, Item.rarity_value("weights", i) * (1.0 + rarity_stage_growth * maxi(0, stage - 1) * i))
         weights.append(weight)
         total += weight
     var pick := rng.randf() * total
@@ -306,8 +306,8 @@ func _add_stat_line(item: Item, scale: float) -> void:
     item.modifiers[chosen] = value
 
 
-func _current_loop() -> int:
-    return StageManager.loop_of(self)
+func _current_stage() -> int:
+    return StageManager.stage_of(self)
 
 func _generate_stat_item(index: int = -1) -> Item:
     var stat_names = _gratable_stat_names()

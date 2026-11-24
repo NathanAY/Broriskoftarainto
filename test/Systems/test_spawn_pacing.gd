@@ -12,15 +12,15 @@ func _build_spawner() -> Dictionary:
     var enemies := Node.new()
     enemies.name = "Enemies"
     nodes.add_child(enemies)
-    var stage := Node.new()
-    stage.name = "StageManager"
-    root.add_child(stage)
+    var phase := Node.new()
+    phase.name = "StageManager"
+    root.add_child(phase)
     var character: CharacterBody2D = auto_free(load("res://src/Systems/Character.tscn").instantiate())
     root.add_child(character)
     character.global_position = Vector2(10000, 0)
     var spawner: EnemySpawner = auto_free(load("res://src/Systems/EnemySpawner.tscn").instantiate())
     spawner.set("character", character)
-    stage.add_child(spawner)
+    phase.add_child(spawner)
     return {"root": root, "enemies": enemies, "spawner": spawner}
 
 
@@ -35,16 +35,16 @@ func test_base_interval_is_1s() -> void:
     assert_int(spawner.spawn_interval).is_equal(1)
 
 
-func test_empty_refill_loop_scaled() -> void:
+func test_empty_refill_stage_scaled() -> void:
     var ctx: Dictionary = _build_spawner()
     var spawner: EnemySpawner = ctx["spawner"]
-    spawner.current_loop = 1
+    spawner.current_stage = 1
     assert_float(spawner.get_empty_refill_delay()).is_equal_approx(1.0, 0.001)
-    spawner.current_loop = 2
+    spawner.current_stage = 2
     assert_float(spawner.get_empty_refill_delay()).is_equal_approx(0.85, 0.001)
-    spawner.current_loop = 3
+    spawner.current_stage = 3
     assert_float(spawner.get_empty_refill_delay()).is_equal_approx(0.7, 0.001)
-    spawner.current_loop = 99
+    spawner.current_stage = 99
     assert_float(spawner.get_empty_refill_delay()).is_equal_approx(0.3, 0.001)
 
 
@@ -63,7 +63,7 @@ func test_adjust_rate_never_exceeds_max_wait() -> void:
 func test_adjust_rate_speeds_up_when_empty() -> void:
     var ctx: Dictionary = _build_spawner()
     var spawner: EnemySpawner = ctx["spawner"]
-    spawner.current_loop = 1
+    spawner.current_stage = 1
     spawner.use_group_spawning = false
     spawner._adjust_spawn_rate()
     assert_float(spawner.spawn_timer.wait_time).is_equal_approx(1.0, 0.001)
@@ -97,7 +97,7 @@ func test_watchdog_shortens_long_wait_when_empty() -> void:
     var ctx: Dictionary = _build_spawner()
     var spawner: EnemySpawner = ctx["spawner"]
     var _enemies: Node = ctx["enemies"]
-    spawner.current_loop = 1
+    spawner.current_stage = 1
     spawner.spawn_active = true
     spawner.spawn_timer.wait_time = 4.0
     spawner.spawn_timer.start()
@@ -117,25 +117,25 @@ func test_set_spawn_multiplier_resizes_the_live_wave() -> void:
 
     spawner.set_spawn_multiplier(4.0)
     assert_int(spawner.target_enemy_count).is_equal(
-        roundi(float(spawner.base_target_enemy_count + spawner.current_loop - 1) * 4.0)
+        roundi(float(spawner.base_target_enemy_count + spawner.current_stage - 1) * 4.0)
     )
 
     # And back down again, without the first scaling having been baked in.
     spawner.set_spawn_multiplier(1.0)
     assert_int(spawner.target_enemy_count).is_equal(
-        spawner.base_target_enemy_count + spawner.current_loop - 1
+        spawner.base_target_enemy_count + spawner.current_stage - 1
     )
 
 
-func test_multiplier_scales_loop_scaling_too() -> void:
+func test_multiplier_scales_stage_scaling_too() -> void:
     var ctx: Dictionary = _build_spawner()
     var spawner: EnemySpawner = ctx["spawner"]
-    spawner.current_loop = 3
+    spawner.current_stage = 3
     spawner.set_spawn_multiplier(2.0)
     assert_int(spawner.target_enemy_count).is_equal(
         (spawner.base_target_enemy_count + 2) * 2
     )
-    # `start_wave()` re-sizes from `current_loop`, so it must not drop the
+    # `start_wave()` re-sizes from `current_stage`, so it must not drop the
     # multiplier on the way - which is the order a scenario hits it in.
     spawner.start_wave()
     assert_int(spawner.target_enemy_count).is_equal(
@@ -143,8 +143,8 @@ func test_multiplier_scales_loop_scaling_too() -> void:
     )
 
 
-## 0.1x must not round the wave to nothing: `StageManager` only ends a stage on
-## an empty arena, so a stage that never fields a monster would never end.
+## 0.1x must not round the wave to nothing: `StageManager` only ends a phase on
+## an empty arena, so a phase that never fields a monster would never end.
 func test_low_multiplier_still_fields_one_enemy() -> void:
     var ctx: Dictionary = _build_spawner()
     var spawner: EnemySpawner = ctx["spawner"]

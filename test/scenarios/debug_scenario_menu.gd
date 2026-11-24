@@ -16,23 +16,23 @@ const MAIN_MENU_SCENE := "res://src/Scenes/menu/Main.tscn"
 const SCENARIOS := [
 	{
 		"title": "Sandbox",
-		"description": "Empty stage 1, held there: no wave and no boss timer. A Spawn enemy panel in the pause menu puts enemies you configure into the arena.",
+		"description": "Empty phase 1, held there: no wave and no boss timer. A Spawn enemy panel in the pause menu puts enemies you configure into the arena.",
 		"scene": "res://test/scenarios/scenario_sandbox.tscn",
 	},
 	{
 		"title": "Loaded build",
-		"description": "Loop 1, stage 1. Four weapons and items carrying 3-5 modifiers each.",
+		"description": "Stage 1, phase 1. Four weapons and items carrying 3-5 modifiers each.",
 		"scene": "res://test/scenarios/scenario_loaded_build.tscn",
 	},
 	{
-		"title": "First stage boss",
-		"description": "Loop 1 boss, so the enemy stage is skipped. Tests the boss itself.",
+		"title": "First phase boss",
+		"description": "Stage 1 boss, so the enemy phase is skipped. Tests the boss itself.",
 		"scene": "res://test/scenarios/scenario_first_boss.tscn",
 	},
 	{
-		"title": "Loop 3",
-		"description": "Endgame scaling: enemies spawn already buffed for loop 3. Clearing the boss opens the final boss / one more loop choice.",
-		"scene": "res://test/scenarios/scenario_loop_three.tscn",
+		"title": "Stage 3",
+		"description": "Endgame scaling: enemies spawn already buffed for stage 3. Clearing the boss opens the final boss / one more stage choice.",
+		"scene": "res://test/scenarios/scenario_stage_three.tscn",
 	},
 	{
 		"title": "Cursed enemies",
@@ -41,7 +41,7 @@ const SCENARIOS := [
 	},
 	{
 		"title": "Enemy preview",
-		"description": "Every enemy type, boss included, in a ring around you. The stage is frozen and they cannot hurt you, so the whole roster can be walked and watched.",
+		"description": "Every enemy type, boss included, in a ring around you. The phase is frozen and they cannot hurt you, so the whole roster can be walked and watched.",
 		"scene": "res://test/scenarios/scenario_enemy_preview.tscn",
 	},
 ]
@@ -102,7 +102,7 @@ func _on_scenario_pressed(index: int) -> void:
 	_publish_monster_multiplier()
 	# No global is set here on purpose. The scenario's own `ScenarioSetup` node
 	# writes the loadout into `GlobalGameState` before the character reads it,
-	# and the stage jump into `StageManager`, so the scene file carries the whole
+	# and the phase jump into `StageManager`, so the scene file carries the whole
 	# configuration and there is no second place to keep in sync.
 	get_tree().change_scene_to_file(path)
 

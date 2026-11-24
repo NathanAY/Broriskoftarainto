@@ -145,15 +145,15 @@ func test_spawned_boss_leaves_a_corpse_on_death() -> void:
 	var marks := Node.new()
 	marks.name = "death_marks"
 	nodes.add_child(marks)
-	var stage := Node.new()
-	stage.name = "StageManager"
-	root.add_child(stage)
+	var phase := Node.new()
+	phase.name = "StageManager"
+	root.add_child(phase)
 	var character: Character = auto_free(load("res://src/Systems/Character.tscn").instantiate())
 	root.add_child(character)
 	var spawner: BossSpawner = auto_free(load("res://src/Systems/BossSpawner.tscn").instantiate())
 	spawner.character = character
 	spawner.spawn_telegraph_time = 0.0 # the test reads the boss straight after the call
-	stage.add_child(spawner)
+	phase.add_child(spawner)
 	spawner.spawn_boss()
 
 	var previous := get_tree().current_scene

@@ -2,7 +2,7 @@ class_name Wallet
 extends RefCounted
 ## The only way money changes. The balance lives in the character's `money`
 ## base stat; going through here is what makes every change observable
-## (`on_money_changed`) and tallied by source for the loop it happened in.
+## (`on_money_changed`) and tallied by source for the stage it happened in.
 ## See `docs/systems/economy.md`.
 
 
@@ -47,18 +47,18 @@ static func sell_ratio(character: Character) -> float:
 
 ## Runs once per shop visit, in this order, because each step reads what the
 ## one before wrote:
-## 1. interest on the money carried over from the last shop (this loop's income
+## 1. interest on the money carried over from the last shop (this stage's income
 ##    excluded, so the rate rewards saving rather than multiplying kills),
 ## 2. the stock dividend, `floor(stock_investment)`,
 ## 3. stock growth, `stock × stock_growth`, added to the *base* so stock that
 ##    came from items keeps its growth after the item is sold.
 ## Returns the coins paid by source and emits `on_payday`.
-static func payday(character: Character, loop: int) -> Dictionary:
+static func payday(character: Character, stage: int) -> Dictionary:
     var economy := config()
     var breakdown := {}
 
     var income := 0.0
-    for coins in income_for_loop(character, loop).values():
+    for coins in income_for_stage(character, stage).values():
         income += float(coins)
     var carried := maxf(0.0, balance(character) - income)
     var interest := mini(floori(maxf(0.0, stat(character, "interest_rate")) * carried), int(economy.get("interest_cap", 10)))
@@ -78,7 +78,7 @@ static func payday(character: Character, loop: int) -> Dictionary:
     for source in breakdown:
         earn(character, breakdown[source], source)
         RunHistory.record(character, PAYDAY_LABELS.get(source, source), "coins", breakdown[source])
-    character.event_manager.emit_event("on_payday", {"loop": loop, "breakdown": breakdown})
+    character.event_manager.emit_event("on_payday", {"stage": stage, "breakdown": breakdown})
     return breakdown
 
 
@@ -88,8 +88,8 @@ static func balance(character: Character) -> float:
 
 ## Adds `amount` and records it under `source` ("kill", "boss", "sell", ...).
 static func earn(character: Character, amount: float, source: String) -> void:
-    var loop := StageManager.loop_of(character)
-    var tally: Dictionary = character.income_by_loop.get_or_add(loop, {})
+    var stage := StageManager.stage_of(character)
+    var tally: Dictionary = character.income_by_stage.get_or_add(stage, {})
     tally[source] = float(tally.get(source, 0.0)) + amount
     _set_balance(character, balance(character) + amount, source)
 
@@ -120,9 +120,9 @@ static func charge(character: Character, amount: float, reason: String) -> void:
     _set_balance(character, balance(character) - amount, reason)
 
 
-## Coins earned in `loop`, keyed by source.
-static func income_for_loop(character: Character, loop: int) -> Dictionary:
-    return character.income_by_loop.get(loop, {})
+## Coins earned in `stage`, keyed by source.
+static func income_for_stage(character: Character, stage: int) -> Dictionary:
+    return character.income_by_stage.get(stage, {})
 
 
 static func _set_balance(character: Character, value: float, source: String) -> void:

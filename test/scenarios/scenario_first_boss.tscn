@@ -7,7 +7,7 @@
 
 [node name="ScenarioSetup" type="Node" parent="."]
 script = ExtResource("2_setup")
-scenario_title = "First stage boss"
+scenario_title = "First phase boss"
 weapon_names = Array[String](["Pistol", "Shotgun"])
 item_names = Array[String](["ArmorPlate"])
 start_mode = 1

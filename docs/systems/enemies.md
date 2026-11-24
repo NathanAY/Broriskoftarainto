@@ -50,7 +50,7 @@ An enemy type is a **scene**, not a class. `Enemy.gd` is the script every enemy 
 | Blink | `src/Systems/enemies/EnemyBlink.tscn` | Chases, then reappears in a ring around you every few seconds. It keeps the contact weapon, so the repositioning is the threat. |
 | Shieldbearer | `src/Systems/enemies/EnemyShieldbearer.tscn` | Turns away every hit that lands on its front arc. Tougher and slower than the grunt; you have to get behind it. |
 | Swarmer | `src/Systems/enemies/EnemySwarmer.tscn` | Tiny, one hit point, faster than the grunt, and arrives in packs of eight. The pack is the threat, not any one body. |
-| Boss | `src/Systems/enemies/EnemyBoss.tscn` | The loop's boss, with a weapon loadout of its own. See `docs/systems/spawners.md`. |
+| Boss | `src/Systems/enemies/EnemyBoss.tscn` | The stage's boss, with a weapon loadout of its own. See `docs/systems/spawners.md`. |
 
 Adding a type is therefore: copy `src/Systems/enemies/Enemy.tscn`, point the sprite at new art, change the stats, set its `description` (the Gamepedia's text for it), and add a row to the spawn table in `src/Scenes/Game.tscn`. No script changes, because the behaviour is duck-typed against the enemy.
 
@@ -90,14 +90,14 @@ The Gunner, the Slimeling and the Lancer were delivered as single images instead
 - **`split_count`** — how many children the split produces.
 - **`split_scale`** — multiplies the children's health, movement speed and damage stat, and shrinks their collider and sprite.
 
-A spawned child is told not to split again (`suppressed`), or the stage would never end: a stage ends when the enemy container is empty.
+A spawned child is told not to split again (`suppressed`), or the phase would never end: a phase ends when the enemy container is empty.
 
 Two ordering rules the split path depends on:
 
 - The children's stats are scaled **before** they enter the tree, because `Health._ready()` reads the health stat once and never looks again.
 - The collider shape is a **shared sub-resource** of the scene, so it is duplicated before its radius is changed. Shrinking it in place would shrink every instance of that enemy scene.
 
-The children are added with `call_deferred`, into the same container the spawner uses (`Nodes/Enemies`), because the death event fires from inside `Health.apply_damage` and touching the tree from a physics callback is a flushing error. `StageManager` ends a stage on `Nodes/Enemies.get_child_count() == 0`, so the children hold the stage open until they are dead too.
+The children are added with `call_deferred`, into the same container the spawner uses (`Nodes/Enemies`), because the death event fires from inside `Health.apply_damage` and touching the tree from a physics callback is a flushing error. `StageManager` ends a phase on `Nodes/Enemies.get_child_count() == 0`, so the children hold the phase open until they are dead too.
 
 The shipped splitter is the Slimeling: three children at `split_scale` 0.6, with no `split_scene`, so every mini is another Slimeling. The sheet's jelly cell is not used because it is translucent, and a see-through enemy reads as a hole in the arena (`docs/visual_style.md`).
 
@@ -145,7 +145,7 @@ The shipped Blink uses the shared default sprite while its own art is pending; t
 Both are spawner rows rather than enemy scripts, so they apply to any scene:
 
 - **`pack_size`** on `EnemySpawnEntry` — one draw spawns this many copies of the row's scene. The Swarmer row uses 8. A pack overrides the spawner's ordinary group size for that draw, and the spawn budget still caps it.
-- **`elite_min_loop`** and the multipliers on `EnemySpawnEntry` — from that loop on, the row spawns the same scene with multiplied health and damage and a tint on its `Node2D` container. Every shipped row turns elite at loop 3. The tint lives on `Node2D` so the hit flash cannot reset it.
+- **`elite_min_stage`** and the multipliers on `EnemySpawnEntry` — from that stage on, the row spawns the same scene with multiplied health and damage and a tint on its `Node2D` container. Every shipped row turns elite at stage 3. The tint lives on `Node2D` so the hit flash cannot reset it.
 
 ## Common vs special
 The arena is meant to feel full of common enemies (Grunt, Slimeling, Swarmer) with a few special ones. The `enemy_rarity` block of `game_config.json` is the single source of spawn weights: commons weigh a lot, specials (Bulwark, Lancer, Toadstinker, Blink, Gunner, Shieldbearer) weigh little and carry a `base_health` that overrides their scene health. Keys and meaning are in `docs/systems/game_config.md`.
@@ -157,6 +157,6 @@ The arena is meant to feel full of common enemies (Grunt, Slimeling, Swarmer) wi
 - The Swarmer still uses the shared default enemy sprite until its own art arrives: `src/Systems/enemies/EnemySwarmer.tscn` points at `src/Assets/enemies/spitter.png`. Replace the texture on the scene when the art ships. The Lancer now has its own `src/Assets/enemies/lancer.png`, the Blink its own `src/Assets/enemies/blink.png`, the Toadstinker its own `src/Assets/enemies/toadstinker.png` (full-resolution 1024px art, generated per `docs/visual_style.md`) and the Shieldbearer its own `src/Assets/enemies/shieldbearer.png`. The Toadstinker sets its own `art_width` (about 90px, a little under the roster canvas) and scales its colliders to match.
 - The Swarmer is drawn small on purpose: its scene sets `art_width = 55` (the old 0.55 scale of the shared canvas) and keeps a smaller collider, so the collider test reads the drawn width rather than the texture width.
 - Death handling uses animation_finished connect with a short anonymous callback — works but can be fragile if animations change. `_die` is re-entrancy guarded, so a duplicate `on_death` cannot restart the animation, but the callback still depends on the animation being named `death`.
-- `StageManager` and `EnemySpawner` end a stage on `Nodes/Enemies.get_child_count() == 0`, so a corpse still holds the stage open for the remainder of its death animation.
+- `StageManager` and `EnemySpawner` end a phase on `Nodes/Enemies.get_child_count() == 0`, so a corpse still holds the phase open for the remainder of its death animation.
 - The charger's telegraph plays the shared `idle` animation. There is no windup clip, and `src/animations/enemy_animations.res` is shared with the player, so a charger needs its own animation library before it can telegraph with one.
 - Behavior implementation details are delegated to movement behaviour nodes; those should be inspected if modifying AI.

@@ -11,10 +11,10 @@ class_name EnemySpawner
 @export var min_spawn_wait: float = 0.4 # fastest tick when arena is empty (strong builds stay in danger)
 @export var max_spawn_wait: float = 4.0 # slowest tick when overpopulated (never boring, caps old 30s bug)
 @export var max_alive_enemies: int = 100 # perf + weak-build protection: skip ticks above this
-@export var health_growth_per_loop: float = 20
-@export var damage_growth_per_loop: float = 1
-@export var base_target_enemy_count = 5 # initial target enemies per stage
-@export var current_loop: int = 1
+@export var health_growth_per_stage: float = 20
+@export var damage_growth_per_stage: float = 1
+@export var base_target_enemy_count = 5 # initial target enemies per phase
+@export var current_stage: int = 1
 @export var spawn_active: bool = true
 
 ## Debug knob: scales how many monsters a wave fields, 1.0 being a normal run.
@@ -32,10 +32,10 @@ class_name EnemySpawner
 @export var max_groups_per_spawn = 2  # maximum number of groups to spawn at once (randomized)
 @export var use_group_spawning = true  # toggle between single spawn and group spawn mode
 ## The enemy types this wave can spawn. Each row names a scene, how likely it is
-## to come up, and the loop it unlocks on. An empty table falls back to
+## to come up, and the stage it unlocks on. An empty table falls back to
 ## `fallback_enemy_scene`, so a scene that forgot to fill it still spawns.
 @export var spawn_table: Array[EnemySpawnEntry] = []
-## Spawned when the table is empty or every row is still locked behind its loop.
+## Spawned when the table is empty or every row is still locked behind its stage.
 @export var fallback_enemy_scene: PackedScene = preload("res://src/Systems/enemies/Enemy.tscn")
 ## Keep spawned enemies at least this far apart from each other (any two alive
 ## enemies at spawn time). Enemy body diameter is ~82 (radius 41), so 90 leaves
@@ -89,12 +89,12 @@ func set_spawn_multiplier(value: float) -> void:
 
 ## How many monsters should be alive in this wave. Floored at one, so a sub-1x
 ## multiplier means a trickle rather than an empty arena: `StageManager` only
-## ends a stage once the arena is empty, so a stage that never fields anything
+## ends a phase once the arena is empty, so a phase that never fields anything
 ## would never end.
 func scaled_target_enemy_count() -> int:
     # `base_target_enemy_count` is an untyped export, so the sum is a Variant and
     # has to be named before it can be typed.
-    var wave_size: int = base_target_enemy_count + current_loop - 1
+    var wave_size: int = base_target_enemy_count + current_stage - 1
     return maxi(1, roundi(float(wave_size) * spawn_multiplier))
 
 
@@ -171,11 +171,11 @@ func _on_spawn_timer_timeout():
             spawn_enemy()
         _adjust_spawn_rate()
     else:
-        # Stop spawning after stage time
+        # Stop spawning after phase time
         spawn_timer.stop()
 
 ## Watchdog: if the player clears the arena mid-tick, shorten a long pending
-## wait so empty-arena downtime never exceeds the loop-scaled refill delay.
+## wait so empty-arena downtime never exceeds the stage-scaled refill delay.
 func _process(_delta: float) -> void:
     if not spawn_active:
         return
@@ -193,7 +193,7 @@ func _process(_delta: float) -> void:
 
 ## Picks the scene for the next enemy out of the spawn table.
 ##
-## A row is open once the current loop has reached its `min_loop`, so the roster
+## A row is open once the current stage has reached its `min_stage`, so the roster
 ## widens as the run goes on rather than every type showing up in wave one.
 ## The open rows are drawn by weight - a row with no weight never comes up -
 ## and a table that is empty, or one whose every row is still locked, falls
@@ -213,7 +213,7 @@ func pick_spawn_entry() -> EnemySpawnEntry:
     for entry in spawn_table:
         if entry == null or entry.scene == null:
             continue
-        if current_loop < entry.min_loop:
+        if current_stage < entry.min_stage:
             continue
         if _entry_weight(entry) <= 0.0:
             continue
@@ -317,7 +317,7 @@ func _alive_count() -> int:
 
 
 ## Instantiates one enemy from `entry`, applies the spawner's modifiers, the
-## row's elite scaling and the loop's stage scaling, then adds it to the shared
+## row's elite scaling and the stage's phase scaling, then adds it to the shared
 ## enemy container and points it at the player. Both spawn paths go through
 ## here so a pack member and a lone spawn cannot drift apart. With a telegraph
 ## time the enemy only appears after the teleport effect has played, so callers
@@ -349,7 +349,7 @@ func _spawn_from_entry(entry: EnemySpawnEntry, spawn_position: Vector2) -> Enemy
 
 ## Special enemies are rarer but tougher: the config's `base_health` for the
 ## row's scene replaces the health in the enemy's Stats node, before elite and
-## loop scaling. A scene with no `base_health` keeps its own.
+## stage scaling. A scene with no `base_health` keeps its own.
 func _apply_rarity_health(enemy: Node, entry: EnemySpawnEntry) -> void:
     var rarity := _rarity(entry)
     var stats = enemy.get_node_or_null("Stats")
@@ -358,12 +358,12 @@ func _apply_rarity_health(enemy: Node, entry: EnemySpawnEntry) -> void:
 
 
 ## Applies a row's elite multipliers once the run has reached its
-## `elite_min_loop`. The tint goes on the visual container rather than the
+## `elite_min_stage`. The tint goes on the visual container rather than the
 ## sprite: `HitFlashManager` tweens the sprite's own modulate and resets it to
 ## white on every hit, which would wipe an elite's colour the first time it is
 ## struck.
 func _apply_elite_scaling(enemy: Node, entry: EnemySpawnEntry) -> void:
-    if entry == null or entry.elite_min_loop <= 0 or current_loop < entry.elite_min_loop:
+    if entry == null or entry.elite_min_stage <= 0 or current_stage < entry.elite_min_stage:
         return
     var stats = enemy.get_node_or_null("Stats")
     if stats:
@@ -409,16 +409,16 @@ func _apply_stage_scaling(enemy: Node) -> void:
     var stats = enemy.get_node_or_null("Stats")
     if not stats:
         return
-    # Scale only by stage
-    var extra_health = health_growth_per_loop * (current_loop - 1)
-    var extra_damage = damage_growth_per_loop * (current_loop - 1)
+    # Scale only by phase
+    var extra_health = health_growth_per_stage * (current_stage - 1)
+    var extra_damage = damage_growth_per_stage * (current_stage - 1)
     stats.set_base_stat("health", stats.stats["health"] + extra_health)
     stats.set_base_stat("damage", stats.stats["damage"] + extra_damage)
 
 func _adjust_spawn_rate():
     var current_enemies = _alive_count()
     if current_enemies == 0:
-        # Empty arena: loop-scaled fast refill (later Loops refill faster).
+        # Empty arena: stage-scaled fast refill (later Stages refill faster).
         spawn_timer.wait_time = get_empty_refill_delay()
         spawn_timer.start()
         return
@@ -430,9 +430,9 @@ func _adjust_spawn_rate():
     spawn_timer.wait_time = clampf(scaled_spawn_interval() / multiplier, scaled_min_spawn_wait(), scaled_max_spawn_wait())
     spawn_timer.start()
 
-## Loop-scaled empty-arena refill: L1=1.0s, L2=0.85s, L3=0.7s, ... floor 0.3s.
+## Stage-scaled empty-arena refill: L1=1.0s, L2=0.85s, L3=0.7s, ... floor 0.3s.
 func get_empty_refill_delay() -> float:
-    return maxf(0.3, 1.0 - 0.15 * float(current_loop - 1))
+    return maxf(0.3, 1.0 - 0.15 * float(current_stage - 1))
 
 ## Wave entry point: (re)starts the cadence so a fresh Wave never inherits a
 ## stale long wait or a stopped timer. First tick lands ~spawn_interval (1s).
@@ -448,6 +448,6 @@ func start_wave() -> void:
     spawn_timer.start()
 
 func _on_next_stage():
-    current_loop += 1
+    current_stage += 1
     start_wave()
-    print("Stage %d started! Target enemies: %d" % [current_loop, target_enemy_count])
+    print("Stage %d started! Target enemies: %d" % [current_stage, target_enemy_count])

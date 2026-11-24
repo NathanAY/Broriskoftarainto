@@ -41,8 +41,8 @@ Read through `Item.rarity_value()` by `ItemFactory` (rolling and applying rarity
 
 | Key | Meaning |
 |---|---|
-| `weights` | Relative roll weight per rarity on loop 1. |
-| `loop_weight_growth` | Each loop past the first multiplies tier `i`'s weight by `1 + growth * (loop - 1) * i`. `0` keeps the odds fixed. |
+| `weights` | Relative roll weight per rarity on stage 1. |
+| `stage_weight_growth` | Each stage past the first multiplies tier `i`'s weight by `1 + growth * (stage - 1) * i`. `0` keeps the odds fixed. |
 | `positive_multipliers` | Gains on the item (and its buff/debuff payload) are multiplied by this. Also multiplies the shop price. |
 | `negative_multipliers` | Losses on the item are multiplied by this. Keep it below the positive one. |
 | `extra_positive_chance` | Chance per attempt of an extra gain line; a rarity gets as many attempts as its index (common 0, legendary 4). |
@@ -56,13 +56,13 @@ Read through `Wallet.config()` by `src/Systems/Items/wallet.gd`, `src/Systems/It
 |---|---|
 | `coins_per_kill` | Coins paid for every enemy death (not the boss). |
 | `sell_ratio` | 0-1. Share of an item's current shop price paid when it is sold. |
-| `reroll_base_cost` | Price of the first reroll on loop 1. |
-| `reroll_loop_step` | Added to the reroll base for every loop past the first. |
+| `reroll_base_cost` | Price of the first reroll on stage 1. |
+| `reroll_stage_step` | Added to the reroll base for every stage past the first. |
 | `reroll_step` | Added for every reroll already made in this shop visit. |
-| `type_prices` | Shop price per offer type before rarity and loop scaling: `stat`, `buff` (buffs and debuffs), `effect`, `weapon`. |
-| `item_price_growth_per_loop` | Every price is multiplied by `1 + growth × (loop − 1)`. `0` keeps prices flat. |
-| `boss_coins_base` | Coins the loop-1 boss pays on death. The final boss pays nothing. |
-| `boss_coins_per_loop` | Added to the boss bounty for every loop past the first. |
+| `type_prices` | Shop price per offer type before rarity and stage scaling: `stat`, `buff` (buffs and debuffs), `effect`, `weapon`. |
+| `item_price_growth_per_stage` | Every price is multiplied by `1 + growth × (stage − 1)`. `0` keeps prices flat. |
+| `boss_coins_base` | Coins the stage-1 boss pays on death. The final boss pays nothing. |
+| `boss_coins_per_stage` | Added to the boss bounty for every stage past the first. |
 | `stock_growth` | At payday, stock grows by `stock_investment × stock_growth`. |
 | `stock_investment_cap` | Stock stops growing here (items can still push it higher). |
 | `coin_gain_cap` | Highest `coin_gain` that counts. |
@@ -80,7 +80,7 @@ Read by `src/Systems/enemy_spawner.gd`. One block per enemy type, keyed by its s
 | Key | Meaning |
 |---|---|
 | `weight` | Spawn weight of that enemy's row in `src/Scenes/Game.tscn`, relative to the other open rows. The only place weights live: a scene not listed weighs `1`, and `0` never spawns it. |
-| `base_health` | Replaces the `health` stat in the enemy's `Stats` node at spawn, before elite and loop scaling. Omit it to keep the scene's own health. |
+| `base_health` | Replaces the `health` stat in the enemy's `Stats` node at spawn, before elite and stage scaling. Omit it to keep the scene's own health. |
 
 ## `economy_modifiers`
 
@@ -90,8 +90,8 @@ One block per economy modifier, keyed by its scene name in `src/Systems/Items/mo
 |---|---|
 | `GildedEdgeModifier` | `per_unit` (damage per coin held), `cap`, `cap_per_extra_stack` |
 | `MarketRallyModifier` | `per_unit` (attack speed per point of stock), `cap`, `cap_per_extra_stack` |
-| `InsurancePolicyModifier` | `premium_base` (coins on loop 1), `premium_per_loop`, `survive_health` (HP left after a saved hit) |
-| `BountyMarkModifier` | `interval` (seconds between marks), `coins_base`, `coins_per_loop`, `bonus_per_extra_stack` |
+| `InsurancePolicyModifier` | `premium_base` (coins on stage 1), `premium_per_stage`, `survive_health` (HP left after a saved hit) |
+| `BountyMarkModifier` | `interval` (seconds between marks), `coins_base`, `coins_per_stage`, `bonus_per_extra_stack` |
 | `RegularCustomerModifier` | `max_free_rerolls` |
 | `FireSaleModifier` | `stock_per_coin` (stock per coin of sale price), `bonus_per_extra_stack` |
 | `TaxCollectorModifier` | `tax_rate` (share of money taken), `tax_rate_per_extra_stack` |

@@ -57,19 +57,19 @@ The 10-second window is what makes regen and life leech scoreable: a +4 HP/0.5s 
 | Failure | What it looks like | Rule that stops it |
 |---|---|---|
 | **Item inflation** | One item is worth +200% or more. | §2 item budget table, §3 per-stat budgets. |
-| **Snowball** | A weapon found at loop 3 doubles a build that already has 10 items. | §4.4 anti-snowball rule. |
+| **Snowball** | A weapon found at stage 3 doubles a build that already has 10 items. | §4.4 anti-snowball rule. |
 
 ### 1.3 The third axis — ECO (economy)
 
 An economy item gives no offense and no survivability. It pays coins, and the coins buy power later. It is budgeted on a third axis so it can be compared with the other two. The mechanics are in `docs/systems/economy.md`.
 
 ```
-ECO = coins the item returns from the shop it was bought in to the loop-3 shop,
-      each coin divided by that loop's price growth  1 + item_price_growth_per_loop × (loop − 1)
+ECO = coins the item returns from the shop it was bought in to the stage-3 shop,
+      each coin divided by that stage's price growth  1 + item_price_growth_per_stage × (stage − 1)
 ROI = ECO / the price paid
 ```
 
-Measured for a purchase in the **loop-1 shop**, against the **income profile** below. Coins are deflated because prices rise each loop: a coin earned at loop 3 buys half of what it did at loop 1.
+Measured for a purchase in the **stage-1 shop**, against the **income profile** below. Coins are deflated because prices rise each stage: a coin earned at stage 3 buys half of what it did at stage 1.
 
 | Rule | Value | Why |
 |---|---|---|
@@ -77,11 +77,11 @@ Measured for a purchase in the **loop-1 shop**, against the **income profile** b
 | ROI of a shop-quality item (free rerolls) | **1.5 … 3.0×** | Coins saved understate a reroll, whose value is the better offer it finds. |
 | Upside | economy only | No `OFF`/`DEF` gain. The cost is fighting the next wave without one. |
 | Cash-out modifiers (coins or stock → a combat stat) | the §1 cap, +15% at their cap | They are `OFF` items whose size depends on the economy, so they are budgeted like any other item. |
-| Anything that compounds | a config cap | Loops past 3 have no ceiling. |
+| Anything that compounds | a config cap | Stages past 3 have no ceiling. |
 
-**Income profile [CURRENT]** — measured 2026-11-22, Multitasker, loops 1-3, one run. It is a measurement, not a design value; re-measure it when enemy pacing or rewards change.
+**Income profile [CURRENT]** — measured 2026-11-22, Multitasker, stages 1-3, one run. It is a measurement, not a design value; re-measure it when enemy pacing or rewards change.
 
-| Loop | Kills | Income (kills + boss) | Carried into the shop | Spent in the shop |
+| Stage | Kills | Income (kills + boss) | Carried into the shop | Spent in the shop |
 |---|---|---|---|---|
 | 1 | 45 | 50 | 0 | 42 |
 | 2 | 70 | 80 | 8 | 55 |
@@ -169,18 +169,18 @@ Full design rules and a worked example in Section 5.
 
 ### 2.3 The scaling budget across a whole run
 
-**[PROPOSED]** Total player power at the end of each loop, measured in multiples of the T0 baseline:
+**[PROPOSED]** Total player power at the end of each stage, measured in multiples of the T0 baseline:
 
 | Point in run | Target power | How it should be reached |
 |---|---|---|
-| Loop 1 start | 1.0× | Starting weapon only |
-| Loop 1 end | 1.8 – 2.2× | ~4-5 items |
-| Loop 2 end | 3.0 – 3.5× | +1 weapon, ~8-10 items |
-| Loop 3 end (choice point) | 4.5 – 6.0× | ~12-14 items |
+| Stage 1 start | 1.0× | Starting weapon only |
+| Stage 1 end | 1.8 – 2.2× | ~4-5 items |
+| Stage 2 end | 3.0 – 3.5× | +1 weapon, ~8-10 items |
+| Stage 3 end (choice point) | 4.5 – 6.0× | ~12-14 items |
 
-**Enemy HP grows ×5 across the run** (`enemy_spawner.gd:14`, `10 → 30 → 50`). A build at 5× baseline damage clears loop 3 at the same time-to-kill it started with — that is the intended shape of the curve. If the player cannot reach 4.5×, the item budgets in §2.1 are too low; if they reach 20×, they are too high.
+**Enemy HP grows ×5 across the run** (`enemy_spawner.gd:14`, `10 → 30 → 50`). A build at 5× baseline damage clears stage 3 at the same time-to-kill it started with — that is the intended shape of the curve. If the player cannot reach 4.5×, the item budgets in §2.1 are too low; if they reach 20×, they are too high.
 
-**Loop 3 is no longer the end of the run.** Past it the player chooses between the final boss and another loop (`docs/systems/stage_manager.md`), so the band above describes the point where the *decision* is offered, not a hard ceiling. Every extra loop continues the same curve: enemy HP `10 + 20 × (loop − 1)` and the boss `10 + 250 × loop`, with no cap. The final boss is scaled `BossSpawner.final_boss_extra_loops` (2) loops past the loop that reached it, so a player who took no extra loops faces roughly the loop-5 boss — above the curve's top row but a smaller jump than clearing a whole extra loop. The weapon ramp stops at `BossSpawner.LOADOUT_LOOP_CAP` (4), so boss *threat* flattens there even though its health and damage keep climbing.
+**Stage 3 is no longer the end of the run.** Past it the player chooses between the final boss and another stage (`docs/systems/stage_manager.md`), so the band above describes the point where the *decision* is offered, not a hard ceiling. Every extra stage continues the same curve: enemy HP `10 + 20 × (stage − 1)` and the boss `10 + 250 × stage`, with no cap. The final boss is scaled `BossSpawner.final_boss_extra_stages` (2) stages past the stage that reached it, so a player who took no extra stages faces roughly the stage-5 boss — above the curve's top row but a smaller jump than clearing a whole extra stage. The weapon ramp stops at `BossSpawner.LOADOUT_STAGE_CAP` (4), so boss *threat* flattens there even though its health and damage keep climbing.
 
 ---
 
@@ -333,23 +333,23 @@ Three more things about this modifier, all **[CURRENT]**:
 
 The same `hits_per_second × duration` shape applies to Bomb (`bomb_on_hit_modifier.gd:8`, 30% of hit damage but attached per hit and detonating after 3 s) and to any future stacking DoT.
 
-### 4.6 Validating against the loop curve
+### 4.6 Validating against the stage curve
 
 **[CURRENT]** enemy HP and DPS, from `enemy_spawner.gd:14-16` and `boss_spawner.gd:13-14`:
 
-| Loop | Basic enemy HP | Basic enemy contact DPS | Boss HP | Boss weapon DPS |
+| Stage | Basic enemy HP | Basic enemy contact DPS | Boss HP | Boss weapon DPS |
 |---|---|---|---|---|
 | 1 | 10 | 8 | 260 | 45 |
 | 2 | 30 | 16 | 510 | 110 |
 | 3 | 50 | 24 | 760 | 278 |
 
-(Basic enemy contact DPS = `5.0 × damage_stat × 1.6`, from the `Thorns` weapon it spawns with — `Enemy.gd` — so it is *per touching enemy*. That weapon is now the `contact_weapon` export's default, so an enemy that clears it does not hurt on touch at all, and the number above is only the basic enemy's. Boss weapon DPS is the summed `WB_raw` of its whole loadout from `boss_spawner.gd`: 2 boss shotguns per loop iteration, plus 2 Pistols from loop 3, plus its own contact weapon, with `damage_stat = 1 + loop`. A pellet weapon's `WB_raw` is `pellet_count × base_damage × base_attack_speed` (§4.2), so a boss shotgun contributes `4 × 3.0 × 0.6 = 7.2`. It assumes **every pellet connects**, which is the boss at best-case uptime — treat it as a ceiling, not a typical value. The pellets are deliberately slow, so real DPS sits well under this.)
+(Basic enemy contact DPS = `5.0 × damage_stat × 1.6`, from the `Thorns` weapon it spawns with — `Enemy.gd` — so it is *per touching enemy*. That weapon is now the `contact_weapon` export's default, so an enemy that clears it does not hurt on touch at all, and the number above is only the basic enemy's. Boss weapon DPS is the summed `WB_raw` of its whole loadout from `boss_spawner.gd`: 2 boss shotguns per stage iteration, plus 2 Pistols from stage 3, plus its own contact weapon, with `damage_stat = 1 + stage`. A pellet weapon's `WB_raw` is `pellet_count × base_damage × base_attack_speed` (§4.2), so a boss shotgun contributes `4 × 3.0 × 0.6 = 7.2`. It assumes **every pellet connects**, which is the boss at best-case uptime — treat it as a ceiling, not a typical value. The pellets are deliberately slow, so real DPS sits well under this.)
 
 **[CURRENT]** the roster of enemy types. These numbers are `.tscn` data, not design constants: a type is rebalanced by editing its scene, and `docs/systems/enemies.md` describes what each one is.
 
 | Type | Scene | Health | Speed (m/s) | Contact DPS | Role |
 |---|---|---|---|---|---|
-| Grunt | `src/Systems/enemies/Enemy.tscn` | 10 | 1.0 | 8 | The baseline the loop table above is written against. |
+| Grunt | `src/Systems/enemies/Enemy.tscn` | 10 | 1.0 | 8 | The baseline the stage table above is written against. |
 | Bulwark | `src/Systems/enemies/EnemyBulwark.tscn` | 30 | 0.4 | 8 | A slow wall: three times the grunt's health at a third of its speed. |
 | Gunner | `src/Systems/enemies/EnemyGunner.tscn` | 7 | 0.9 | 0 | Ranged: it holds a firing distance and shoots the shared `Pistol` (`11.5 x 0.8 = 9.2` DPS), which the player can dodge, so it is weaker and slower than the grunt at touch range. |
 | Slimeling | `src/Systems/enemies/EnemySlimeling.tscn` | 6 | 1.0 | 8 | Splits: it dies into three children at `split_scale` 0.6, each with scaled health, speed, damage and collider, so its real TTK is the parent plus three minis. Weaker than the grunt up front to pay for the bodies it leaves behind. |
@@ -363,19 +363,19 @@ The same `hits_per_second × duration` shape applies to Bomb (`bomb_on_hit_modif
 
 - Its **time to kill** may be longer, but only if the player has a way to avoid the fight. The Bulwark's health triples its TTK, and its speed drops to a third, so the answer is to walk around it rather than to out-shoot it. A type that is both slower to kill *and* faster than the player is a stat check, not a shape.
 - Its **threat** may not be a damage number the basic enemy also has. The Bulwark carries the same Thorns the grunt does, so its danger is the wall it is, not the damage it does.
-- Its **cost to the player** is judged at the loop it appears in, like a weapon (§4.6): a type that appears at loop 1 has to fit the loop-1 TTK band, and one that appears later has the later band's power to match.
+- Its **cost to the player** is judged at the stage it appears in, like a weapon (§4.6): a type that appears at stage 1 has to fit the stage-1 TTK band, and one that appears later has the later band's power to match.
 
 The numbers themselves are not pinned by tests — `test/Systems/test_enemy_variant_loadouts.gd` compares one enemy against another, so a balance pass does not have to touch a test.
 
-A weapon is balanced when, at the loop it is *found* in, its time-to-kill on a basic enemy lands in a band:
+A weapon is balanced when, at the stage it is *found* in, its time-to-kill on a basic enemy lands in a band:
 
-| Loop found in | Target TTK on a basic enemy | `WB_solo` needed at baseline |
+| Stage found in | Target TTK on a basic enemy | `WB_solo` needed at baseline |
 |---|---|---|
 | 1 | 1.5 – 3.0 s | 3.5 – 7.0 |
 | 2 | 1.5 – 3.0 s | 10 – 20 |
 | 3 | 1.5 – 3.0 s | 17 – 33 |
 
-A T1 weapon (`WB_solo` 7.5-9.0) found at loop 3 is a dead pickup — that is the intent, and the two tables are how you tell the difference between a weapon that is under-budgeted and one that has simply outstaged its tier.
+A T1 weapon (`WB_solo` 7.5-9.0) found at stage 3 is a dead pickup — that is the intent, and the two tables are how you tell the difference between a weapon that is under-budgeted and one that has simply outstaged its tier.
 
 ### 4.7 Worked example — designing "a slow heavy rifle"
 
@@ -383,7 +383,7 @@ A T1 weapon (`WB_solo` 7.5-9.0) found at loop 3 is a dead pickup — that is the
 2. **Target**: `WB_solo = 10.0`, which lands in the T2 band (10.0-11.5). Uptime 0.95 (§4.3) → inflate `WB_raw` by ×1.05 → `WB_raw = 10.5`.
 3. **Split**: `base_damage = WB_raw / base_attack_speed = 10.5 / 0.5 = 21.0`. That is the whole weapon: `base_damage 21.0`, `base_attack_speed 0.5`.
 4. **No riders.** A rifle that is slow *and* carries poison is the §4.5 trap: `duration 3.0` makes the poison +300% of whatever the rifle does, and at 0.5 hits/s the stacks arrive so slowly that the tooltip promises something the fight never delivers.
-5. **Validate** (§4.6). Loop 2 enemy, HP 30 → TTK 3.0 s, top of the 1.5-3.0 s band. Loop 3 enemy, HP 50 → TTK 5.0 s, over the band. So the weapon wants to appear **early-to-mid loop 2**, once the character has enough damage to keep up — which is exactly what a T2 should do.
+5. **Validate** (§4.6). Stage 2 enemy, HP 30 → TTK 3.0 s, top of the 1.5-3.0 s band. Stage 3 enemy, HP 50 → TTK 5.0 s, over the band. So the weapon wants to appear **early-to-mid stage 2**, once the character has enough damage to keep up — which is exactly what a T2 should do.
 6. **Anti-snowball** (§4.4). A fresh character's `WB_solo` is 7.0, so `10.0 ≤ 1.25 × max(7.0, 7.0) = 8.75`? **No.** The rifle is correctly *unbuyable on turn 1*. It unlocks once roughly two damage items have pushed the character to ~8.0. The rule decided this weapon's availability window without anyone noticing it by feel.
 
 For contrast, this is what the code produces by accident: leaving `base_damage` at the `BaseWeapon` default (5.0) and `base_attack_speed` at 1.0 gives `WB_raw 5.0` and `WB_solo 4.75` — **-32% against the starting Fist**, permanently unbuyable. That is why four of the five existing weapons never set `base_damage` at all.
@@ -398,7 +398,7 @@ For contrast, this is what the code produces by accident: leaving `base_damage` 
 [ ] Tier step from the tier below is <= 1.6x
 [ ] Every declared rider <= 25% of WB_solo (§4.5)
 [ ] Any rider with a `duration` budgeted as duration x multiplier <= 0.25 (§4.5)
-[ ] TTK against the §4.6 loop table is 1.5-3.0s
+[ ] TTK against the §4.6 stage table is 1.5-3.0s
 [ ] Anti-snowball (§4.4) holds against the T0 starting weapon
 [ ] target_selector is the .tres you meant (aim/ is cross-wired today - balance_audit.md #16)
 [ ] sprite is set - a missing sprite means no WeaponVisual node is created (weapon_holder.gd:71)
@@ -491,7 +491,7 @@ Price 3, hard cap **+15% WB / +15% EHP**. Measured against the §1.1 reference f
 
 Two notes from the current catalog:
 
-- **`Spread` is the clearest violation**: `spread_modifier.gd:24-33` loops `range(active_count)` and spawns **two** extra projectiles per iteration, so one stack makes the weapon fire **3× as many projectiles — +200% WB** for a price-3 item. One stack should be one extra projectile (+50% at most, and that is already the whole budget).
+- **`Spread` is the clearest violation**: `spread_modifier.gd:24-33` stages `range(active_count)` and spawns **two** extra projectiles per iteration, so one stack makes the weapon fire **3× as many projectiles — +200% WB** for a price-3 item. One stack should be one extra projectile (+50% at most, and that is already the whole budget).
 - **`Chain` is the same problem in target space**: `chain_modifier.gd:94` sets `max_bounces * active`, and each chain projectile deals `max(base_amount, final_amount)` — full damage. Three bounces = **+300% WB** against a pack.
 
 ### 6.3 Modifiers that read the wrong stat

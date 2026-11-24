@@ -1,10 +1,10 @@
 # GdUnit generated TestSuite
-class_name ShopStageTest
+class_name ShopPhaseTest
 extends GdUnitTestSuite
 
 
-func test_shop_stage_opens_shop_automatically() -> void:
-    var runner := scene_runner("res://test/TestShopStage.tscn")
+func test_shop_phase_opens_shop_automatically() -> void:
+    var runner := scene_runner("res://test/TestShopPhase.tscn")
     var test_scene := runner.scene()
     get_tree().current_scene = test_scene
 
@@ -131,7 +131,7 @@ func test_reroll_cost_grows_and_resets_on_new_shop() -> void:
 
 
 ## Buying an offer must leave its slot empty -- the shop does not backfill
-## mid-stage. Reroll is the only thing that refills the row.
+## mid-phase. Reroll is the only thing that refills the row.
 func test_buying_leaves_empty_slot_until_reroll() -> void:
     var shop: ShopMenu = load("res://src/Scenes/menu/ShopMenu.tscn").instantiate()
     add_child(shop)

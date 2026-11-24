@@ -1,7 +1,7 @@
 extends Node2D
-## Test-only "shop stage" root script.
+## Test-only "shop phase" root script.
 ## Opens the ShopMenu automatically on start so the shop can be
-## tested without playing through enemy/boss stages first.
+## tested without playing through enemy/boss phases first.
 
 @export var starting_money: float = 100.0
 @export var auto_open_shop: bool = true
@@ -18,10 +18,10 @@ func _ready() -> void:
 
 func _open_shop() -> void:
     if not is_instance_valid(character):
-        push_warning("ShopStage: Character missing, cannot open shop.")
+        push_warning("ShopPhase: Character missing, cannot open shop.")
         return
     if not is_instance_valid(shop_menu):
-        push_warning("ShopStage: ShopMenu missing, cannot open shop.")
+        push_warning("ShopPhase: ShopMenu missing, cannot open shop.")
         return
     # Character._ready() already sets GlobalGameState.current_character,
     # but ensure it here in case ready order changes.

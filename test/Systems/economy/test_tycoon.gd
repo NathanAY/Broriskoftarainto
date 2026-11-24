@@ -80,7 +80,7 @@ func test_debt_grows_when_the_shop_opens() -> void:
 	var character := _with_credit()
 	Wallet.spend(character, 10.0, "buy")
 
-	character.event_manager.emit_event("on_shop_enter", {"loop": 1})
+	character.event_manager.emit_event("on_shop_enter", {"stage": 1})
 
 	assert_float(Wallet.balance(character)).is_equal(-10.0 - ceilf(10.0 * _cfg("debt_interest")))
 
@@ -88,7 +88,7 @@ func test_debt_grows_when_the_shop_opens() -> void:
 func test_no_debt_means_no_debt_interest() -> void:
 	var character := _with_credit()
 	Wallet.earn(character, 10.0, "kill")
-	character.event_manager.emit_event("on_shop_enter", {"loop": 1})
+	character.event_manager.emit_event("on_shop_enter", {"stage": 1})
 	assert_float(Wallet.balance(character)).is_equal(10.0)
 
 

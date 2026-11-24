@@ -101,7 +101,7 @@ func _ready() -> void:
 
 	var shop: CanvasLayer = load("res://src/Scenes/menu/ShopMenu.tscn").instantiate()
 	add_child(shop)
-	# `ShopMenu.item_factory` is wired by the real ShopStage; this fixture builds
+	# `ShopMenu.item_factory` is wired by the real ShopPhase; this fixture builds
 	# its own (ItemFactory needs a `Stats` child for its @onready) so the offers
 	# can be pinned. A fixed seed plus a pre-seeded `drop_pool` - which
 	# `get_item_from_pool_or_generate()` drains - makes the screenshot repeatable

@@ -15,7 +15,7 @@ func _ready() -> void:
 	if quad == null:
 		return
 	# A scene instance shares its sub-resources with every other instance, so
-	# two loop portals would otherwise write the same QuadMesh. Duplicate first.
+	# two stage portals would otherwise write the same QuadMesh. Duplicate first.
 	quad = quad.duplicate() as QuadMesh
 	quad.size = sprite.texture.get_size()
 	mesh = quad

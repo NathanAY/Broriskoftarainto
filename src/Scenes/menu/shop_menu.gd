@@ -67,9 +67,9 @@ func show_menu():
     free_rerolls_used = 0
     if not _entered and character:
         _entered = true
-        var loop := StageManager.loop_of(self)
-        character.event_manager.emit_event("on_shop_enter", {"loop": loop})
-        _payday_text = _describe_payday(Wallet.payday(character, loop))
+        var stage := StageManager.stage_of(self)
+        character.event_manager.emit_event("on_shop_enter", {"stage": stage})
+        _payday_text = _describe_payday(Wallet.payday(character, stage))
     _update_reroll_button()
     _update_money_label()
     _update_stats() # Update stats when opening the shop
@@ -524,14 +524,14 @@ func _generate_entry_id() -> String:
     _shop_entry_id_counter += 1
     return str(Time.get_unix_time_from_system()) + "_" + str(_shop_entry_id_counter)
 
-## Reroll price: a base that grows with every loop, plus a surcharge for each
+## Reroll price: a base that grows with every stage, plus a surcharge for each
 ## reroll already made in this shop visit (reset by `show_menu()`).
 func reroll_cost() -> int:
     if _free_rerolls_left() > 0:
         return 0
     var economy := Wallet.config()
     return int(economy.get("reroll_base_cost", 1)) \
-        + int(economy.get("reroll_loop_step", 2)) * (StageManager.loop_of(self) - 1) \
+        + int(economy.get("reroll_stage_step", 2)) * (StageManager.stage_of(self) - 1) \
         + int(economy.get("reroll_step", 1)) * rerolls_done
 
 

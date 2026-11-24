@@ -21,16 +21,16 @@ func _build_tree(with_arena: bool, spawner_scene: String, character_pos: Vector2
 	var enemies := Node.new()
 	enemies.name = "Enemies"
 	nodes.add_child(enemies)
-	var stage := Node.new()
-	stage.name = "StageManager"
-	root.add_child(stage)
+	var phase := Node.new()
+	phase.name = "StageManager"
+	root.add_child(phase)
 	var character: CharacterBody2D = auto_free(load("res://src/Systems/Character.tscn").instantiate())
 	root.add_child(character)
 	character.global_position = character_pos
 	var spawner: Node = auto_free(load(spawner_scene).instantiate())
 	spawner.set("character", character)
 	spawner.set("spawn_telegraph_time", 0.0) # these tests read the enemy straight after the call
-	stage.add_child(spawner)
+	phase.add_child(spawner)
 	return {"root": root, "arena": arena, "enemies": enemies, "character": character, "spawner": spawner}
 
 

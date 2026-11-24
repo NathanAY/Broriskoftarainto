@@ -16,8 +16,8 @@ render_mode unshaded;
 //
 // The disc is drawn *behind* the ring Sprite2D, so anything past the hole is
 // hidden by the stone. The final COLOR is multiplied by the incoming modulate,
-// which is what lets a LoopChoicePortal's `tint` (red for the final boss, pale
-// blue for one more loop) colour the vortex along with the ring.
+// which is what lets a StageChoicePortal's `tint` (red for the final boss, pale
+// blue for the Deeper Gate) colour the vortex along with the ring.
 
 uniform float hole_radius = 0.34;
 uniform float arms = 3.0;

@@ -141,7 +141,7 @@ func apply_to(holder: Node) -> void:
     # A Timer only ticks once it is inside the scene tree, and calling start()
     # before that is an engine error rather than a deferred start. Weapons can be
     # equipped while their holder is still off-tree - buying in the shop builds
-    # the character before it enters the stage - so in that case wait and start
+    # the character before it enters the phase - so in that case wait and start
     # from the tree instead. Starting immediately when the timer is already live
     # keeps the common path byte-for-byte as it was.
     #

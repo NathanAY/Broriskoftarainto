@@ -1,16 +1,16 @@
 extends Portal
-class_name LoopChoicePortal
+class_name StageChoicePortal
 
 ## A world portal standing for one answer to the end-of-run question. It only
 ## reports which answer it is, once the `Portal` entry animation has played;
 ## `StageManager` owns what that means for the run.
 ##
-## Two of these are spawned past `StageManager.FINAL_BOSS_LOOP`: one for the
-## final boss, one for another loop. Picking either frees both.
+## Two of these are spawned past `StageManager.FINAL_BOSS_STAGE`: one for the
+## final boss, one for another stage. Picking either frees both.
 
 signal chosen(choice: Choice)
 
-enum Choice { FINAL_BOSS, EXTRA_LOOP }
+enum Choice { FINAL_BOSS, EXTRA_STAGE }
 
 @export var choice: Choice = Choice.FINAL_BOSS
 @export var label_text: String = "Final boss"

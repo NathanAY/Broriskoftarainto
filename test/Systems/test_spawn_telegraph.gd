@@ -14,16 +14,16 @@ func _build_tree(telegraph: float) -> Dictionary:
     var enemies := Node.new()
     enemies.name = "Enemies"
     nodes.add_child(enemies)
-    var stage := Node.new()
-    stage.name = "StageManager"
-    root.add_child(stage)
+    var phase := Node.new()
+    phase.name = "StageManager"
+    root.add_child(phase)
     var character: Character = auto_free(load("res://src/Systems/Character.tscn").instantiate())
     root.add_child(character)
     var spawner: EnemySpawner = auto_free(load("res://src/Systems/EnemySpawner.tscn").instantiate())
     spawner.set("character", character)
     spawner.spawn_telegraph_time = telegraph
     spawner.use_group_spawning = false
-    stage.add_child(spawner)
+    phase.add_child(spawner)
     return {"nodes": nodes, "enemies": enemies, "spawner": spawner}
 
 
@@ -50,7 +50,7 @@ func test_enemy_appears_only_after_the_effect_has_played() -> void:
     assert_int(spawner._alive_count()).is_equal(1)
 
 
-func test_boss_appears_after_the_effect_and_the_stage_waits_for_it() -> void:
+func test_boss_appears_after_the_effect_and_the_phase_waits_for_it() -> void:
     var ctx := _build_tree(0.0)
     var spawner: BossSpawner = auto_free(load("res://src/Systems/BossSpawner.tscn").instantiate())
     spawner.character = ctx["spawner"].character

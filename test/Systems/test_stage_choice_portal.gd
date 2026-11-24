@@ -1,4 +1,4 @@
-class_name LoopChoicePortalTest
+class_name StageChoicePortalTest
 extends GdUnitTestSuite
 
 ## Pins two things about the end-of-run portals that players can see:
@@ -7,11 +7,11 @@ extends GdUnitTestSuite
 ##  - Tab (`ui_focus_next`, routed to `cancel_action`) cannot remove the portal,
 ##    and the menu does not offer "Leave", because the answer is forced.
 
-const LOOP_PORTAL: PackedScene = preload("res://src/Systems/LoopChoicePortal.tscn")
+const STAGE_PORTAL: PackedScene = preload("res://src/Systems/StageChoicePortal.tscn")
 
 
-func _portal() -> LoopChoicePortal:
-	var portal := LOOP_PORTAL.instantiate() as LoopChoicePortal
+func _portal() -> StageChoicePortal:
+	var portal := STAGE_PORTAL.instantiate() as StageChoicePortal
 	add_child(portal)
 	return portal
 
@@ -23,7 +23,7 @@ func _tab_event() -> InputEventAction:
 	return tab
 
 
-## The stage's `Nodes` container is added after `Character` in the scene tree, so
+## The phase's `Nodes` container is added after `Character` in the scene tree, so
 ## without an explicit z_index the portal sprite paints over the player. Actors
 ## sit at z 0, so the portal must sit below zero.
 func test_portal_is_drawn_behind_the_player() -> void:
@@ -38,7 +38,7 @@ func test_shop_portal_is_drawn_behind_the_player() -> void:
 	assert_int((portal as Node2D).z_index).is_less(0)
 
 
-func test_tab_does_not_destroy_the_loop_portal() -> void:
+func test_tab_does_not_destroy_the_stage_portal() -> void:
 	var portal := _portal()
 	var manager := InteractionManager.new()
 	add_child(manager)
@@ -49,7 +49,7 @@ func test_tab_does_not_destroy_the_loop_portal() -> void:
 	assert_bool(portal.is_queued_for_deletion()).is_false()
 
 
-func test_menu_does_not_offer_leave_on_the_loop_portal() -> void:
+func test_menu_does_not_offer_leave_on_the_stage_portal() -> void:
 	var portal := _portal()
 	portal.show_menu()
 

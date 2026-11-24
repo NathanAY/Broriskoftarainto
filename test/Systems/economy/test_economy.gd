@@ -87,7 +87,7 @@ func test_income_is_tallied_by_source() -> void:
 	Wallet.earn(character, 4.0, "boss")
 	Wallet.spend(character, 3.0, "buy")
 
-	var tally: Dictionary = Wallet.income_for_loop(character, 1)
+	var tally: Dictionary = Wallet.income_for_stage(character, 1)
 	assert_float(tally.get("kill", 0.0)).is_equal(2.0)
 	assert_float(tally.get("boss", 0.0)).is_equal(4.0)
 	assert_bool(tally.has("buy")).is_false()
@@ -106,19 +106,19 @@ func test_a_kill_pays_the_configured_coins() -> void:
 	assert_float(Wallet.balance(character)).is_equal(float(_economy("coins_per_kill", 1)))
 
 
-func test_boss_bounty_grows_with_the_loop() -> void:
+func test_boss_bounty_grows_with_the_stage() -> void:
 	var base := float(_economy("boss_coins_base", 0))
-	var per_loop := float(_economy("boss_coins_per_loop", 0))
+	var per_stage := float(_economy("boss_coins_per_stage", 0))
 	assert_int(BossSpawner.bounty_for(1, false)).is_equal(roundi(base))
-	assert_int(BossSpawner.bounty_for(3, false)).is_equal(roundi(base + per_loop * 2))
+	assert_int(BossSpawner.bounty_for(3, false)).is_equal(roundi(base + per_stage * 2))
 
 
 func test_final_boss_pays_nothing() -> void:
 	assert_int(BossSpawner.bounty_for(3, true)).is_equal(0)
 
 
-## The real path: a spawned loop boss dying pays its bounty to the character.
-func test_dying_loop_boss_pays_its_bounty() -> void:
+## The real path: a spawned stage boss dying pays its bounty to the character.
+func test_dying_stage_boss_pays_its_bounty() -> void:
 	var root: Node = auto_free(Node.new())
 	add_child(root)
 	var nodes := Node.new()
@@ -127,39 +127,39 @@ func test_dying_loop_boss_pays_its_bounty() -> void:
 	var enemies := Node.new()
 	enemies.name = "Enemies"
 	nodes.add_child(enemies)
-	var stage := Node.new()
-	stage.name = "StageManager"
-	root.add_child(stage)
+	var phase := Node.new()
+	phase.name = "StageManager"
+	root.add_child(phase)
 	var character := _build_character()
 	var spawner: BossSpawner = auto_free(load(BOSS_SPAWNER).instantiate())
 	spawner.character = character
 	spawner.spawn_telegraph_time = 0.0
-	stage.add_child(spawner)
+	phase.add_child(spawner)
 	spawner.spawn_boss()
 
 	var boss: Enemy = spawner.boss_instance
 	var health: Health = boss.get_node("Health")
 	health.event_manager.emit_event("on_death", {"self": boss, "damage_context": null})
 
-	assert_float(Wallet.balance(character)).is_equal(float(BossSpawner.bounty_for(spawner.current_loop, false)))
+	assert_float(Wallet.balance(character)).is_equal(float(BossSpawner.bounty_for(spawner.current_stage, false)))
 
 
 # --- Prices -------------------------------------------------------------------
 
 
-func test_item_price_rises_each_loop() -> void:
+func test_item_price_rises_each_stage() -> void:
 	var analyzer: ItemPriceAnalyzer = auto_free(ItemPriceAnalyzer.new())
-	var growth := float(_economy("item_price_growth_per_loop", 0.0))
+	var growth := float(_economy("item_price_growth_per_stage", 0.0))
 	var item: Item = load(STAT_ITEM)
-	var loop_1 := analyzer.get_price(item, 1)
-	assert_int(analyzer.get_price(item, 3)).is_equal(roundi(loop_1 * (1.0 + growth * 2)))
+	var stage_1 := analyzer.get_price(item, 1)
+	assert_int(analyzer.get_price(item, 3)).is_equal(roundi(stage_1 * (1.0 + growth * 2)))
 
 	var weapon: BaseWeapon = load(WEAPON)
 	var weapon_1 := analyzer.get_price(weapon, 1)
 	assert_int(analyzer.get_price(weapon, 3)).is_equal(roundi(weapon_1 * (1.0 + growth * 2)))
 
 
-func test_sell_price_follows_the_current_loop_price() -> void:
+func test_sell_price_follows_the_current_stage_price() -> void:
 	var analyzer: ItemPriceAnalyzer = auto_free(ItemPriceAnalyzer.new())
 	var ratio := float(_economy("sell_ratio", 0.5))
 	var weapon: BaseWeapon = load(WEAPON)

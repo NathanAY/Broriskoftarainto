@@ -79,7 +79,7 @@ if rng.randf() < repeat_item_chance_scale * pool_size / (pool_size + 1.0):
 
 The raw pool hit rate `N / (N + 1)` climbs towards 100%, which used to make a run converge on re-offering the same handful of items. `repeat_item_chance_scale` (0.25 in `game_config.json`) multiplies it, so a repeat is at most a 25% outcome and a new item is always the likelier one.
 
-Still true: every generated item is appended, nothing is evicted, and the pool is never reset per loop. The shop fixture `test/tools/shop_ui_preview.gd` sets the scale back to 1.0 so its row is drawn from the pool it pinned.
+Still true: every generated item is appended, nothing is evicted, and the pool is never reset per stage. The shop fixture `test/tools/shop_ui_preview.gd` sets the scale back to 1.0 so its row is drawn from the pool it pinned.
 
 ## Gift and curse (the negative half)
 
@@ -102,7 +102,7 @@ Every generated item is a positive half plus a curse, and the curse is one of tw
 
 Every item from `generate_random_item()` gets a rarity (`Item.rarity`, the same `BaseWeapon.Rarity` enum and border colours weapons use). Items from `get_item_by_type()` and hand-made `.tres` items stay COMMON. All numbers are in the `item_rarity` block of `game_config.json` (see `docs/systems/game_config.md`); `Item.rarity_value(key, rarity)` reads them.
 
-- **Roll** — `roll_rarity(loop)`: weighted by `weights`, and tier `i`'s weight grows by `loop_weight_growth * (loop - 1) * i`, so later loops roll rarer items. The loop is read from the current scene's `StageManager` like the shop's reroll price, 1 outside a game.
+- **Roll** — `roll_rarity(stage)`: weighted by `weights`, and tier `i`'s weight grows by `stage_weight_growth * (stage - 1) * i`, so later stages roll rarer items. The stage is read from the current scene's `StageManager` like the shop's reroll price, 1 outside a game.
 - **Scale** — `apply_rarity(item, rarity)` multiplies each positive `flat` in `Item.modifiers` by `positive_multipliers` and each negative one by the smaller `negative_multipliers`. A buff/debuff payload (scene 0) is the item's gain even when negative, so it scales by the positive multiplier and is re-packed. Effect scenes' own numbers (poison, homing, ...) and harmful COST scenes are **not** scaled.
 - **Extra lines** — up to `rarity` attempts (common 0, legendary 4) at `extra_positive_chance` each add a gain stat line, and one attempt at `extra_negative_chance` adds a loss line. Both pick a stat the item does not modify yet and roll it with `_generate_stat_modifiers`, times the rarity's multiplier.
 - **Price** — `ItemPriceAnalyzer` multiplies the type price by the positive multiplier.

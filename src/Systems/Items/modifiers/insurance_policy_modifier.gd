@@ -1,7 +1,7 @@
 extends BaseModifier
 ## A lethal hit instead leaves the holder at `survive_health` and costs a
-## premium of `premium_base + premium_per_loop × (loop - 1)` coins. One claim per
-## stack per loop (reset when the shop opens); no claim when the premium cannot
+## premium of `premium_base + premium_per_stage × (stage - 1)` coins. One claim per
+## stack per stage (reset when the shop opens); no claim when the premium cannot
 ## be paid. Numbers come from the `economy_modifiers` config.
 
 ## After the energy shield has soaked its share, so the shield is spent first.
@@ -15,8 +15,8 @@ var _claims_used: int = 0
 
 func get_tooltip_stats() -> String:
     var config := _economy_config()
-    return "Survive a lethal hit for %d coins (+%d per loop), once per loop" % [
-        int(config.get("premium_base", 0)), int(config.get("premium_per_loop", 0))]
+    return "Survive a lethal hit for %d coins (+%d per stage), once per stage" % [
+        int(config.get("premium_base", 0)), int(config.get("premium_per_stage", 0))]
 
 
 func attachEventManager(em: Node):
@@ -27,7 +27,7 @@ func attachEventManager(em: Node):
 
 func premium() -> float:
     var config := _economy_config()
-    return float(config.get("premium_base", 0)) + float(config.get("premium_per_loop", 0)) * (StageManager.loop_of(self) - 1)
+    return float(config.get("premium_base", 0)) + float(config.get("premium_per_stage", 0)) * (StageManager.stage_of(self) - 1)
 
 
 func _on_before_take_damage(event: Dictionary) -> void:

@@ -1,6 +1,6 @@
 extends Interactable
 class_name Portal
-## Shared base of the world portals (`ShopPortal`, `LoopChoicePortal`).
+## Shared base of the world portals (`ShopPortal`, `StageChoicePortal`).
 ##
 ## Pressing Enter does not act at once: the portal pulls the player to its
 ## centre, spins them down into the hole while its aura winds up, flashes, and

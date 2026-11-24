@@ -26,13 +26,13 @@ Data flow
 - Outputs: Events emitted like `on_item_added`/`on_item_removed`; effects may attach to `EventManager`.
 
 Pricing (items.md, catalog `ItemPriceAnalyzer`)
-- `ItemPriceAnalyzer.get_price(resource, loop = 0)` classifies an offer and returns its shop cost. The type prices are `economy.type_prices` in `game_config.json` (shipped: stat 1, buff/debuff 2, effect 3, weapon 5):
+- `ItemPriceAnalyzer.get_price(resource, stage = 0)` classifies an offer and returns its shop cost. The type prices are `economy.type_prices` in `game_config.json` (shipped: stat 1, buff/debuff 2, effect 3, weapon 5):
   - stat item (no effect scene, no buff/debuff meta type) = `stat`
   - buff or debuff (`meta("type")` = `buff`/`debuff`) = `buff`
   - modifier (has an `effect_scene`) = `effect`
   - `BaseWeapon` = `weapon`
-  - An item's type price is then multiplied by its rarity's positive multiplier (`Item.rarity`, see "Rarity" in `docs/systems/item_factory.md`), then by the loop growth `1 + item_price_growth_per_loop × (loop − 1)`, and rounded. `loop` 0 means the running game's loop (`StageManager.loop_of`), which is 1 outside a game.
-- `get_sell_price(resource, ratio = -1, loop = 0)` sells at `round(price × ratio)` (min 1), where a negative `ratio` means `economy.sell_ratio`. It is a ratio of the *current* loop's price, so selling never beats buying in the same shop.
+  - An item's type price is then multiplied by its rarity's positive multiplier (`Item.rarity`, see "Rarity" in `docs/systems/item_factory.md`), then by the stage growth `1 + item_price_growth_per_stage × (stage − 1)`, and rounded. `stage` 0 means the running game's stage (`StageManager.stage_of`), which is 1 outside a game.
+- `get_sell_price(resource, ratio = -1, stage = 0)` sells at `round(price × ratio)` (min 1), where a negative `ratio` means `economy.sell_ratio`. It is a ratio of the *current* stage's price, so selling never beats buying in the same shop.
 - The shop (`ShopMenu`) holds a `PriceAnalyzer` node and uses it for both buy and sell buttons.
 - **A stat item that rolled a harmful modifier is priced as a modifier (`effect`), not as a stat item (`stat`).** `get_price` only looks at whether `effect_scene` is non-empty, so the ~35% of generated stat items that carry a drain cross a price band. Intentional - the item really does run a behavior - but it means the stat-item tier is no longer a flat 1.
 

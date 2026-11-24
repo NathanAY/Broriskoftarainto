@@ -11,7 +11,7 @@ extends GdUnitTestSuite
 ##    later art swap cannot leave the disc too small (a visible gap) or so wide
 ##    that it spills past the ring's silhouette.
 
-const LOOP_PORTAL: PackedScene = preload("res://src/Systems/LoopChoicePortal.tscn")
+const STAGE_PORTAL: PackedScene = preload("res://src/Systems/StageChoicePortal.tscn")
 const SHOP_PORTAL: PackedScene = preload("res://src/Systems/ShopPortal.tscn")
 const PORTAL_ART_PATH := "res://src/Assets/portal.png"
 const VORTEX_SHADER_PATH := "res://src/Systems/portal_vortex.gdshader"
@@ -81,7 +81,7 @@ func _axis_distance(a: Vector2i, b: Vector2i) -> int:
 
 
 func test_both_portals_use_the_shipped_ring_art() -> void:
-	for scene in [LOOP_PORTAL, SHOP_PORTAL]:
+	for scene in [STAGE_PORTAL, SHOP_PORTAL]:
 		var portal := _portal(scene)
 		var sprite := _sprite(portal)
 		assert_object(sprite).override_failure_message(
@@ -95,7 +95,7 @@ func test_both_portals_use_the_shipped_ring_art() -> void:
 ## Draw order is the whole trick: the quad is much wider than the visible gate,
 ## and the stone ring is what crops it. Behind the ring is the only correct spot.
 func test_the_gate_surface_draws_behind_the_ring() -> void:
-	for scene in [LOOP_PORTAL, SHOP_PORTAL]:
+	for scene in [STAGE_PORTAL, SHOP_PORTAL]:
 		var portal := _portal(scene)
 		var vortex := _vortex(portal)
 		var sprite := _sprite(portal)
@@ -108,7 +108,7 @@ func test_the_gate_surface_draws_behind_the_ring() -> void:
 
 
 func test_the_vortex_uses_the_portal_shader() -> void:
-	var portal := _portal(LOOP_PORTAL)
+	var portal := _portal(STAGE_PORTAL)
 	var material := _vortex(portal).material as ShaderMaterial
 	assert_object(material).override_failure_message(
 		"the vortex has no ShaderMaterial").is_not_null()
@@ -122,7 +122,7 @@ func test_the_vortex_uses_the_portal_shader() -> void:
 ## the sprite: a vortex left at the art's raw size, or at scale 1, would sit the
 ## mask in the wrong place.
 func test_the_vortex_covers_the_sprite_drawn_rect() -> void:
-	for scene in [LOOP_PORTAL, SHOP_PORTAL]:
+	for scene in [STAGE_PORTAL, SHOP_PORTAL]:
 		var portal := _portal(scene)
 		var sprite := _sprite(portal)
 		var vortex := _vortex(portal)
@@ -143,7 +143,7 @@ func test_the_vortex_covers_the_sprite_drawn_rect() -> void:
 ## centred on the canvas — it sits above the middle — which is why a mask sized
 ## to the hole's own radius left a one-pixel line at the top of the ring.
 func test_the_mask_covers_the_offset_hole_and_stays_behind_the_stone() -> void:
-	for scene in [LOOP_PORTAL, SHOP_PORTAL]:
+	for scene in [STAGE_PORTAL, SHOP_PORTAL]:
 		var portal := _portal(scene)
 		var material := _vortex(portal).material as ShaderMaterial
 		var hole_radius: float = material.get_shader_parameter("hole_radius")
@@ -163,8 +163,8 @@ func test_the_mask_covers_the_offset_hole_and_stays_behind_the_stone() -> void:
 ## A scene instance shares its sub-resources with every other instance, so two
 ## portals spawned in one frame would otherwise both write the same QuadMesh.
 func test_each_portal_gets_its_own_quad() -> void:
-	var first := _portal(LOOP_PORTAL)
-	var second := _portal(LOOP_PORTAL)
+	var first := _portal(STAGE_PORTAL)
+	var second := _portal(STAGE_PORTAL)
 	assert_object(_vortex(first).mesh).override_failure_message(
 		"two portals share one QuadMesh, so sizing one retargets the other"
 	).is_not_same(_vortex(second).mesh)
@@ -177,7 +177,7 @@ func test_each_portal_gets_its_own_quad() -> void:
 ## shimmers, and a plain linear filter would not sample mipmaps even if the PNG
 ## imported with them, so both halves are pinned.
 func test_the_ring_art_is_filtered_with_mipmaps() -> void:
-	for scene in [LOOP_PORTAL, SHOP_PORTAL]:
+	for scene in [STAGE_PORTAL, SHOP_PORTAL]:
 		var portal := _portal(scene)
 		assert_int(_sprite(portal).texture_filter).override_failure_message(
 			"the portal art is minified, so its sprite needs mipmapped filtering"

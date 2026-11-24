@@ -1,7 +1,7 @@
 extends BaseModifier
 class_name BountyMarkModifier
 ## Every `interval` seconds one living enemy is marked with a gold ring. Killing
-## a marked enemy pays `(coins_base + coins_per_loop × (loop - 1))` coins, ×
+## a marked enemy pays `(coins_base + coins_per_stage × (stage - 1))` coins, ×
 ## `1 + bonus_per_extra_stack × (stacks - 1)`, scaled by `coin_gain`. Numbers
 ## come from the `economy_modifiers` config.
 
@@ -14,8 +14,8 @@ const RING_NAME := "BountyMarkRing"
 
 func get_tooltip_stats() -> String:
     var config := _economy_config()
-    return "Mark an enemy every %ss: kill pays %d coins (+%d per loop)" % [
-        str(config.get("interval", 0.0)), int(config.get("coins_base", 0)), int(config.get("coins_per_loop", 0))]
+    return "Mark an enemy every %ss: kill pays %d coins (+%d per stage)" % [
+        str(config.get("interval", 0.0)), int(config.get("coins_base", 0)), int(config.get("coins_per_stage", 0))]
 
 
 func attachEventManager(em: Node):
@@ -51,7 +51,7 @@ func mark_random_enemy() -> void:
 
 func bounty() -> float:
     var config := _economy_config()
-    var coins := float(config.get("coins_base", 0)) + float(config.get("coins_per_loop", 0)) * (StageManager.loop_of(self) - 1)
+    var coins := float(config.get("coins_base", 0)) + float(config.get("coins_per_stage", 0)) * (StageManager.stage_of(self) - 1)
     return coins * (1.0 + float(config.get("bonus_per_extra_stack", 0.0)) * (_active_stacks() - 1))
 
 

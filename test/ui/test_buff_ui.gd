@@ -114,7 +114,7 @@ func test_the_grid_is_two_centred_rows_anchored_across_the_top_of_the_screen() -
     # instead of overlapping it.
     assert_float(grid.anchor_right).is_equal(1.0)
     assert_float(grid.offset_top).override_failure_message(
-        "the row must sit below the stage timer, not on top of it"
+        "the row must sit below the phase timer, not on top of it"
     ).is_greater_equal(22.0)
     assert_int(grid.buffs_row.alignment).is_equal(HBoxContainer.ALIGNMENT_CENTER)
     assert_int(grid.debuffs_row.alignment).is_equal(HBoxContainer.ALIGNMENT_CENTER)

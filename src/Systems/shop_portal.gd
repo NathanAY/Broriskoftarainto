@@ -58,7 +58,7 @@ func _on_entered() -> void:
     queue_free()  # remove portal after entering shop
 
 func _clean_game_area(shop: ShopMenu):
-    # cleanup stage-specific nodes (death marks, altars etc.)
+    # cleanup phase-specific nodes (death marks, altars etc.)
     var death_marks_parent = get_tree().current_scene.get_node_or_null("Nodes/death_marks")
     if death_marks_parent:
         for child in death_marks_parent.get_children():

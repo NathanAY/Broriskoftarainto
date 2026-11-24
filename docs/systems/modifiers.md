@@ -123,7 +123,7 @@ Catalog
 | PlusDamageToHealthyTargetModifier | `plus_damage_to_healthy_target_modifier.gd` | `before_deal_damage` | +30% damage vs targets above 90% HP; × active stacks. |
 | PoisonModifier | `poison_modifier.gd` | `on_hit` | Applies `PoisonEffect` (100% of hit damage per tick); +50% tick damage per stack. |
 | ProjectileBounceModifier | `projectile_bounce_modifier.gd` | `on_attack` | Projectiles bounce to 3 extra targets per stack. |
-| ReflectProjectileModifier | `reflect_projectiles_modifier.gd` | `before_take_damage` | Fires 2 projectiles back at attackers; +1 per stack and larger range. |
+| ReflectProjectileModifier | `reflect_projectiles_modifier.gd` | `before_take_damage` | Fires 2 projectiles back at attackers; +1 per stack and larger range. Each deals `item_base_damage`. A modifier that deals item damage exposes `tooltip_item_damage_fraction()` (its share of `item_base_damage`), and its card row shows "Damage: base (final)" like a weapon (SpinningOrbs does the same). |
 | FlatRegenModifier | `flat_regen_modifier.gd` (extends `regen_modifier.gd`) | passive timer | Regenerates fixed HP per tick; × stacks. No trigger event. `health_delta` is signed — a negative value drains (see "Losing health over time"). |
 | PercentRegenModifier | `percent_regen_modifier.gd` (extends `regen_modifier.gd`) | passive timer | Regenerates % of max HP per tick; × stacks. No trigger event. `health_delta_percent` is signed. |
 | FlatLifeDrainModifier | `flat_life_drain_modifier.gd` (extends `regen_modifier.gd`) | passive timer | Loses fixed HP per tick; × stacks. `effect_kind = COST`, so the card effect line is red. Routed through `Health.apply_damage`, so it can kill and runs the defender phase. |

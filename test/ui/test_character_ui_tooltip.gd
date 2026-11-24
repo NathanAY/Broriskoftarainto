@@ -397,7 +397,28 @@ func test_spinning_orbs_tooltip_shows_trigger_and_damage() -> void:
     var scene: PackedScene = load("res://src/Systems/Items/modifiers/SpinningOrbsModifier.tscn")
     var item: Item = ItemBuilder.make_effect_item("Spinning Orbs Modifier", "flavor", scene, {})
     var lines: PackedStringArray = ItemTooltip.tooltip_lines(item)
-    assert_that(lines).contains("effect: Spinning Orbs — Orbs deal 50% of base damage (Triggers on hit)")
+    assert_that(lines).contains("effect: Spinning Orbs — Orbs deal 50% of your item base damage (Triggers on hit)")
+
+
+## The effect row carries "Damage: base (final)" like a weapon card, derived from the
+## holder's item_base_damage and damage stats, never from a literal.
+func test_item_damage_effects_show_damage_number_like_weapons() -> void:
+    var stats: Stats = auto_free(Stats.new())
+    stats.stats["item_base_damage"] = 8.0
+    stats.stats["damage"] = 1.5
+    for path in ["res://src/Systems/Items/modifiers/SpinningOrbsModifier.tscn", "res://src/Systems/Items/modifiers/ReflectProjectilesModifier.tscn"]:
+        var scene: PackedScene = load(path)
+        var item: Item = ItemBuilder.make_effect_item("Test Item", "flavor", scene, {})
+        var display: Dictionary = ItemTooltip.resolve_effect_display_for_item(item, 0)
+        var fraction: float = display["item_damage_fraction"]
+        assert_float(fraction).is_greater(0.0)
+        var base: float = 8.0 * fraction
+        var expected := "Damage: %s (%s)" % [ItemTooltip.format_value(snappedf(base, 0.01)), ItemTooltip.format_value(snappedf(base * 1.5, 0.01))]
+        var text := ""
+        for row in ItemTooltip.card_rows(item, stats):
+            if (row as ItemCardRow).kind == ItemCardRow.Kind.EFFECT:
+                text = (row as ItemCardRow).text
+        assert_str(text).contains(expected)
 
 
 func test_flat_regen_tooltip_shows_amount_without_trigger() -> void:
@@ -505,7 +526,7 @@ func test_high_health_bonus_tooltip() -> void:
 
 func test_reflect_tooltip() -> void:
     assert_that(_effect_line_for_scene("res://src/Systems/Items/modifiers/ReflectProjectilesModifier.tscn")).is_equal(
-        "effect: Reflect Projectiles — Fires 2 projectiles back at attackers (+1 per stack) (Triggers on before take damage)")
+        "effect: Reflect Projectiles — Fires 2 projectiles back at attackers (+1 per stack), each dealing your item base damage (Triggers on before take damage)")
 
 
 func test_spread_tooltip() -> void:
@@ -845,6 +866,13 @@ func test_stat_hint_armor_has_formula_and_examples() -> void:
     assert_that(hint).contains("(10 / (10 + armor))")
     assert_that(hint).contains("1 armor blocks about 9%")
     assert_that(hint).contains("10 armor blocks 50%")
+
+
+func test_stat_hint_credit_limit_explains_debt() -> void:
+    var hint: String = ItemTooltip.stat_hint("credit_limit")
+    assert_bool(hint.is_empty()).is_false()
+    assert_that(hint).contains("spend into debt")
+    assert_that(hint).contains("lowers your damage while you owe money")
 
 
 func test_tooltip_ui_bind_to_row_text() -> void:

@@ -517,6 +517,9 @@ func _read_effect_display(scene: PackedScene) -> Dictionary:
         tooltip_text = str(instance.get("tooltip_text"))
     if instance.has_method("get_tooltip_stats"):
         tooltip_stats = str(instance.call("get_tooltip_stats"))
+    var item_damage_fraction := 0.0
+    if instance.has_method("tooltip_item_damage_fraction"):
+        item_damage_fraction = float(instance.call("tooltip_item_damage_fraction"))
     if props.has("trigger_event"):
         var trig = instance.get("trigger_event")
         if trig != null:
@@ -535,6 +538,7 @@ func _read_effect_display(scene: PackedScene) -> Dictionary:
     display["stats"] = tooltip_stats
     display["trigger"] = trigger
     display["effect_kind"] = effect_kind
+    display["item_damage_fraction"] = item_damage_fraction
     return display
 
 # Read the actual trigger_event off a (possibly dynamically configured) scene.

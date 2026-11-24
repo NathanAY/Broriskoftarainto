@@ -24,7 +24,11 @@ func attachEventManager(em: Node):
     event_manager.subscribe("on_stat_changes", Callable(self, "_on_stat_changes"))
 
 func get_tooltip_stats() -> String:
-    return "Orbs deal %d%% of base damage" % int(round(DAMAGE * 100.0))
+    return "Orbs deal %d%% of your item base damage" % int(round(DAMAGE * 100.0))
+
+## Share of `item_base_damage` each orb deals; the tooltip turns it into a number.
+func tooltip_item_damage_fraction() -> float:
+    return DAMAGE
 
 func _on_trigger(event: Dictionary):
     # Skip when the event was emitted by our own orbs (prevents self-retrigger loops)

@@ -24,7 +24,7 @@ const STAT_HINTS: Dictionary = {
     "area_radius": "Radius of area attacks and melee swings.",
     "attack_range": "Maximum distance at which your weapons can hit targets (in meters).",
     "movement_speed": "Movement speed in meters per second (m/s).",
-    "armor": "Reduces incoming damage.\nFormula: final damage x (10 / (10 + armor)).\nExample: 1 armor blocks about 9%% (multiplier 0.91).\nExample: 10 armor blocks 50%% (multiplier 0.50).",
+    "armor": "Reduces incoming damage.\nFormula: final damage x (10 / (10 + armor)).\nExample: 1 armor blocks about 9% (multiplier 0.91).\nExample: 10 armor blocks 50% (multiplier 0.50).",
     "flat_regen_per_second": "Health recovered each second, before damage.\nA life drain item subtracts from this, so a negative number means you are losing health faster than you regain it.",
     "percent_regen_per_second": "Percent of your MAX health recovered each second, before damage.\nA percent life drain item subtracts from this.",
     "critical_chance": "Chance per hit to land a critical strike (in percent, 0-100).",
@@ -40,11 +40,18 @@ const STAT_HINTS: Dictionary = {
     "shop_discount": "Takes this share off every item price in the shop. Rerolls are not discounted.\n0.03 = 3 percent off.",
     "resale_value": "Added to the share of an item's price you get back when you sell it.\n0.05 = 5 percent more.",
     "free_rerolls": "Rerolls you get for free in every shop visit. Free rerolls do not make the next paid reroll more expensive.",
+    "credit_limit": "How far your money may go below zero. You can spend into debt up to this amount in the shop.\nDebt grows every time you enter the shop and lowers your damage while you owe money.",
 }
 
 
-static func stat_hint(stat_name: String) -> String:
-    return str(STAT_HINTS.get(stat_name, ""))
+## `stats` (optional) is the holder's Stats, so a hint can state the live effect
+## of the stat: armor adds the mitigation it gives right now.
+static func stat_hint(stat_name: String, stats: Stats = null) -> String:
+    var hint := str(STAT_HINTS.get(stat_name, ""))
+    if stat_name == "armor" and stats != null:
+        var mitigation := 1.0 - Damage.armor_multiplier(stats.get_stat("armor"))
+        hint += "\nCurrent mitigation: %d%%." % roundi(mitigation * 100.0)
+    return hint
 
 
 static func tooltip_lines(resource: Resource) -> PackedStringArray:
@@ -86,7 +93,8 @@ static func tooltip_lines(resource: Resource) -> PackedStringArray:
 ## Structured counterpart of `tooltip_lines()`, used by `ShopItemCard` so
 ## each line can be colored and get its own stat icon. `tooltip_lines()`
 ## stays the flat-text source for hover tooltips and is left untouched.
-## `holder_stats` only matters for weapons; see `weapon_card_rows`.
+## `holder_stats` matters for weapons (see `weapon_card_rows`) and for effects that
+## deal item damage (the "Damage: 2.5 (3)" part of their row).
 static func card_rows(resource: Resource, holder_stats: Stats = null) -> Array:
     var rows: Array = []
     if resource is CharacterData:
@@ -101,7 +109,7 @@ static func card_rows(resource: Resource, holder_stats: Stats = null) -> Array:
         _append_buff_debuff_rows(rows, item)
     else:
         _append_name_row(rows, item.name)
-        _append_effect_rows(rows, item)
+        _append_effect_rows(rows, item, 0, holder_stats)
         _append_modifier_rows(rows, item)
     return rows
 
@@ -231,22 +239,22 @@ static func format_value(value) -> String:
 ## both a helpful and a harmful modifier therefore shows both lines - showing only
 ## the first would hide the downside from the player while the holder still
 ## applied it.
-static func _append_effect_rows(rows: Array, item: Item, start_index: int = 0) -> void:
+static func _append_effect_rows(rows: Array, item: Item, start_index: int = 0, holder_stats: Stats = null) -> void:
     if not has_effect_scene(item):
         return
     for i in range(maxi(0, start_index), item.effect_scene.size()):
-        _append_effect_row(rows, item, i)
+        _append_effect_row(rows, item, i, holder_stats)
 
 
-static func _append_effect_row(rows: Array, item: Item, index: int) -> void:
-    var row := effect_row(resolve_effect_display_for_item(item, index))
+static func _append_effect_row(rows: Array, item: Item, index: int, holder_stats: Stats = null) -> void:
+    var row := effect_row(resolve_effect_display_for_item(item, index), holder_stats)
     if row != null:
         rows.append(row)
 
 
 ## The EFFECT row for one effect display dictionary, or null when it has no name.
 ## Shared by item cards and the character menu's Modifiers tab so both read alike.
-static func effect_row(display: Dictionary) -> ItemCardRow:
+static func effect_row(display: Dictionary, holder_stats: Stats = null) -> ItemCardRow:
     var effect_name := humanize_effect_name(str(display.get("name", "")))
     if effect_name.is_empty():
         return null
@@ -257,6 +265,9 @@ static func effect_row(display: Dictionary) -> ItemCardRow:
     var stats := str(display.get("stats", ""))
     if not stats.is_empty():
         body_parts.append(stats)
+    var item_fraction := float(display.get("item_damage_fraction", 0.0))
+    if item_fraction > 0.0:
+        body_parts.append("Damage: " + _item_damage_text(item_fraction, holder_stats))
     var row := ItemCardRow.new()
     row.kind = ItemCardRow.Kind.EFFECT
     row.tone = _tone_for_effect_kind(int(display.get("effect_kind", BaseModifier.EffectKind.BENEFIT)))
@@ -265,6 +276,18 @@ static func effect_row(display: Dictionary) -> ItemCardRow:
     if not trigger.is_empty():
         row.text += " (on %s)" % humanize_trigger(trigger)
     return row
+
+
+## "2.5 (3)" for an effect that deals `fraction` of `item_base_damage`, in the
+## weapon tooltip's "base (final)" shape. Whose stats: the given holder's, else the
+## player's, else the defaults (base number only).
+static func _item_damage_text(fraction: float, holder_stats: Stats) -> String:
+    if not is_instance_valid(holder_stats) and is_instance_valid(GlobalGameState.current_character):
+        holder_stats = GlobalGameState.current_character.stats
+    if not is_instance_valid(holder_stats):
+        return format_value(snappedf(Stats.default_stat("item_base_damage") * fraction, 0.01))
+    var base := holder_stats.get_stat("item_base_damage") * fraction
+    return _with_final(base, base * holder_stats.get_stat("damage"))
 
 
 ## Each stat modifier keeps the tone its own sign implies. An item's modifiers
@@ -515,6 +538,7 @@ static func _empty_effect_display() -> Dictionary:
         "stats": "",
         "trigger": "",
         "effect_kind": BaseModifier.EffectKind.BENEFIT,
+        "item_damage_fraction": 0.0,
     }
 
 
@@ -543,6 +567,8 @@ static func display_from_node(instance: Node, fallback_name: String) -> Dictiona
     # live values, never stale static text.
     if instance.has_method("get_tooltip_stats"):
         display["stats"] = str(instance.call("get_tooltip_stats"))
+    if instance.has_method("tooltip_item_damage_fraction"):
+        display["item_damage_fraction"] = float(instance.call("tooltip_item_damage_fraction"))
     if props.has("trigger_event"):
         var trig = instance.get("trigger_event")
         if trig != null:

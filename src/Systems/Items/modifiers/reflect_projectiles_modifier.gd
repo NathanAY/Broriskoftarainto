@@ -9,9 +9,13 @@ extends BaseModifier
 @export var trigger_event: String = "before_take_damage"
 
 func get_tooltip_stats() -> String:
-    return "Fires %d projectiles back at attackers (+1 per stack)" % volley_projectile_count
+    return "Fires %d projectiles back at attackers (+1 per stack), each dealing your item base damage" % volley_projectile_count
 
-var modifier_meta := "spawned_by_ReflectProjectileModifier"
+## Share of `item_base_damage` each projectile deals (all of it); the tooltip turns it into a number.
+func tooltip_item_damage_fraction() -> float:
+    return 1.0
+
+var modifier_meta :="spawned_by_ReflectProjectileModifier"
 var ignore_groups: Array = []
 var _current_projectile_speed_multiplier: float = 1.0
 var _current_damage_multiplier: float = 1.0

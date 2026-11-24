@@ -71,6 +71,23 @@ func test_selling_the_armor_item_takes_the_armor_back_out() -> void:
 	character.free()
 
 
+## The hover names the mitigation the armor gives right now, derived from the
+## live stat so a rebalanced armor value does not break the check.
+func test_armor_hint_states_current_mitigation() -> void:
+	var character := _build_character()
+	var stats: Stats = character.get_node("Stats")
+	character.get_node("ItemHolder").add_item(load(ARMOR_ITEM))
+
+	var expected := roundi((1.0 - Damage.armor_multiplier(stats.get_stat("armor"))) * 100.0)
+	assert_str(ItemTooltip.stat_hint("armor", stats)).contains("Current mitigation: %d%%" % expected)
+	assert_str(ItemTooltip.stat_hint("armor")).not_contains("Current mitigation")
+	character.free()
+
+
+func test_hint_without_stats_stays_the_static_text() -> void:
+	assert_str(ItemTooltip.stat_hint("armor")).is_equal(ItemTooltip.STAT_HINTS["armor"])
+
+
 func test_generated_stat_items_can_roll_armor() -> void:
 	var factory_scene = load(FACTORY_SCENE).instantiate()
 	add_child(factory_scene)

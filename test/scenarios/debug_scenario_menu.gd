@@ -35,6 +35,11 @@ const SCENARIOS := [
 		"scene": "res://test/scenarios/scenario_stage_three.tscn",
 	},
 	{
+		"title": "Final boss",
+		"description": "The Vault Baron at stage 3, with the stage-3 build. Pause for Boss: phase 2 / phase 3 to skip ahead.",
+		"scene": "res://test/scenarios/scenario_final_boss.tscn",
+	},
+	{
 		"title": "Cursed enemies",
 		"description": "Enemies carry a debuff item, so the HUD's debuff row fills. Also picks up a buff item.",
 		"scene": "res://test/scenarios/scenario_cursed_enemies.tscn",

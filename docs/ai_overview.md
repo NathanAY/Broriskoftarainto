@@ -29,11 +29,12 @@ Start here, then follow one system at a time. Every path below is repo-root-rela
 |---|---|
 | `characters.md` | `CharacterData` resources, character select UI, how a character is applied at spawn |
 | `damage.md` | `Damage.deal()`, the one pipeline every hit goes through: crit, armor, listener phases, direct vs secondary hits |
-| `debug_scenarios.md` | The main menu's "Debug scenarios" button: four dev-only mid/endgame runs and how a scenario is configured |
+| `debug_scenarios.md` | The main menu's "Debug scenarios" button: the dev-only mid/endgame runs (final boss included) and how a scenario is configured |
 | `enemies.md` | `Enemy` behaviour, health, boss variant |
 | `economy.md` | Money: the `Wallet` every coin goes through, the five economy stats, payday, shop events, price growth per stage, the boss bounty |
 | `effects.md` | Every VFX the game spawns — impact sparks, blast fireballs, damage flashes, death shards — and the three authoring traps that decide whether one works |
 | `event_manager.md` | The `LocalEventManager` event bus and the `event_contract.gd` schema checker |
+| `final_boss.md` | The Vault Baron: `BossBrain` phases, the attack timeline, coin patterns, how `BossSpawner` spawns it |
 | `game_config.md` | `game_config.json`: the one hand-edited file for item drop weights and other tunable numbers |
 | `gamepedia.md` | The Gamepedia opened from the main and pause menus: characters, weapons, enemies and modifiers read straight from the shipped data |
 | `items.md` | The `Item` resource, `ItemHolder`, `ItemBuilder`, pricing |

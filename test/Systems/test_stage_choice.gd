@@ -70,6 +70,8 @@ func before_test() -> void:
 func after_test() -> void:
     # A leaked pause would freeze every later test in the session.
     get_tree().paused = false
+    # The final boss's death slows time; a leaked slow-mo would slow later tests.
+    Engine.time_scale = 1.0
     get_tree().current_scene = _saved_scene
     collect_orphan_node_details()
 
@@ -323,6 +325,22 @@ func test_final_boss_is_scaled_past_the_stage_that_reached_it() -> void:
     # same growth, so a hardcoded figure would fail here.
     assert_float(final_hp).is_equal_approx(
         plain_stage_hp + growth * spawner.final_boss_extra_stages, 0.001)
+
+
+## The final boss is its own scripted fight: the final scene with a `BossBrain`,
+## not the stage boss with a bigger shotgun loadout.
+func test_final_boss_is_the_scripted_fight_without_a_loadout() -> void:
+    var manager := _manager()
+    manager.current_stage = StageManager.FINAL_BOSS_STAGE
+    manager.boss_spawner.current_stage = StageManager.FINAL_BOSS_STAGE
+
+    manager.go_to_phase(StageManager.PHASE_FINAL_BOSS)
+    var boss: Enemy = manager.boss_spawner.boss_instance
+
+    assert_str(boss.scene_file_path).is_equal(manager.boss_spawner.final_boss_scene.resource_path)
+    assert_object(boss.behaviour).is_instanceof(BossBrain)
+    # Only the contact weapon: the attacks replace the shotgun ramp.
+    assert_int(boss.weapon_holder.weapons.size()).is_equal(1 if boss.contact_weapon != null else 0)
 
 
 ## The loadout ramp is capped, so a boss scaled far past the normal run carries a

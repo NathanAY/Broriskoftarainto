@@ -51,7 +51,7 @@ Two things the portals have to get right, both pinned by `test/Systems/test_stag
 
 ## Final boss scaling
 
-`BossSpawner.spawn_final_boss()` is the same encounter as an ordinary boss, scaled `final_boss_extra_stages` (2) stages past `current_stage` — so it always out-scales the stage that led to it, and keeps climbing if the player banked extra stages first.
+`BossSpawner.spawn_final_boss()` spawns the Vault Baron (`docs/systems/final_boss.md`), scaled `final_boss_extra_stages` (2) stages past `current_stage` — so it always out-scales the stage that led to it, and keeps climbing if the player banked extra stages first.
 
 The weapon ramp stops at `BossSpawner.LOADOUT_STAGE_CAP` (4). Past the cap the boss carries the stage-4 loadout rather than another pair of shotguns per stage, which would cost frames instead of adding threat.
 

@@ -51,6 +51,7 @@ An enemy type is a **scene**, not a class. `Enemy.gd` is the script every enemy 
 | Shieldbearer | `src/Systems/enemies/EnemyShieldbearer.tscn` | Turns away every hit that lands on its front arc. Tougher and slower than the grunt; you have to get behind it. |
 | Swarmer | `src/Systems/enemies/EnemySwarmer.tscn` | Tiny, one hit point, faster than the grunt, and arrives in packs of eight. The pack is the threat, not any one body. |
 | Boss | `src/Systems/enemies/EnemyBoss.tscn` | The stage's boss, with a weapon loadout of its own. See `docs/systems/spawners.md`. |
+| Vault Baron | `src/Systems/enemies/EnemyFinalBoss.tscn` | The final boss: a scripted three-phase fight driven by `BossBrain`. See `docs/systems/final_boss.md`. |
 
 Adding a type is therefore: copy `src/Systems/enemies/Enemy.tscn`, point the sprite at new art, change the stats, set its `description` (the Gamepedia's text for it), and add a row to the spawn table in `src/Scenes/Game.tscn`. No script changes, because the behaviour is duck-typed against the enemy.
 

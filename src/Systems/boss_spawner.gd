@@ -9,6 +9,9 @@ class_name BossSpawner
 @export var arena_spawn_margin: float = 64.0
 @export var spawn_active: bool = false
 @export var boss_scene: PackedScene = preload("res://src/Systems/enemies/EnemyBoss.tscn")
+## The final boss, a scripted fight (`BossBrain`) rather than a weapon loadout.
+## See `docs/systems/final_boss.md`.
+@export var final_boss_scene: PackedScene = preload("res://src/Systems/enemies/EnemyFinalBoss.tscn")
 @export var current_stage: int = 1
 @export var health_growth_per_stage: float = 250
 @export var damage_growth_per_stage: float = 1
@@ -82,7 +85,7 @@ func _spawn_boss(stage: int, is_final: bool = false):
         if not is_instance_valid(enemiesNode) or not enemiesNode.is_inside_tree():
             return
 
-    boss_instance = boss_scene.instantiate()
+    boss_instance = (final_boss_scene if is_final else boss_scene).instantiate()
     boss_instance.global_position = spawn_position
     enemiesNode.add_child(boss_instance)
 
@@ -98,7 +101,7 @@ func _spawn_boss(stage: int, is_final: bool = false):
                 DeathMark.leave_corpse(event.get("self")))
 
     # Apply stage-based scaling
-    _apply_scaling(stage)
+    _apply_scaling(stage, is_final)
 
     if boss_instance.has_method("set_target_position"):
         boss_instance.set_target_position(character)
@@ -112,8 +115,10 @@ func clamp_spawn_position(pos: Vector2) -> Vector2:
     return arena.clamp_to_arena(pos, arena_spawn_margin)
 
 ## `stage` is the stage this boss is scaled as, not necessarily `current_stage`:
-## `spawn_final_boss()` passes a few stages beyond it.
-func _apply_scaling(stage: int) -> void:
+## `spawn_final_boss()` passes a few stages beyond it. The final boss gets the
+## health and damage scaling but no weapon loadout: its attacks replace it, and
+## they read the `damage` stat scaled here.
+func _apply_scaling(stage: int, is_final: bool = false) -> void:
     var stats = boss_instance.get_node_or_null("Stats")
     if not stats:
         return
@@ -127,7 +132,7 @@ func _apply_scaling(stage: int) -> void:
     # Clamped: the weapon ramp stops at `LOADOUT_STAGE_CAP` so a boss scaled past
     # the normal run carries a budgeted loadout rather than another pair of
     # shotguns per stage. Below the cap this is the shipped ramp, unchanged.
-    var loadout_stage: int = mini(stage, LOADOUT_STAGE_CAP)
+    var loadout_stage: int = 0 if is_final else mini(stage, LOADOUT_STAGE_CAP)
     for i in loadout_stage:
         boss_instance.weapon_holder.add_weapon(load("res://src/Resources/weapons/boss/BossShotgun.tres"))
         boss_instance.weapon_holder.add_weapon(load("res://src/Resources/weapons/boss/BossShotgun.tres"))

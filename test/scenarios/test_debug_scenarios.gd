@@ -14,6 +14,7 @@ const FIRST_BOSS := "res://test/scenarios/scenario_first_boss.tscn"
 const STAGE_THREE := "res://test/scenarios/scenario_stage_three.tscn"
 const CURSED_ENEMIES := "res://test/scenarios/scenario_cursed_enemies.tscn"
 const ENEMY_PREVIEW := "res://test/scenarios/scenario_enemy_preview.tscn"
+const FINAL_BOSS := "res://test/scenarios/scenario_final_boss.tscn"
 
 ## `ScenarioSetup` waits one frame before it equips anything, so the assertions
 ## below have to sit past that frame.
@@ -254,6 +255,42 @@ func test_enemy_preview_freezes_the_phase() -> void:
     assert_bool(stage_manager.enemy_spawner.spawn_active).is_false()
     assert_bool(stage_manager.boss_spawner.spawn_active).is_false()
 
+
+
+func test_final_boss_starts_the_final_fight_at_its_stage() -> void:
+    var scenario := await _run_scenario(FINAL_BOSS)
+    var stage_manager: StageManager = scenario.get_node("StageManager")
+    var setup: DebugScenarioSetup = scenario.get_node("ScenarioSetup")
+
+    assert_int(stage_manager.current_phase).is_equal(StageManager.PHASE_FINAL_BOSS)
+    assert_int(stage_manager.current_stage).is_equal(setup.start_stage)
+    assert_int(stage_manager.boss_spawner.current_stage).is_equal(setup.start_stage)
+    assert_bool(stage_manager.enemy_spawner.spawn_active).is_false()
+
+
+func test_final_boss_adds_the_phase_buttons_to_the_pause_menu() -> void:
+    var scenario := await _run_scenario(FINAL_BOSS)
+    var buttons := scenario.get_node("UI/PauseMenu/Control/VBoxContainer")
+
+    assert_object(buttons.get_node_or_null("BossPhase2Button")).is_not_null()
+    assert_object(buttons.get_node_or_null("BossPhase3Button")).is_not_null()
+
+
+## The buttons look the boss up when pressed, because it is still teleporting
+## in when the scenario starts: before it lands there is nothing to skip.
+func test_final_boss_phase_skip_reaches_the_live_boss() -> void:
+    var scenario := await _run_scenario(FINAL_BOSS)
+    var stage_manager: StageManager = scenario.get_node("StageManager")
+    var setup: DebugScenarioSetup = scenario.get_node("ScenarioSetup")
+    await get_tree().create_timer(stage_manager.boss_spawner.spawn_telegraph_time + 0.2).timeout
+    var boss := stage_manager.boss_spawner.boss_instance
+    assert_object(boss).is_not_null()
+
+    assert_bool(setup.skip_boss_to_phase(stage_manager, 3)).is_true()
+
+    var brain := boss.behaviour as BossBrain
+    assert_int(brain.phase).is_equal(3)
+    assert_bool(boss.health_node.is_dead).is_false()
 
 ## Instantiates a scenario scene and lets `ScenarioSetup` finish applying it.
 ## The scene is published as `current_scene` because that is how the real game

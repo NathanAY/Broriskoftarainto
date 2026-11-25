@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://c8vbossprevw"]
+
+[ext_resource type="Script" path="res://test/tools/final_boss_preview.gd" id="1"]
+
+[node name="FinalBossPreview" type="Node2D"]
+script = ExtResource("1")

@@ -1,0 +1,159 @@
+[gd_scene format=3 uid="uid://c8vbaronfnl2"]
+
+[ext_resource type="Script" uid="uid://cs2dub84x6wjd" path="res://src/Scripts/Enemy.gd" id="1_h6yb1"]
+[ext_resource type="Texture2D" uid="uid://burvtsx5s6g28" path="res://src/Assets/enemies/vault_baron.png" id="2_body"]
+[ext_resource type="Texture2D" uid="uid://csqw8yly3b26m" path="res://src/Assets/enemies/vault_baron_broken.png" id="2_broken"]
+[ext_resource type="PackedScene" uid="uid://da5n82twecexo" path="res://src/Systems/LocalEventManager.tscn" id="3_44j8u"]
+[ext_resource type="PackedScene" uid="uid://dst2hov333sk2" path="res://src/Systems/stats/Stats.tscn" id="5_ule8x"]
+[ext_resource type="PackedScene" uid="uid://bymf3sqpkbdcr" path="res://src/Systems/Items/ItemHolder.tscn" id="6_dyeb4"]
+[ext_resource type="PackedScene" uid="uid://cskdgn6s7qlfo" path="res://src/Systems/weapon/WeaponHolder.tscn" id="7_lkba8"]
+[ext_resource type="PackedScene" uid="uid://dorbxm8iyx8ni" path="res://src/Systems/damage/Health.tscn" id="8_pl1s5"]
+[ext_resource type="PackedScene" uid="uid://jsw2vxmrn6yc" path="res://src/Scenes/particles/ParticleEffectManager.tscn" id="9_h3m6n"]
+[ext_resource type="PackedScene" uid="uid://cx3p26icyy5wu" path="res://src/animations/animation_player.tscn" id="10_5sddf"]
+[ext_resource type="PackedScene" uid="uid://cmvgx8sqctngm" path="res://src/Scenes/effects/TextureBurstManager.tscn" id="10_ywwjk"]
+[ext_resource type="AnimationLibrary" uid="uid://cwclbp73qaped" path="res://src/animations/enemy_animations.res" id="11_awrnt"]
+[ext_resource type="PackedScene" uid="uid://brgr2yeaajlxi" path="res://src/Scenes/effects/HitFlashManager.tscn" id="13_flash"]
+[ext_resource type="PackedScene" path="res://src/Systems/damage/FrontShield.tscn" id="14_shield"]
+[ext_resource type="Script" uid="uid://cxkbupcu0nwiw" path="res://src/Systems/boss/boss_brain.gd" id="15_brain"]
+[ext_resource type="Script" uid="uid://cjrtpf20b4cg6" path="res://src/Systems/boss/attacks/coin_spray_attack.gd" id="16_spray"]
+[ext_resource type="Script" uid="uid://dlosdro4u4i4a" path="res://src/Systems/boss/attacks/dividend_ring_attack.gd" id="17_ring"]
+[ext_resource type="Script" uid="uid://cxe6o0u4kngty" path="res://src/Systems/boss/attacks/ram_attack.gd" id="18_ram"]
+[ext_resource type="Script" uid="uid://bxbtqrndg4gdx" path="res://src/Systems/boss/attacks/coin_spiral_attack.gd" id="19_spiral"]
+[ext_resource type="Script" uid="uid://d21gnswjrxc17" path="res://src/Systems/boss/attacks/safe_drop_attack.gd" id="20_safe"]
+[ext_resource type="Script" uid="uid://djms0bgk6cjcx" path="res://src/Systems/boss/attacks/burrow_attack.gd" id="21_burrow"]
+[ext_resource type="Script" uid="uid://b5225two7jejh" path="res://src/Systems/boss/attacks/golden_beam_attack.gd" id="22_beam"]
+[ext_resource type="Script" uid="uid://c50lwdjlo034j" path="res://src/Systems/boss/attacks/margin_call_attack.gd" id="23_margin"]
+[ext_resource type="AudioStream" uid="uid://by5d7u7fkkp2d" path="res://src/Assets/sounds/fist/whoosh_swish_high_fast_01.wav" id="30_whoosh1"]
+[ext_resource type="AudioStream" uid="uid://c8hwpbk0f5eo1" path="res://src/Assets/sounds/fist/whoosh_swish_high_fast_02.wav" id="31_whoosh2"]
+[ext_resource type="AudioStream" uid="uid://ctxut6hbdtbi2" path="res://src/Assets/sounds/fist/whoosh_swish_high_fast_04.wav" id="32_whoosh4"]
+[ext_resource type="AudioStream" uid="uid://654dl1dnsap3" path="res://src/Assets/sounds/pistol/gun_pistol_shot_01.wav" id="33_pistol"]
+[ext_resource type="AudioStream" uid="uid://dsnefjhxtmimy" path="res://src/Assets/sounds/shotgun/gun_shotgun_sawed_off_shot_01.wav" id="34_shot1"]
+[ext_resource type="AudioStream" uid="uid://k4wp11l3lmq8" path="res://src/Assets/sounds/shotgun/gun_shotgun_sawed_off_shot_02.wav" id="35_shot2"]
+[ext_resource type="AudioStream" uid="uid://dpvtq674kp48u" path="res://src/Assets/sounds/shotgun/gun_shotgun_sawed_off_shot_03.wav" id="36_shot3"]
+
+[sub_resource type="Gradient" id="Gradient_shadow"]
+offsets = PackedFloat32Array(0.6935484, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_shadow"]
+gradient = SubResource("Gradient_shadow")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 58.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hitbox"]
+radius = 66.0
+
+[node name="Enemy" type="CharacterBody2D"]
+script = ExtResource("1_h6yb1")
+description = "The Vault Baron, the wasteland's richest creature. Pays out in coin sprays, rings and rams; its armoured front turns hits away until its vault bursts open."
+art_width = 195
+
+[node name="Node2D" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
+texture = ExtResource("2_body")
+
+[node name="Shadow" type="Sprite2D" parent="Node2D/Sprite2D"]
+show_behind_parent = true
+modulate = Color(0, 0, 0, 0.35)
+position = Vector2(0, 293.75)
+scale = Vector2(15.453, 4.945)
+texture = SubResource("GradientTexture2D_shadow")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")
+one_way_collision_margin = 1.2
+
+[node name="Hitbox" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("CircleShape2D_hitbox")
+
+[node name="EventManager" parent="." instance=ExtResource("3_44j8u")]
+
+[node name="Stats" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("5_ule8x")]
+event_manager = NodePath("../EventManager")
+
+[node name="ItemHolder" parent="." instance=ExtResource("6_dyeb4")]
+
+[node name="WeaponHolder" parent="." instance=ExtResource("7_lkba8")]
+
+[node name="Health" parent="." node_paths=PackedStringArray("event_manager") instance=ExtResource("8_pl1s5")]
+event_manager = NodePath("../EventManager")
+
+[node name="ParticleEffectManager" parent="." instance=ExtResource("9_h3m6n")]
+
+[node name="TextureBurstManager" parent="." instance=ExtResource("10_ywwjk")]
+
+[node name="HitFlashManager" parent="." instance=ExtResource("13_flash")]
+
+[node name="AnimationPlayer" parent="." instance=ExtResource("10_5sddf")]
+libraries/ = ExtResource("11_awrnt")
+autoplay = &""
+
+[node name="FrontShield" parent="." instance=ExtResource("14_shield")]
+
+[node name="MovementBehaviour" type="Node" parent="."]
+script = ExtResource("15_brain")
+broken_texture = ExtResource("2_broken")
+phase_sound = ExtResource("34_shot1")
+death_sound = ExtResource("36_shot3")
+
+[node name="CoinSpray" type="Node" parent="MovementBehaviour"]
+script = ExtResource("16_spray")
+config_key = "coin_spray"
+active_sound = ExtResource("33_pistol")
+
+[node name="DividendRing" type="Node" parent="MovementBehaviour"]
+script = ExtResource("17_ring")
+config_key = "dividend_ring"
+active_sound = ExtResource("34_shot1")
+
+[node name="Ram" type="Node" parent="MovementBehaviour"]
+script = ExtResource("18_ram")
+config_key = "ram"
+active_sound = ExtResource("30_whoosh1")
+impact_sound = ExtResource("35_shot2")
+
+[node name="DoubleRam" type="Node" parent="MovementBehaviour"]
+script = ExtResource("18_ram")
+config_key = "double_ram"
+active_sound = ExtResource("30_whoosh1")
+impact_sound = ExtResource("35_shot2")
+
+[node name="SafeDrop" type="Node" parent="MovementBehaviour"]
+script = ExtResource("20_safe")
+config_key = "safe_drop"
+telegraph_sound = ExtResource("31_whoosh2")
+impact_sound = ExtResource("36_shot3")
+
+[node name="Burrow" type="Node" parent="MovementBehaviour"]
+script = ExtResource("21_burrow")
+config_key = "burrow"
+telegraph_sound = ExtResource("31_whoosh2")
+impact_sound = ExtResource("36_shot3")
+
+[node name="CoinSpiral" type="Node" parent="MovementBehaviour"]
+script = ExtResource("19_spiral")
+config_key = "coin_spiral"
+active_sound = ExtResource("33_pistol")
+
+[node name="GoldRush" type="Node" parent="MovementBehaviour"]
+script = ExtResource("18_ram")
+config_key = "gold_rush"
+active_sound = ExtResource("30_whoosh1")
+impact_sound = ExtResource("35_shot2")
+
+[node name="GoldenBeam" type="Node" parent="MovementBehaviour"]
+script = ExtResource("22_beam")
+config_key = "golden_beam"
+active_sound = ExtResource("32_whoosh4")
+
+[node name="MarginCall" type="Node" parent="MovementBehaviour"]
+script = ExtResource("23_margin")
+config_key = "margin_call"
+telegraph_sound = ExtResource("32_whoosh4")

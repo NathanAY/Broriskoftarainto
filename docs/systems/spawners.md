@@ -46,7 +46,7 @@ Enemies do not pop in. `_spawn_from_entry()` first plays `src/Scenes/particles/s
 - `StageManager` to control `spawn_active` flags; `Enemy` scenes expect `Stats`, `WeaponHolder`, `ItemHolder` children.
 
 ## Boss scaling
-- `spawn_boss()` spawns the stage's boss; `spawn_final_boss()` spawns the same scene scaled `final_boss_extra_stages` (2) stages past `current_stage`. `StageManager` calls the second only from its `PHASE_FINAL_BOSS` phase. Both go through one private `_spawn_boss(stage)`, so the guard against a double spawn and the arena clamp cannot drift between them.
+- `spawn_boss()` spawns the stage's boss; `spawn_final_boss()` spawns `final_boss_scene` (the Vault Baron, `docs/systems/final_boss.md`) scaled `final_boss_extra_stages` (2) stages past `current_stage`, with no weapon loadout — its attacks replace it. `StageManager` calls the second only from its `PHASE_FINAL_BOSS` phase. Both go through one private `_spawn_boss(stage)`, so the guard against a double spawn and the arena clamp cannot drift between them.
 - `_apply_scaling(stage)` takes the stage to scale as an argument rather than reading `current_stage`, because the final boss is scaled as a *later* stage than the run is on.
 - Health and damage grow `health_growth_per_stage` / `damage_growth_per_stage` per stage value. The weapon ramp (2 boss shotguns per stage, 2 Pistols at iteration 2, a `SpreadShot` at iteration 3) stops at `LOADOUT_STAGE_CAP` (4), so a boss scaled far past a normal run carries a budgeted loadout instead of a pair of shotguns per stage. The shipped ramp is untouched through stage 4; only stages past it are affected.
 

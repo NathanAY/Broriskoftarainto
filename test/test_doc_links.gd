@@ -71,6 +71,8 @@ const ALLOWED_MISSING := {
 		"runtime output of run_scene_shot.bat, written on demand, never committed",
 	"res://enemies.png":
 		"runtime output of run_scene_shot.bat for the enemy gallery, written on demand, never committed",
+	"res://boss_shot.png":
+		"runtime output of run_scene_shot.bat for the final boss preview, written on demand, never committed",
 	"res://poison_shot.png":
 		"runtime output of run_scene_shot.bat for the poison preview, written on demand, never committed",
 }

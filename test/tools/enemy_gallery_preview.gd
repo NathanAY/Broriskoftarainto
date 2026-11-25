@@ -22,6 +22,7 @@ const ROSTER := [
 	{"name": "Blink", "scene": "res://src/Systems/enemies/EnemyBlink.tscn"},
 	{"name": "Shieldbearer", "scene": "res://src/Systems/enemies/EnemyShieldbearer.tscn"},
 	{"name": "Swarmer", "scene": "res://src/Systems/enemies/EnemySwarmer.tscn"},
+	{"name": "Vault Baron", "scene": "res://src/Systems/enemies/EnemyFinalBoss.tscn"},
 ]
 
 ## How far apart two enemies stand, in pixels. Comfortably more than the

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Six dev-only runs that start in a state a normal run would need several stages to reach, so a build or a balance number can be checked without playing up to it. The **Sandbox** one goes the other way: it starts ordinary and hands you the controls. They are reached from the main menu's **Debug scenarios** button, next to **New game** - the character select → `StarterMenu.tscn` route is still the default way to play, and nothing here is on that path.
+Dev-only runs that start in a state a normal run would need several stages to reach, so a build or a balance number can be checked without playing up to it. The **Sandbox** one goes the other way: it starts ordinary and hands you the controls. They are reached from the main menu's **Debug scenarios** button, next to **New game** - the character select → `StarterMenu.tscn` route is still the default way to play, and nothing here is on that path.
 
 None of it ships. The picker, the scenarios and their tests live in `test/scenarios/`, and the only `src/` change is the button in `src/Scenes/menu/Main.tscn` plus the handler in `src/Scenes/menu/main_menu.gd`. That handler checks the picker exists first, so a build without `test/` warns instead of changing to a missing scene.
 
@@ -12,6 +12,7 @@ None of it ships. The picker, the scenarios and their tests live in `test/scenar
 | Loaded build | `test/scenarios/scenario_loaded_build.tscn` | Stage 1, phase 1, Ranger with 4 weapons and 5 items - three of which carry 3-5 modifiers each |
 | First phase boss | `test/scenarios/scenario_first_boss.tscn` | Stage 1 **phase 2**: the enemy phase is skipped and the boss spawns at once |
 | Stage 3 | `test/scenarios/scenario_stage_three.tscn` | Stage 3 phase 1: enemies already scaled by `current_stage`, boss spawner scaled to match |
+| Final boss | `test/scenarios/scenario_final_boss.tscn` | The Vault Baron at stage 3 with the stage-3 build, as if the Finale Gate was just taken. The pause menu gets **Boss: phase 2** and **Boss: phase 3** buttons that skip the fight ahead |
 | Cursed enemies | `test/scenarios/scenario_cursed_enemies.tscn` | Stage 1, phase 1, with a **debuff item on every enemy**, so the HUD's debuff row fills. Also picks up a buff item, so both rows show at once |
 | Enemy preview | `test/scenarios/scenario_enemy_preview.tscn` | Frozen phase 1 with **one of every enemy type**, boss included, in a ring around the player. The roster chases but cannot hurt you, so the whole set can be walked and watched |
 | Arena preview | `test/scenarios/scenario_arena_preview.tscn` | Frozen, empty phase 1. The pause menu gets a **New arena** button that rolls the arena theme (recolour or full-tile sheet) and ground layout again and names the theme on the button |
@@ -48,6 +49,12 @@ The other two are `spawn_active = false` (the cadence stops on its own terms rat
 There is no way to bring the wave back from the panel. `StageManager.go_to_phase(1)` and `EnemySpawner.start_wave()` are the seams if that is ever wanted.
 
 `test/tools/sandbox_panel_preview.tscn` renders the panel alone, for a layout check with `run_scene_shot.bat`: the real route needs a live pause screen, which a one-shot render cannot reach.
+
+## Final boss: skipping to a phase
+
+`StartMode.FINAL_BOSS` puts `start_stage` on the manager and both spawners (as `StartMode.STAGE` does) and then calls `go_to_phase(StageManager.PHASE_FINAL_BOSS)`, the same call `StageChoicePortal` makes, so the boss gets exactly the scaling the Finale Gate would give it.
+
+`boss_phase_buttons = true` adds two pause-menu buttons. They call `skip_boss_to_phase()`, which looks the boss up **when pressed**: when the scenario starts the boss is still teleporting in (`BossSpawner.spawn_telegraph_time`), so there is nothing to hold yet. The skip itself is `BossBrain.skip_to_phase()`, which sets health to each threshold and enters the phase with its speed, adds, shield break and art, but no transition. See `docs/systems/final_boss.md`.
 
 ## Cursed enemies: making the debuff row reachable
 

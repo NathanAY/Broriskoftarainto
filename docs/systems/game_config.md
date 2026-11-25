@@ -107,6 +107,41 @@ Read by `src/Systems/arena.gd`. The ground art is brown; each theme recolours it
 | `decor_scale` | Scale of a decor sprite (the sheet cells are 128x128 px, so 0.5 is 64x64, one ground cell). |
 | `themes` | List of themes, one picked per stage: `{name, hue_shift, saturation, brightness}` recolours the flat ground and the border (`hue_shift` is degrees, the art starts brown so ~75-100 is green; the others are multipliers). An optional `decor` is the path of an 8x8 sheet of transparent-background sprites scattered over the ground instead of the default sheet; unlike the default it is not recoloured, so pair it with a ground colour that suits it. Add a row for a new look; an empty list leaves the art brown. |
 
+## `final_boss`
+
+Read by `src/Systems/boss/boss_brain.gd`, `src/Systems/boss/boss_attack.gd` and `src/Systems/boss/boss_bullets.gd`. See `docs/systems/final_boss.md`. Lists marked *per phase* have one entry per phase (1, 2, 3).
+
+| Key | Meaning |
+|---|---|
+| `phase_thresholds` | Health fractions that end phase 1 and phase 2. A hit is cut short at the next one, so no phase is skipped. |
+| `intro_time` | Seconds after spawning before the first attack. Kept equal to `name_card_time`, so the first attack comes as the card fades. |
+| `name_card_time` | Seconds the boss's name card is on screen (fade in, hold, fade out). |
+| `sound_volume_db` | Volume offset for every boss sound. |
+| `shake` | Camera kick in px (before the options slider) per moment: `phase` (phase change), `wall` (ram hits a wall), `blast` (safes land), `erupt` (burrow eruption), `death`. |
+| `transition_time` | Seconds the boss stands still and takes no damage between phases. |
+| `attack_gap` | Seconds of walking between one attack's recovery and the next telegraph. |
+| `keep_distance` | *Per phase.* Distance in px the boss walks to between attacks (0 = right onto the player). |
+| `speed_mult` | *Per phase.* Movement speed multiplier. |
+| `phase3_damage_taken_mult` | Damage multiplier on hits the boss takes in phase 3. |
+| `coin_speed`, `coin_size`, `coin_life`, `coin_hit_radius` | Coin speed (px/s), drawn size (px), lifetime (s), and collider radius as a fraction of `coin_size`. |
+| `coin_damage` | A coin's damage before the boss's `damage` stat and the attack's `damage_mult`. |
+| `attacks.<key>` | One block per attack. Every block has `weight` (pick chance), `phases` (which phases may pick it), `telegraph` and `recover` (seconds). |
+| `attacks.coin_spray` | `count` coins per volley over `spread_deg`; `volleys` volleys, `volley_interval` s apart; `damage_mult`. |
+| `attacks.dividend_ring` | `count` slots in the ring, `gap` of them left empty towards the player; `speed_mult` on `coin_speed`; `damage_mult`. |
+| `shockwave_radius`, `shockwave_force`, `shockwave_duration` | The phase-change push: reach (px), knockback speed (m/s) and how long it lasts (s). No damage. |
+| `adds_phases`, `adds_interval`, `adds_pack_size`, `adds_max_alive`, `adds_spawn_distance` | Debt Collectors: which phases spawn them, seconds between packs, swarmers per pack, the alive cap, and spawn distance from the player (px). |
+| `enrage_time`, `enrage_recover_mult` | Seconds of fight before the boss enrages, and the multiplier on its recoveries and attack gaps after that. |
+| `plate_burst_radius` | Size (px) of the visual pop when the ram plate breaks at phase 3. |
+| `death_time_scale`, `death_slowmo_time`, `death_ramp_time` | The kill's slow motion: time scale, real seconds held, real seconds easing back to 1. |
+| `death_coins`, `death_coin_lifetime` | The kill's coin fountain: particle count and lifetime (s). |
+| `attacks.gold_rush` | The ram script with `charges` 4: each charge runs until a wall (or `max_duration`), then re-aims after `between` s. Same keys as `attacks.ram`. |
+| `attacks.golden_beam` | `arc_deg` swept over `sweep_time` (s), beam `length` and `width` (px), `hit_interval` (s, per body), `damage` (times the damage stat). |
+| `attacks.margin_call` | `close_time`, `hold_time`, `open_time` (s), `min_radius` (px around the boss), `start_radius` (px, only without an arena), `ring_width` (px), `hit_interval` (s), `damage` (times the damage stat) to anything outside the ring. |
+| `attacks.ram`, `attacks.double_ram` | One script: `charges` (1 or 2), `between` (pause between charges, s), `speed_mult` on movement speed while charging, `max_duration` per charge (s), `wall_stagger` (extra recovery after a wall hit on the last charge, s), `line_length` of the telegraph line (px). |
+| `attacks.safe_drop` | `count` safes, `fall_time` (s), blast `radius` (px), `scatter` (px around where the player is heading), `drop_height` and `safe_size` (px, visual), `damage` (times the boss's damage stat). |
+| `attacks.burrow` | `track_time` and `lock_time` (s), `mound_speed` (px/s), `mound_size` (px), `erupt_radius` (px), `damage` (times the damage stat), and the eruption ring: `ring_count`, `ring_gap`, `ring_speed_mult`, `ring_damage_mult`. |
+| `attacks.coin_spiral` | `duration` (s), `arms`, `interval` between shots (s), `turn_deg` per shot, `speed_mult`, `damage_mult`. |
+
 ## Adding a new setting
 
 **Do not hardcode tunable numbers.** Any chance, weight, minimum, multiplier, cap or other value someone might rebalance goes into `game_config.json`, not into a `const` or a literal in a script. A `const` is fine only for a true invariant (an array index, an enum, a unit conversion).

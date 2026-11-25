@@ -40,6 +40,7 @@ enum StartMode {
 	PHASE_ONE, ## normal run: the enemy phase of `current_stage`.
 	BOSS_PHASE, ## straight to phase 2 - the enemy phase is skipped entirely.
 	STAGE, ## the enemy phase of `start_stage`, with both spawners already scaled.
+	FINAL_BOSS, ## the final boss at `start_stage`, as if the Finale Gate was just taken.
 }
 
 ## Monster-density multiplier for the run the picker is about to start, read by
@@ -85,6 +86,10 @@ static var pending_monster_multiplier: float = 1.0
 ## Holds the run empty and adds a "New arena" pause-menu button that rolls the
 ## arena theme again, so every look can be flicked through.
 @export var arena_preview: bool = false
+## Adds "Boss: phase 2" and "Boss: phase 3" pause-menu buttons that skip the
+## final boss to that phase (`BossBrain.skip_to_phase`), so a late phase can be
+## played without fighting through the earlier ones.
+@export var boss_phase_buttons: bool = false
 
 
 ## Runs before *any* child's `_ready`, which is what makes this the right hook:
@@ -108,6 +113,7 @@ func _ready() -> void:
 	_apply_monster_multiplier()
 	_install_sandbox_menu()
 	_install_arena_preview()
+	_install_boss_phase_buttons()
 	_freeze_phase()
 	_spawn_enemy_roster()
 	_on_phase_applied()
@@ -216,6 +222,13 @@ func _apply_start_mode() -> void:
 			# (`start_wave()` reads `current_stage`) instead of the stage-1 wave
 			# that `_ready()` already started.
 			stage_manager.go_to_phase(1)
+		StartMode.FINAL_BOSS:
+			# Scaled the way the Finale Gate does it: every counter on `start_stage`,
+			# then the same phase call `StageChoicePortal` makes.
+			stage_manager.current_stage = start_stage
+			stage_manager.enemy_spawner.current_stage = start_stage
+			stage_manager.boss_spawner.current_stage = start_stage
+			stage_manager.go_to_phase(StageManager.PHASE_FINAL_BOSS)
 
 
 ## Applies the picker's monster density. Last of the three, because
@@ -367,3 +380,32 @@ func _install_arena_preview() -> void:
 		if index >= 0:
 			button.text = "New arena (%s)" % themes[index].get("name", index))
 	(pause_menu.get_node("Control/VBoxContainer") as VBoxContainer).add_child(button)
+
+
+## Two pause-menu buttons that skip the final boss to phase 2 or 3. The boss is
+## looked up when a button is pressed, not now: it is still teleporting in.
+func _install_boss_phase_buttons() -> void:
+	if not boss_phase_buttons:
+		return
+	var pause_menu := get_node_or_null("../UI/PauseMenu")
+	var stage_manager := get_node_or_null("../StageManager") as StageManager
+	if pause_menu == null or stage_manager == null:
+		push_warning("DebugScenarioSetup: no PauseMenu or StageManager for the boss phase buttons.")
+		return
+	for target_phase in [2, 3]:
+		var button := UiMenuButton.new()
+		button.name = "BossPhase%dButton" % target_phase
+		button.text = "Boss: phase %d" % target_phase
+		button.pressed.connect(skip_boss_to_phase.bind(stage_manager, target_phase))
+		(pause_menu.get_node("Control/VBoxContainer") as VBoxContainer).add_child(button)
+
+
+## Skips the live final boss to `target_phase`. Returns false when there is no
+## boss (yet) to skip.
+func skip_boss_to_phase(stage_manager: StageManager, target_phase: int) -> bool:
+	var boss := stage_manager.boss_spawner.boss_instance
+	if boss == null or not is_instance_valid(boss) or not (boss.behaviour is BossBrain):
+		push_warning("DebugScenarioSetup: no final boss to skip yet - it may still be teleporting in.")
+		return false
+	(boss.behaviour as BossBrain).skip_to_phase(target_phase)
+	return true

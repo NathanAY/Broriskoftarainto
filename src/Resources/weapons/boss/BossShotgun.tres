@@ -9,6 +9,11 @@
 [ext_resource type="AudioStream" uid="uid://dpvtq674kp48u" path="res://src/Assets/sounds/shotgun/gun_shotgun_sawed_off_shot_03.wav" id="7_bshotgun"]
 [ext_resource type="AudioStream" uid="uid://b34vfixm8vslw" path="res://src/Assets/sounds/shotgun/gun_shotgun_sawed_off_shot_04.wav" id="8_bshotgun"]
 
+[ext_resource type="AudioStream" uid="uid://dfrwjdqxdjtb0" path="res://src/Assets/sounds/weapon/crit/ricochet_01.wav" id="crit_01"]
+[ext_resource type="AudioStream" uid="uid://bls4duhw458r0" path="res://src/Assets/sounds/weapon/crit/ricochet_02.wav" id="crit_02"]
+[ext_resource type="AudioStream" uid="uid://c7b06q6ctybg8" path="res://src/Assets/sounds/weapon/crit/ricochet_03.wav" id="crit_03"]
+[ext_resource type="AudioStream" uid="uid://dx2v2de7j8k6o" path="res://src/Assets/sounds/weapon/crit/ricochet_04.wav" id="crit_04"]
+
 [resource]
 script = ExtResource("1_bshotgun")
 pellet_count = 4
@@ -24,3 +29,4 @@ target_selector = ExtResource("3_bshotgun")
 sprite = ExtResource("4_bshotgun")
 attack_sound = Array[Resource]([ExtResource("5_bshotgun"), ExtResource("6_bshotgun"), ExtResource("7_bshotgun"), ExtResource("8_bshotgun")])
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"
+hit_sound_crit = Array[Resource]([ExtResource("crit_01"), ExtResource("crit_02"), ExtResource("crit_03"), ExtResource("crit_04")])

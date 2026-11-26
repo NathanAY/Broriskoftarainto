@@ -8,6 +8,29 @@
 [ext_resource type="AudioStream" uid="uid://2am8nx14mq6d" path="res://src/Assets/sounds/fist/whoosh_swish_high_fast_03.wav" id="3_su6vs"]
 [ext_resource type="Resource" uid="uid://hye6t5sxe2yg" path="res://src/Resources/weapons/aim/closest.tres" id="3_wkow1"]
 [ext_resource type="AudioStream" uid="uid://ctxut6hbdtbi2" path="res://src/Assets/sounds/fist/whoosh_swish_high_fast_04.wav" id="4_ki4yr"]
+[ext_resource type="AudioStream" uid="uid://cjhue5f6d6n0a" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_01.wav" id="5_g4ala"]
+[ext_resource type="AudioStream" uid="uid://dtdk802cpg5aw" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_02.wav" id="6_aewd1"]
+[ext_resource type="AudioStream" uid="uid://bepflkwcn8u1o" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_03.wav" id="7_5njlf"]
+[ext_resource type="AudioStream" uid="uid://bxp2n3ix7coyd" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_04.wav" id="8_fxvav"]
+[ext_resource type="AudioStream" uid="uid://defen3xcwrp8m" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_05.wav" id="9_n4f1l"]
+[ext_resource type="AudioStream" uid="uid://d2and0y0gtl66" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_06.wav" id="10_ose5l"]
+[ext_resource type="AudioStream" uid="uid://e8yfu6xqv6gi" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_07.wav" id="11_37g5w"]
+[ext_resource type="AudioStream" uid="uid://dbwvlllbwykbm" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_08.wav" id="12_8yb6w"]
+[ext_resource type="AudioStream" uid="uid://du4cq1odqq2ox" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_09.wav" id="13_asm1j"]
+[ext_resource type="AudioStream" uid="uid://cswlny4mvttrg" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_10.wav" id="14_xut7n"]
+[ext_resource type="AudioStream" uid="uid://do3fc16q1e4wc" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_11.wav" id="15_j4o6x"]
+[ext_resource type="AudioStream" uid="uid://w7opuxmdmadx" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_12.wav" id="16_bm6b6"]
+[ext_resource type="AudioStream" uid="uid://by03g3im6ltsj" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_13.wav" id="17_b00lr"]
+[ext_resource type="AudioStream" uid="uid://dkkjbmpb83h7u" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_14.wav" id="18_0yv6o"]
+[ext_resource type="AudioStream" uid="uid://cvi6drplkgpwm" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_15.wav" id="19_o2id2"]
+[ext_resource type="AudioStream" uid="uid://dwffwxm6f0drn" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_16.wav" id="20_rmsiy"]
+[ext_resource type="AudioStream" uid="uid://ktg6t011kqvy" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_17.wav" id="21_hid77"]
+[ext_resource type="AudioStream" uid="uid://dbm7rpxarvux0" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_18.wav" id="22_cq75r"]
+[ext_resource type="AudioStream" uid="uid://bnso4uhic5fwu" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_19.wav" id="23_oq55u"]
+[ext_resource type="AudioStream" uid="uid://y2k4rnop1j6a" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_20.wav" id="24_y8der"]
+[ext_resource type="AudioStream" uid="uid://c5s0rqiuc5ave" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_21.wav" id="25_445r5"]
+[ext_resource type="AudioStream" uid="uid://bdbnq3geggaek" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_22.wav" id="26_tcqif"]
+[ext_resource type="AudioStream" uid="uid://bh17foe4wyhgp" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_23.wav" id="27_f65tm"]
 
 [resource]
 script = ExtResource("1_ukhvm")
@@ -17,12 +40,13 @@ description = "Fist"
 base_damage = 10.0
 modifiers = {
 "knockback": {
-"strength": 0.83,
-"duration": 0.2
+"duration": 0.2,
+"strength": 0.83
 }
 }
-weapon_range = 1.0
 target_selector = ExtResource("3_wkow1")
 sprite = ExtResource("2_wkow1")
 attack_sound = Array[Resource]([ExtResource("1_sjfbb"), ExtResource("2_6xf22"), ExtResource("3_su6vs"), ExtResource("4_ki4yr")])
+hit_sound = Array[Resource]([ExtResource("5_g4ala"), ExtResource("6_aewd1"), ExtResource("7_5njlf"), ExtResource("8_fxvav"), ExtResource("9_n4f1l"), ExtResource("10_ose5l"), ExtResource("11_37g5w"), ExtResource("12_8yb6w"), ExtResource("13_asm1j"), ExtResource("14_xut7n"), ExtResource("15_j4o6x"), ExtResource("16_bm6b6"), ExtResource("17_b00lr"), ExtResource("18_0yv6o"), ExtResource("19_o2id2"), ExtResource("20_rmsiy"), ExtResource("21_hid77"), ExtResource("22_cq75r"), ExtResource("23_oq55u"), ExtResource("24_y8der"), ExtResource("25_445r5"), ExtResource("26_tcqif"), ExtResource("27_f65tm")])
+weapon_range = 1.0
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"

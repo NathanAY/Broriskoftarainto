@@ -78,6 +78,7 @@ func do_damage(body: Node) -> void:
     ctx.final_amount = current_damage
     ctx.weapon = self
     ctx.tags.append("contact")
+    play_hit_sound()
     # Contact has no shot of its own, so each landed hit doubles as its attack.
     if Damage.deal(ctx, event_manager) and event_manager:
         event_manager.emit_event("on_attack", {"weapon": self, "body": body, "damage_context": ctx})

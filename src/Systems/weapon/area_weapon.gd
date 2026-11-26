@@ -28,6 +28,8 @@ func try_shoot(targets: Array[Node]) -> void:
     var holder = get_holder()
     if not holder: return
     _spawn_burst(holder)
+    if not attack_sound.is_empty():
+        SoundManager.play(attack_sound.pick_random(), 0, 0)
     for t in targets:
         if t.has_node("Health"):
             do_damage(t)
@@ -58,6 +60,7 @@ func do_damage(body):
     ctx.final_amount = current_damage
     ctx.weapon = self
     ctx.tags.append("melee")
+    play_hit_sound()
     # An aura has no shot of its own, so each landed hit doubles as its attack.
     if Damage.deal(ctx, event_manager) and event_manager:
         event_manager.emit_event("on_attack", {"weapon": self, "body": body, "damage_context": ctx})

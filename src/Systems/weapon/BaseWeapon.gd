@@ -32,6 +32,19 @@ const RARITY_COLORS: Array[Color] = [
 ## fit to `AssetSizes.WEAPON_SPRITE`. 1.0 = default, 0.7 = 30% smaller.
 @export_range(0.1, 3.0, 0.05) var sprite_scale: float = 1.0
 @export var attack_sound: Array[Resource] = []
+@export var hit_sound: Array[Resource] = []
+@export var hit_sound_crit: Array[Resource] = []
+
+## Plays one random `hit_sound` for a landed hit. A weapon with no hit sounds
+## (the boss shotgun) plays nothing; `pick_random()` on an empty list is an error.
+func play_hit_sound() -> void:
+    if not hit_sound.is_empty():
+        SoundManager.play(hit_sound.pick_random(), 0, 0)
+
+## Plays one random `hit_sound_crit` for a landed critical hit. Nothing when empty.
+func play_hit_sound_crit() -> void:
+    if not hit_sound_crit.is_empty():
+        SoundManager.play(hit_sound_crit.pick_random(), 0, 0)
 
 ## How far this weapon reaches, **in meters**. The unit the player is shown, so
 ## a `.tres` reads 1.0 rather than 300 and a designer can compare two weapons

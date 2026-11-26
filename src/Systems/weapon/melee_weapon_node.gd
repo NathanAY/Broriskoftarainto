@@ -148,6 +148,7 @@ func _try_damage(collider: Object) -> void:
     if _damaged_bodies.has(target):
         return
     _damaged_bodies.append(target)
+    weapon_data.play_hit_sound()
     do_damage(target)
 
 

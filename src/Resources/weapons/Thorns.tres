@@ -2,6 +2,10 @@
 
 [ext_resource type="Script" uid="uid://dvdh213vyghat" path="res://src/Systems/weapon/contact_weapon.gd" id="1_6tgmt"]
 [ext_resource type="Resource" uid="uid://88gqpdee82ou" path="res://src/Resources/weapons/aim/all.tres" id="3_lldkg"]
+[ext_resource type="AudioStream" uid="uid://bblymyu3cgwbw" path="res://src/Assets/sounds/thorns/hit/punch_hit_01.wav" id="hit_01"]
+[ext_resource type="AudioStream" uid="uid://18ki1syt6ixv" path="res://src/Assets/sounds/thorns/hit/punch_hit_02.wav" id="hit_02"]
+[ext_resource type="AudioStream" uid="uid://bjngpje737ofn" path="res://src/Assets/sounds/thorns/hit/punch_hit_03.wav" id="hit_03"]
+[ext_resource type="AudioStream" uid="uid://dmt6re75vw0vl" path="res://src/Assets/sounds/thorns/hit/punch_hit_04.wav" id="hit_04"]
 
 [resource]
 script = ExtResource("1_6tgmt")
@@ -9,4 +13,5 @@ name = "Thorns"
 description = "Hidden contact weapon. Attacks when enemy touchs you."
 base_attack_speed = 1.6
 target_selector = ExtResource("3_lldkg")
+hit_sound = Array[Resource]([ExtResource("hit_01"), ExtResource("hit_02"), ExtResource("hit_03"), ExtResource("hit_04")])
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"

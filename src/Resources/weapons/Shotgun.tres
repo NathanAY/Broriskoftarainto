@@ -9,6 +9,35 @@
 [ext_resource type="AudioStream" uid="uid://b34vfixm8vslw" path="res://src/Assets/sounds/shotgun/gun_shotgun_sawed_off_shot_04.wav" id="4_r5sdm"]
 [ext_resource type="Texture2D" uid="uid://ca5udqvxkmunk" path="res://src/Assets/weapons/shotgun.png" id="7_6n3w5"]
 
+[ext_resource type="AudioStream" uid="uid://cjhue5f6d6n0a" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_01.wav" id="hit_01"]
+[ext_resource type="AudioStream" uid="uid://dtdk802cpg5aw" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_02.wav" id="hit_02"]
+[ext_resource type="AudioStream" uid="uid://bepflkwcn8u1o" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_03.wav" id="hit_03"]
+[ext_resource type="AudioStream" uid="uid://bxp2n3ix7coyd" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_04.wav" id="hit_04"]
+[ext_resource type="AudioStream" uid="uid://defen3xcwrp8m" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_05.wav" id="hit_05"]
+[ext_resource type="AudioStream" uid="uid://d2and0y0gtl66" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_06.wav" id="hit_06"]
+[ext_resource type="AudioStream" uid="uid://e8yfu6xqv6gi" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_07.wav" id="hit_07"]
+[ext_resource type="AudioStream" uid="uid://dbwvlllbwykbm" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_08.wav" id="hit_08"]
+[ext_resource type="AudioStream" uid="uid://du4cq1odqq2ox" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_09.wav" id="hit_09"]
+[ext_resource type="AudioStream" uid="uid://cswlny4mvttrg" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_10.wav" id="hit_10"]
+[ext_resource type="AudioStream" uid="uid://do3fc16q1e4wc" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_11.wav" id="hit_11"]
+[ext_resource type="AudioStream" uid="uid://w7opuxmdmadx" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_12.wav" id="hit_12"]
+[ext_resource type="AudioStream" uid="uid://by03g3im6ltsj" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_13.wav" id="hit_13"]
+[ext_resource type="AudioStream" uid="uid://dkkjbmpb83h7u" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_14.wav" id="hit_14"]
+[ext_resource type="AudioStream" uid="uid://cvi6drplkgpwm" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_15.wav" id="hit_15"]
+[ext_resource type="AudioStream" uid="uid://dwffwxm6f0drn" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_16.wav" id="hit_16"]
+[ext_resource type="AudioStream" uid="uid://ktg6t011kqvy" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_17.wav" id="hit_17"]
+[ext_resource type="AudioStream" uid="uid://dbm7rpxarvux0" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_18.wav" id="hit_18"]
+[ext_resource type="AudioStream" uid="uid://bnso4uhic5fwu" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_19.wav" id="hit_19"]
+[ext_resource type="AudioStream" uid="uid://y2k4rnop1j6a" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_20.wav" id="hit_20"]
+[ext_resource type="AudioStream" uid="uid://c5s0rqiuc5ave" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_21.wav" id="hit_21"]
+[ext_resource type="AudioStream" uid="uid://bdbnq3geggaek" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_22.wav" id="hit_22"]
+[ext_resource type="AudioStream" uid="uid://bh17foe4wyhgp" path="res://src/Assets/sounds/weapon/hit/sandback_punch/hit_impact_23.wav" id="hit_23"]
+
+[ext_resource type="AudioStream" uid="uid://dfrwjdqxdjtb0" path="res://src/Assets/sounds/weapon/crit/ricochet_01.wav" id="crit_01"]
+[ext_resource type="AudioStream" uid="uid://bls4duhw458r0" path="res://src/Assets/sounds/weapon/crit/ricochet_02.wav" id="crit_02"]
+[ext_resource type="AudioStream" uid="uid://c7b06q6ctybg8" path="res://src/Assets/sounds/weapon/crit/ricochet_03.wav" id="crit_03"]
+[ext_resource type="AudioStream" uid="uid://dx2v2de7j8k6o" path="res://src/Assets/sounds/weapon/crit/ricochet_04.wav" id="crit_04"]
+
 [resource]
 script = ExtResource("1_st5ot")
 pellet_count = 5
@@ -28,3 +57,5 @@ sprite = ExtResource("7_6n3w5")
 sprite_scale = 1.25
 attack_sound = Array[Resource]([ExtResource("1_4wmwi"), ExtResource("2_22c8m"), ExtResource("3_6aj5i"), ExtResource("4_r5sdm")])
 metadata/_custom_type_script = "uid://2vl1rp4agc1u"
+hit_sound = Array[Resource]([ExtResource("hit_01"), ExtResource("hit_02"), ExtResource("hit_03"), ExtResource("hit_04"), ExtResource("hit_05"), ExtResource("hit_06"), ExtResource("hit_07"), ExtResource("hit_08"), ExtResource("hit_09"), ExtResource("hit_10"), ExtResource("hit_11"), ExtResource("hit_12"), ExtResource("hit_13"), ExtResource("hit_14"), ExtResource("hit_15"), ExtResource("hit_16"), ExtResource("hit_17"), ExtResource("hit_18"), ExtResource("hit_19"), ExtResource("hit_20"), ExtResource("hit_21"), ExtResource("hit_22"), ExtResource("hit_23")])
+hit_sound_crit = Array[Resource]([ExtResource("crit_01"), ExtResource("crit_02"), ExtResource("crit_03"), ExtResource("crit_04")])

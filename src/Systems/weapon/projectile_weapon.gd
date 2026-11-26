@@ -13,7 +13,7 @@ class_name ProjectileWeapon
 var _current_projectile_speed_multiplier: float = 1
 
 func try_shoot(targets: Array[Node]) -> void:
-    SoundManager.play(attack_sound.pick_random(), -10, 0.2)
+    SoundManager.play(attack_sound.pick_random(), -20, 0.2)
     shoot_projectile(targets[0])
 
 func shoot_projectile(target: Node) -> Projectile:

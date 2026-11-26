@@ -11,7 +11,7 @@ func tooltip_details() -> Array:
     return details
 
 func try_shoot(targets: Array[Node]) -> void:
-    SoundManager.play(attack_sound.pick_random(), -15, 0.2)
+    SoundManager.play(attack_sound.pick_random(), -20, 0.2)
     var p: Projectile = shoot_projectile(targets[0])
     if p == null:
         return

@@ -1,7 +1,7 @@
 # Final boss — the Vault Baron
 
 ## Purpose
-The run's last fight: a scripted three-phase boss, faced when the player picks the Finale Gate. Stage bosses are still `src/Systems/enemies/EnemyBoss.tscn` with a shotgun loadout. The full design (all planned attacks, art prompts, milestones) is `docs/plans/final-boss-vault-baron.md`.
+The run's last fight: a scripted three-phase boss, faced when the player picks the Finale Gate. Stage bosses are still `src/Systems/enemies/EnemyBoss.tscn` with a shotgun loadout.
 
 **Built so far (M1-M4):** the whole fight. Phase 1: Coin Spray, Dividend Ring, Ram. Phase 2: Coin Spray, Dividend Ring, Double Ram, Safe Drop, Burrow, Coin Spiral, and Debt Collector adds. Phase 3: Coin Spray, Gold Rush, Golden Beam, Margin Call. Plus the phase-change shockwave, the plate popping off at phase 3, enrage and the death sequence. Plus presentation: the name card, a boss bar with phase ticks, screen shake and sounds. What is left is M5, balance playtesting, and real boss sounds (the ones wired in are placeholders).
 

@@ -7,10 +7,10 @@
 				"min_roll": 3.0,
 				"pick_weight": 3
 			},
-			"stock_investment": {"roll": 2.0},
-			"coin_gain": {"roll": 0.03},
-			"interest_rate": {"roll": 0.15},
-			"shop_discount": {"roll": 0.03},
+			"stock_investment": {"roll": 4.0},
+			"coin_gain": {"roll": 0.05},
+			"interest_rate": {"roll": 0.25},
+			"shop_discount": {"roll": 0.06},
 			"resale_value": {"roll": 0.05}
 		},
 		"modifier_weights": {

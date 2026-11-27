@@ -137,7 +137,7 @@ rows, so armor is editable there too.
 
 ## How a character's stats are coloured
 `base_stats` are **absolute** values that overwrite the `Stats` defaults, not
-gains — a Ranger's `health: 30.0` replaces the default 10. So the panel shows
+gains — a Ranger's `health: 20.0` replaces the default 10. So the panel shows
 the absolute number and uses colour to say whether it beats the default:
 - `src/Systems/stats/stats.gd` exposes `const DEFAULT_STATS` plus
   `static func default_stat(name)`, which is the single source of truth for the

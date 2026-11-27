@@ -13,7 +13,7 @@ script = ExtResource("1_tycoon")
 display_name = "Tycoon"
 description = "Lets the market fight for him: starts with stock and a line of credit, but earns less from kills."
 base_stats = {
-"health": 35.0,
+"health": 20.0,
 "damage": 0.9,
 "stock_investment": 5.0,
 "coin_gain": -0.25

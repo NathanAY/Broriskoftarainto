@@ -79,6 +79,8 @@ They still chase (`set_target_position(character)`), because a still sprite cann
 
 ## Monster density
 
+A **Character** dropdown sits above the list (built in code from `src/Assets/character/*/*.tres`). "Scenario default" keeps each scene's own `character_path`; any other entry is handed over as `DebugScenarioSetup.pending_character_path` and replaces it in `_enter_tree()`, for every scenario, Sandbox included.
+
 One slider under the list, **0.1x - 20x**, defaulting to 1.0x. It is shared by every scenario rather than being a per-scenario field, so a build can be checked against a trickle of monsters or an arena full of them without editing a scene.
 
 The picker reads the slider at press time and writes it to `DebugScenarioSetup.pending_monster_multiplier`, a **static** rather than a node: the scenario scene that reads it is not in the tree yet, and a static is the only thing that survives the scene change. `ScenarioSetup._ready()` applies it to `StageManager.enemy_spawner` after `_apply_start_mode()` — it has to be last, because the phase jump can call `start_wave()`, which re-sizes the wave from `current_stage` and would drop a multiplier applied before it.

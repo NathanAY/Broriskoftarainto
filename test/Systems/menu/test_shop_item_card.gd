@@ -77,10 +77,11 @@ func test_shop_items_are_horizontal_cards() -> void:
         assert_that(child is ShopItemCard).is_true()
 
     var shop_card: ShopItemCard = shop.items_container.get_child(0)
-    assert_str(shop_card.primary_button.text).is_equal("Buy (1)")
+    var stat_price := int(GameConfig.section("economy").get("type_prices", {}).get("stat", 1))
+    assert_str(shop_card.primary_button.text).is_equal("Buy (%d)" % stat_price)
     assert_str(shop_card.secondary_button.text).is_equal("Lock")
     assert_str(shop_card.name_label.text).is_equal(item.name)
-    assert_int(shop_card.price).is_equal(1)
+    assert_int(shop_card.price).is_equal(stat_price)
     assert_int(shop_card.icon_holder.get_child_count()).is_equal(1)
 
     var pickup_card: ShopItemCard = shop.items_container.get_child(1)
@@ -175,7 +176,7 @@ func test_buy_button_uses_card() -> void:
 
     var holder: ItemHolder = character.get_node("ItemHolder")
     assert_int(holder.items.size()).is_equal(1)
-    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(4.0)
+    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(5.0 - card.price)
 
     character.free()
     shop.free()
@@ -410,14 +411,16 @@ func test_shop_disables_buy_when_money_is_short() -> void:
     card.primary_button.pressed.emit()
     assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(0.0)
 
-    # With 6 money a 1-cost stat item is affordable and the purchase succeeds.
-    character.get_node("Stats").set_base_stat("money", 6)
+    # With the weapon's price plus a stat item's price in hand, the stat item is
+    # affordable and buying it leaves exactly the weapon's price.
+    var stat_price := int(GameConfig.section("economy").get("type_prices", {}).get("stat", 1))
+    character.get_node("Stats").set_base_stat("money", card.price + stat_price)
     shop._add_shop_item_entry(load(PLUS_DAMAGE_ITEM))
     var cheap: ShopItemCard = shop.items_container.get_child(1)
-    assert_int(cheap.price).is_equal(1)
+    assert_int(cheap.price).is_equal(stat_price)
     assert_bool(cheap.primary_button.disabled).is_false()
     cheap.primary_button.pressed.emit()
-    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(5.0)
+    assert_float(character.get_node("Stats").stats.get("money", 0.0)).is_equal(float(card.price))
 
     # With 5 money the 5-cost weapon is affordable again.
     shop._refresh_affordability()

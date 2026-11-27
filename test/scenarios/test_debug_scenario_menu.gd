@@ -121,6 +121,46 @@ func test_picked_density_is_handed_over() -> void:
     assert_float(DebugScenarioSetup.pending_monster_multiplier).is_equal_approx(7.5, 0.001)
 
 
+func test_character_picker_defaults_to_scenario_character() -> void:
+    assert_str(menu._selected_character_path()).is_empty()
+
+
+func test_character_picker_lists_every_character_on_disk() -> void:
+    var picker: OptionButton = menu.character_picker
+    var paths: Array[String] = []
+    for index in picker.item_count:
+        paths.append(picker.get_item_metadata(index))
+    for dir_name in DirAccess.get_directories_at(menu.CHARACTERS_DIR):
+        for file_name in DirAccess.get_files_at(menu.CHARACTERS_DIR.path_join(dir_name)):
+            if file_name.ends_with(".tres"):
+                assert_array(paths).contains(
+                    [menu.CHARACTERS_DIR.path_join(dir_name).path_join(file_name)]
+                )
+
+
+func test_picked_character_replaces_the_scenario_character() -> void:
+    var saved_path: String = DebugScenarioSetup.pending_character_path
+    var saved_start: String = GlobalGameState.starting_character
+    var picker: OptionButton = menu.character_picker
+    picker.select(1)
+    var picked: String = menu._selected_character_path()
+    assert_str(picked).is_not_empty()
+
+    DebugScenarioSetup.pending_character_path = picked
+    var setup: DebugScenarioSetup = auto_free(DebugScenarioSetup.new())
+    setup.character_path = DebugScenarioSetup.DEFAULT_CHARACTER
+    add_child(setup)
+    assert_str(GlobalGameState.starting_character).is_equal(picked)
+
+    DebugScenarioSetup.pending_character_path = ""
+    var plain: DebugScenarioSetup = auto_free(DebugScenarioSetup.new())
+    add_child(plain)
+    assert_str(GlobalGameState.starting_character).is_equal(DebugScenarioSetup.DEFAULT_CHARACTER)
+
+    DebugScenarioSetup.pending_character_path = saved_path
+    GlobalGameState.starting_character = saved_start
+
+
 func test_density_handed_over_is_clamped_to_the_range() -> void:
     var slider: HSlider = menu.get_node("Control/Center/Menu/MonsterRow/MonsterSlider")
     # Set past the slider's own range, which is what a stale value from a

@@ -50,6 +50,10 @@ enum StartMode {
 ## it and is the only writer; a scenario never writes it back.
 static var pending_monster_multiplier: float = 1.0
 
+## Character the picker chose for the run about to start; empty keeps the
+## scenario's own `character_path`. Static for the same reason as the multiplier.
+static var pending_character_path: String = ""
+
 @export var scenario_title := "Debug scenario"
 ## Must be a real `src/Assets/character/<id>/<Id>.tres`: `CharacterInitializer`
 ## derives the sprite folder from this path, so a synthetic resource loads with
@@ -98,7 +102,7 @@ static var pending_monster_multiplier: float = 1.0
 ## frame. The loadout below is added afterwards through the holder API instead,
 ## because those holders only exist once `Character` is built.
 func _enter_tree() -> void:
-	GlobalGameState.starting_character = character_path
+	GlobalGameState.starting_character = pending_character_path if pending_character_path != "" else character_path
 	GlobalGameState.starting_weapons = []
 	GlobalGameState.starting_items = []
 

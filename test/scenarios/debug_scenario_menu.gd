@@ -60,6 +60,10 @@ const SCENARIOS := [
 const MIN_MONSTER_MULTIPLIER := 0.1
 const MAX_MONSTER_MULTIPLIER := 20.0
 
+const CHARACTERS_DIR := "res://src/Assets/character"
+
+var character_picker: OptionButton
+
 @onready var scenario_list: VBoxContainer = $Control/Center/Menu/ScenarioList
 @onready var back_button: Button = $Control/Center/Menu/BackButton
 @onready var monster_slider: HSlider = $Control/Center/Menu/MonsterRow/MonsterSlider
@@ -67,11 +71,37 @@ const MAX_MONSTER_MULTIPLIER := 20.0
 
 
 func _ready() -> void:
+	_add_character_picker()
 	for index in SCENARIOS.size():
 		scenario_list.add_child(_make_row(index))
 	back_button.pressed.connect(_on_back_pressed)
 	monster_slider.value_changed.connect(_on_monster_slider_changed)
 	_on_monster_slider_changed(monster_slider.value)
+
+
+## "Character" dropdown above the scenario list: the first entry keeps each
+## scenario's own character, the rest are every `.tres` under `CHARACTERS_DIR`.
+## Built in code so the list cannot drift from the characters on disk.
+func _add_character_picker() -> void:
+	character_picker = OptionButton.new()
+	character_picker.name = "CharacterPicker"
+	character_picker.add_item("Character: scenario default")
+	character_picker.set_item_metadata(0, "")
+	for dir_name in DirAccess.get_directories_at(CHARACTERS_DIR):
+		for file_name in DirAccess.get_files_at(CHARACTERS_DIR.path_join(dir_name)):
+			if file_name.ends_with(".tres"):
+				character_picker.add_item(file_name.get_basename())
+				character_picker.set_item_metadata(
+					character_picker.item_count - 1,
+					CHARACTERS_DIR.path_join(dir_name).path_join(file_name)
+				)
+	scenario_list.add_sibling(character_picker)
+	scenario_list.get_parent().move_child(character_picker, scenario_list.get_index())
+
+
+## The character path the dropdown shows ("" = scenario default).
+func _selected_character_path() -> String:
+	return character_picker.get_item_metadata(character_picker.selected)
 
 
 ## One button plus the line describing it, as a single row so the two stay
@@ -110,6 +140,7 @@ func _on_scenario_pressed(index: int) -> void:
 		push_error("Debug scenario scene missing: " + path)
 		return
 	_publish_monster_multiplier()
+	DebugScenarioSetup.pending_character_path = _selected_character_path()
 	# No global is set here on purpose. The scenario's own `ScenarioSetup` node
 	# writes the loadout into `GlobalGameState` before the character reads it,
 	# and the phase jump into `StageManager`, so the scene file carries the whole

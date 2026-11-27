@@ -132,7 +132,7 @@ func test_character_select_uses_compact_cards_and_detail_panel() -> void:
 	# The top panel is the shared card base, not a hand-rolled label.
 	assert_that(menu.details_panel).is_instanceof(ItemDisplayPanel)
 	assert_str(menu.details_panel.name_label.text).is_equal(second.character.display_name)
-	assert_str(menu.details_panel.info_label.text).contains("Health")
+	assert_str(menu.details_panel.info_label.text).contains("Starting Weapon")
 	assert_int(menu.details_panel.icon_holder.get_child_count()).is_equal(1)
 
 	menu.free()

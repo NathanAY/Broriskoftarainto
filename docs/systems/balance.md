@@ -428,12 +428,12 @@ The test needs `tier` on `BaseWeapon` (see `balance_audit.md`), and the range ba
 
 | Character | `base_stats` | `modifiers` | Starting weapon | `WB_raw` | `WB_solo` |
 |---|---|---|---|---|---|
-| Multitasker (default) | `health 40` | — | Fist | 10.0 | **7.0** |
-| Brawler | `attack_speed 1.05`, `damage 1.2`, `health 45`, `movement_speed 0.9`, `armor 4` | — | Fist | 12.6 | **8.8** |
-| Ranger | `attack_speed 1.0`, `damage 0.85`, `health 30`, `movement_speed 1.25` | — | Pistol (starts with the Spread item) | 7.8 | **6.6** |
-| Soldier | `attack_speed 0.9`, `damage 0.85`, `health 42`, `movement_speed 0.9`, `armor 5` | — | Shotgun (`Σ 17.5`) | 8.9 | **7.6** |
-| Wildling | `attack_speed 1.15`, `damage 1.05`, `health 38`, `movement_speed 1.1` | `WildlingRegenModifier` (1 HP / 0.5 s) | Thorns (contact) | 9.7 | **8.7** |
-| Tycoon | `damage 0.9`, `health 35`, `stock_investment 5`, `coin_gain −0.25` | `CreditLineModifier` | SMG (`2.0 × 5`) | 9.0 | **7.7** |
+| Multitasker (default) | `health 20` | — | Fist | 10.0 | **7.0** |
+| Brawler | `attack_speed 1.05`, `damage 1.2`, `health 20`, `movement_speed 0.9`, `armor 4` | — | Fist | 12.6 | **8.8** |
+| Ranger | `attack_speed 1.0`, `damage 0.85`, `health 20`, `movement_speed 1.25` | — | Pistol (starts with the Spread item) | 7.8 | **6.6** |
+| Soldier | `attack_speed 0.9`, `damage 0.85`, `health 20`, `movement_speed 0.9`, `armor 5` | — | Shotgun (`Σ 17.5`) | 8.9 | **7.6** |
+| Wildling | `attack_speed 1.15`, `damage 1.05`, `health 20`, `movement_speed 1.1` | `WildlingRegenModifier` (1 HP / 0.5 s) | Thorns (contact) | 9.7 | **8.7** |
+| Tycoon | `damage 0.9`, `health 20`, `stock_investment 5`, `coin_gain −0.25` | `CreditLineModifier` | SMG (`2.0 × 5`) | 9.0 | **7.7** |
 | Miner | `movement_speed 1.05` (default `health` and `damage`) | `MinerMineModifier` | Shotgun (`Σ 17.5`), fired through mines at ×1.5 | 10.5 | **8.9** |
 
 The seven characters live in `src/Assets/character/<id>/<Id>.tres`; `docs/systems/characters.md` is the format reference. Five attack archetypes are represented: melee arc (Multitasker, Brawler), ranged single shot (Ranger), rapid fire (Tycoon), pellet cone (Soldier), contact (Wildling) and mines (Miner). The Miner's ×1.5 mine damage is outside `WB_solo`: it pays for shots flying in random directions and only firing when an enemy walks over a mine.
@@ -441,20 +441,19 @@ The seven characters live in `src/Assets/character/<id>/<Id>.tres`; `docs/system
 **Rules [PROPOSED]:**
 
 - A character's starting `WB_solo` must be within **±30%** of the reference character (Multitasker, 7.0). The band is enforced by `test/Systems/characters/test_character_power_budget.gd`, which derives every figure from the `.tres` rather than pinning literals.
-- A character's starting `EHP` must be within **±60%** of the reference (40). **[CURRENT]** EHP spread:
+- A character's starting `EHP` must be within **±60%** of the reference (20). Character `health` is capped at **20**; the default is 10 (the Miner keeps it). **[CURRENT]** EHP spread:
 
 | Character | `health` | `armor` | Mitigation | `EHP` | vs reference |
 |---|---|---|---|---|---|
-| Ranger | 30 | 0 | 1.00 | **30** | 0.75× |
-| Tycoon | 35 | 0 | 1.00 | **35** | 0.88× |
-| Wildling | 38 | 0 | 1.00 | **38** | 0.95× |
-| Miner | 10 | 0 | 1.00 | **10** | 0.25× — **out of band** |
-| Multitasker | 40 | 0 | 1.00 | **40** | 1.00× |
-| Brawler | 45 | 4 | 0.714 | **63** | 1.58× |
-| Soldier | 42 | 5 | 0.667 | **63** | 1.58× |
+| Miner | 10 | 0 | 1.00 | **10** | 0.50× |
+| Ranger | 20 | 0 | 1.00 | **20** | 1.00× |
+| Tycoon | 20 | 0 | 1.00 | **20** | 1.00× |
+| Wildling | 20 | 0 | 1.00 | **20** | 1.00× |
+| Multitasker | 20 | 0 | 1.00 | **20** | 1.00× |
+| Brawler | 20 | 4 | 0.714 | **28** | 1.40× |
+| Soldier | 20 | 5 | 0.667 | **30** | 1.50× |
 
-- **The Miner is below the EHP band on purpose.** He keeps the default `health` 10 by design decision (2026-11-27), so `test_starting_ehp_is_within_band` fails on him until that decision changes or the band does.
-- **A character's own regen is outside the EHP table.** EHP counts armor, which reduces each hit; a regen tick recovers health over time, so folding it in would need a damage-rate model the budget test deliberately does not have. The Wildling's `1 HP / 0.5 s` is therefore an unmeasured sustain add-on on top of its listed `EHP 38` — set it low, and prefer the archetype it reinforces (the Wildling trades hits taken for speed and contact damage) over raw throughput.
+- **A character's own regen is outside the EHP table.** EHP counts armor, which reduces each hit; a regen tick recovers health over time, so folding it in would need a damage-rate model the budget test deliberately does not have. The Wildling's `1 HP / 0.5 s` is therefore an unmeasured sustain add-on on top of its listed `EHP 20` — set it low, and prefer the archetype it reinforces (the Wildling trades hits taken for speed and contact damage) over raw throughput.
 - **A character that starts with no weapon is a design error until it has one.** All seven now start armed.
 - **Ranger's Spread is a deliberate clear-power exception.** `SpreadModifier` is +200% clear `WB` (audit row 1) and is kept as-is by design; Ranger is a glass cannon whose solo `WB_solo` (6.6) is in band while its pack damage is not. The budget test measures the weapon only, not the item.
 - Each character owns a distinct kit: no two share the same `base_stats` + weapon + item signature (also asserted by the budget test).

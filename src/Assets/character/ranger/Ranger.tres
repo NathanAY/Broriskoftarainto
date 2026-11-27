@@ -16,7 +16,7 @@ description = "Glass cannon: the fastest character, spraying a spread-firing pis
 base_stats = {
 "attack_speed": 1.0,
 "damage": 0.85,
-"health": 30.0,
+"health": 20.0,
 "movement_speed": 1.25
 }
 starting_weapons = Array[ExtResource("3_ranger")]([ExtResource("5_ranger")])

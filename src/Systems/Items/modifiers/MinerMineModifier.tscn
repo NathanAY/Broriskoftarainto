@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bawoljn4cu4rs"]
+[gd_scene format=3 uid="uid://drxbixhs7u31m"]
 
 [ext_resource type="Script" uid="uid://bofylopit86ax" path="res://src/Systems/Items/modifiers/miner_mine_modifier.gd" id="1_miner"]
 [ext_resource type="AudioStream" uid="uid://dvfcnf81f5b3h" path="res://src/Assets/sounds/miner/lay/lay_01.wav" id="2_lay"]
@@ -14,6 +14,6 @@
 [ext_resource type="AudioStream" uid="uid://c1ojo3jh36gsx" path="res://src/Assets/sounds/miner/lay/lay_11.wav" id="12_lay"]
 [ext_resource type="AudioStream" uid="uid://bw5l5fcr321c6" path="res://src/Assets/sounds/miner/lay/lay_12.wav" id="13_lay"]
 
-[node name="MinerMineModifier" type="Node"]
+[node name="MinerMineModifier" type="Node" unique_id=707199305]
 script = ExtResource("1_miner")
 lay_sounds = Array[AudioStream]([ExtResource("2_lay"), ExtResource("3_lay"), ExtResource("4_lay"), ExtResource("5_lay"), ExtResource("6_lay"), ExtResource("7_lay"), ExtResource("8_lay"), ExtResource("9_lay"), ExtResource("10_lay"), ExtResource("11_lay"), ExtResource("12_lay"), ExtResource("13_lay")])

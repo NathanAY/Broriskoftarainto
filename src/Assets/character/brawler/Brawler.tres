@@ -14,7 +14,7 @@ description = "Melee bruiser: the hardest-hitting and toughest up close, but slo
 base_stats = {
 "attack_speed": 1.05,
 "damage": 1.2,
-"health": 45.0,
+"health": 20.0,
 "movement_speed": 0.9,
 "armor": 4.0
 }

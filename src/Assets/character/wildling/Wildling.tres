@@ -2,11 +2,12 @@
 
 [ext_resource type="Script" uid="uid://b174fx02jtd8q" path="res://src/Systems/characters/CharacterData.gd" id="1_wildling"]
 [ext_resource type="Texture2D" uid="uid://co8tav7tulvwb" path="res://src/Assets/character/potato.png" id="2_wildling"]
-[ext_resource type="Texture2D" uid="uid://bvqgnt287p1h3" path="res://src/Assets/character/wildling/wildling_eyes.png" id="6_wildling"]
-[ext_resource type="Texture2D" uid="uid://bhxnf5pmjhat2" path="res://src/Assets/character/wildling/wildling_mouth.png" id="7_wildling"]
 [ext_resource type="Script" uid="uid://2vl1rp4agc1u" path="res://src/Systems/weapon/BaseWeapon.gd" id="3_wildling"]
 [ext_resource type="Resource" uid="uid://bai6x23uxk0rk" path="res://src/Resources/weapons/Thorns.tres" id="4_wildling"]
 [ext_resource type="PackedScene" path="res://src/Assets/character/wildling/WildlingRegenModifier.tscn" id="5_wildling"]
+[ext_resource type="Texture2D" uid="uid://bvqgnt287p1h3" path="res://src/Assets/character/wildling/wildling_eyes.png" id="6_wildling"]
+[ext_resource type="Script" uid="uid://bi8j7om4juysb" path="res://src/Systems/Items/Item.gd" id="6_x1fy0"]
+[ext_resource type="Texture2D" uid="uid://bhxnf5pmjhat2" path="res://src/Assets/character/wildling/wildling_mouth.png" id="7_wildling"]
 
 [resource]
 script = ExtResource("1_wildling")
@@ -15,7 +16,7 @@ description = "Berserker: fast on its feet and hurts whatever touches it, but fr
 base_stats = {
 "attack_speed": 1.15,
 "damage": 1.05,
-"health": 50.0,
+"health": 20.0,
 "movement_speed": 1.1
 }
 modifiers = [ExtResource("5_wildling")]

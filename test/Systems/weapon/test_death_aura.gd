@@ -238,11 +238,15 @@ func test_a_tick_places_its_burst_on_the_weapon_sprite() -> void:
 		"the aura tick spawned no damage burst").is_equal(1)
 
 	var burst := spawned_bursts[0]
-	# `burst.radius` is pixels - `AreaWeapon` hands the burst `get_range_px()` -
-	# so the expectation is the weapon's own pixel accessor, not the meter value.
+	# `burst.radius` is pixels - `AreaWeapon` hands the burst `visual_radius_px()`,
+	# the range plus a margin for the hit body's own size - so the ring must
+	# cover the range and equal the weapon's own accessor.
 	assert_float(burst.radius).override_failure_message(
-		"the burst does not match the weapon's weapon_range, so it draws a "
-		+ "circle the damage does not reach").is_equal(aura.get_range_px())
+		"the burst is not the weapon's visual radius").is_equal(
+		aura.visual_radius_px(_one(test_scene.get_node("Enemy"))))
+	assert_float(burst.radius).override_failure_message(
+		"the burst draws a circle smaller than the damage reaches").is_greater_equal(
+		aura.get_range_px())
 	assert_vector(burst.global_position).override_failure_message(
 		"the burst is not centred on the weapon sprite the selector measures from"
 	).is_equal(aura.sprite_node.global_position)
@@ -349,10 +353,34 @@ func test_bursts_do_not_share_their_process_material() -> void:
 	# weapon_range would pin the authored authoring choice instead of the scaling.
 	assert_float(_rim_radius(first)).override_failure_message(
 		"the rim shards were not scaled to the weapon's own range"
-	).is_equal_approx(aura.get_range_px() * AreaDamageBurst.START_FRACTION, RADIUS_TOLERANCE)
+	).is_equal_approx(aura.visual_radius_px(_one(enemy)) * AreaDamageBurst.START_FRACTION, RADIUS_TOLERANCE)
 	assert_float(_rim_radius(last)).override_failure_message(
 		"the second weapon's burst drew the first weapon's range"
-	).is_equal_approx(second.get_range_px() * AreaDamageBurst.START_FRACTION, RADIUS_TOLERANCE)
+	).is_equal_approx(second.visual_radius_px(_one(enemy)) * AreaDamageBurst.START_FRACTION, RADIUS_TOLERANCE)
+
+	test_scene.free()
+
+
+## The rim shards must be able to reach the aura's edge: no damping, and
+## start radius + speed * lifetime equals the weapon's range.
+func test_rim_shards_reach_the_weapon_range() -> void:
+	var runner := scene_runner(WeaponTestSupport.TEST_SCENE)
+	var test_scene := runner.scene()
+	get_tree().current_scene = test_scene
+
+	var character: Character = test_scene.get_node("Character")
+	var aura: AreaWeapon = WeaponTestSupport.equip_only_weapon(character, DEATH_AURA)
+
+	_record_bursts(character)
+	aura.try_shoot(_one(test_scene.get_node("Enemy")))
+	assert_int(spawned_bursts.size()).is_equal(1)
+
+	var rim := spawned_bursts[0].get_node("Rim") as GPUParticles2D
+	var ring := rim.process_material as ParticleProcessMaterial
+	assert_float(ring.damping_max).override_failure_message(
+		"damping makes the shards stop short of the aura's range").is_equal(0.0)
+	assert_float(ring.emission_ring_radius + ring.initial_velocity_max * rim.lifetime) \
+		.is_equal_approx(aura.visual_radius_px(_one(test_scene.get_node("Enemy"))), 0.1)
 
 	test_scene.free()
 

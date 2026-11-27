@@ -67,6 +67,11 @@ func _retarget_rim(emitter: GPUParticles2D, target_radius: float) -> void:
 	var inner := target_radius * START_FRACTION
 	ring.emission_ring_inner_radius = inner * 0.92
 	ring.emission_ring_radius = inner
+	# Damping bleeds speed, so the shards would stop well short of the edge. With
+	# none, distance travelled is exactly speed * lifetime, which is what the
+	# speed below is derived from.
+	ring.damping_min = 0.0
+	ring.damping_max = 0.0
 	var authored_speed := ring.initial_velocity_max
 	if authored_speed > 0.0:
 		var speed := (target_radius - inner) / maxf(emitter.lifetime, 0.01)

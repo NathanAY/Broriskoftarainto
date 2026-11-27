@@ -13,10 +13,14 @@ func find_targets(_origin: Node, _range: float, _ignore_node: Node) -> Array[Nod
 ## centre distance, so a big creature is in reach as soon as its body is, and
 ## its size is part of the answer rather than something its centre hides.
 static func reach_distance(from: Vector2, target: Node2D) -> float:
-    var dist := from.distance_to(target.global_position)
+    return maxf(from.distance_to(target.global_position) - hitbox_radius(target), 0.0)
+
+
+## Radius in pixels of `target`'s circular hitbox, or 0 when it has none.
+static func hitbox_radius(target: Node2D) -> float:
     var shape_node := target.get_node_or_null("Hitbox/CollisionShape2D") as CollisionShape2D
     if shape_node == null:
         shape_node = target.get_node_or_null("CollisionShape2D") as CollisionShape2D
     if shape_node != null and shape_node.shape is CircleShape2D:
-        dist -= (shape_node.shape as CircleShape2D).radius * shape_node.global_scale.x
-    return maxf(dist, 0.0)
+        return (shape_node.shape as CircleShape2D).radius * shape_node.global_scale.x
+    return 0.0

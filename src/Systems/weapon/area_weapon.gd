@@ -27,7 +27,7 @@ const BURST_SCENE := preload("res://src/Scenes/particles/area_damage_burst.tscn"
 func try_shoot(targets: Array[Node]) -> void:
     var holder = get_holder()
     if not holder: return
-    _spawn_burst(holder)
+    _spawn_burst(holder, visual_radius_px(targets))
     if not attack_sound.is_empty():
         SoundManager.play(attack_sound.pick_random(), 0, 0)
     for t in targets:
@@ -41,9 +41,9 @@ func try_shoot(targets: Array[Node]) -> void:
 ## `remove_from` frees, so nothing is left behind when the weapon is unequipped.
 ## `local_coords` is off on both emitters, so the shards stay where they were
 ## thrown instead of being dragged along by a moving holder.
-func _spawn_burst(holder: Node) -> void:
+func _spawn_burst(holder: Node, ring_radius: float) -> void:
     var burst: AreaDamageBurst = BURST_SCENE.instantiate()
-    burst.radius = get_range_px()
+    burst.radius = ring_radius
     holder.add_child(burst)
     # After parenting, not before: an unparented Node2D has no parent transform
     # to compose, so writing `global_position` first would store the sprite's
@@ -51,6 +51,18 @@ func _spawn_burst(holder: Node) -> void:
     # `_ready` reads `radius`, so that has to be set before `add_child`.
     if sprite_node and is_instance_valid(sprite_node):
         burst.global_position = sprite_node.global_position
+
+## The ring's radius in pixels. Hits are measured to the target's hitbox *edge*
+## (`TargetSelector.reach_distance`), so a body is hit while its centre is up to
+## its own radius past `get_range_px()`. The ring is drawn that much wider, using
+## the largest hitbox among `targets`, so it covers what was actually hit and
+## needs no fixed margin. With no targets it is the plain range.
+func visual_radius_px(targets: Array[Node] = []) -> float:
+    var slack := 0.0
+    for t in targets:
+        if t is Node2D:
+            slack = maxf(slack, TargetSelector.hitbox_radius(t))
+    return get_range_px() + slack
 
 func do_damage(body):
     var ctx = DamageContext.new()

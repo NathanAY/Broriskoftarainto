@@ -65,6 +65,7 @@ Two details in that generator are load-bearing, not taste:
 
 - An aura has no impact point and no chosen target, so its visual is a ring rather than a hit spark: shards thrown outward that arrive at the aura's edge exactly as they die, plus a short flash where the pulse was born. `area_weapon.gd` spawns it per tick at `sprite_node.global_position`, because that sprite is what the selector measures from (and it orbits the holder, so the aura centre is offset from the character).
 - `AreaDamageBurst.START_FRACTION` (0.55) is where along the outward leg the shards start. Below 1 so they travel outward as they fade; at 1 they would sit on the damage edge from the first frame and read as a static ring.
+- The rim's damping is forced to 0 at runtime: damping bleeds speed, so shards stopped well inside the radius and the ring looked smaller than the real reach. Hit reach itself is measured to the target's hitbox edge (`TargetSelector.reach_distance`), so `AreaWeapon.visual_radius_px(targets)` draws the ring `range` plus the largest hitbox radius among the targets hit that tick (no fixed margin, so it stays right at any range).
 - Speed is derived from radius as well as position — a longer aura has to take longer to cross, or its shards reach the edge at full brightness and keep going, drawing damage past what was hit.
 
 ## The poison bubbles (`poison_particles.tscn`)

@@ -28,7 +28,4 @@ func _show_damage(event: Dictionary) -> void:
     if (ctx.tags.has("explosion")):
         dmg_num.color = Color.YELLOW
     dmg_num.global_position = body.global_position + random_offset
-    if (ctx.is_crit):
-        dmg_num.show_text("%s!" % [int(damage)])
-    else:
-        dmg_num.show_damage(damage)
+    dmg_num.show_damage(damage, ctx.is_crit)

@@ -103,9 +103,9 @@ Read by `src/Systems/arena.gd`. The ground art is brown; each theme recolours it
 
 | Key | Meaning |
 |---|---|
-| `decor_chance` | Chance that each 64 px ground cell gets one decor sprite (from `tiles_3.png`, or the theme's own `decor` sheet). |
+| `decor_chance` | Chance that each 64 px ground cell gets one decor sprite (from `tiles_decor.png`, or the theme's own `decor` sheet). |
 | `decor_scale` | Scale of a decor sprite (the sheet cells are 128x128 px, so 0.5 is 64x64, one ground cell). |
-| `themes` | List of themes, one picked per stage: `{name, hue_shift, saturation, brightness}` recolours the flat ground and the border (`hue_shift` is degrees, the art starts brown so ~75-100 is green; the others are multipliers). An optional `decor` is the path of an 8x8 sheet of transparent-background sprites scattered over the ground instead of the default sheet; unlike the default it is not recoloured, so pair it with a ground colour that suits it. Add a row for a new look; an empty list leaves the art brown. |
+| `themes` | List of themes, one picked per stage: `{name, hue_shift, saturation, brightness}` recolours the flat ground and the border (`hue_shift` is degrees, the art starts brown so ~75-100 is green; the others are multipliers). An optional `decor` is the path of an 8x8 sheet of transparent-background sprites, or a list of such paths (each sprite picks a sheet at random), scattered over the ground instead of the default sheet; unlike the default it is not recoloured, so pair it with a ground colour that suits it. Sheets are `src/Assets/tiles/tiles_<biome>_<n>.png` (pandora, moon, jungle, desert, lakebed, tundra); none is global, each is listed only on the ground colours that suit it (e.g. moon on `ash`/`night`/`moon`, tundra on `ice`/`snow`). Add a row for a new look; an empty list leaves the art brown. |
 
 ## `final_boss`
 

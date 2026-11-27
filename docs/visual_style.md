@@ -212,7 +212,7 @@ The shipped art is desaturated, and the outline is heavy. This is measured, not 
 
 | Asset | Near-black outline pixels | Mean saturation of non-outline pixels |
 | --- | --- | --- |
-| `src/Assets/tiles/tiles_1.png` | 4.3% | 25.9% |
+| `src/Assets/tiles/tiles_ground.png` | 4.3% | 25.9% |
 | `src/Assets/weapons/pistol.png` | 64.0% | 19.3% |
 | `src/Assets/enemies/spitter.png` | 48.7% | 36.3% |
 | `src/Assets/character/brawler/brawler_icon.png` | 36.9% | 28.4% |

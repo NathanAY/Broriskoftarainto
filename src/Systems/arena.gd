@@ -4,7 +4,7 @@ class_name Arena
 ##
 ## Centered on the Arena node's position (place at 0,0 so Rect is symmetric).
 ## Ground replicates Brotato 3.6 `MyTileMap`: a TileMapLayer filled with
-## weighted-random tiles from a 3x4 atlas (`tiles_1.png`, copied from
+## weighted-random tiles from a 3x4 atlas (`tiles_ground.png`, copied from
 ## Brotato 3.6 `resources/tiles/`). The plain tile at atlas coords (2, 3)
 ## has weight 50 while every decorated tile (rocks, grass tufts, pebbles)
 ## has weight 1, so most cells are plain ground with occasional decoration
@@ -37,7 +37,7 @@ const WALL_LAYER_BIT: int = 1 << (WALL_PHYSICS_LAYER - 1)
         _rebuild()
 
 ## Tile atlas texture. Must be a ATLAS_COLS x ATLAS_ROWS grid of tile_size px tiles.
-@export var ground_texture: Texture2D = preload("res://src/Assets/tiles/tiles_1.png"):
+@export var ground_texture: Texture2D = preload("res://src/Assets/tiles/tiles_ground.png"):
     set(value):
         ground_texture = value
         _rebuild()
@@ -91,7 +91,7 @@ const WALL_LAYER_BIT: int = 1 << (WALL_PHYSICS_LAYER - 1)
 
 ## Sheet of tiny flat ground details (transparent background) scattered over a
 ## flat ground. null = use the decorated `ground_texture` tiles instead.
-@export var decor_texture: Texture2D = preload("res://src/Assets/tiles/tiles_3.png"):
+@export var decor_texture: Texture2D = preload("res://src/Assets/tiles/tiles_decor.png"):
     set(value):
         decor_texture = value
         _rebuild()
@@ -102,9 +102,10 @@ const WALL_LAYER_BIT: int = 1 << (WALL_PHYSICS_LAYER - 1)
 
 var _tile_source_id: int = 0
 var _decor: Node2D
-## Decor sheet the current theme brings (null = `decor_texture`). Its sprites keep
-## their own colours instead of being recoloured with the ground.
-var _theme_decor: Texture2D
+## Decor sheets the current theme brings (empty = `decor_texture`). Each sprite
+## picks one at random; they keep their own colours instead of being recoloured
+## with the ground.
+var _theme_decor: Array[Texture2D] = []
 ## Index of the theme currently applied (-1 = none).
 var theme_index: int = -1
 var _theme: Array = [0.0, 1.0, 1.0]
@@ -137,8 +138,12 @@ func apply_theme(theme: Dictionary, index: int = -1) -> void:
     var sat: float = float(theme.get("saturation", 1.0))
     var bright: float = float(theme.get("brightness", 1.0))
     _theme = [-deg_to_rad(hue), sat, bright]
-    var decor_path: String = theme.get("decor", "")
-    _theme_decor = load(decor_path) if not decor_path.is_empty() else null
+    # `decor` is one sheet path or a list of them.
+    var decor: Variant = theme.get("decor", [])
+    var decor_paths: Array = [decor] if decor is String else decor
+    _theme_decor.clear()
+    for path in decor_paths:
+        _theme_decor.append(load(str(path)))
     # Ground, decor and outline all depend on the theme, so lay them out again.
     _rebuild()
     _update_outline_color()
@@ -351,8 +356,8 @@ func _scatter_decor() -> void:
     if _decor != null:
         _decor.free()
         _decor = null
-    var sheet: Texture2D = _theme_decor if _theme_decor != null else decor_texture
-    if sheet == null or ground == null:
+    var sheets: Array = _theme_decor if not _theme_decor.is_empty() else [decor_texture]
+    if sheets[0] == null or ground == null:
         return
     var cfg: Dictionary = GameConfig.section("arena")
     var chance: float = float(cfg.get("decor_chance", 0.3))
@@ -361,7 +366,6 @@ func _scatter_decor() -> void:
     _decor.name = "Decor"
     add_child(_decor)
     move_child(_decor, ground.get_index() + 1)
-    var cell := Vector2(sheet.get_width() / float(DECOR_COLS), sheet.get_height() / float(DECOR_ROWS))
     var rng := RandomNumberGenerator.new()
     if ground_seed == 0:
         rng.randomize()
@@ -373,6 +377,8 @@ func _scatter_decor() -> void:
         for gy in range(grid.y):
             if rng.randf() >= chance:
                 continue
+            var sheet: Texture2D = sheets[rng.randi_range(0, sheets.size() - 1)]
+            var cell := Vector2(sheet.get_width() / float(DECOR_COLS), sheet.get_height() / float(DECOR_ROWS))
             var atlas := AtlasTexture.new()
             atlas.atlas = sheet
             atlas.region = Rect2(Vector2(rng.randi_range(0, DECOR_COLS - 1), rng.randi_range(0, DECOR_ROWS - 1)) * cell, cell)
@@ -391,7 +397,7 @@ func _scatter_decor() -> void:
 func _apply_decor_material() -> void:
     if _decor == null:
         return
-    if _theme_decor == null:
+    if _theme_decor.is_empty():
         _apply_material(_decor, Color.WHITE)
     else:
         _decor.material = null

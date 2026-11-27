@@ -285,3 +285,23 @@ func test_theme_decor_sheet_keeps_its_colours_and_default_is_recoloured() -> voi
 	assert_object(arena.ground.material).is_not_null()
 	arena.apply_theme({"hue_shift": 90.0}, 1)
 	assert_object(arena.get_node("Decor").material).is_not_null()
+
+
+func test_theme_decor_list_mixes_every_sheet() -> void:
+	var arena: Arena = auto_free(load("res://src/Systems/Arena.tscn").instantiate())
+	arena.random_theme = false
+	add_child(arena)
+	var paths: Array = ["res://src/Assets/tiles/tiles_grass.png", "res://src/Assets/tiles/tiles_snow.png"]
+	arena.apply_theme({"decor": paths}, 0)
+	var used := {}
+	for sprite in arena.get_node("Decor").get_children():
+		used[(sprite.texture as AtlasTexture).atlas.resource_path] = true
+	for path in paths:
+		assert_bool(used.has(path)).is_true()
+
+
+func test_every_configured_theme_decor_sheet_loads() -> void:
+	for theme in GameConfig.section("arena").get("themes", []):
+		var decor: Variant = theme.get("decor", [])
+		for path in ([decor] if decor is String else decor):
+			assert_object(load(path)).is_instanceof(Texture2D)

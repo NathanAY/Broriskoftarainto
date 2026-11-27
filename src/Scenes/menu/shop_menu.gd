@@ -180,6 +180,11 @@ func _apply_buyable(card: ShopItemCard) -> void:
     card.primary_button.text = ("Buy (%d)" % card.price) if room else "No free slot"
     if not room:
         card.price_label.tooltip_text = "All weapon slots are full."
+    var weapon_holder: WeaponHolder = character.get_node_or_null("WeaponHolder") if character else null
+    var offer = card.get_meta("item")
+    if offer is BaseWeapon and weapon_holder and not weapon_holder.accepts_kind(offer):
+        card.primary_button.text = "Ranged only"
+        card.price_label.tooltip_text = "This character can only use ranged weapons."
 
 func hide_menu():
     get_tree().paused = false

@@ -208,6 +208,9 @@ func get_holder() -> Node:
 func _on_timeout() -> void:
     var holder = get_holder()
     if not holder: return
+    var weapon_holder := holder.get_node_or_null("WeaponHolder") as WeaponHolder
+    if weapon_holder and weapon_holder.hold_fire:
+        return
 
     var targets: Array[Node] = []
     if target_selector:

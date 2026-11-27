@@ -16,20 +16,29 @@ func try_shoot(targets: Array[Node]) -> void:
     SoundManager.play(attack_sound.pick_random(), -20, 0.2)
     shoot_projectile(targets[0])
 
+## Projectiles one attack fires. A pellet weapon overrides it; the Miner's mine
+## reads it to know how many shots a stretch of time is worth.
+func projectiles_per_attack() -> int:
+    return 1
+
 func shoot_projectile(target: Node) -> Projectile:
     var holder = get_holder()
     if not holder or not projectile_scene: return
-    
-    var p: Projectile = projectile_scene.instantiate()
-        
-    # get weapon’s sprite node
-    var holder_sprite_node: Node2D = sprite_node
+    var from: Vector2 = sprite_node.global_position if sprite_node else holder.global_position
+    var p := spawn_projectile(from, (target.global_position - from).normalized())
+    p.set_target(target)
+    event_manager.emit_event("on_attack", {"projectile": p, "weapon": self})
+    return p
 
-    if holder_sprite_node:
-        p.global_position = holder_sprite_node.global_position
-    else:
-        p.global_position = holder.global_position
-    
+## A projectile of this weapon at `from` flying along `dir`, fully configured
+## (stats, pierce, damage, friendly fire) and added to the scene. Emits nothing:
+## `shoot_projectile` reports the attack, a mine detonation does not.
+func spawn_projectile(from: Vector2, dir: Vector2) -> Projectile:
+    var holder = get_holder()
+    if not holder or not projectile_scene: return null
+
+    var p: Projectile = projectile_scene.instantiate()
+    p.global_position = from
     p.attachEventManager(event_manager)
     var projectile_props = {
         "pierce": stats.get_stat("projectile_pierce") if stats.get_stat("projectile_pierce") else 0.0,
@@ -48,14 +57,9 @@ func shoot_projectile(target: Node) -> Projectile:
     if p.has_method("set_ignore_groups"):
         var ignoreGroups = holder.get_groups().filter(func(g): return g != "damageable")
         p.set_ignore_groups(ignoreGroups)
-    if p.has_method("set_direction"):
-        var dir = (target.global_position - holder_sprite_node.global_position).normalized()
-        p.set_direction(dir)
-        p.set_target(target)
-
+    p.set_direction(dir)
     p.source_weapon = self
     holder.get_tree().current_scene.add_child(p)
-    event_manager.emit_event("on_attack", {"projectile": p, "weapon": self})
     return p
 
 func _on_stat_changes(_event) -> void:

@@ -43,7 +43,8 @@
 			"RegularCustomerModifier": 1.0,
 			"FireSaleModifier": 1.0,
 			"TaxCollectorModifier": 0.5,
-			"CreditLineModifier": 0.0
+			"CreditLineModifier": 0.0,
+			"MinerMineModifier": 0.0
 		}
 	},
 	"item_rarity": {
@@ -93,6 +94,7 @@
 		"TaxCollectorModifier": {"tax_rate": 0.1, "tax_rate_per_extra_stack": 0.05},
 		"CreditLineModifier": {"credit_limit": 15, "debt_interest": 0.25, "debt_damage_penalty": 0.2}
 	},
+	"miner_mine": {"lay_interval": 2.0, "damage_multiplier": 1.5, "trigger_radius": 0.06, "max_mines": 12, "lay_sound_db": 0.0},
 	"arena": {
 		"decor_chance": 0.3,
 		"decor_scale": 0.5,

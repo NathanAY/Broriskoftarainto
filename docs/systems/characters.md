@@ -4,7 +4,7 @@ This document explains the new character system (data, UI, and integration point
 
 ## Overview
 - Characters are data-driven Resources (`CharacterData`). Each one lives in its own folder under `src/Assets/character/`, named `<Id>.tres` next to its art — e.g. `src/Assets/character/ranger/Ranger.tres`.
-- The six characters today are **Brawler, Multitasker, Ranger, Soldier, Tycoon, Wildling**. Multitasker is the default (`GlobalGameState.DEFAULT_CHARACTER`). Each owns a distinct attack archetype: Multitasker (Fist, baseline), Brawler (Fist melee bruiser), Ranger (Pistol + Spread, glass-cannon gunner), Soldier (Shotgun, armored mid-range), Wildling (Thorns contact, berserker), Tycoon (SMG, the economy character: starting stock, less coin per kill, and a Credit Line that lets him spend into debt — see `docs/systems/economy.md`). The power budget for the roster lives in `docs/systems/balance.md` §5.
+- The seven characters today are **Brawler, Miner, Multitasker, Ranger, Soldier, Tycoon, Wildling**. Multitasker is the default (`GlobalGameState.DEFAULT_CHARACTER`). Each owns a distinct attack archetype: Multitasker (Fist, baseline), Brawler (Fist melee bruiser), Ranger (Pistol + Spread, glass-cannon gunner), Soldier (Shotgun, armored mid-range), Wildling (Thorns contact, berserker), Tycoon (SMG, the economy character: starting stock, less coin per kill, and a Credit Line that lets him spend into debt — see `docs/systems/economy.md`), Miner (Shotgun, mines: see "The Miner" below). The power budget for the roster lives in `docs/systems/balance.md` §5.
 - Selection UI: `src/Scenes/menu/CharacterSelect.tscn` lets the player pick a character at the start of a run. It scans `src/Assets/character/` and picks up any new `.tres` without a code change.
 - The chosen character is stored in the autoload `GlobalGameState.starting_character` and applied when the player `Character` instance is created.
 
@@ -60,7 +60,7 @@ mouth  src/Assets/character/<id>/<id>_mouth.png
 
 Reuse is just pointing two `.tres` files at the same texture, but no two characters may end up with the same *look* — `test_no_two_characters_look_identical` in `test/Systems/characters/test_character_sprite_parts.gd` compares pixels, so a copied PNG under a new name fails it too.
 
-The Tycoon is the one character with its own body (`src/Assets/character/tycoon/tycoon_body.png`, a gold egg with a top hat and a belly chain). Its three parts are cut from the generated sheets in `docs/plans/images/sprites/` by `test/tools/extract_tycoon_parts.gd` (`godot --headless --path . -s res://test/tools/extract_tycoon_parts.gd`); re-run it rather than editing those PNGs by hand. A custom body must stand on the potato's footprint (same width, same bottom edge) so the legs and shadow still line up. `src/Assets/character/<id>/<id>_icon.png` is no longer drawn by either path; a character with no parts still renders the shared body.
+The Tycoon is the one character with its own body (`src/Assets/character/tycoon/tycoon_body.png`, a gold egg with a top hat and a belly chain). Its three parts are cut from the generated sheets in `docs/plans/images/sprites/` by `test/tools/extract_character_parts.gd` (`godot --headless --path . -s res://test/tools/extract_character_parts.gd -- tycoon`); re-run it rather than editing those PNGs by hand. A custom body must stand on the potato's footprint (same width, same bottom edge) so the legs and shadow still line up. `src/Assets/character/<id>/<id>_icon.png` is no longer drawn by either path; a character with no parts still renders the shared body.
 
 ## How selection and application works
 1. Player picks a card in `CharacterSelect` (first character is pre-selected so the detail panel is never empty); the detail panel shows the full `CharacterTooltip` stats. On confirm the script sets `GlobalGameState.starting_character = "res://src/Assets/character/ranger/Ranger.tres"` (string path).
@@ -148,6 +148,15 @@ the absolute number and uses colour to say whether it beats the default:
 
 Entries in `modifiers` are real deltas, so those keep the explicit `+`/`-` and
 derive their tone from the value itself — same rule the shop cards use.
+
+## The Miner
+`src/Assets/character/miner/Miner.tres` lists one behaviour, `MinerMineModifier` (`src/Systems/Items/modifiers/miner_mine_modifier.gd`, generation weight 0 so it is never sold). While attached it sets two flags on the `WeaponHolder`:
+- `ranged_only`: `add_weapon` / `can_add_weapon` refuse anything that is not a `ProjectileWeapon`. The shop shows such an offer as **Ranged only**. A melee weapon picked in the starter menu is silently not equipped.
+- `hold_fire`: `BaseWeapon._on_timeout` returns early, so weapons aim but never shoot.
+
+Instead, every `lay_interval` seconds the modifier drops a `Mine` (`src/Systems/Items/modifiers/mine.gd`, a script-only `Area2D`) under the player. Its sprite, `src/Assets/character/miner/miner_mine.png`, is the top-left mine of `docs/plans/images/mines/mines_1.png`, cut edge to edge so the mine scales it to exactly the width of its trigger circle: what you see is what an enemy must touch. The other mine sheets in that folder are unused alternatives. It packs, per ranged weapon, the **whole attacks** finished in that window (`attack_speed × lay_interval`, rounded down), each worth `projectiles_per_attack()` projectiles, so a shotgun always drops full volleys. The unfinished attack is carried into the next mine: a weapon attacking every 1.2 s packs 1 attack into the first 2 s mine, carries the 0.8 s it had charged, and packs 2 into the second. The first enemy body to touch it fires every packed shot from its centre in random directions through `ProjectileWeapon.spawn_projectile`, at `damage_multiplier` × the weapon's live damage. Mine shots emit no `on_attack`, so on-attack effects (Spread) do not proc on them; on-hit effects do. At most `max_mines` stay on the ground, the oldest is removed first. Numbers: `miner_mine` in `game_config.json`. Pinned by `test/Systems/characters/test_miner.gd`.
+
+The Miner has his own body, the horned grey egg (bottom right of the bodies sheet), with strapped goggles and a toothy grin from the overlay sheet, all in `docs/plans/images/sprites/` and cut by `test/tools/extract_character_parts.gd`. Each mine plays one random clip of the modifier's `lay_sounds`: 12 footswitch-click variations in `src/Assets/sounds/miner/lay/`, cut from one recording on its silences, mono and peak-normalised, played at `lay_sound_db`.
 
 ## Adding a new character
 1. Create `src/Assets/character/<id>/<Id>.tres` using the `CharacterData` script as the resource type, next to the character's art (or copy an existing one and rename).

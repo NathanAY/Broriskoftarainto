@@ -24,6 +24,12 @@ var event_manager: EventManager:
 ## How many weapons this holder may carry; 0 is no limit. The player's holder
 ## sets 6 in `Character.tscn`. Enemies keep 0 - the boss carries more than six.
 @export var max_weapons: int = 0
+## Refuses every weapon that is not a `ProjectileWeapon`. Set by the Miner's
+## `MinerMineModifier`, which can only pack projectiles into its mines.
+var ranged_only: bool = false
+## Weapons keep aiming but never fire on their own timer. Also the Miner's:
+## the mine fires their shots instead.
+var hold_fire: bool = false
 # visual placement config
 ## How far from the holder each weapon sprite orbits, in **meters**. Converted
 ## to pixels in `_get_weapon_position`, the only place a `Vector2` is built.
@@ -109,8 +115,12 @@ func find_combinable(weapon: BaseWeapon) -> BaseWeapon:
 ## Whether `add_weapon` would take this weapon: there is a free slot, or it can
 ## be combined into a weapon already held.
 func can_add_weapon(weapon_resource: BaseWeapon) -> bool:
-    return weapon_resource != null \
+    return accepts_kind(weapon_resource) \
             and (not is_full() or find_combinable(weapon_resource) != null)
+
+## Whether this holder takes this kind of weapon at all, slots aside.
+func accepts_kind(weapon_resource: BaseWeapon) -> bool:
+    return weapon_resource != null and (not ranged_only or weapon_resource is ProjectileWeapon)
 
 ## Merges an equipped weapon with its equipped duplicate: the duplicate is
 ## removed and `weapon_inst` climbs one rarity. Returns false when it has no
@@ -133,7 +143,7 @@ func _raise_rarity(weapon_inst: BaseWeapon) -> void:
 ## Equips a copy of `weapon_resource`. With every slot taken it is combined into
 ## an equipped duplicate instead, and refused (false) when there is none.
 func add_weapon(weapon_resource: BaseWeapon) -> bool:
-    if weapon_resource == null:
+    if not accepts_kind(weapon_resource):
         return false
     if is_full():
         var partner := find_combinable(weapon_resource)

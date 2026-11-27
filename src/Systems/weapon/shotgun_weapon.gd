@@ -12,6 +12,9 @@ func tooltip_details() -> Array:
     details.append(["Pellets", str(pellet_count)])
     return details
 
+func projectiles_per_attack() -> int:
+    return pellet_count
+
 func try_shoot(targets: Array[Node]) -> void:
     SoundManager.play(attack_sound.pick_random(), -20, 0.2)
     var dir = (targets[0].global_position - sprite_node.global_position).normalized()

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://g2w7tpm0myos"]
+
+[ext_resource type="Script" uid="uid://b174fx02jtd8q" path="res://src/Systems/characters/CharacterData.gd" id="1_miner"]
+[ext_resource type="Script" uid="uid://2vl1rp4agc1u" path="res://src/Systems/weapon/BaseWeapon.gd" id="2_miner"]
+[ext_resource type="Resource" uid="uid://fov62q3eb6q7" path="res://src/Resources/weapons/Shotgun.tres" id="3_miner"]
+[ext_resource type="PackedScene" uid="uid://bawoljn4cu4rs" path="res://src/Systems/Items/modifiers/MinerMineModifier.tscn" id="4_miner"]
+[ext_resource type="Texture2D" uid="uid://iovygik3jtdn" path="res://src/Assets/character/miner/miner_body.png" id="7_miner"]
+[ext_resource type="Texture2D" uid="uid://de4tkeebgypl" path="res://src/Assets/character/miner/miner_eyes.png" id="5_miner"]
+[ext_resource type="Texture2D" uid="uid://dei32e7nt77v3" path="res://src/Assets/character/miner/miner_mouth.png" id="6_miner"]
+
+[resource]
+script = ExtResource("1_miner")
+display_name = "Miner"
+description = "Never shoots straight: his guns load a mine under him every few seconds, and whatever steps on it eats the whole volley. Ranged weapons only."
+base_stats = {
+"movement_speed": 1.05
+}
+modifiers = [ExtResource("4_miner")]
+starting_weapons = Array[ExtResource("2_miner")]([ExtResource("3_miner")])
+body = ExtResource("7_miner")
+eyes = ExtResource("5_miner")
+mouth = ExtResource("6_miner")
+legs_tint = Color(0.835, 0.855, 0.831, 1)
+metadata/_custom_type_script = "uid://b174fx02jtd8q"

@@ -139,6 +139,7 @@ Catalog
 | FireSaleModifier | `fire_sale_modifier.gd` | `on_sell` | Sales add `stock_investment`. |
 | TaxCollectorModifier | `tax_collector_modifier.gd` | `on_payday` | `COST`: takes a share of held money each payday. |
 | CreditLineModifier | `credit_line_modifier.gd` | `on_shop_enter` | Tycoon only (generation weight 0): spend into debt up to `credit_limit`; debt grows each shop and cuts damage. |
+| MinerMineModifier | `miner_mine_modifier.gd` | own timer | Miner only (generation weight 0): weapons hold fire and only ranged ones equip; a `Mine` is laid every `lay_interval` with their shots. See `docs/systems/characters.md`. |
 
 Guidelines for adding a new modifier
 1. `extends BaseModifier` (`src/Systems/Items/modifiers/base_modifier.gd`), matching the file's indentation style (4-space), in `Systems/Items/modifiers/`. For a variant of an existing behavior, extend that script instead and set differing defaults in `_init()`.

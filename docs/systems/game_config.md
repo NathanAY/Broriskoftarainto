@@ -97,6 +97,18 @@ One block per economy modifier, keyed by its scene name in `src/Systems/Items/mo
 | `TaxCollectorModifier` | `tax_rate` (share of money taken), `tax_rate_per_extra_stack` |
 | `CreditLineModifier` | `credit_limit` (coins of debt allowed), `debt_interest` (share a debt grows by each shop), `debt_damage_penalty` (damage lost while in debt) |
 
+## `miner_mine`
+
+Read by `src/Systems/Items/modifiers/miner_mine_modifier.gd`, the Miner's mines (see `docs/systems/characters.md`).
+
+| Key | Meaning |
+|---|---|
+| `lay_interval` | Seconds between mines; also the stretch of fire one mine packs. |
+| `damage_multiplier` | Damage of a mine shot relative to the weapon's own (1.5 = +50%). |
+| `trigger_radius` | Meters from the mine's centre an enemy body sets it off; also its drawn size. |
+| `max_mines` | Mines left on the ground at once; laying past it removes the oldest. |
+| `lay_sound_db` | Volume offset (dB) of the mine-laying click. |
+
 ## `arena`
 
 Read by `src/Systems/arena.gd`. The ground art is brown; each theme recolours it (and the wall outline) with a hue-rotate shader. A random theme is picked when the arena loads and a different one at every `StageManager.start_new_stage()`.
